@@ -1,0 +1,493 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   The First Reels — /reel
+   The essay's companion screening room. Three movements: the cream masthead
+   (the lobby), a dark auditorium where the clips run, and the cream appendix
+   where the house lights come up on the paperwork. Same type roles as the
+   essay: --poster for display, --read for prose, --data for every number.
+   All classes are rl-prefixed; this file loads only with the /reel route.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.rl-page {
+  /* Warm black, one step past --ink: nitrate stock, not neutral darkness. */
+  --house: #14100a;
+  --strip: #090705;
+  --screen-edge: rgba(241, 232, 213, 0.16);
+  --lit: #f1e8d5;
+  --lit-prose: #d9cfb9;
+  --lit-faint: #a1937c;
+}
+
+/* ── Masthead (the lobby) ────────────────────────────────────────────────── */
+
+.rl-masthead { padding: 64px 0 56px; position: relative; overflow: hidden; }
+.rl-masthead::after {
+  content: '';
+  position: absolute;
+  inset: -30% -10% auto;
+  height: 160%;
+  background: radial-gradient(56% 50% at 50% 30%, #fffaf0 0%, rgba(255, 250, 240, 0) 66%);
+  pointer-events: none;
+  z-index: 0;
+}
+.rl-masthead > .wrap { position: relative; z-index: 1; }
+
+.rl-kicker {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin: 0 0 26px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rl-kicker::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+.rl-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; }
+.rl-kicker a:hover { color: var(--ember); }
+
+.rl-mast-title {
+  font-family: var(--poster);
+  font-weight: 400;
+  margin: 0;
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+.rl-mast-title .l1 { display: block; font-size: clamp(44px, 10.4vw, 132px); }
+.rl-mast-title .l2 {
+  display: block;
+  font-size: clamp(19px, 3.4vw, 44px);
+  color: var(--ember);
+  margin-top: 0.12em;
+  padding-left: 0.1em;
+}
+
+.rl-lede {
+  font-size: clamp(17px, 2vw, 21px);
+  line-height: 1.52;
+  max-width: 58ch;
+  margin: 34px 0 0;
+  color: var(--ink);
+}
+.rl-lede em {
+  font-style: normal;
+  font-family: var(--data);
+  font-size: 0.82em;
+  font-variant-numeric: tabular-nums;
+  background: var(--paper-deep);
+  padding: 0.08em 0.34em;
+  border-radius: 2px;
+}
+
+.rl-mast-foot {
+  margin-top: 38px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 32px;
+  align-items: baseline;
+  font-family: var(--data);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.rl-mast-foot b { font-weight: 400; color: var(--ink); font-size: 15px; }
+.rl-mast-foot a { color: var(--ember); text-decoration: none; border-bottom: 1px solid currentColor; }
+
+/* ── The auditorium ──────────────────────────────────────────────────────── */
+
+.rl-house { background: var(--house); color: var(--lit-prose); position: relative; }
+
+/* Dimming strip at the top: the lights going down. */
+.rl-dim {
+  height: 120px;
+  background: linear-gradient(to bottom, var(--paper), #6d5f49 34%, var(--house) 88%);
+}
+.rl-house-note {
+  text-align: center;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--lit-faint);
+  padding: 34px 20px 0;
+  margin: 0;
+}
+
+.rl-cascade { max-width: 720px; margin: 0 auto; padding: 0 20px 40px; }
+
+.rl-clip {
+  min-height: 100svh;
+  display: grid;
+  align-content: center;
+  padding: 11vh 0;
+}
+
+.rl-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 18px;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lit-faint);
+  border-top: 1px solid var(--screen-edge);
+  padding-top: 12px;
+  margin-bottom: 10px;
+}
+.rl-no { color: var(--ember); }
+.rl-fam { display: inline-flex; align-items: center; gap: 7px; }
+.rl-fam i { width: 9px; height: 9px; border-radius: 1px; box-shadow: 0 0 0 1px rgba(241, 232, 213, 0.35); }
+.rl-yr { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--lit); }
+
+.rl-title {
+  font-family: var(--poster);
+  font-weight: 400;
+  font-size: clamp(27px, 4.6vw, 44px);
+  line-height: 0.98;
+  color: var(--lit);
+  margin: 0 0 6px;
+}
+
+.rl-offlist {
+  display: inline-block;
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--house);
+  background: var(--lit-faint);
+  border-radius: 2px;
+  padding: 3px 8px;
+  margin: 2px 0 8px;
+}
+
+/* The frame: video between two sprocket strips. */
+.rl-frame {
+  position: relative;
+  background: var(--strip);
+  padding: 12px 30px;
+  border: 1px solid rgba(241, 232, 213, 0.08);
+  border-radius: 2px;
+  margin-top: 12px;
+}
+.rl-frame::before,
+.rl-frame::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  width: 30px;
+  background-image: radial-gradient(4px 5.5px at 50% 11px, #2b2416 97%, rgba(0, 0, 0, 0) 100%);
+  background-size: 100% 24px;
+  background-repeat: repeat-y;
+}
+.rl-frame::before { left: 0; }
+.rl-frame::after { right: 0; }
+
+.rl-frame video {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #000;
+  outline-offset: 3px;
+}
+
+/* Overlay states share a footprint over the video, inside the sprockets. */
+.rl-overlay {
+  position: absolute;
+  inset: 12px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  /* Let clicks fall through to the video (and its native controls) —
+     only the button and links inside the overlay are targets. */
+  pointer-events: none;
+}
+.rl-overlay.veil { background: rgba(9, 7, 5, 0.55); pointer-events: auto; }
+.rl-overlay .rl-bigplay, .rl-overlay a { pointer-events: auto; }
+
+.rl-bigplay {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--lit);
+  background: rgba(9, 7, 5, 0.72);
+  border: 1px solid var(--screen-edge);
+  border-radius: 2px;
+  padding: 13px 20px;
+  cursor: pointer;
+}
+.rl-bigplay:hover { border-color: var(--lit); }
+.rl-bigplay svg { display: block; }
+
+.rl-error {
+  text-align: center;
+  font-family: var(--data);
+  font-size: 11.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lit);
+  padding: 20px;
+}
+.rl-error b { display: block; font-weight: 400; color: var(--ember); margin-bottom: 10px; letter-spacing: 0.2em; }
+.rl-error a { color: var(--lit-prose); }
+
+/* Control strip under the frame — always visible, never hover-only. */
+.rl-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-top: 10px;
+  font-family: var(--data);
+  font-size: 11px;
+}
+.rl-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font: inherit;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lit);
+  background: transparent;
+  border: 1px solid var(--screen-edge);
+  border-radius: 2px;
+  padding: 8px 13px;
+  cursor: pointer;
+}
+.rl-btn:hover { border-color: var(--lit); }
+.rl-btn[aria-pressed='true'] { background: var(--lit); color: var(--house); }
+.rl-btn svg { display: block; }
+
+.rl-mark {
+  margin-left: auto;
+  color: var(--lit-faint);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.rl-srclink {
+  color: var(--lit-faint);
+  text-decoration: none;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(161, 147, 124, 0.5);
+  padding-bottom: 1px;
+}
+.rl-srclink:hover { color: var(--lit); }
+
+.rl-blurb {
+  font-size: 16.5px;
+  line-height: 1.58;
+  margin: 20px 0 0;
+  max-width: 60ch;
+}
+.rl-what {
+  font-family: var(--data);
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--lit-faint);
+  margin: 12px 0 0;
+  max-width: 74ch;
+}
+.rl-what b {
+  font-weight: 400;
+  color: var(--lit-prose);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.rl-credit {
+  font-family: var(--data);
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--lit-faint);
+  margin: 14px 0 0;
+  border-top: 1px solid rgba(241, 232, 213, 0.1);
+  padding-top: 10px;
+}
+.rl-credit a { color: inherit; }
+.rl-credit a:hover { color: var(--lit); }
+
+/* End of programme */
+.rl-tail {
+  text-align: center;
+  padding: 4vh 20px 16vh;
+}
+.rl-tail p {
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--lit-faint);
+  margin: 0 0 22px;
+}
+.rl-tail a {
+  font-family: var(--data);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--lit);
+  text-decoration: none;
+  border: 1px solid var(--screen-edge);
+  border-radius: 2px;
+  padding: 11px 18px;
+}
+.rl-tail a:hover { border-color: var(--lit); }
+
+/* ── The leader gauge (signature) ────────────────────────────────────────────
+   A fixed Academy-leader dial at the right edge: crosshair circle, a sweep
+   that advances through the programme, the current reel's year beneath it. */
+
+.rl-gauge {
+  position: fixed;
+  right: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 60;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.rl-gauge.on { opacity: 1; }
+.rl-gauge svg { display: block; margin: 0 auto; }
+.rl-gauge-year {
+  font-family: var(--poster);
+  font-size: 30px;
+  line-height: 1;
+  color: var(--lit);
+  margin-top: 10px;
+}
+.rl-gauge-reel {
+  font-family: var(--data);
+  font-size: 9.5px;
+  letter-spacing: 0.22em;
+  color: var(--lit-faint);
+  margin-top: 6px;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 960px) { .rl-gauge { display: none; } }
+
+/* ── The paperwork (appendix, house lights up) ───────────────────────────── */
+
+.rl-papers { background: var(--paper); padding: 72px 0 80px; }
+.rl-papers .rl-kicker { margin-bottom: 18px; }
+.rl-papers h2 {
+  font-family: var(--poster);
+  font-weight: 400;
+  font-size: clamp(30px, 5vw, 50px);
+  line-height: 0.98;
+  margin: 0 0 14px;
+}
+.rl-papers .lede-p {
+  font-size: 16.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  max-width: 66ch;
+  margin: 0 0 12px;
+}
+
+.rl-ledger-scroll { overflow-x: auto; margin-top: 34px; }
+table.rl-ledger {
+  border-collapse: collapse;
+  font-family: var(--data);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  width: 100%;
+}
+table.rl-ledger th,
+table.rl-ledger td {
+  border-bottom: 1px solid var(--rule);
+  padding: 8px 18px 8px 0;
+  text-align: left;
+  vertical-align: top;
+}
+table.rl-ledger thead th {
+  font-weight: 400;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 10px;
+  border-bottom: 2px solid var(--ink);
+}
+table.rl-ledger a { color: var(--ink); }
+table.rl-ledger .dim { color: var(--ink-faint); }
+
+.rl-rejects { margin-top: 48px; }
+.rl-rejects h3 {
+  font-family: var(--poster);
+  font-weight: 400;
+  font-size: 26px;
+  margin: 0 0 10px;
+}
+.rl-rejects > p { font-size: 15px; color: var(--ink-soft); max-width: 66ch; margin: 0 0 18px; }
+.rl-rejects ul { list-style: none; margin: 0; padding: 0; max-width: 78ch; }
+.rl-rejects li {
+  border-top: 1px solid var(--rule);
+  padding: 9px 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+.rl-rejects li b {
+  font-weight: 600;
+  color: var(--ink);
+}
+.rl-rejects li .yr {
+  font-family: var(--data);
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  margin-left: 6px;
+}
+.rl-rejects details { margin-top: 26px; font-family: var(--data); font-size: 11.5px; }
+.rl-rejects summary {
+  cursor: pointer;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.rl-rejects details li { font-size: 12.5px; font-family: var(--data); }
+.rl-rejects details a { color: var(--ink); }
+
+.rl-back {
+  display: inline-block;
+  margin-top: 44px;
+  font-family: var(--data);
+  font-size: 11.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink);
+  border-bottom: 1px solid var(--ember);
+  text-decoration: none;
+  padding-bottom: 2px;
+}
+
+/* ── Small screens ───────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .rl-masthead { padding: 44px 0 40px; }
+  .rl-kicker { font-size: 10px; letter-spacing: 0.16em; gap: 9px; }
+  .rl-cascade { padding: 0 14px 30px; }
+  .rl-clip { padding: 9vh 0; }
+  .rl-frame { padding: 8px 20px; }
+  .rl-frame::before, .rl-frame::after { width: 20px; background-size: 100% 20px; }
+  .rl-frame::before, .rl-frame::after { background-image: radial-gradient(3px 4.5px at 50% 9px, #2b2416 97%, rgba(0, 0, 0, 0) 100%); }
+  .rl-overlay { inset: 8px 20px; }
+  .rl-mark { flex-basis: 100%; margin-left: 0; }
+}
+
+/* ── Motion ──────────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .rl-gauge { transition: none; }
+}

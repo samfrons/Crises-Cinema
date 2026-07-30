@@ -33,6 +33,23 @@ export default function Page() {
               It is also, admittedly, a personal guide to cinematic Armageddon. In the world of
               disaster movies the end is only the beginning of understanding.
             </p>
+            <p>
+              <a
+                href="/reel"
+                style={{
+                  fontFamily: 'var(--data)',
+                  fontSize: 11.5,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: 'var(--paper)',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid var(--ember)',
+                  paddingBottom: 2,
+                }}
+              >
+                Watch the first reels — ten public-domain films, 1900–1930 →
+              </a>
+            </p>
           </div>
 
           <div>
