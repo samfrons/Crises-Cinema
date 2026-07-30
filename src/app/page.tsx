@@ -1,28 +1,75 @@
-// threejs/src/app/page.tsx
+import Hero from './components/Hero';
+import FearIndex from './components/FearIndex';
+import summaryData from '../data/summary.json';
+import type { Summary } from '@/lib/taxonomy';
 
-"use client";
+// Aggregates are computed at build time by scripts/build-data.mjs, so the hero
+// and the chart render as static HTML. Only the film catalogue is fetched.
+const summary = summaryData as unknown as Summary;
 
-import React from 'react';
-import dynamic from 'next/dynamic';
-import './globals.css';
-
-
-
-//import Mfc1 from './components/Mfc1';
-
-const DisasterMovieTimeline = dynamic(
-  () => import('./components/disaster'),
-  { ssr: false }
-);
-
-
-
-export default function Home() {
+export default function Page() {
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
-   
-     <DisasterMovieTimeline />
-     
-    </div>
+    <>
+      <a className="skip" href="#reel">Skip to the chart</a>
+
+      <Hero summary={summary} />
+      <hr className="hr" />
+
+      <main id="main">
+        <FearIndex summary={summary} />
+      </main>
+
+      <footer className="colophon">
+        <div className="wrap">
+          <div>
+            <h2>About this</h2>
+            <p>
+              Disaster movies are a guilty pleasure turned scholarly pursuit. Each era’s
+              on-screen catastrophes track its anxieties with uncanny precision, so charting
+              them is less a film buff’s hobby than a seismograph of the shared psyche —
+              a timeline of cultural tremors, one mushroom cloud at a time.
+            </p>
+            <p>
+              It is also, admittedly, a personal guide to cinematic Armageddon. In the world of
+              disaster movies the end is only the beginning of understanding.
+            </p>
+          </div>
+
+          <div>
+            <h3>How the categories were made</h3>
+            <p>
+              The source data labelled these films with 105 different disaster types, 49 main
+              categories and 191 subcategories — much of it inconsistent, some of it mangled by
+              a bad comma-split. Those were consolidated into eleven families under four
+              headings. Each film’s original, finer label is still what appears on its card.
+            </p>
+            <p>
+              Judgement calls were made. A film with a stated cause is filed under that cause
+              rather than its setting, so Mad Max: Fury Road counts as Atomic and not as a
+              post-apocalyptic film. Where the source contradicts itself, the more specific
+              signal wins.
+            </p>
+          </div>
+
+          <div>
+            <h3>The data</h3>
+            <dl>
+              <dt>Films</dt>
+              <dd>{summary.total}, released {summary.firstYear}–{summary.lastYear}</dd>
+              <dt>With a rating</dt>
+              <dd>{summary.withRating}</dd>
+              <dt>With box office</dt>
+              <dd>{summary.withBoxOffice} — the rest unrecorded</dd>
+              <dt>Most common origin</dt>
+              <dd>{summary.countries[0]?.[0]} ({summary.countries[0]?.[1]} films)</dd>
+              <dt>Ratings &amp; posters</dt>
+              <dd>TMDB</dd>
+              <dt>Data built</dt>
+              <dd>{summary.generated}</dd>
+            </dl>
+          </div>
+        </div>
+      </footer>
+    </>
   );
 }

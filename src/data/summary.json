@@ -1,0 +1,546 @@
+{
+  "generated": "2026-07-30",
+  "total": 750,
+  "firstYear": 1898,
+  "lastYear": 2025,
+  "byFamily": {
+    "earth": 205,
+    "climate": 33,
+    "cosmic": 43,
+    "wreckage": 122,
+    "atomic": 63,
+    "machines": 36,
+    "plague": 85,
+    "undead": 43,
+    "invaders": 44,
+    "divine": 53,
+    "afterfall": 18,
+    "unsorted": 5
+  },
+  "decades": [
+    {
+      "decade": 1890,
+      "total": 4,
+      "counts": {
+        "earth": 3,
+        "wreckage": 1
+      },
+      "dominant": "earth",
+      "meanRating": 4.9,
+      "topRated": {
+        "t": "Oil Gush Fire in Bibiheybat (Bibiheybətdə neft fontanı yanğını)",
+        "y": 1898,
+        "r": 5.5
+      },
+      "mostSeen": {
+        "t": "The Oil Gush in Balakhany (Balaxanıda neft fontanı)",
+        "y": 1898,
+        "v": 15
+      },
+      "topGrossing": null
+    },
+    {
+      "decade": 1900,
+      "total": 3,
+      "counts": {
+        "earth": 2,
+        "wreckage": 1
+      },
+      "dominant": "earth",
+      "meanRating": 4.7,
+      "topRated": {
+        "t": "San Francisco: Aftermath of Earthquake",
+        "y": 1906,
+        "r": 5.4
+      },
+      "mostSeen": {
+        "t": "San Francisco: Aftermath of Earthquake",
+        "y": 1906,
+        "v": 11
+      },
+      "topGrossing": null
+    },
+    {
+      "decade": 1910,
+      "total": 1,
+      "counts": {
+        "wreckage": 1
+      },
+      "dominant": "wreckage",
+      "meanRating": 6.5,
+      "topRated": {
+        "t": "The Sinking of the Lusitania",
+        "y": 1918,
+        "r": 6.5
+      },
+      "mostSeen": {
+        "t": "The Sinking of the Lusitania",
+        "y": 1918,
+        "v": 50
+      },
+      "topGrossing": null
+    },
+    {
+      "decade": 1920,
+      "total": 9,
+      "counts": {
+        "earth": 5,
+        "wreckage": 1,
+        "invaders": 1,
+        "divine": 2
+      },
+      "dominant": "earth",
+      "meanRating": 6.2,
+      "topRated": {
+        "t": "The White Sister",
+        "y": 1923,
+        "r": 7
+      },
+      "mostSeen": {
+        "t": "Tramp, Tramp, Tramp",
+        "y": 1926,
+        "v": 16
+      },
+      "topGrossing": {
+        "t": "Noah's Ark",
+        "y": 1928,
+        "b": "$3M"
+      }
+    },
+    {
+      "decade": 1930,
+      "total": 13,
+      "counts": {
+        "earth": 4,
+        "cosmic": 1,
+        "wreckage": 5,
+        "plague": 2,
+        "divine": 1
+      },
+      "dominant": "wreckage",
+      "meanRating": 5.9,
+      "topRated": {
+        "t": "Hindenburg Disaster Newsreel Footage",
+        "y": 1937,
+        "r": 7.5
+      },
+      "mostSeen": {
+        "t": "San Francisco",
+        "y": 1936,
+        "v": 67
+      },
+      "topGrossing": null
+    },
+    {
+      "decade": 1940,
+      "total": 2,
+      "counts": {
+        "earth": 2
+      },
+      "dominant": "earth",
+      "meanRating": 5.5,
+      "topRated": {
+        "t": "Tornado",
+        "y": 1943,
+        "r": 5.5
+      },
+      "mostSeen": {
+        "t": "Tornado",
+        "y": 1943,
+        "v": 4
+      },
+      "topGrossing": null
+    },
+    {
+      "decade": 1950,
+      "total": 19,
+      "counts": {
+        "earth": 3,
+        "cosmic": 3,
+        "wreckage": 2,
+        "atomic": 5,
+        "machines": 2,
+        "plague": 2,
+        "invaders": 1,
+        "divine": 1
+      },
+      "dominant": "atomic",
+      "meanRating": 5.8,
+      "topRated": {
+        "t": "A Night to Remember",
+        "y": 1958,
+        "r": 7.6
+      },
+      "mostSeen": {
+        "t": "Godzilla Raids Again (ゴジラの逆襲)",
+        "y": 1959,
+        "v": 265
+      },
+      "topGrossing": null
+    },
+    {
+      "decade": 1960,
+      "total": 28,
+      "counts": {
+        "earth": 4,
+        "cosmic": 3,
+        "wreckage": 2,
+        "atomic": 13,
+        "plague": 2,
+        "undead": 2,
+        "invaders": 2
+      },
+      "dominant": "atomic",
+      "meanRating": 6.4,
+      "topRated": {
+        "t": "Dr. Strangelove or: How I Learned To Stop Worrying and Love the Bomb",
+        "y": 1964,
+        "r": 8.1
+      },
+      "mostSeen": {
+        "t": "Dr. Strangelove or: How I Learned To Stop Worrying and Love the Bomb",
+        "y": 1964,
+        "v": 5525
+      },
+      "topGrossing": null
+    },
+    {
+      "decade": 1970,
+      "total": 74,
+      "counts": {
+        "earth": 13,
+        "climate": 4,
+        "cosmic": 4,
+        "wreckage": 22,
+        "atomic": 6,
+        "machines": 4,
+        "plague": 8,
+        "undead": 1,
+        "invaders": 3,
+        "divine": 4,
+        "afterfall": 4,
+        "unsorted": 1
+      },
+      "dominant": "wreckage",
+      "meanRating": 5.8,
+      "topRated": {
+        "t": "Stalker",
+        "y": 1979,
+        "r": 8.2
+      },
+      "mostSeen": {
+        "t": "Mad Max",
+        "y": 1979,
+        "v": 3054
+      },
+      "topGrossing": {
+        "t": "The Towering Inferno",
+        "y": 1974,
+        "b": "$140M"
+      }
+    },
+    {
+      "decade": 1980,
+      "total": 30,
+      "counts": {
+        "earth": 5,
+        "cosmic": 1,
+        "wreckage": 8,
+        "atomic": 5,
+        "machines": 2,
+        "plague": 6,
+        "divine": 1,
+        "afterfall": 1,
+        "unsorted": 1
+      },
+      "dominant": "wreckage",
+      "meanRating": 6.1,
+      "topRated": {
+        "t": "Blade Runner",
+        "y": 1982,
+        "r": 7.9
+      },
+      "mostSeen": {
+        "t": "Blade Runner",
+        "y": 1982,
+        "v": 13603
+      },
+      "topGrossing": {
+        "t": "Raise the Titanic",
+        "y": 1980,
+        "b": "$7M"
+      }
+    },
+    {
+      "decade": 1990,
+      "total": 98,
+      "counts": {
+        "earth": 26,
+        "climate": 6,
+        "cosmic": 7,
+        "wreckage": 17,
+        "atomic": 6,
+        "machines": 6,
+        "plague": 14,
+        "undead": 1,
+        "invaders": 5,
+        "divine": 8,
+        "afterfall": 2
+      },
+      "dominant": "earth",
+      "meanRating": 5.8,
+      "topRated": {
+        "t": "The End of Evangelion",
+        "y": 1997,
+        "r": 8.3
+      },
+      "mostSeen": {
+        "t": "The Matrix",
+        "y": 1999,
+        "v": 25415
+      },
+      "topGrossing": {
+        "t": "Titanic",
+        "y": 1997,
+        "b": "$2.2B"
+      }
+    },
+    {
+      "decade": 2000,
+      "total": 170,
+      "counts": {
+        "earth": 58,
+        "climate": 7,
+        "cosmic": 9,
+        "wreckage": 24,
+        "atomic": 9,
+        "machines": 6,
+        "plague": 22,
+        "undead": 11,
+        "invaders": 12,
+        "divine": 11,
+        "unsorted": 1
+      },
+      "dominant": "earth",
+      "meanRating": 5.8,
+      "topRated": {
+        "t": "Children of Men",
+        "y": 2006,
+        "r": 7.6
+      },
+      "mostSeen": {
+        "t": "I Am Legend",
+        "y": 2007,
+        "v": 15526
+      },
+      "topGrossing": {
+        "t": "2012",
+        "y": 2009,
+        "b": "$791M"
+      }
+    },
+    {
+      "decade": 2010,
+      "total": 230,
+      "counts": {
+        "earth": 62,
+        "climate": 11,
+        "cosmic": 11,
+        "wreckage": 30,
+        "atomic": 14,
+        "machines": 10,
+        "plague": 25,
+        "undead": 21,
+        "invaders": 15,
+        "divine": 18,
+        "afterfall": 11,
+        "unsorted": 2
+      },
+      "dominant": "earth",
+      "meanRating": 5.9,
+      "topRated": {
+        "t": "Interstellar",
+        "y": 2014,
+        "r": 8.4
+      },
+      "mostSeen": {
+        "t": "Interstellar",
+        "y": 2014,
+        "v": 35177
+      },
+      "topGrossing": {
+        "t": "Interstellar",
+        "y": 2014,
+        "b": "$702M"
+      }
+    },
+    {
+      "decade": 2020,
+      "total": 69,
+      "counts": {
+        "earth": 18,
+        "climate": 5,
+        "cosmic": 4,
+        "wreckage": 8,
+        "atomic": 5,
+        "machines": 6,
+        "plague": 4,
+        "undead": 7,
+        "invaders": 5,
+        "divine": 7
+      },
+      "dominant": "earth",
+      "meanRating": 6.8,
+      "topRated": {
+        "t": "Finch",
+        "y": 2021,
+        "r": 7.9
+      },
+      "mostSeen": {
+        "t": "Don't Look Up",
+        "y": 2021,
+        "v": 8077
+      },
+      "topGrossing": {
+        "t": "Greenland",
+        "y": 2020,
+        "b": "$52M"
+      }
+    }
+  ],
+  "byYear": {
+    "1898": 4,
+    "1900": 2,
+    "1906": 1,
+    "1918": 1,
+    "1922": 1,
+    "1923": 1,
+    "1924": 1,
+    "1926": 5,
+    "1928": 1,
+    "1930": 1,
+    "1931": 2,
+    "1933": 2,
+    "1935": 2,
+    "1936": 2,
+    "1937": 3,
+    "1939": 1,
+    "1942": 1,
+    "1943": 1,
+    "1950": 2,
+    "1951": 2,
+    "1952": 2,
+    "1953": 1,
+    "1955": 3,
+    "1956": 1,
+    "1957": 2,
+    "1958": 3,
+    "1959": 3,
+    "1960": 2,
+    "1961": 4,
+    "1962": 6,
+    "1963": 2,
+    "1964": 3,
+    "1965": 3,
+    "1966": 1,
+    "1967": 1,
+    "1968": 2,
+    "1969": 4,
+    "1970": 7,
+    "1971": 5,
+    "1972": 6,
+    "1973": 3,
+    "1974": 10,
+    "1975": 5,
+    "1976": 6,
+    "1977": 11,
+    "1978": 8,
+    "1979": 13,
+    "1980": 8,
+    "1981": 3,
+    "1982": 1,
+    "1983": 3,
+    "1984": 4,
+    "1985": 3,
+    "1986": 1,
+    "1987": 1,
+    "1988": 3,
+    "1989": 3,
+    "1990": 4,
+    "1991": 7,
+    "1992": 2,
+    "1993": 6,
+    "1994": 7,
+    "1995": 10,
+    "1996": 15,
+    "1997": 20,
+    "1998": 17,
+    "1999": 10,
+    "2000": 12,
+    "2001": 11,
+    "2002": 16,
+    "2003": 18,
+    "2004": 13,
+    "2005": 15,
+    "2006": 20,
+    "2007": 17,
+    "2008": 19,
+    "2009": 29,
+    "2010": 10,
+    "2011": 21,
+    "2012": 23,
+    "2013": 30,
+    "2014": 34,
+    "2015": 20,
+    "2016": 24,
+    "2017": 25,
+    "2018": 22,
+    "2019": 21,
+    "2020": 13,
+    "2021": 23,
+    "2022": 9,
+    "2023": 12,
+    "2024": 10,
+    "2025": 2
+  },
+  "peakYear": [
+    "2014",
+    34
+  ],
+  "withRating": 684,
+  "withBoxOffice": 34,
+  "countries": [
+    [
+      "United States",
+      371
+    ],
+    [
+      "United Kingdom",
+      59
+    ],
+    [
+      "Canada",
+      48
+    ],
+    [
+      "Japan",
+      33
+    ],
+    [
+      "Germany",
+      24
+    ],
+    [
+      "South Korea",
+      21
+    ],
+    [
+      "Australia",
+      18
+    ],
+    [
+      "France",
+      12
+    ]
+  ]
+}

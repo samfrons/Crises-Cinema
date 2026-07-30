@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build && cp -r .next public",
+    "dev": "npm run build:data && next dev",
+    "build": "npm run build:data && next build",
+    "build:data": "node scripts/build-data.mjs",
     "start": "next start",
     "lint": "next lint",
     "lint-build": "npm run lint && npm run build"

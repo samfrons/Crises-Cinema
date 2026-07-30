@@ -1,14 +1,8 @@
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
-  transpilePackages: ['three'],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-}
+  reactStrictMode: true,
+  // TypeScript and ESLint errors are no longer suppressed — the build is the
+  // gate. Posters are plain <img> pointing at TMDB, so no image config here.
+};
 
-export default nextConfig
+export default nextConfig;

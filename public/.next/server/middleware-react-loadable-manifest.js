@@ -1,1 +1,0 @@
-self.__REACT_LOADABLE_MANIFEST='{"app/page.tsx -> ./components/disaster":{"id":3200,"files":["static/chunks/200.68bafa6768e09830.js"]}}';
