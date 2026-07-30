@@ -1,0 +1,441 @@
+{
+  "generated": "2026-07-30",
+  "policy": "Conjunctive clearance: (1) released before 1931 — US public domain by age; (2) item date corroborates the release year; (3) no youtube rips or banned collections; (4) a playable h.264 file. License tags are supporting evidence only.",
+  "clips": [
+    {
+      "id": "a-railway-collision-1900-directed-by-walter-r.-booth",
+      "kind": "dataset",
+      "title": "A Railway Collision",
+      "year": 1900,
+      "family": "wreckage",
+      "blurb": "Walter R. Booth wrecks two model trains on a mountain ledge — the oldest staged catastrophe in the dataset, forty-eight seconds of engineered calamity.",
+      "what": "Model trains meet head-on beside a tunnel mouth; carriages tumble down the slope.",
+      "audioNote": "Silent picture — no soundtrack exists.",
+      "startAt": 0,
+      "window": 0,
+      "duration": 48,
+      "width": 496,
+      "height": 360,
+      "src": "https://archive.org/download/a-railway-collision-1900-directed-by-walter-r.-booth/A%20Railway%20Collision%201900%20Directed%20by%20Walter%20R.%20Booth%20.mp4",
+      "poster": "https://archive.org/download/a-railway-collision-1900-directed-by-walter-r.-booth/a-railway-collision-1900-directed-by-walter-r.-booth.thumbs/A%20Railway%20Collision%201900%20Directed%20by%20Walter%20R.%20Booth%20_000021.jpg",
+      "source": {
+        "identifier": "a-railway-collision-1900-directed-by-walter-r.-booth",
+        "itemUrl": "https://archive.org/details/a-railway-collision-1900-directed-by-walter-r.-booth",
+        "file": "A Railway Collision 1900 Directed by Walter R. Booth .mp4",
+        "fileSizeMB": 4,
+        "itemDate": "1900",
+        "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "rights": null,
+        "possibleCopyrightStatus": null,
+        "collections": [
+          "feature_films_unsorted",
+          "feature_films",
+          "moviesandfilms"
+        ],
+        "pdBasis": "Released 1900; US public domain — published before 1931.",
+        "note": "Duplicate upload \"silent-a-railway-collision\" (curated silent_films collection, same 1900 date) corroborates identity."
+      }
+    },
+    {
+      "id": "silent-searching-ruins-on-broadway-galveston-for-dead-bodies",
+      "kind": "dataset",
+      "title": "Searching Ruins on Broadway, Galveston, for Dead Bodies",
+      "year": 1900,
+      "family": "earth",
+      "blurb": "Eight days after the deadliest hurricane in American history, an Edison crew set a tripod among the debris of Broadway. Disaster cinema before anyone thought to invent it: the camera simply arrived.",
+      "what": "Work crews pick through the wreckage of the Galveston hurricane, September 1900.",
+      "audioNote": "Silent actuality — no soundtrack exists.",
+      "startAt": 0,
+      "window": 0,
+      "duration": 60,
+      "width": 606,
+      "height": 480,
+      "src": "https://archive.org/download/silent-searching-ruins-on-broadway-galveston-for-dead-bodies/Searching%20Ruins%20on%20Broadway%2C%20Galveston%2C%20for%20Dead%20Bodies.mp4",
+      "poster": "https://archive.org/download/silent-searching-ruins-on-broadway-galveston-for-dead-bodies/silent-searching-ruins-on-broadway-galveston-for-dead-bodies.thumbs/Searching%20Ruins%20on%20Broadway%2C%20Galveston%2C%20for%20Dead%20Bodies_000008.jpg",
+      "source": {
+        "identifier": "silent-searching-ruins-on-broadway-galveston-for-dead-bodies",
+        "itemUrl": "https://archive.org/details/silent-searching-ruins-on-broadway-galveston-for-dead-bodies",
+        "file": "Searching Ruins on Broadway, Galveston, for Dead Bodies.mp4",
+        "fileSizeMB": 5,
+        "itemDate": "1900",
+        "licenseUrl": null,
+        "rights": null,
+        "possibleCopyrightStatus": null,
+        "collections": [
+          "silent_films",
+          "feature_films",
+          "moviesandfilms"
+        ],
+        "pdBasis": "Released 1900; US public domain — published before 1931.",
+        "note": null
+      }
+    },
+    {
+      "id": "SanFranc1906",
+      "kind": "archive",
+      "title": "San Francisco Earthquake Aftermath, Part 1",
+      "year": 1906,
+      "family": "earth",
+      "blurb": "Not on the film list — raw reels from the Prelinger Archives. Refugees, tent kitchens and freestanding chimneys: the same catastrophe at street level, unedited.",
+      "what": "Displaced residents and ruined buildings; the original print jumps and rolls.",
+      "audioNote": "Silent actuality — no soundtrack exists.",
+      "startAt": 0,
+      "window": 90,
+      "duration": 1406,
+      "width": 320,
+      "height": 240,
+      "src": "https://archive.org/download/SanFranc1906/SanFranc1906_512kb.mp4",
+      "poster": "https://archive.org/download/SanFranc1906/SanFranc1906.thumbs/SanFranc1906_000300.jpg",
+      "source": {
+        "identifier": "SanFranc1906",
+        "itemUrl": "https://archive.org/details/SanFranc1906",
+        "file": "SanFranc1906_512kb.mp4",
+        "fileSizeMB": 99,
+        "itemDate": "1906",
+        "licenseUrl": "http://creativecommons.org/licenses/publicdomain/",
+        "rights": null,
+        "possibleCopyrightStatus": null,
+        "collections": [
+          "prelinger",
+          "moviesandfilms"
+        ],
+        "pdBasis": "Released 1906; US public domain — published before 1931.",
+        "note": null
+      }
+    },
+    {
+      "id": "AfterThetheSanFranciscoEarthquake1906",
+      "kind": "dataset",
+      "title": "San Francisco: Aftermath of Earthquake",
+      "year": 1906,
+      "family": "earth",
+      "blurb": "The dataset’s first earthquake: actuality reels shot in the smouldering weeks after 18 April 1906, cut together from the footage that survived.",
+      "what": "Pans across ruined San Francisco streets, toppled facades and burned-out blocks.",
+      "audioNote": "Silent footage — the score on this transfer was added by the compiler.",
+      "startAt": 0,
+      "window": 0,
+      "duration": 129,
+      "width": 320,
+      "height": 240,
+      "src": "https://archive.org/download/AfterThetheSanFranciscoEarthquake1906/earthquake_512kb.mp4",
+      "poster": "https://archive.org/download/AfterThetheSanFranciscoEarthquake1906/AfterThetheSanFranciscoEarthquake1906.thumbs/earthquake_000060.jpg",
+      "source": {
+        "identifier": "AfterThetheSanFranciscoEarthquake1906",
+        "itemUrl": "https://archive.org/details/AfterThetheSanFranciscoEarthquake1906",
+        "file": "earthquake_512kb.mp4",
+        "fileSizeMB": 10,
+        "itemDate": null,
+        "licenseUrl": "http://creativecommons.org/licenses/by/3.0/",
+        "rights": null,
+        "possibleCopyrightStatus": null,
+        "collections": [
+          "silent_films",
+          "short_films",
+          "feature_films",
+          "moviesandfilms"
+        ],
+        "pdBasis": "Released 1906; US public domain — published before 1931.",
+        "note": "Item carries no date field. Identity rests on content: every foot of it is 1906 San Francisco aftermath actuality, matching the dataset film. The uploader states it is a compilation of those reels with a music track added, and licenses that edit CC BY 3.0."
+      }
+    },
+    {
+      "id": "the-sinking-of-the-lusitania-1918",
+      "kind": "dataset",
+      "title": "The Sinking of the Lusitania",
+      "year": 1918,
+      "family": "wreckage",
+      "blurb": "Winsor McCay spent nearly two years drawing the torpedoing of the Lusitania — some 25,000 drawings. The first animated documentary, and still furious.",
+      "what": "Animated re-enactment: the liner steams into frame, the torpedo strikes, the ship goes down by the bow.",
+      "audioNote": "Silent picture — any sound on this transfer is an added score.",
+      "startAt": 0,
+      "window": 120,
+      "duration": 649,
+      "width": 640,
+      "height": 480,
+      "src": "https://archive.org/download/the-sinking-of-the-lusitania-1918/The_Sinking_of_the_Lusitania_(1918).mp4",
+      "poster": "https://archive.org/download/the-sinking-of-the-lusitania-1918/the-sinking-of-the-lusitania-1918.thumbs/The_Sinking_of_the_Lusitania_(1918)_000420.jpg",
+      "source": {
+        "identifier": "the-sinking-of-the-lusitania-1918",
+        "itemUrl": "https://archive.org/details/the-sinking-of-the-lusitania-1918",
+        "file": "The_Sinking_of_the_Lusitania_(1918).mp4",
+        "fileSizeMB": 57,
+        "itemDate": "1918",
+        "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "rights": null,
+        "possibleCopyrightStatus": null,
+        "collections": [
+          "opensource_movies"
+        ],
+        "pdBasis": "Released 1918; US public domain — published before 1931.",
+        "note": "A second upload (\"Sinking_of_the_Lusitania\", also dated 1918) corroborates identity; it was rejected for carrying a spurious NC-ND tag."
+      }
+    },
+    {
+      "id": "silent-sodom-und-gomorrha",
+      "kind": "dataset",
+      "title": "Sodom and Gomorrah",
+      "year": 1922,
+      "family": "divine",
+      "blurb": "Michael Curtiz, two decades before Casablanca, burns a biblical city with thousands of Viennese extras. The oldest divine judgment on the books.",
+      "what": "Fire rains on the city; crowds flee through collapsing colonnades; the ruins smoke.",
+      "audioNote": "Silent picture — any sound on this transfer is an added score.",
+      "startAt": 5820,
+      "window": 75,
+      "duration": 7436,
+      "width": 544,
+      "height": 416,
+      "src": "https://archive.org/download/silent-sodom-und-gomorrha/Sodom%20und%20Gomorrha.mp4",
+      "poster": "https://archive.org/download/silent-sodom-und-gomorrha/silent-sodom-und-gomorrha.thumbs/Sodom%20und%20Gomorrha_005874.jpg",
+      "source": {
+        "identifier": "silent-sodom-und-gomorrha",
+        "itemUrl": "https://archive.org/details/silent-sodom-und-gomorrha",
+        "file": "Sodom und Gomorrha.mp4",
+        "fileSizeMB": 652,
+        "itemDate": "1923-03-26",
+        "licenseUrl": null,
+        "rights": null,
+        "possibleCopyrightStatus": null,
+        "collections": [
+          "silent_films",
+          "feature_films",
+          "moviesandfilms"
+        ],
+        "pdBasis": "Released 1922; US public domain — published before 1931.",
+        "note": "Item date 1923-03-26 is the general release; the premiere was October 1922 (dataset year). Duplicate upload \"sodom-und-gomorrha-lucy-doraine\" (dated 1922, named for its star) corroborates identity."
+      }
+    },
+    {
+      "id": "ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423",
+      "kind": "dataset",
+      "title": "The White Sister",
+      "year": 1923,
+      "family": "earth",
+      "blurb": "Lillian Gish takes the veil; Vesuvius objects. A romantic melodrama that settles its third act with an eruption and a burst dam.",
+      "what": "The climax: the volcano erupts, the dam gives way, and tinted crowds evacuate into the smoke.",
+      "audioNote": "Silent picture — any sound on this transfer is an added score.",
+      "startAt": 7850,
+      "window": 75,
+      "duration": 8094,
+      "width": 636,
+      "height": 480,
+      "src": "https://archive.org/download/ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423/The.White.Sister.1923.DVDRip.x264-HANDJOB.mp4",
+      "poster": "https://archive.org/download/ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423/ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423.thumbs/The.White.Sister.1923.DVDRip.x264-HANDJOB_007914.jpg",
+      "source": {
+        "identifier": "ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423",
+        "itemUrl": "https://archive.org/details/ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423",
+        "file": "The.White.Sister.1923.DVDRip.x264-HANDJOB.mp4",
+        "fileSizeMB": 842,
+        "itemDate": "1923",
+        "licenseUrl": null,
+        "rights": null,
+        "possibleCopyrightStatus": null,
+        "collections": [
+          "feature_films_unsorted",
+          "feature_films",
+          "moviesandfilms"
+        ],
+        "pdBasis": "Released 1923; US public domain — published before 1931.",
+        "note": null
+      }
+    },
+    {
+      "id": "the-johnstown-flood-1926-by-irving-cummings",
+      "kind": "dataset",
+      "title": "The Johnstown Flood",
+      "year": 1926,
+      "family": "earth",
+      "blurb": "Fox’s dramatisation of the 1889 dam failure that killed 2,209 people. The dataset files it under Floods; Pennsylvania filed it under memory.",
+      "what": "The South Fork dam gives way and the flood takes the valley below.",
+      "audioNote": "Silent picture — any sound on this transfer is an added score.",
+      "startAt": 3480,
+      "window": 75,
+      "duration": 4084,
+      "width": 1440,
+      "height": 1080,
+      "src": "https://archive.org/download/the-johnstown-flood-1926-by-irving-cummings/The.Johnstown.Flood.1926.1080p.BluRay.x264.AAC-%5BYTS.MX%5D.mp4",
+      "poster": "https://archive.org/download/the-johnstown-flood-1926-by-irving-cummings/the-johnstown-flood-1926-by-irving-cummings.thumbs/The.Johnstown.Flood.1926.1080p.BluRay.x264.AAC-%5BYTS.MX%5D_003483.jpg",
+      "source": {
+        "identifier": "the-johnstown-flood-1926-by-irving-cummings",
+        "itemUrl": "https://archive.org/details/the-johnstown-flood-1926-by-irving-cummings",
+        "file": "The.Johnstown.Flood.1926.1080p.BluRay.x264.AAC-[YTS.MX].mp4",
+        "fileSizeMB": 1216,
+        "itemDate": "1926",
+        "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "rights": null,
+        "possibleCopyrightStatus": null,
+        "collections": [
+          "opensource_movies"
+        ],
+        "pdBasis": "Released 1926; US public domain — published before 1931.",
+        "note": "A second 1926-dated transfer (\"the-johnstown-flood\", 66 min vs 68 min here) corroborates identity; it was passed over for a TCM broadcast bug burned into the frame."
+      }
+    },
+    {
+      "id": "noahs-ark-1928_202401",
+      "kind": "dataset",
+      "title": "Noah's Ark",
+      "year": 1928,
+      "family": "divine",
+      "blurb": "Warner Bros. answers the Great War with the Great Flood. The deluge was real enough to injure stuntmen; sound was arriving, and so was the water.",
+      "what": "Lightning splits the rock; the storm builds toward the breaking of the flood.",
+      "audioNote": "Part-talkie — synchronised score with talking sequences.",
+      "startAt": 4790,
+      "window": 75,
+      "duration": 6476,
+      "width": 640,
+      "height": 480,
+      "src": "https://archive.org/download/noahs-ark-1928_202401/Noah's%20Ark%20(1928).mp4",
+      "poster": "https://archive.org/download/noahs-ark-1928_202401/noahs-ark-1928_202401.thumbs/Noah's%20Ark%20(1928)_004794.jpg",
+      "source": {
+        "identifier": "noahs-ark-1928_202401",
+        "itemUrl": "https://archive.org/details/noahs-ark-1928_202401",
+        "file": "Noah's Ark (1928).mp4",
+        "fileSizeMB": 615,
+        "itemDate": "1928",
+        "licenseUrl": "https://creativecommons.org/publicdomain/mark/1.0/",
+        "rights": null,
+        "possibleCopyrightStatus": null,
+        "collections": [
+          "opensource_movies"
+        ],
+        "pdBasis": "Released 1928; US public domain — published before 1931.",
+        "note": null
+      }
+    },
+    {
+      "id": "madam-satan_1930",
+      "kind": "dataset",
+      "title": "Madam Satan",
+      "year": 1930,
+      "family": "wreckage",
+      "blurb": "Cecil B. DeMille throws a masquerade aboard a zeppelin, then hits it with a storm. The last film here to enter the public domain — 1 January 2026.",
+      "what": "The costume ball in the dirigible; the storm; the guests take to parachutes.",
+      "audioNote": "Sound film — original recorded dialogue and score.",
+      "startAt": 6440,
+      "window": 75,
+      "duration": 6941,
+      "width": 656,
+      "height": 480,
+      "src": "https://archive.org/download/madam-satan_1930/madam-satan_1930.ia.mp4",
+      "poster": "https://archive.org/download/madam-satan_1930/madam-satan_1930.thumbs/madam-satan_1930_006298.jpg",
+      "source": {
+        "identifier": "madam-satan_1930",
+        "itemUrl": "https://archive.org/details/madam-satan_1930",
+        "file": "madam-satan_1930.ia.mp4",
+        "fileSizeMB": 668,
+        "itemDate": "1930-09-20",
+        "licenseUrl": null,
+        "rights": null,
+        "possibleCopyrightStatus": null,
+        "collections": [
+          "Comedy_Films",
+          "feature_films",
+          "moviesandfilms"
+        ],
+        "pdBasis": "Released 1930; US public domain — published before 1931.",
+        "note": null
+      }
+    }
+  ],
+  "rejected": {
+    "films": [
+      {
+        "title": "Oil Gush Fire in Bibiheybat",
+        "year": 1898,
+        "reason": "No archive.org item found."
+      },
+      {
+        "title": "The Oil Gush in Balakhany",
+        "year": 1898,
+        "reason": "No archive.org item found."
+      },
+      {
+        "title": "The Launch of H.M.S. Albion",
+        "year": 1898,
+        "reason": "No archive.org item found (the surviving print is held by the BFI)."
+      },
+      {
+        "title": "The Launch of HMS Albion at Blackwall",
+        "year": 1898,
+        "reason": "No archive.org item found (the surviving print is held by the BFI)."
+      },
+      {
+        "title": "Torment",
+        "year": 1924,
+        "reason": "No archive.org item found."
+      },
+      {
+        "title": "The Last Days of Pompeii",
+        "year": 1926,
+        "reason": "Only the 1913 Italian version is on archive.org — a different film than the dataset’s 1926 entry."
+      },
+      {
+        "title": "The Sea Beast",
+        "year": 1926,
+        "reason": "Search returns only the unrelated 2022 animated feature, its trailers, and a scanned souvenir programme."
+      },
+      {
+        "title": "Tramp, Tramp, Tramp",
+        "year": 1926,
+        "reason": "The only match (\"tramp_tramp_tramp_1926\") is a Fleischer sing-along cartoon of the marching song, not the Harry Langdon feature."
+      },
+      {
+        "title": "Volcano!",
+        "year": 1926,
+        "reason": "No archive.org item found."
+      }
+    ],
+    "items": [
+      {
+        "identifier": "johnstown-flood-1989-charles-guggenheim",
+        "reason": "A 1989 documentary tagged CC0 — the tag is evidence the metadata is wrong, not that the film is free. Fails the age test by 58 years.",
+        "itemUrl": "https://archive.org/details/johnstown-flood-1989-charles-guggenheim"
+      },
+      {
+        "identifier": "tramp_tramp_tramp_1926",
+        "reason": "Identity failure: a Fleischer cartoon (c. 1924), not the 1926 Langdon feature the identifier implies.",
+        "itemUrl": "https://archive.org/details/tramp_tramp_tramp_1926"
+      },
+      {
+        "identifier": "madamSatan30",
+        "reason": "A single scene ripped from YouTube (file is a youtube download); the full 1930 feature exists in a cleaner item.",
+        "itemUrl": "https://archive.org/details/madamSatan30"
+      },
+      {
+        "identifier": "the-johnstown-flood",
+        "reason": "Same 1926 film, but the transfer is an off-air recording with a TCM logo burned in. Used as corroborating evidence only.",
+        "itemUrl": "https://archive.org/details/the-johnstown-flood"
+      },
+      {
+        "identifier": "Sinking_of_the_Lusitania",
+        "reason": "Same 1918 film, but tagged CC BY-NC-ND — a spurious restriction on a public-domain work. Preferred the PD-marked upload.",
+        "itemUrl": "https://archive.org/details/Sinking_of_the_Lusitania"
+      },
+      {
+        "identifier": "san-francisco-earthquake-1906-in-color",
+        "reason": "Modern AI colorisation of 1906 footage — a new creative layer with unclear status. The plain footage ships instead.",
+        "itemUrl": "https://archive.org/details/san-francisco-earthquake-1906-in-color"
+      },
+      {
+        "identifier": "noahsark1928",
+        "reason": "Same 1928 film as the accepted item, but a single 3.2 GB MPEG4 with no streaming derivative.",
+        "itemUrl": "https://archive.org/details/noahsark1928"
+      },
+      {
+        "identifier": "madam-satan-1930_202601",
+        "reason": "Same 1930 film, but a 2.4 GB transfer with no streamable derivative; the accepted item has an archive-generated h.264.",
+        "itemUrl": "https://archive.org/details/madam-satan-1930_202601"
+      },
+      {
+        "identifier": "gli-ultimi-giorni-di-pompei-1913-en-st",
+        "reason": "The 1913 Pompeii, not the dataset’s 1926 film. Pre-1931 itself, but the wrong picture.",
+        "itemUrl": "https://archive.org/details/gli-ultimi-giorni-di-pompei-1913-en-st"
+      },
+      {
+        "identifier": "GalvestonHurricaneAndTidalWaveOf1900",
+        "reason": "Modern compilation carrying an NC-ND claim; the untouched Edison actuality ships instead.",
+        "itemUrl": "https://archive.org/details/GalvestonHurricaneAndTidalWaveOf1900"
+      }
+    ]
+  }
+}
