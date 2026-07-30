@@ -37,7 +37,8 @@ export interface ReelClip {
   duration: number | null;
   width: number | null;
   height: number | null;
-  src: string;
+  /** Primary download URL first, then the item's two mirror nodes. */
+  srcs: string[];
   poster: string | null;
   source: ReelSource;
 }

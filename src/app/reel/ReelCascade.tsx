@@ -85,9 +85,9 @@ export default function ReelCascade({ clips }: { clips: ReelClip[] }) {
   }, []);
 
   const playClip = useCallback(
-    (i: number) => {
+    (i: number, force = false) => {
       const v = videos.current[i];
-      if (!v || uiRef.current[i].status === 'error') return;
+      if (!v || (!force && uiRef.current[i].status === 'error')) return;
       videos.current.forEach((other, j) => {
         if (j !== i && other && !other.paused) other.pause();
       });
@@ -195,6 +195,20 @@ export default function ReelCascade({ clips }: { clips: ReelClip[] }) {
     }
   };
 
+  // The stream died (a single archive node can be down for hours) — let the
+  // reader ask the projectionist to thread it again.
+  const onRetry = (i: number) => {
+    const v = videos.current[i];
+    if (!v) return;
+    patch(i, { status: 'idle' });
+    seeked.current[i] = false;
+    v.load();
+    if (v.preload === 'none') v.preload = 'metadata';
+    ensureStart(i);
+    wanted.current = i;
+    playClip(i, true);
+  };
+
   const onMute = (i: number) => {
     const v = videos.current[i];
     const muted = !uiRef.current[i].muted;
@@ -247,7 +261,6 @@ export default function ReelCascade({ clips }: { clips: ReelClip[] }) {
                 <video
                   ref={(el) => { videos.current[i] = el; }}
                   data-idx={i}
-                  src={c.src}
                   poster={c.poster ?? undefined}
                   preload="none"
                   muted={u.muted}
@@ -269,7 +282,7 @@ export default function ReelCascade({ clips }: { clips: ReelClip[] }) {
                   }}
                   onTimeUpdate={() => onTime(i)}
                   onError={(e) => {
-                    if ((e.target as HTMLVideoElement).currentSrc) patch(i, { status: 'error' });
+                    if ((e.target as HTMLVideoElement).error) patch(i, { status: 'error' });
                   }}
                   onClick={(e) => {
                     if (!showControlsAttr) {
@@ -277,16 +290,37 @@ export default function ReelCascade({ clips }: { clips: ReelClip[] }) {
                       onToggle(i);
                     }
                   }}
-                />
+                >
+                  {/* Download redirector first, then the item's own node(s):
+                      the selection algorithm walks to the next source when a
+                      fetch fails, so a flaky redirect is not a dead clip. */}
+                  {c.srcs.map((s, k) => (
+                    <source
+                      key={s}
+                      src={s}
+                      type="video/mp4"
+                      onError={
+                        k === c.srcs.length - 1
+                          ? () => patch(i, { status: 'error' })
+                          : undefined
+                      }
+                    />
+                  ))}
+                </video>
 
                 {u.status === 'error' ? (
                   <div className="rl-overlay veil" role="status">
                     <div className="rl-error">
                       <b>Footage unavailable</b>
-                      the stream from archive.org did not answer —{' '}
-                      <a href={c.source.itemUrl} target="_blank" rel="noreferrer">
-                        open the source item ↗
-                      </a>
+                      the stream from archive.org did not answer
+                      <span className="rl-error-row">
+                        <button type="button" className="rl-btn" onClick={() => onRetry(i)}>
+                          Try again
+                        </button>
+                        <a href={c.source.itemUrl} target="_blank" rel="noreferrer">
+                          open the source item ↗
+                        </a>
+                      </span>
                     </div>
                   </div>
                 ) : hydrated && !playing ? (

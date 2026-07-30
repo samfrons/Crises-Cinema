@@ -38,11 +38,13 @@ export default function ReelPage() {
             <span className="l2">Disaster, before it was a genre</span>
           </h1>
           <p className="rl-lede rise rise-3">
-            The oldest films on the list are old enough to belong to everyone. Here are{' '}
-            <em>{clips.length}</em> of them — <em>{first}</em> to <em>{last}</em>, every one in
-            the US public domain, streamed straight from the Internet Archive with its paperwork
-            attached. The earliest are not fiction at all: a tripod set down in the wreckage,
-            eight days after the storm. Then the studios noticed what a crowd will pay to watch.
+            The oldest films on the list are old enough to belong to everyone. Of the{' '}
+            <em>18</em> released before 1931, <em>{datasetCount}</em> could be found and cleared —
+            they run here, <em>{first}</em> to <em>{last}</em>, with one reel of raw archive
+            footage, every frame in the US public domain and streamed straight from the Internet
+            Archive with its paperwork attached. The earliest are not fiction at all: a tripod
+            set down in the wreckage, eight days after the storm. Then the studios noticed what
+            a crowd will pay to watch.
           </p>
           <div className="rl-mast-foot rise rise-4">
             <span><b>{datasetCount}</b> films from the dataset</span>
@@ -97,7 +99,7 @@ export default function ReelPage() {
                         {c.kind === 'archive' ? <span className="dim"> · archive footage</span> : null}
                       </td>
                       <td>{c.year}</td>
-                      <td>
+                      <td className="src-cell">
                         <a href={c.source.itemUrl} target="_blank" rel="noreferrer">
                           {c.source.identifier}
                         </a>

@@ -237,6 +237,13 @@
 }
 .rl-error b { display: block; font-weight: 400; color: var(--ember); margin-bottom: 10px; letter-spacing: 0.2em; }
 .rl-error a { color: var(--lit-prose); }
+.rl-error-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 14px;
+}
 
 /* Control strip under the frame — always visible, never hover-only. */
 .rl-controls {
@@ -421,6 +428,12 @@ table.rl-ledger thead th {
 }
 table.rl-ledger a { color: var(--ink); }
 table.rl-ledger .dim { color: var(--ink-faint); }
+/* Identifiers run long — let them wrap so the basis column stays on screen. */
+table.rl-ledger td.src-cell {
+  white-space: normal;
+  word-break: break-all;
+  max-width: 330px;
+}
 
 .rl-rejects { margin-top: 48px; }
 .rl-rejects h3 {

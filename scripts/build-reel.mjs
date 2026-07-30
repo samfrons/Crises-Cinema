@@ -97,7 +97,9 @@ const PROGRAMME = [
     kind: 'archive',
     title: 'San Francisco Earthquake Aftermath, Part 1', year: 1906, family: 'earth',
     identifier: 'SanFranc1906',
-    file: 'SanFranc1906_512kb.mp4',
+    // Not the _512kb derivative: that one is old MPEG-4 Part 2, which some
+    // browsers refuse. This is the archive's modern h.264 transcode.
+    file: 'SanFranc1906.mp4',
     startAt: 0, window: 90, posterAt: 300,
     blurb:
       'Not on the film list — raw reels from the Prelinger Archives. Refugees, tent ' +
@@ -124,7 +126,7 @@ const PROGRAMME = [
     title: 'Sodom and Gomorrah', year: 1922, family: 'divine',
     identifier: 'silent-sodom-und-gomorrha',
     file: 'Sodom und Gomorrha.mp4',
-    startAt: 5820, window: 75, posterAt: 5874,
+    startAt: 5872, window: 75, posterAt: 5874,
     blurb:
       'Michael Curtiz, two decades before Casablanca, burns a biblical city with thousands ' +
       'of Viennese extras. The oldest divine judgment on the books.',
@@ -139,7 +141,7 @@ const PROGRAMME = [
     title: 'The White Sister', year: 1923, family: 'earth',
     identifier: 'ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423',
     file: 'The.White.Sister.1923.DVDRip.x264-HANDJOB.mp4',
-    startAt: 7850, window: 75, posterAt: 7914,
+    startAt: 7905, window: 75, posterAt: 7914,
     blurb:
       'Lillian Gish takes the veil; Vesuvius objects. A romantic melodrama that settles its ' +
       'third act with an eruption and a burst dam.',
@@ -151,7 +153,7 @@ const PROGRAMME = [
     title: 'The Johnstown Flood', year: 1926, family: 'earth',
     identifier: 'the-johnstown-flood-1926-by-irving-cummings',
     file: 'The.Johnstown.Flood.1926.1080p.BluRay.x264.AAC-[YTS.MX].mp4',
-    startAt: 3480, window: 75, posterAt: 3480,
+    startAt: 3730, window: 75, posterAt: 3780,
     blurb:
       'Fox’s dramatisation of the 1889 dam failure that killed 2,209 people. The ' +
       'dataset files it under Floods; Pennsylvania filed it under memory.',
@@ -297,6 +299,15 @@ async function verify(entry) {
   if (!poster) warnings.push('no frame thumbnails on item — clip ships without a poster');
 
   const dl = `https://archive.org/download/${entry.identifier}`;
+
+  // archive.org serves each item from two physical nodes (d1/d2). The
+  // download redirector can 302 to a node that is down, so the page gets all
+  // three URLs and the <video> walks them as <source> fallbacks.
+  const filePath = encodePath(entry.file);
+  const dirPath = String(data.dir ?? '').split('/').map(encodeURIComponent).join('/');
+  const mirrors = [...new Set([data.d1, data.d2].filter(Boolean))]
+    .map((host) => `https://${host}${dirPath}/${filePath}`);
+
   return {
     ok: true,
     warnings,
@@ -314,7 +325,7 @@ async function verify(entry) {
       duration: file.length ? Math.round(Number(file.length)) : null,
       width: file.width ? Number(file.width) : null,
       height: file.height ? Number(file.height) : null,
-      src: `${dl}/${encodePath(entry.file)}`,
+      srcs: [`${dl}/${filePath}`, ...mirrors],
       poster: poster ? `${dl}/${encodePath(poster.name)}` : null,
       source: {
         identifier: entry.identifier,

@@ -16,7 +16,10 @@
       "duration": 48,
       "width": 496,
       "height": 360,
-      "src": "https://archive.org/download/a-railway-collision-1900-directed-by-walter-r.-booth/A%20Railway%20Collision%201900%20Directed%20by%20Walter%20R.%20Booth%20.mp4",
+      "srcs": [
+        "https://archive.org/download/a-railway-collision-1900-directed-by-walter-r.-booth/A%20Railway%20Collision%201900%20Directed%20by%20Walter%20R.%20Booth%20.mp4",
+        "https://dn801207.us.archive.org/0/items/a-railway-collision-1900-directed-by-walter-r.-booth/A%20Railway%20Collision%201900%20Directed%20by%20Walter%20R.%20Booth%20.mp4"
+      ],
       "poster": "https://archive.org/download/a-railway-collision-1900-directed-by-walter-r.-booth/a-railway-collision-1900-directed-by-walter-r.-booth.thumbs/A%20Railway%20Collision%201900%20Directed%20by%20Walter%20R.%20Booth%20_000021.jpg",
       "source": {
         "identifier": "a-railway-collision-1900-directed-by-walter-r.-booth",
@@ -50,7 +53,10 @@
       "duration": 60,
       "width": 606,
       "height": 480,
-      "src": "https://archive.org/download/silent-searching-ruins-on-broadway-galveston-for-dead-bodies/Searching%20Ruins%20on%20Broadway%2C%20Galveston%2C%20for%20Dead%20Bodies.mp4",
+      "srcs": [
+        "https://archive.org/download/silent-searching-ruins-on-broadway-galveston-for-dead-bodies/Searching%20Ruins%20on%20Broadway%2C%20Galveston%2C%20for%20Dead%20Bodies.mp4",
+        "https://dn801202.us.archive.org/0/items/silent-searching-ruins-on-broadway-galveston-for-dead-bodies/Searching%20Ruins%20on%20Broadway%2C%20Galveston%2C%20for%20Dead%20Bodies.mp4"
+      ],
       "poster": "https://archive.org/download/silent-searching-ruins-on-broadway-galveston-for-dead-bodies/silent-searching-ruins-on-broadway-galveston-for-dead-bodies.thumbs/Searching%20Ruins%20on%20Broadway%2C%20Galveston%2C%20for%20Dead%20Bodies_000008.jpg",
       "source": {
         "identifier": "silent-searching-ruins-on-broadway-galveston-for-dead-bodies",
@@ -82,15 +88,18 @@
       "startAt": 0,
       "window": 90,
       "duration": 1406,
-      "width": 320,
-      "height": 240,
-      "src": "https://archive.org/download/SanFranc1906/SanFranc1906_512kb.mp4",
+      "width": 640,
+      "height": 480,
+      "srcs": [
+        "https://archive.org/download/SanFranc1906/SanFranc1906.mp4",
+        "https://dn600301.us.archive.org/0/items/SanFranc1906/SanFranc1906.mp4"
+      ],
       "poster": "https://archive.org/download/SanFranc1906/SanFranc1906.thumbs/SanFranc1906_000300.jpg",
       "source": {
         "identifier": "SanFranc1906",
         "itemUrl": "https://archive.org/details/SanFranc1906",
-        "file": "SanFranc1906_512kb.mp4",
-        "fileSizeMB": 99,
+        "file": "SanFranc1906.mp4",
+        "fileSizeMB": 146,
         "itemDate": "1906",
         "licenseUrl": "http://creativecommons.org/licenses/publicdomain/",
         "rights": null,
@@ -117,7 +126,10 @@
       "duration": 129,
       "width": 320,
       "height": 240,
-      "src": "https://archive.org/download/AfterThetheSanFranciscoEarthquake1906/earthquake_512kb.mp4",
+      "srcs": [
+        "https://archive.org/download/AfterThetheSanFranciscoEarthquake1906/earthquake_512kb.mp4",
+        "https://dn801208.us.archive.org/0/items/AfterThetheSanFranciscoEarthquake1906/earthquake_512kb.mp4"
+      ],
       "poster": "https://archive.org/download/AfterThetheSanFranciscoEarthquake1906/AfterThetheSanFranciscoEarthquake1906.thumbs/earthquake_000060.jpg",
       "source": {
         "identifier": "AfterThetheSanFranciscoEarthquake1906",
@@ -152,7 +164,11 @@
       "duration": 649,
       "width": 640,
       "height": 480,
-      "src": "https://archive.org/download/the-sinking-of-the-lusitania-1918/The_Sinking_of_the_Lusitania_(1918).mp4",
+      "srcs": [
+        "https://archive.org/download/the-sinking-of-the-lusitania-1918/The_Sinking_of_the_Lusitania_(1918).mp4",
+        "https://ia903209.us.archive.org/11/items/the-sinking-of-the-lusitania-1918/The_Sinking_of_the_Lusitania_(1918).mp4",
+        "https://ia803209.us.archive.org/11/items/the-sinking-of-the-lusitania-1918/The_Sinking_of_the_Lusitania_(1918).mp4"
+      ],
       "poster": "https://archive.org/download/the-sinking-of-the-lusitania-1918/the-sinking-of-the-lusitania-1918.thumbs/The_Sinking_of_the_Lusitania_(1918)_000420.jpg",
       "source": {
         "identifier": "the-sinking-of-the-lusitania-1918",
@@ -179,12 +195,15 @@
       "blurb": "Michael Curtiz, two decades before Casablanca, burns a biblical city with thousands of Viennese extras. The oldest divine judgment on the books.",
       "what": "Fire rains on the city; crowds flee through collapsing colonnades; the ruins smoke.",
       "audioNote": "Silent picture — any sound on this transfer is an added score.",
-      "startAt": 5820,
+      "startAt": 5872,
       "window": 75,
       "duration": 7436,
       "width": 544,
       "height": 416,
-      "src": "https://archive.org/download/silent-sodom-und-gomorrha/Sodom%20und%20Gomorrha.mp4",
+      "srcs": [
+        "https://archive.org/download/silent-sodom-und-gomorrha/Sodom%20und%20Gomorrha.mp4",
+        "https://dn601209.us.archive.org/0/items/silent-sodom-und-gomorrha/Sodom%20und%20Gomorrha.mp4"
+      ],
       "poster": "https://archive.org/download/silent-sodom-und-gomorrha/silent-sodom-und-gomorrha.thumbs/Sodom%20und%20Gomorrha_005874.jpg",
       "source": {
         "identifier": "silent-sodom-und-gomorrha",
@@ -213,12 +232,15 @@
       "blurb": "Lillian Gish takes the veil; Vesuvius objects. A romantic melodrama that settles its third act with an eruption and a burst dam.",
       "what": "The climax: the volcano erupts, the dam gives way, and tinted crowds evacuate into the smoke.",
       "audioNote": "Silent picture — any sound on this transfer is an added score.",
-      "startAt": 7850,
+      "startAt": 7905,
       "window": 75,
       "duration": 8094,
       "width": 636,
       "height": 480,
-      "src": "https://archive.org/download/ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423/The.White.Sister.1923.DVDRip.x264-HANDJOB.mp4",
+      "srcs": [
+        "https://archive.org/download/ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423/The.White.Sister.1923.DVDRip.x264-HANDJOB.mp4",
+        "https://dn801202.us.archive.org/0/items/ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423/The.White.Sister.1923.DVDRip.x264-HANDJOB.mp4"
+      ],
       "poster": "https://archive.org/download/ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423/ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423.thumbs/The.White.Sister.1923.DVDRip.x264-HANDJOB_007914.jpg",
       "source": {
         "identifier": "ptp_the-white-sister_henry-king_dvd_x264_mkv_716x480_252423",
@@ -247,13 +269,16 @@
       "blurb": "Fox’s dramatisation of the 1889 dam failure that killed 2,209 people. The dataset files it under Floods; Pennsylvania filed it under memory.",
       "what": "The South Fork dam gives way and the flood takes the valley below.",
       "audioNote": "Silent picture — any sound on this transfer is an added score.",
-      "startAt": 3480,
+      "startAt": 3730,
       "window": 75,
       "duration": 4084,
       "width": 1440,
       "height": 1080,
-      "src": "https://archive.org/download/the-johnstown-flood-1926-by-irving-cummings/The.Johnstown.Flood.1926.1080p.BluRay.x264.AAC-%5BYTS.MX%5D.mp4",
-      "poster": "https://archive.org/download/the-johnstown-flood-1926-by-irving-cummings/the-johnstown-flood-1926-by-irving-cummings.thumbs/The.Johnstown.Flood.1926.1080p.BluRay.x264.AAC-%5BYTS.MX%5D_003483.jpg",
+      "srcs": [
+        "https://archive.org/download/the-johnstown-flood-1926-by-irving-cummings/The.Johnstown.Flood.1926.1080p.BluRay.x264.AAC-%5BYTS.MX%5D.mp4",
+        "https://dn600309.us.archive.org/0/items/the-johnstown-flood-1926-by-irving-cummings/The.Johnstown.Flood.1926.1080p.BluRay.x264.AAC-%5BYTS.MX%5D.mp4"
+      ],
+      "poster": "https://archive.org/download/the-johnstown-flood-1926-by-irving-cummings/the-johnstown-flood-1926-by-irving-cummings.thumbs/The.Johnstown.Flood.1926.1080p.BluRay.x264.AAC-%5BYTS.MX%5D_003780.jpg",
       "source": {
         "identifier": "the-johnstown-flood-1926-by-irving-cummings",
         "itemUrl": "https://archive.org/details/the-johnstown-flood-1926-by-irving-cummings",
@@ -284,7 +309,10 @@
       "duration": 6476,
       "width": 640,
       "height": 480,
-      "src": "https://archive.org/download/noahs-ark-1928_202401/Noah's%20Ark%20(1928).mp4",
+      "srcs": [
+        "https://archive.org/download/noahs-ark-1928_202401/Noah's%20Ark%20(1928).mp4",
+        "https://dn600202.us.archive.org/0/items/noahs-ark-1928_202401/Noah's%20Ark%20(1928).mp4"
+      ],
       "poster": "https://archive.org/download/noahs-ark-1928_202401/noahs-ark-1928_202401.thumbs/Noah's%20Ark%20(1928)_004794.jpg",
       "source": {
         "identifier": "noahs-ark-1928_202401",
@@ -316,7 +344,11 @@
       "duration": 6941,
       "width": 656,
       "height": 480,
-      "src": "https://archive.org/download/madam-satan_1930/madam-satan_1930.ia.mp4",
+      "srcs": [
+        "https://archive.org/download/madam-satan_1930/madam-satan_1930.ia.mp4",
+        "https://ia902803.us.archive.org/7/items/madam-satan_1930/madam-satan_1930.ia.mp4",
+        "https://ia802803.us.archive.org/7/items/madam-satan_1930/madam-satan_1930.ia.mp4"
+      ],
       "poster": "https://archive.org/download/madam-satan_1930/madam-satan_1930.thumbs/madam-satan_1930_006298.jpg",
       "source": {
         "identifier": "madam-satan_1930",
