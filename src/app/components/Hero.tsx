@@ -69,6 +69,11 @@ export default function Hero({ summary }: { summary: Summary }) {
               Start the reel ↓
             </a>
           </span>
+          <span>
+            <a href="#explorer" style={{ color: 'var(--ember)', textDecoration: 'none', borderBottom: '1px solid currentColor' }}>
+              Browse the catalogue ↓
+            </a>
+          </span>
         </div>
       </div>
     </header>
