@@ -66,6 +66,23 @@ export default function Page() {
               post-apocalyptic film. Where the source contradicts itself, the more specific
               signal wins.
             </p>
+            <p>
+              <a
+                href="/methodology"
+                style={{
+                  fontFamily: 'var(--data)',
+                  fontSize: 11.5,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: 'var(--paper)',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid var(--ember)',
+                  paddingBottom: 2,
+                }}
+              >
+                Read the full methodology →
+              </a>
+            </p>
           </div>
 
           <div>
