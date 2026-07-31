@@ -465,6 +465,44 @@ table.counts td.zero { color: var(--rule); }
   margin-top: auto;
 }
 
+/* ══ Plot language ═══════════════════════════════════════════════════════ */
+
+.lang { border-top: 1px solid var(--rule); padding-top: 8px; }
+.lang-row {
+  display: grid;
+  grid-template-columns: 132px 1fr 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.lang-label { font-family: var(--data); font-size: 12.5px; font-weight: 600; }
+.lang-track { display: flex; align-items: center; gap: 9px; }
+.lang-meter { flex: 1; height: 10px; background: var(--paper-deep); position: relative; }
+.lang-bar { position: absolute; inset: 0 auto 0 0; height: 100%; }
+.lang-bar.surv { background: var(--ink-soft); }
+.lang-bar.ann { background: var(--ember); }
+.lang-pct {
+  flex: none;
+  width: 100px;
+  font-family: var(--data);
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+.lang-note {
+  margin: 18px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-faint);
+  max-width: 62ch;
+}
+
+@media (max-width: 640px) {
+  .lang-row { grid-template-columns: 1fr; gap: 6px; padding: 12px 0; }
+  .lang-label { margin-bottom: 2px; }
+}
+
 /* ══ Explorer ════════════════════════════════════════════════════════════ */
 
 .ex-controls {

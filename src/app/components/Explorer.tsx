@@ -15,12 +15,13 @@ interface Props {
   onSelect: (decade: number) => void;
   query: string;
   onQuery: (q: string) => void;
+  total: number;
 }
 
 const PAGE = 24;
 
 export default function Explorer({
-  decades, films, active, selected, onSelect, query, onQuery,
+  decades, films, active, selected, onSelect, query, onQuery, total,
 }: Props) {
   const [open, setOpen] = useState<Film | null>(null);
   const [limit, setLimit] = useState(PAGE);
@@ -50,7 +51,7 @@ export default function Explorer({
           <input
             id="film-search"
             type="search"
-            placeholder="Search 750 films, subjects, directors…"
+            placeholder={`Search ${total} films, subjects, directors…`}
             value={query}
             onChange={(e) => { onQuery(e.target.value); setLimit(PAGE); }}
           />

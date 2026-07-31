@@ -105,6 +105,23 @@ export interface DecadeRow {
   topGrossing: { t: string; y: number; b: string } | null;
 }
 
+export interface OriginRow {
+  decade: number;
+  us: number;
+  other: number;
+  total: number;
+  usShare: number;
+}
+
+export interface PlotLanguageRow {
+  family: FamilyId;
+  withPlot: number;
+  survival: number;
+  annihilation: number;
+  survivalPct: number;
+  annihilationPct: number;
+}
+
 export interface Summary {
   generated: string;
   total: number;
@@ -117,6 +134,8 @@ export interface Summary {
   withRating: number;
   withBoxOffice: number;
   countries: [string, number][];
+  originByDecade: OriginRow[];
+  plotLanguage: PlotLanguageRow[];
 }
 
 // ── Formatting ──────────────────────────────────────────────────────────────

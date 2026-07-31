@@ -21,7 +21,7 @@ export interface ReelSource {
 
 export interface ReelClip {
   id: string;
-  /** 'dataset' = a film from the 750; 'archive' = adjacent actuality footage. */
+  /** 'dataset' = a film from the main set; 'archive' = adjacent actuality footage. */
   kind: 'dataset' | 'archive';
   title: string;
   year: number;

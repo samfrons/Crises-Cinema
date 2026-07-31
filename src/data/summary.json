@@ -1,21 +1,21 @@
 {
-  "generated": "2026-07-30",
-  "total": 750,
+  "generated": "2026-07-31",
+  "total": 831,
   "firstYear": 1898,
   "lastYear": 2025,
   "byFamily": {
-    "earth": 205,
-    "climate": 33,
-    "cosmic": 43,
-    "wreckage": 122,
-    "atomic": 63,
-    "machines": 36,
-    "plague": 85,
-    "undead": 43,
-    "invaders": 44,
-    "divine": 53,
-    "afterfall": 18,
-    "unsorted": 5
+    "earth": 207,
+    "climate": 42,
+    "cosmic": 47,
+    "wreckage": 125,
+    "atomic": 83,
+    "machines": 39,
+    "plague": 87,
+    "undead": 48,
+    "invaders": 50,
+    "divine": 61,
+    "afterfall": 31,
+    "unsorted": 11
   },
   "decades": [
     {
@@ -62,21 +62,22 @@
     },
     {
       "decade": 1910,
-      "total": 1,
+      "total": 2,
       "counts": {
+        "cosmic": 1,
         "wreckage": 1
       },
-      "dominant": "wreckage",
-      "meanRating": 6.5,
+      "dominant": "cosmic",
+      "meanRating": 7.3,
       "topRated": {
-        "t": "The Sinking of the Lusitania",
-        "y": 1918,
-        "r": 6.5
+        "t": "The End of the World",
+        "y": 1916,
+        "r": 8
       },
       "mostSeen": {
-        "t": "The Sinking of the Lusitania",
-        "y": 1918,
-        "v": 50
+        "t": "The End of the World",
+        "y": 1916,
+        "v": 225725
       },
       "topGrossing": null
     },
@@ -109,12 +110,12 @@
     },
     {
       "decade": 1930,
-      "total": 13,
+      "total": 14,
       "counts": {
         "earth": 4,
         "cosmic": 1,
         "wreckage": 5,
-        "plague": 2,
+        "plague": 3,
         "divine": 1
       },
       "dominant": "wreckage",
@@ -125,9 +126,9 @@
         "r": 7.5
       },
       "mostSeen": {
-        "t": "San Francisco",
+        "t": "Things to Come",
         "y": 1936,
-        "v": 67
+        "v": 9238
       },
       "topGrossing": null
     },
@@ -153,12 +154,12 @@
     },
     {
       "decade": 1950,
-      "total": 19,
+      "total": 20,
       "counts": {
         "earth": 3,
         "cosmic": 3,
         "wreckage": 2,
-        "atomic": 5,
+        "atomic": 6,
         "machines": 2,
         "plague": 2,
         "invaders": 1,
@@ -172,20 +173,20 @@
         "r": 7.6
       },
       "mostSeen": {
-        "t": "Godzilla Raids Again (ゴジラの逆襲)",
-        "y": 1959,
-        "v": 265
+        "t": "World Without End",
+        "y": 1956,
+        "v": 2418
       },
       "topGrossing": null
     },
     {
       "decade": 1960,
-      "total": 28,
+      "total": 32,
       "counts": {
         "earth": 4,
-        "cosmic": 3,
+        "cosmic": 4,
         "wreckage": 2,
-        "atomic": 13,
+        "atomic": 16,
         "plague": 2,
         "undead": 2,
         "invaders": 2
@@ -198,28 +199,28 @@
         "r": 8.1
       },
       "mostSeen": {
-        "t": "Dr. Strangelove or: How I Learned To Stop Worrying and Love the Bomb",
-        "y": 1964,
-        "v": 5525
+        "t": "The Day the Earth Caught Fire",
+        "y": 1961,
+        "v": 6385
       },
       "topGrossing": null
     },
     {
       "decade": 1970,
-      "total": 74,
+      "total": 90,
       "counts": {
         "earth": 13,
         "climate": 4,
         "cosmic": 4,
         "wreckage": 22,
-        "atomic": 6,
+        "atomic": 8,
         "machines": 4,
         "plague": 8,
         "undead": 1,
-        "invaders": 3,
-        "divine": 4,
-        "afterfall": 4,
-        "unsorted": 1
+        "invaders": 6,
+        "divine": 8,
+        "afterfall": 10,
+        "unsorted": 2
       },
       "dominant": "wreckage",
       "meanRating": 5.8,
@@ -229,9 +230,9 @@
         "r": 8.2
       },
       "mostSeen": {
-        "t": "Mad Max",
-        "y": 1979,
-        "v": 3054
+        "t": "Battle for the Planet of the Apes",
+        "y": 1973,
+        "v": 35654
       },
       "topGrossing": {
         "t": "The Towering Inferno",
@@ -241,29 +242,31 @@
     },
     {
       "decade": 1980,
-      "total": 30,
+      "total": 65,
       "counts": {
-        "earth": 5,
-        "cosmic": 1,
-        "wreckage": 8,
-        "atomic": 5,
+        "earth": 6,
+        "climate": 7,
+        "cosmic": 2,
+        "wreckage": 9,
+        "atomic": 18,
         "machines": 2,
-        "plague": 6,
-        "divine": 1,
-        "afterfall": 1,
-        "unsorted": 1
+        "plague": 7,
+        "undead": 1,
+        "divine": 4,
+        "afterfall": 7,
+        "unsorted": 2
       },
-      "dominant": "wreckage",
-      "meanRating": 6.1,
+      "dominant": "atomic",
+      "meanRating": 6,
       "topRated": {
-        "t": "Blade Runner",
-        "y": 1982,
-        "r": 7.9
+        "t": "Nausicaä of the Valley of the Wind",
+        "y": 1984,
+        "r": 8
       },
       "mostSeen": {
-        "t": "Blade Runner",
-        "y": 1982,
-        "v": 13603
+        "t": "Mad Max 2 (The Road Warrior)",
+        "y": 1981,
+        "v": 203029
       },
       "topGrossing": {
         "t": "Raise the Titanic",
@@ -273,31 +276,32 @@
     },
     {
       "decade": 1990,
-      "total": 98,
+      "total": 105,
       "counts": {
-        "earth": 26,
+        "earth": 27,
         "climate": 6,
-        "cosmic": 7,
+        "cosmic": 8,
         "wreckage": 17,
-        "atomic": 6,
-        "machines": 6,
+        "atomic": 7,
+        "machines": 8,
         "plague": 14,
         "undead": 1,
         "invaders": 5,
         "divine": 8,
-        "afterfall": 2
+        "afterfall": 3,
+        "unsorted": 1
       },
       "dominant": "earth",
       "meanRating": 5.8,
       "topRated": {
-        "t": "The End of Evangelion",
-        "y": 1997,
-        "r": 8.3
+        "t": "The Handmaid's Tale",
+        "y": 1990,
+        "r": 8.4
       },
       "mostSeen": {
-        "t": "The Matrix",
-        "y": 1999,
-        "v": 25415
+        "t": "The Handmaid's Tale",
+        "y": 1990,
+        "v": 262477
       },
       "topGrossing": {
         "t": "Titanic",
@@ -307,19 +311,19 @@
     },
     {
       "decade": 2000,
-      "total": 170,
+      "total": 174,
       "counts": {
         "earth": 58,
         "climate": 7,
         "cosmic": 9,
         "wreckage": 24,
         "atomic": 9,
-        "machines": 6,
+        "machines": 7,
         "plague": 22,
-        "undead": 11,
+        "undead": 13,
         "invaders": 12,
         "divine": 11,
-        "unsorted": 1
+        "unsorted": 2
       },
       "dominant": "earth",
       "meanRating": 5.8,
@@ -329,9 +333,9 @@
         "r": 7.6
       },
       "mostSeen": {
-        "t": "I Am Legend",
-        "y": 2007,
-        "v": 15526
+        "t": "Daybreakers",
+        "y": 2008,
+        "v": 135969
       },
       "topGrossing": {
         "t": "2012",
@@ -341,23 +345,23 @@
     },
     {
       "decade": 2010,
-      "total": 230,
+      "total": 237,
       "counts": {
         "earth": 62,
-        "climate": 11,
+        "climate": 12,
         "cosmic": 11,
         "wreckage": 30,
         "atomic": 14,
         "machines": 10,
         "plague": 25,
-        "undead": 21,
-        "invaders": 15,
-        "divine": 18,
+        "undead": 23,
+        "invaders": 16,
+        "divine": 19,
         "afterfall": 11,
-        "unsorted": 2
+        "unsorted": 4
       },
       "dominant": "earth",
-      "meanRating": 5.9,
+      "meanRating": 6,
       "topRated": {
         "t": "Interstellar",
         "y": 2014,
@@ -376,17 +380,17 @@
     },
     {
       "decade": 2020,
-      "total": 69,
+      "total": 74,
       "counts": {
         "earth": 18,
-        "climate": 5,
+        "climate": 6,
         "cosmic": 4,
-        "wreckage": 8,
+        "wreckage": 10,
         "atomic": 5,
         "machines": 6,
         "plague": 4,
         "undead": 7,
-        "invaders": 5,
+        "invaders": 7,
         "divine": 7
       },
       "dominant": "earth",
@@ -397,9 +401,9 @@
         "r": 7.9
       },
       "mostSeen": {
-        "t": "Don't Look Up",
+        "t": "A Quiet Place Part II",
         "y": 2021,
-        "v": 8077
+        "v": 287928
       },
       "topGrossing": {
         "t": "Greenland",
@@ -412,6 +416,7 @@
     "1898": 4,
     "1900": 2,
     "1906": 1,
+    "1916": 1,
     "1918": 1,
     "1922": 1,
     "1923": 1,
@@ -422,7 +427,7 @@
     "1931": 2,
     "1933": 2,
     "1935": 2,
-    "1936": 2,
+    "1936": 3,
     "1937": 3,
     "1939": 1,
     "1942": 1,
@@ -432,43 +437,43 @@
     "1952": 2,
     "1953": 1,
     "1955": 3,
-    "1956": 1,
+    "1956": 2,
     "1957": 2,
     "1958": 3,
     "1959": 3,
     "1960": 2,
-    "1961": 4,
+    "1961": 6,
     "1962": 6,
     "1963": 2,
-    "1964": 3,
+    "1964": 4,
     "1965": 3,
     "1966": 1,
-    "1967": 1,
+    "1967": 2,
     "1968": 2,
     "1969": 4,
     "1970": 7,
     "1971": 5,
-    "1972": 6,
-    "1973": 3,
-    "1974": 10,
-    "1975": 5,
-    "1976": 6,
-    "1977": 11,
+    "1972": 8,
+    "1973": 6,
+    "1974": 12,
+    "1975": 8,
+    "1976": 8,
+    "1977": 14,
     "1978": 8,
-    "1979": 13,
-    "1980": 8,
-    "1981": 3,
-    "1982": 1,
-    "1983": 3,
-    "1984": 4,
-    "1985": 3,
-    "1986": 1,
-    "1987": 1,
-    "1988": 3,
-    "1989": 3,
-    "1990": 4,
+    "1979": 14,
+    "1980": 9,
+    "1981": 6,
+    "1982": 4,
+    "1983": 8,
+    "1984": 9,
+    "1985": 7,
+    "1986": 6,
+    "1987": 3,
+    "1988": 6,
+    "1989": 7,
+    "1990": 10,
     "1991": 7,
-    "1992": 2,
+    "1992": 3,
     "1993": 6,
     "1994": 7,
     "1995": 10,
@@ -483,40 +488,40 @@
     "2004": 13,
     "2005": 15,
     "2006": 20,
-    "2007": 17,
-    "2008": 19,
+    "2007": 20,
+    "2008": 20,
     "2009": 29,
-    "2010": 10,
+    "2010": 11,
     "2011": 21,
     "2012": 23,
-    "2013": 30,
+    "2013": 31,
     "2014": 34,
-    "2015": 20,
+    "2015": 23,
     "2016": 24,
     "2017": 25,
-    "2018": 22,
+    "2018": 24,
     "2019": 21,
     "2020": 13,
-    "2021": 23,
-    "2022": 9,
-    "2023": 12,
-    "2024": 10,
+    "2021": 24,
+    "2022": 10,
+    "2023": 14,
+    "2024": 11,
     "2025": 2
   },
   "peakYear": [
     "2014",
     34
   ],
-  "withRating": 684,
+  "withRating": 745,
   "withBoxOffice": 34,
   "countries": [
     [
       "United States",
-      371
+      402
     ],
     [
       "United Kingdom",
-      59
+      68
     ],
     [
       "Canada",
@@ -524,23 +529,221 @@
     ],
     [
       "Japan",
-      33
+      39
     ],
     [
       "Germany",
       24
     ],
     [
+      "Australia",
+      22
+    ],
+    [
       "South Korea",
       21
     ],
     [
-      "Australia",
-      18
-    ],
-    [
       "France",
-      12
+      15
     ]
+  ],
+  "originByDecade": [
+    {
+      "decade": 1890,
+      "us": 0,
+      "other": 4,
+      "total": 4,
+      "usShare": 0
+    },
+    {
+      "decade": 1900,
+      "us": 2,
+      "other": 1,
+      "total": 3,
+      "usShare": 67
+    },
+    {
+      "decade": 1910,
+      "us": 1,
+      "other": 1,
+      "total": 2,
+      "usShare": 50
+    },
+    {
+      "decade": 1920,
+      "us": 7,
+      "other": 2,
+      "total": 9,
+      "usShare": 78
+    },
+    {
+      "decade": 1930,
+      "us": 9,
+      "other": 4,
+      "total": 13,
+      "usShare": 69
+    },
+    {
+      "decade": 1940,
+      "us": 2,
+      "other": 0,
+      "total": 2,
+      "usShare": 100
+    },
+    {
+      "decade": 1950,
+      "us": 15,
+      "other": 5,
+      "total": 20,
+      "usShare": 75
+    },
+    {
+      "decade": 1960,
+      "us": 16,
+      "other": 16,
+      "total": 32,
+      "usShare": 50
+    },
+    {
+      "decade": 1970,
+      "us": 56,
+      "other": 27,
+      "total": 83,
+      "usShare": 67
+    },
+    {
+      "decade": 1980,
+      "us": 21,
+      "other": 36,
+      "total": 57,
+      "usShare": 37
+    },
+    {
+      "decade": 1990,
+      "us": 61,
+      "other": 31,
+      "total": 92,
+      "usShare": 66
+    },
+    {
+      "decade": 2000,
+      "us": 80,
+      "other": 74,
+      "total": 154,
+      "usShare": 52
+    },
+    {
+      "decade": 2010,
+      "us": 100,
+      "other": 119,
+      "total": 219,
+      "usShare": 46
+    },
+    {
+      "decade": 2020,
+      "us": 32,
+      "other": 37,
+      "total": 69,
+      "usShare": 46
+    }
+  ],
+  "plotLanguage": [
+    {
+      "family": "earth",
+      "withPlot": 189,
+      "survival": 42,
+      "annihilation": 38,
+      "survivalPct": 22,
+      "annihilationPct": 20
+    },
+    {
+      "family": "climate",
+      "withPlot": 42,
+      "survival": 12,
+      "annihilation": 6,
+      "survivalPct": 29,
+      "annihilationPct": 14
+    },
+    {
+      "family": "cosmic",
+      "withPlot": 46,
+      "survival": 8,
+      "annihilation": 7,
+      "survivalPct": 17,
+      "annihilationPct": 15
+    },
+    {
+      "family": "wreckage",
+      "withPlot": 125,
+      "survival": 29,
+      "annihilation": 14,
+      "survivalPct": 23,
+      "annihilationPct": 11
+    },
+    {
+      "family": "atomic",
+      "withPlot": 82,
+      "survival": 29,
+      "annihilation": 31,
+      "survivalPct": 35,
+      "annihilationPct": 38
+    },
+    {
+      "family": "machines",
+      "withPlot": 36,
+      "survival": 1,
+      "annihilation": 12,
+      "survivalPct": 3,
+      "annihilationPct": 33
+    },
+    {
+      "family": "plague",
+      "withPlot": 80,
+      "survival": 9,
+      "annihilation": 13,
+      "survivalPct": 11,
+      "annihilationPct": 16
+    },
+    {
+      "family": "undead",
+      "withPlot": 48,
+      "survival": 18,
+      "annihilation": 13,
+      "survivalPct": 38,
+      "annihilationPct": 27
+    },
+    {
+      "family": "invaders",
+      "withPlot": 50,
+      "survival": 11,
+      "annihilation": 10,
+      "survivalPct": 22,
+      "annihilationPct": 20
+    },
+    {
+      "family": "divine",
+      "withPlot": 61,
+      "survival": 9,
+      "annihilation": 17,
+      "survivalPct": 15,
+      "annihilationPct": 28
+    },
+    {
+      "family": "afterfall",
+      "withPlot": 31,
+      "survival": 11,
+      "annihilation": 10,
+      "survivalPct": 35,
+      "annihilationPct": 32
+    },
+    {
+      "family": "unsorted",
+      "withPlot": 11,
+      "survival": 4,
+      "annihilation": 0,
+      "survivalPct": 36,
+      "annihilationPct": 0
+    }
   ]
 }

@@ -1,9 +1,14 @@
 import type { Metadata, Viewport } from 'next';
+import summaryData from '../data/summary.json';
+import type { Summary } from '@/lib/taxonomy';
 import './globals.css';
+
+const summary = summaryData as unknown as Summary;
 
 const title = 'Disasters by the Decade — According to Hollywood';
 const description =
-  'A data essay on 750 disaster films from 1898 to 2025, sorted by what Hollywood was actually afraid of, decade by decade.';
+  `A data essay on ${summary.total} disaster films from ${summary.firstYear} to ${summary.lastYear}, ` +
+  'sorted by what Hollywood was actually afraid of, decade by decade.';
 
 export const metadata: Metadata = {
   title,

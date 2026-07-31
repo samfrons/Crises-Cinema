@@ -5,6 +5,7 @@ import { FAMILY_IDS, type FamilyId, type Film, type Summary } from '@/lib/taxono
 import DecadeChart, { type Mode } from './DecadeChart';
 import CategoryRail from './CategoryRail';
 import StoryNotes from './StoryNotes';
+import PlotLanguage from './PlotLanguage';
 import Explorer from './Explorer';
 
 /**
@@ -92,11 +93,26 @@ export default function FearIndex({ summary }: { summary: Summary }) {
       <section id="notes">
         <div className="wrap">
           <p className="eyebrow">Notes in the margin</p>
-          <h2 className="section-title">Five things the data says out loud</h2>
+          <h2 className="section-title">Eight things the data says out loud</h2>
           <p className="lede">
             Pick one to open that decade below.
           </p>
           <StoryNotes onPick={goToDecade} />
+        </div>
+      </section>
+
+      <hr className="hr" />
+
+      <section id="language">
+        <div className="wrap">
+          <p className="eyebrow">A word-level cross-section</p>
+          <h2 className="section-title">How the plots talk about the ending</h2>
+          <p className="lede">
+            Every film&apos;s own plot summary, scanned for two kinds of language: survival
+            (survive, escape, rescue, shelter) and annihilation (destroy, annihilate,
+            extinct, wipe out). Sorted by the widest gap between the two.
+          </p>
+          <PlotLanguage rows={summary.plotLanguage} />
         </div>
       </section>
 
@@ -118,6 +134,7 @@ export default function FearIndex({ summary }: { summary: Summary }) {
             onSelect={setDecade}
             query={query}
             onQuery={setQuery}
+            total={summary.total}
           />
         </div>
       </section>

@@ -93,6 +93,56 @@ const money = (n) => {
 /** A film is only a credible "best of decade" if enough people voted on it. */
 const VOTE_FLOOR = 500;
 
+/**
+ * Two word-lists run against each film's own PlotSummary text. This is a
+ * count of how the *descriptions* talk about stakes -- not a per-film verdict
+ * on how the story actually ends, which the dataset has no field for and
+ * this script does not claim to know. A summary can use both words, or
+ * neither; the two counts are independent, not a split of 100%.
+ */
+const SURVIVAL_RE = /\bsurviv|\bescape|\brescue|\bshelter|\brefuge|\bsafety\b/i;
+const ANNIHILATION_RE = /\bdestro|\bdestruction|\bannihilat|\bextinct|wipe(s|d)? out|\bapocalyp|\bdoom|obliterat|\bdevastat/i;
+
+function plotLanguageByFamily(films) {
+  const byFamily = new Map();
+  for (const f of films) {
+    if (!f.p) continue;
+    if (!byFamily.has(f.f)) byFamily.set(f.f, { withPlot: 0, survival: 0, annihilation: 0 });
+    const row = byFamily.get(f.f);
+    row.withPlot += 1;
+    if (SURVIVAL_RE.test(f.p)) row.survival += 1;
+    if (ANNIHILATION_RE.test(f.p)) row.annihilation += 1;
+  }
+  return FAMILY_ORDER.filter((id) => byFamily.has(id)).map((id) => {
+    const row = byFamily.get(id);
+    return {
+      family: id,
+      withPlot: row.withPlot,
+      survival: row.survival,
+      annihilation: row.annihilation,
+      survivalPct: Math.round((row.survival / row.withPlot) * 100),
+      annihilationPct: Math.round((row.annihilation / row.withPlot) * 100),
+    };
+  });
+}
+
+/** US share of each decade's output, by count of films with a known country. */
+function originByDecade(films) {
+  const decades = new Map();
+  for (const f of films) {
+    if (!f.c) continue;
+    const d = Math.floor(f.y / 10) * 10;
+    if (!decades.has(d)) decades.set(d, { us: 0, other: 0 });
+    const row = decades.get(d);
+    if (f.c === 'United States') row.us += 1; else row.other += 1;
+  }
+  return [...decades.keys()].sort((a, b) => a - b).map((decade) => {
+    const { us, other } = decades.get(decade);
+    const total = us + other;
+    return { decade, us, other, total, usShare: Math.round((us / total) * 100) };
+  });
+}
+
 function summarise(films) {
   const decades = new Map();
   for (const f of films) {
@@ -151,6 +201,8 @@ function summarise(films) {
     countries: Object.entries(
       films.reduce((acc, f) => (f.c ? { ...acc, [f.c]: (acc[f.c] ?? 0) + 1 } : acc), {}),
     ).sort((a, b) => b[1] - a[1]).slice(0, 8),
+    originByDecade: originByDecade(films),
+    plotLanguage: plotLanguageByFamily(films),
   };
 }
 
