@@ -53,6 +53,17 @@
 .md-p a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--ember); text-underline-offset: 2px; }
 .md-p i { font-style: italic; color: var(--ink); }
 
+.md-quote {
+  margin: 22px 0;
+  padding: 4px 0 4px 22px;
+  border-left: 3px solid var(--ember);
+  max-width: 66ch;
+  font-size: 17px;
+  line-height: 1.6;
+  font-style: italic;
+  color: var(--ink);
+}
+
 /* ── Disaster taxonomy ───────────────────────────────────────────────────── */
 
 .md-tree { display: grid; gap: 30px; margin-top: 38px; }
@@ -85,6 +96,7 @@
   line-height: 1.7;
   color: var(--ink-soft);
 }
+.md-sub ul li, .md-flat li { break-inside: avoid-column; }
 .md-flat { columns: 2; column-gap: 28px; }
 
 .md-shipped {
@@ -101,6 +113,98 @@
   text-transform: uppercase;
   color: var(--ember);
   margin-right: 8px;
+}
+
+/* ── Classification passes ───────────────────────────────────────────────── */
+
+.md-passes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin: 34px 0 44px;
+}
+.md-pass { border-top: 2px solid var(--ink); padding-top: 14px; }
+.md-pass h3 {
+  font-family: var(--poster);
+  font-weight: 400;
+  font-size: 20px;
+  margin: 0 0 10px;
+  line-height: 1.1;
+}
+.md-pass-cats {
+  font-family: var(--data);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin: 0 0 10px;
+}
+.md-pass-fields {
+  margin-bottom: 10px;
+  font-size: 12.5px;
+  columns: 1;
+}
+.md-pass .md-status { margin-top: 8px; }
+
+/* ── Pipeline diagram ────────────────────────────────────────────────────── */
+
+.md-pipeline {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  max-width: 560px;
+  margin: 24px 0 8px;
+}
+.md-pipe-stage {
+  border: 1px solid var(--ink);
+  background: var(--paper-lit);
+  padding: 14px 20px;
+}
+.md-pipe-stage h4 {
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin: 0 0 6px;
+}
+.md-pipe-label {
+  font-family: var(--poster);
+  font-weight: 400;
+  font-size: 19px;
+  margin: 0 0 6px;
+  line-height: 1.1;
+}
+.md-pipe-detail { font-size: 13px; line-height: 1.5; color: var(--ink-soft); margin: 0; }
+.md-pipe-arrow {
+  text-align: center;
+  font-family: var(--data);
+  color: var(--ink-faint);
+  padding: 4px 0;
+  font-size: 15px;
+}
+
+/* ── Theme cross-map ─────────────────────────────────────────────────────── */
+
+.md-cross-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 22px 28px;
+  margin-top: 22px;
+}
+.md-cross h4 {
+  font-family: var(--poster);
+  font-weight: 400;
+  font-size: 18px;
+  margin: 0 0 4px;
+  line-height: 1.15;
+}
+.md-cross ul { columns: 1; }
+.md-cross-related {
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  margin: 0 0 8px;
 }
 
 /* ── Themes and elements ─────────────────────────────────────────────────── */
