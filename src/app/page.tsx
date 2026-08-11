@@ -101,6 +101,26 @@ export default function Page() {
               <dt>Data built</dt>
               <dd>{summary.generated}</dd>
             </dl>
+            <p>
+              {/* The explorer above loads its films after paint, so this static
+                  index is the version that survives a reader with no scripts —
+                  and the one search engines and assistants actually read. */}
+              <a
+                href="/catalogue"
+                style={{
+                  fontFamily: 'var(--data)',
+                  fontSize: 11.5,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: 'var(--paper)',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid var(--ember)',
+                  paddingBottom: 2,
+                }}
+              >
+                Browse all {summary.total} films as a plain index →
+              </a>
+            </p>
           </div>
         </div>
       </footer>

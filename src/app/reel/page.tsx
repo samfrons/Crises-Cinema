@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import ReelCascade from './ReelCascade';
 import reelData from '../../data/reel.json';
 import { licenseLabel, type ReelManifest } from '@/lib/reel';
+import { abs } from '@/lib/site';
 import './reel.css';
 
 const manifest = reelData as unknown as ReelManifest;
@@ -15,7 +16,8 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  openGraph: { title, description, type: 'article', siteName: 'Disasters by the Decade' },
+  alternates: { canonical: abs('/reel') },
+  openGraph: { title, description, url: abs('/reel'), type: 'article', siteName: 'Disasters by the Decade' },
   twitter: { card: 'summary_large_image', title, description },
 };
 

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import summaryData from '../../data/summary.json';
 import type { Summary } from '@/lib/taxonomy';
 import { DISASTER_TAXONOMY, THEMES, CLASSIFICATION_PASSES, THEME_CROSSMAP, PIPELINE } from './data';
+import { abs } from '@/lib/site';
 import './methodology.css';
 
 const summary = summaryData as unknown as Summary;
@@ -14,7 +15,8 @@ const description =
 export const metadata: Metadata = {
   title,
   description,
-  openGraph: { title, description, type: 'article', siteName: 'Disasters by the Decade' },
+  alternates: { canonical: abs('/methodology') },
+  openGraph: { title, description, url: abs('/methodology'), type: 'article', siteName: 'Disasters by the Decade' },
   twitter: { card: 'summary_large_image', title, description },
 };
 
