@@ -1,0 +1,427 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   The Atlas of Ruin — /atlas
+   Two chart plates from an imagined exhibitor's pressbook: a dotted world
+   map of every named setting, and its negative — the orbital chart for the
+   films that leave. Same three type roles as the rest of the site; ink is
+   the data colour, ember only ever the touched state. All classes at-
+   prefixed; loads only with the /atlas route.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Masthead ───────────────────────────────────────────────────────────── */
+
+.at-masthead { padding: 64px 0 44px; }
+
+.at-kicker {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin: 0 0 26px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.at-kicker::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+.at-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; }
+.at-kicker a:hover { color: var(--ember); }
+
+.at-title {
+  font-family: var(--poster);
+  font-weight: 400;
+  margin: 0;
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+.at-title .l1 { display: block; font-size: clamp(44px, 10.4vw, 118px); }
+.at-title .l2 {
+  display: block;
+  font-size: clamp(19px, 3.4vw, 40px);
+  color: var(--ember);
+  margin-top: 0.12em;
+  padding-left: 0.1em;
+}
+
+.at-lede {
+  font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.55;
+  max-width: 62ch;
+  margin: 30px 0 0;
+}
+.at-lede em { font-style: italic; }
+
+.at-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 20px 32px;
+  border-top: 2px solid var(--ink);
+  padding-top: 20px;
+  margin: 44px 0 0;
+}
+.at-facts dt {
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+.at-facts dd { margin: 0; }
+.at-facts .big { font-family: var(--poster); font-size: 38px; line-height: 0.9; display: block; }
+.at-facts .sub {
+  display: block;
+  font-family: var(--data);
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 5px;
+}
+
+/* ── Plates, shared ─────────────────────────────────────────────────────── */
+
+.at-plate-section { padding: 56px 0 64px; }
+.at-plate-note { font-size: 15.5px; color: var(--ink-soft); max-width: 58ch; margin: 0 0 28px; }
+
+/* The plate: a printed figure with a heavy frame and tick-marked corners. */
+.at-plate {
+  margin: 0;
+  border: 1px solid var(--ink);
+  background:
+    radial-gradient(120% 90% at 50% 12%, var(--paper-lit) 0%, var(--paper) 62%);
+  position: relative;
+  box-shadow: 4px 4px 0 var(--paper-deep);
+}
+.at-plate::before,
+.at-plate::after {
+  content: '+';
+  position: absolute;
+  font-family: var(--data);
+  font-size: 13px;
+  color: var(--ink-faint);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 2;
+}
+.at-plate::before { top: 5px; left: 7px; }
+.at-plate::after { bottom: 5px; right: 7px; }
+
+.at-map-wrap { padding: 18px 14px 6px; }
+.at-scroll { overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+.at-inner { position: relative; min-width: 760px; }
+.at-map-wrap svg { display: block; width: 100%; height: auto; }
+
+.at-scroll-hint {
+  display: none;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 8px 2px 0;
+}
+@media (max-width: 820px) { .at-scroll-hint { display: block; } }
+
+.at-tip { min-width: 200px; }
+
+.at-plate-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 26px;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--rule);
+  margin: 8px 14px 0;
+  padding: 10px 2px 12px;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.at-plate-no { color: var(--ink-faint); letter-spacing: 0.18em; }
+.at-scale { display: inline-flex; align-items: center; gap: 8px; }
+.at-scale svg { display: block; }
+
+/* ── Plate 1: the territories ───────────────────────────────────────────── */
+
+.at-land {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  opacity: 0.52;
+}
+
+.at-pin { cursor: pointer; outline-offset: 3px; }
+/* The ember fill and dashed halo are the click feedback; the browser focus
+   box only earns its keep for keyboard users. */
+.at-pin:focus:not(:focus-visible),
+.at-node:focus:not(:focus-visible) { outline: none; }
+.at-pin-hit { fill: transparent; }
+.at-pin-dot {
+  fill: var(--ink);
+  stroke: var(--paper);
+  stroke-width: 1.6;
+  transition: fill 0.15s ease;
+}
+.at-pin:hover .at-pin-dot,
+.at-pin:focus-visible .at-pin-dot,
+.at-pin.sel .at-pin-dot { fill: var(--ember); }
+.at-pin-halo {
+  fill: none;
+  stroke: var(--ember);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+}
+
+.at-pin-label {
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  fill: var(--ink-soft);
+  paint-order: stroke;
+  stroke: var(--paper);
+  stroke-width: 3.4;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.at-table { margin-top: 30px; }
+
+/* ── The dossier ────────────────────────────────────────────────────────── */
+
+.at-dossier {
+  margin-top: 26px;
+  border-top: 2px solid var(--ink);
+  padding-top: 16px;
+}
+.at-dossier-head { position: relative; padding-right: 40px; margin-bottom: 16px; }
+.at-dossier-eyebrow {
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin: 0 0 6px;
+}
+.at-dossier h3 {
+  font-family: var(--poster);
+  font-weight: 400;
+  font-size: clamp(26px, 4vw, 38px);
+  line-height: 0.95;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.at-dossier h3 .ct {
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+.at-dossier-x {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.at-dossier-x:hover { border-color: var(--ink); color: var(--ink); }
+
+.at-films {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
+  border-bottom: 1px solid var(--rule);
+}
+.at-films li { border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); }
+.at-films a,
+.at-film-still {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+.at-films a:hover { background: var(--paper-lit); }
+.at-films img,
+.at-noposter {
+  width: 40px;
+  height: 60px;
+  flex: none;
+  object-fit: cover;
+  border-radius: 1px;
+  background: var(--paper-deep);
+}
+.at-noposter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--data);
+  font-size: 8px;
+  color: var(--ink-faint);
+}
+.at-film-body { min-width: 0; }
+.at-film-body b { display: block; font-size: 14.5px; line-height: 1.25; font-weight: 600; }
+.at-film-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--data);
+  font-size: 10.5px;
+  color: var(--ink-soft);
+  margin-top: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.at-film-meta i { width: 8px; height: 8px; border-radius: 1px; flex: none; }
+
+/* Dark variant, under Plate 2. */
+.at-dossier.dark { border-top-color: var(--paper); }
+.at-dossier.dark h3, .at-dossier.dark .at-film-body b { color: var(--paper); }
+.at-dossier.dark h3 .ct { color: #a1937c; }
+.at-dossier.dark .at-film-meta { color: #c4b89f; }
+.at-dossier.dark .at-films,
+.at-dossier.dark .at-films li { border-color: #3d352b; }
+.at-dossier.dark .at-films a:hover { background: #241e18; }
+.at-dossier.dark .at-dossier-x { border-color: #3d352b; color: #c4b89f; }
+.at-dossier.dark .at-dossier-x:hover { border-color: var(--paper); color: var(--paper); }
+.at-dossier.dark .at-noposter { background: #241e18; }
+
+/* ── Plate 2: off the map ───────────────────────────────────────────────── */
+
+/* The whole section flips to night. */
+.at-space-section {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 64px 0 72px;
+}
+.at-space-section .eyebrow { color: #a1937c; }
+.at-space-section .section-title { color: var(--paper); }
+.at-space-section .at-plate-note { color: #c4b89f; }
+
+.at-plate.dark {
+  border-color: #3d352b;
+  background: radial-gradient(130% 100% at 8% 100%, #241d15 0%, #16110c 58%);
+  box-shadow: 4px 4px 0 #000;
+}
+.at-plate.dark::before,
+.at-plate.dark::after { color: #6b5f4d; }
+
+.at-plate-foot.dark { border-top-color: #3d352b; color: #a1937c; }
+.at-plate-foot.dark .at-plate-no { color: #6b5f4d; }
+
+.at-star { fill: var(--paper); opacity: 0.5; pointer-events: none; }
+.at-star.dim { opacity: 0.18; }
+.at-orbit, .at-earth, .at-earth-label { pointer-events: none; }
+
+.at-earth {
+  fill: #116aac;
+  fill-opacity: 0.24;
+  stroke: var(--paper);
+  stroke-width: 1.6;
+}
+.at-earth-label {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  fill: #a1937c;
+}
+
+.at-orbit {
+  fill: none;
+  stroke: var(--paper);
+  stroke-opacity: 0.24;
+  stroke-width: 1;
+  stroke-dasharray: 2 7;
+  stroke-linecap: round;
+}
+
+.at-node { cursor: pointer; outline-offset: 3px; }
+.at-node-hit { fill: transparent; }
+.at-node-dot {
+  fill: var(--paper);
+  stroke: var(--ink);
+  stroke-width: 2;
+  transition: fill 0.15s ease;
+}
+.at-node:hover .at-node-dot,
+.at-node:focus-visible .at-node-dot,
+.at-node.sel .at-node-dot { fill: var(--ember); }
+.at-node:hover .at-node-count,
+.at-node:focus-visible .at-node-count,
+.at-node.sel .at-node-count { fill: var(--paper-lit); }
+.at-node-halo {
+  fill: none;
+  stroke: var(--ember);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+}
+.at-node-count {
+  font-family: var(--data);
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--ink);
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.at-node-label {
+  font-family: var(--data);
+  font-size: 11.5px;
+  letter-spacing: 0.14em;
+  fill: var(--paper);
+  pointer-events: none;
+}
+.at-node-blurb {
+  font-family: var(--read);
+  font-style: italic;
+  font-size: 11.5px;
+  fill: #a1937c;
+  pointer-events: none;
+}
+
+/* ── Colophon ───────────────────────────────────────────────────────────── */
+
+.at-colophon { padding: 64px 0 70px; }
+.at-colophon h2 {
+  font-family: var(--poster);
+  font-weight: 400;
+  font-size: 32px;
+  margin: 0 0 14px;
+}
+.at-colophon p {
+  font-size: 15.5px;
+  line-height: 1.62;
+  color: var(--ink-soft);
+  max-width: 68ch;
+  margin: 0 0 14px;
+}
+.at-colophon a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--ember);
+  text-underline-offset: 2px;
+}
+
+/* ── Small screens ──────────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  .at-masthead { padding: 44px 0 36px; }
+  .at-kicker { font-size: 10px; letter-spacing: 0.16em; gap: 9px; }
+  .at-plate-section { padding: 40px 0 48px; }
+  .at-map-wrap { padding: 12px 8px 4px; }
+  .at-node-blurb { display: none; }
+  .at-facts .big { font-size: 30px; }
+  .at-space-section { padding: 48px 0 56px; }
+}

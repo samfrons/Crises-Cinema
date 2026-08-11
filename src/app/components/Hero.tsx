@@ -74,6 +74,11 @@ export default function Hero({ summary }: { summary: Summary }) {
               Browse the catalogue ↓
             </a>
           </span>
+          <span>
+            <a href="/atlas" style={{ color: 'var(--ember)', textDecoration: 'none', borderBottom: '1px solid currentColor' }}>
+              Open the atlas →
+            </a>
+          </span>
         </div>
       </div>
     </header>

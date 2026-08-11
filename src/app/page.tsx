@@ -35,6 +35,23 @@ export default function Page() {
             </p>
             <p>
               <a
+                href="/atlas"
+                style={{
+                  fontFamily: 'var(--data)',
+                  fontSize: 11.5,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: 'var(--paper)',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid var(--ember)',
+                  paddingBottom: 2,
+                }}
+              >
+                See where it all happens — the Atlas of Ruin →
+              </a>
+            </p>
+            <p>
+              <a
                 href="/reel"
                 style={{
                   fontFamily: 'var(--data)',
