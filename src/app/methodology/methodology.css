@@ -239,6 +239,14 @@
   padding-bottom: 2px;
 }
 
+/* ── Foot ────────────────────────────────────────────────────────────────── */
+
+.md-foot {
+  border-top: 2px solid var(--ink);
+  margin-top: clamp(40px, 6vw, 72px);
+  padding: 20px 0 56px;
+}
+
 @media (max-width: 640px) {
   .md-masthead { padding: 44px 0 36px; }
   .md-kicker { font-size: 10px; letter-spacing: 0.16em; gap: 9px; }

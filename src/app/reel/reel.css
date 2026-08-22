@@ -487,6 +487,14 @@ table.rl-ledger td.src-cell {
 
 /* ── Small screens ───────────────────────────────────────────────────────── */
 
+/* ── Foot ────────────────────────────────────────────────────────────────── */
+
+.rl-foot {
+  border-top: 2px solid var(--ink);
+  margin-top: clamp(40px, 6vw, 72px);
+  padding: 20px 0 56px;
+}
+
 @media (max-width: 640px) {
   .rl-masthead { padding: 44px 0 40px; }
   .rl-kicker { font-size: 10px; letter-spacing: 0.16em; gap: 9px; }

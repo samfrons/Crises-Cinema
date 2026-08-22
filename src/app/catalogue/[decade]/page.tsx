@@ -4,6 +4,7 @@ import { country, family, money, orDash, tmdbUrl } from '@/lib/taxonomy';
 import { abs } from '@/lib/site';
 import { DECADES, findDecade, summary } from '../films';
 import '../catalogue.css';
+import SiteCopyright from '../../components/SiteCopyright';
 
 /**
  * One decade of the catalogue as static HTML — no scripts, no async data.
@@ -130,6 +131,7 @@ export default function DecadePage({ params }: Props) {
             JSON: <a href="/data/films.json">/data/films.json</a>. How these categories were made:{' '}
             <a href="/methodology">the methodology</a>.
           </p>
+          <SiteCopyright />
         </div>
       </footer>
     </div>

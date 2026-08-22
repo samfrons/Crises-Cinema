@@ -3,6 +3,7 @@ import summaryData from '../../data/summary.json';
 import type { Summary } from '@/lib/taxonomy';
 import { DISASTER_TAXONOMY, THEMES, CLASSIFICATION_PASSES, THEME_CROSSMAP, PIPELINE } from './data';
 import { abs } from '@/lib/site';
+import SiteCopyright from '../components/SiteCopyright';
 import './methodology.css';
 
 const summary = summaryData as unknown as Summary;
@@ -297,6 +298,12 @@ export default function MethodologyPage() {
           </div>
         </section>
       </main>
+
+      <footer className="md-foot">
+        <div className="wrap">
+          <SiteCopyright />
+        </div>
+      </footer>
     </div>
   );
 }

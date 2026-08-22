@@ -2,6 +2,7 @@ import Hero from './components/Hero';
 import FearIndex from './components/FearIndex';
 import summaryData from '../data/summary.json';
 import type { Summary } from '@/lib/taxonomy';
+import SiteCopyright from './components/SiteCopyright';
 
 // Aggregates are computed at build time by scripts/build-data.mjs, so the hero
 // and the chart render as static HTML. Only the film catalogue is fetched.
@@ -122,6 +123,7 @@ export default function Page() {
               </a>
             </p>
           </div>
+          <SiteCopyright />
         </div>
       </footer>
     </>

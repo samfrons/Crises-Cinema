@@ -3,6 +3,7 @@ import ReelCascade from './ReelCascade';
 import reelData from '../../data/reel.json';
 import { licenseLabel, type ReelManifest } from '@/lib/reel';
 import { abs } from '@/lib/site';
+import SiteCopyright from '../components/SiteCopyright';
 import './reel.css';
 
 const manifest = reelData as unknown as ReelManifest;
@@ -145,6 +146,12 @@ export default function ReelPage() {
           </div>
         </section>
       </main>
+
+      <footer className="rl-foot">
+        <div className="wrap">
+          <SiteCopyright />
+        </div>
+      </footer>
     </div>
   );
 }
