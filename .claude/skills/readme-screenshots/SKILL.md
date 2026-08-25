@@ -1,111 +1,146 @@
 ---
 name: readme-screenshots
-description: Refresh the public README's screenshots and headline stats for this Next.js site (Disasters by the Decade). Use this whenever the README's images look stale — after a redesign, a new page or section, a copy change to the hero/atlas/reel/methodology pages, or whenever the film count or decade count in src/data/summary.json has moved on since the images were last captured. Also use it any time someone asks to "update the README", "refresh the screenshots", "make the README look current", or "polish the README" for this repo. Drives the real dev server with Playwright and crops each shot to match what the README actually describes — don't hand-roll a one-off screenshot script when this one already exists and is wired to the site's actual anchors and selectors.
+description: Capture real, current screenshots of a running app and wire them into that project's public README.md, for any project — not just one repo. Use this whenever asked to write a "polished public README," add screenshots to a README that has none, refresh a README whose images or stats have gone stale (after a redesign, a new page, or a data/feature change), or any request phrased as "make the README look professional / public-facing," "update the README screenshots," or "the README looks outdated." Bundles a reusable Playwright capture engine (`scripts/capture-screenshots.cjs`) driven by a shots config you write fresh for each project — don't hand-roll a one-off screenshot script when this engine already exists; do the per-project discovery this skill describes instead.
 ---
 
 # README screenshots
 
-The README embeds six JPEGs from `docs/screenshots/` and quotes a handful
-of numbers (film count, year range, decade count, the four-group split) in
-prose. Both go stale the same two ways: the site's content or layout
-changes, or the underlying data is rebuilt with a different film count.
-This skill refreshes both from the live app and the live data file, so the
-README never quietly drifts from what a visitor actually sees.
+A README with real screenshots earns trust a wall of text can't — but a
+screenshot is only as good as its accuracy: the wrong page, a loading
+skeleton caught mid-render, or a stat in the prose next to it that's since
+drifted. This skill is a repeatable way to get both right: discover what a
+README should show, capture it properly from the actual running app, and
+keep the surrounding prose honest.
 
-## Why this exists as a script, not ad hoc Playwright calls
+The mechanical part (launch a browser, wait for real content, crop,
+compress, save) is the same on every project, so it's a bundled script. The
+part that differs by project — which pages matter, what selector proves a
+page has actually rendered, what numbers the README quotes — has to be
+figured out fresh each time by reading that project's own code and README.
+Don't skip that discovery step and reuse a shots list from a previous
+project; it will silently point at the wrong selectors.
 
-The six shots aren't arbitrary crops — each one is pinned to the specific
-selector and scroll position that makes it match its README caption (the
-decade chart at `#reel`, the film cards at `#explorer`, the atlas as a full
-page because it has two distinct plates). Re-deriving those anchors from
-scratch each time risks a shot that's technically "a screenshot of the
-page" but not the section the caption promises. `scripts/capture-screenshots.cjs`
-already encodes the right selector, wait condition, and crop for each one —
-use it, and only touch the `SHOTS` list inside it when a page's structure
-actually changes.
+## 1. Get the app running
 
-## Steps
+Check for a project skill that already knows how to launch this app — read
+`.claude/skills/*/SKILL.md` in the repo for one that mentions running or
+driving it, and use it if found. Otherwise fall back to the `run` skill's
+patterns: find the dev command (`package.json` scripts, a `Makefile`,
+`docker-compose`, the README's own "Getting Started"), start it in the
+background, and **poll** the port until it actually answers — don't guess
+with a fixed sleep:
 
-1. **Install deps and start the dev server** (it runs the data pipeline
-   first, so the site reflects whatever's currently in `public/`):
+```bash
+npm install   # or the project's real install step
+(nohup npm run dev > /tmp/devserver.log 2>&1 &)
+timeout 90 bash -c 'until curl -sf http://localhost:3000 >/dev/null; do sleep 2; done'
+```
 
-   ```bash
-   npm install
-   (nohup npm run dev > /tmp/nextdev.log 2>&1 &)
-   timeout 90 bash -c 'until curl -sf http://localhost:3000 >/dev/null; do sleep 2; done'
-   ```
+Note the base URL and port — the shots config in step 3 needs it. If the
+port is already bound from a previous run, free it first:
+`lsof -ti:<port> -sTCP:LISTEN | xargs -r kill`.
 
-   If the port is already bound from a previous run, free it first:
-   `lsof -ti:3000 -sTCP:LISTEN | xargs -r kill`.
+## 2. Figure out what to shoot
 
-2. **Check the headline stats** before touching any prose, so you know
-   whether the numbers actually moved:
+**Refreshing an existing README with images:** read its current `![alt
+text](path)` lines and the paragraphs around them. That prose is the
+checklist — it tells you what each image is supposed to prove, so re-derive
+the same set of shots (same pages, same sections) rather than inventing a
+new set. If a page or section referenced no longer exists, drop it; if
+something new was added that the README doesn't mention yet, that's a
+signal to ask whether it belongs.
 
-   ```bash
-   node .claude/skills/readme-screenshots/scripts/print-stats.mjs
-   ```
+**Writing a README's screenshots for the first time:** find the app's real
+pages/routes rather than guessing — grep for route definitions matching the
+framework (Next.js App Router: `**/page.tsx`; Pages Router: `pages/**/*`;
+React Router: route configs; Rails: `config/routes.rb`; Django:
+`urls.py`; etc.), or crawl `<a href>` links from the rendered homepage with
+Playwright if the framework isn't obvious. Pick the homepage plus roughly
+3-6 more views that show what the product actually *does* — the features a
+visitor would want proof of — not settings pages, empty states, or admin
+screens.
 
-   Compare its output against what `README.md` currently says (the "831
-   films", "1898–2025", "14 decades", and the four group counts — "296
-   films blame earth & sky", etc. — all appear in the opening paragraphs).
-   Update any that changed. This script derives the group totals the same
-   way `Hero.tsx` does — if a family's `group` ever changes in
-   `src/lib/taxonomy.ts`, update the mirrored mapping at the top of
-   `print-stats.mjs` too, or the two will silently disagree.
+For a shot that should crop to one section of a page (a chart, a specific
+feature) rather than the whole page, find a stable selector tied to that
+content — an `id`, a heading, a distinctive class — and use it as an
+`anchor` to scroll to plus a `waitFor` to confirm it rendered. Don't crop by
+guessing a pixel offset; it breaks the moment the layout shifts.
 
-3. **Capture the screenshots.** `playwright` is a global install here, not
-   a project dependency — `NODE_PATH` is what makes `require('playwright')`
-   resolve:
+## 3. Write the shots config and capture
 
-   ```bash
-   NODE_PATH=$(npm root -g) node .claude/skills/readme-screenshots/scripts/capture-screenshots.cjs
-   ```
+Write a small JSON config — see the full shape documented at the top of
+`scripts/capture-screenshots.cjs` — with one entry per screenshot:
 
-   This overwrites every file in `docs/screenshots/` in place. Chromium is
-   preinstalled at `/opt/pw-browsers/chromium` — don't run `playwright
-   install`, it isn't needed and may fail without network access.
+```json
+{
+  "baseUrl": "http://localhost:3000",
+  "outDir": "docs/screenshots",
+  "shots": [
+    { "name": "home-hero", "path": "/", "waitFor": ".hero-title" },
+    { "name": "pricing", "path": "/", "anchor": "#pricing", "waitFor": "#pricing", "settle": 1000 },
+    { "name": "dashboard", "path": "/dashboard", "waitFor": "[data-testid=chart]", "fullPage": true }
+  ]
+}
+```
 
-4. **Look at what you captured** before trusting it — a selector that
-   silently stopped matching produces a technically-valid screenshot of
-   the wrong state (a loading skeleton, an empty chart). Read at least
-   `home-hero.jpg`, `home-explorer.jpg`, and `atlas.jpg` back with the Read
-   tool and eyeball them against their README captions. The script prints
-   a `!` warning line for any shot whose `waitFor` selector never appeared
-   — treat that as a hard signal something broke, not a shot to ship
-   anyway.
+Then run it:
 
-5. **If a page was added, removed, or restructured** enough that none of
-   the existing six shots covers it, add or edit an entry in the `SHOTS`
-   array in `capture-screenshots.cjs` — pick a selector that only appears
-   once the section has real content (not the page shell), matching the
-   pattern already used for the existing entries — then add or update the
-   corresponding `![...]` line and surrounding paragraph in `README.md`.
+```bash
+node .claude/skills/readme-screenshots/scripts/capture-screenshots.cjs shots.json
+```
 
-6. **Stop the dev server** once you're done:
+The script needs the `playwright` npm package resolvable. Check whether the
+project already has it (`node -e "require.resolve('playwright')"`); if not,
+either add it as a devDependency or point `NODE_PATH` at wherever a global
+install lives (`NODE_PATH=$(npm root -g) node ...` — this only works
+because the script uses CommonJS `require`, not `import`). Chromium itself
+needs to exist somewhere the script can launch it: if the box has one
+preinstalled (this container has one at `/opt/pw-browsers/chromium`), set
+`chromiumPath` in the config to it; otherwise run `npx playwright install
+chromium` once and leave `chromiumPath` unset so Playwright manages its own.
 
-   ```bash
-   lsof -ti:3000 -sTCP:LISTEN | xargs -r kill
-   ```
+## 4. Check what you actually captured
 
-7. **Review the diff.** `git status` / `git diff --stat` should show
-   updated files under `docs/screenshots/` and, if the numbers moved, a
-   prose diff in `README.md`. A refresh where nothing actually changed is
-   a legitimate outcome — don't force a commit just to show activity.
+A selector that stopped matching still produces a "successful" screenshot —
+of a loading skeleton or an empty state. Read at least the homepage/hero
+shot and one or two others back with the Read tool and compare them against
+what the README will claim they show. Treat any `!` warning line the script
+prints (selector never appeared) as a hard stop, not a shot to ship anyway —
+fix the selector or extend `settle` and recapture.
+
+## 5. Update the README
+
+Embed the images with real captions, and while you're in there, check any
+numbers the README states in prose (counts, versions, stats) against their
+actual source — a data file the app builds from, `package.json`'s version,
+an API response — rather than leaving a stale figure sitting next to a
+freshly captured screenshot that contradicts it. Compress images before
+committing: JPEG at quality 85 and ~1.5x device scale is close to lossless
+at README display sizes and keeps a typical shot around 150–400KB, small
+enough to commit directly rather than needing external hosting.
+
+## 6. Clean up
+
+Stop the dev server you started in step 1
+(`lsof -ti:<port> -sTCP:LISTEN | xargs -r kill`), then review the diff —
+`git status` / `git diff --stat` should show the new/updated images and, if
+anything changed, a matching prose diff. A refresh where nothing actually
+changed is a legitimate outcome; don't force a commit to show activity.
 
 ## Gotchas
 
-- **`waitUntil: 'networkidle'` hangs on `/reel`** — it streams video from
-  the Internet Archive, which never goes idle. The script uses `waitUntil:
-  'load'` plus a selector wait instead; keep that pattern if you add shots
-  on that page.
-- **Client components paint in after hydration.** The explorer's film
-  cards and the atlas map are client-side, so a shot taken right after
-  `load` can catch an empty or partially-rendered state even though the
-  selector already exists in the DOM. That's what the per-shot `settle`
-  delay is for — extend it rather than removing it if a capture looks
-  incomplete.
-- **File size.** JPEG at quality 85 and 1.5x device scale keeps each shot
-  around 200–300KB (full-page shots like the atlas run larger, ~500–600KB)
-  — small enough to commit directly to the repo. Don't switch to PNG or
-  raise the scale factor without a reason; it roughly triples file size
-  for a difference GitHub's rendered width mostly hides anyway.
+- **`networkidle` hangs** on anything with streaming media, websockets, or
+  background polling — always prefer `waitUntil: 'load'` plus an explicit
+  `waitFor` selector, which the bundled script already does.
+- **Client-rendered content isn't done just because its selector exists.**
+  A React/Vue component can mount with an empty or skeleton state before its
+  data arrives. That's what per-shot `settle` is for — extend it rather than
+  trusting the selector alone if a capture looks incomplete.
+- **NODE_PATH only helps `require`, never `import`.** If you see
+  `ERR_MODULE_NOT_FOUND` for `playwright` despite `NODE_PATH` being set,
+  something is trying to `import` it — the bundled script avoids this by
+  being CommonJS on purpose; don't rewrite it as `.mjs`.
+- **Don't blow up the repo.** Full-page shots of long pages get large even
+  compressed; if a page is very long, prefer a targeted `anchor` crop over
+  `fullPage: true`, or accept the larger file only where the whole page is
+  genuinely the point (e.g. a long-form data essay).

@@ -1,66 +1,106 @@
 #!/usr/bin/env node
-// Screenshots every page/section the README embeds, against a dev server that
-// must already be running at BASE_URL. One image per shot spec below — edit
-// this list when a page is added, removed, or its layout changes enough that
-// the old crop no longer shows what the caption says it shows.
+// Generic Playwright capture engine for README screenshots. It knows nothing
+// about any particular project — every project-specific decision (which
+// pages, which selectors, which crops) lives in a shots config that the
+// caller writes fresh each time, based on that project's own README and
+// routes. This file is only the mechanical part: launch a browser, visit
+// each URL, wait for real content, crop, compress, save.
 //
 // Usage:
-//   NODE_PATH=$(npm root -g) node .claude/skills/readme-screenshots/scripts/capture-screenshots.cjs
+//   node capture-screenshots.cjs <config.json>
+//   SHOTS_JSON='{"shots":[...]}' node capture-screenshots.cjs
 //
-// CommonJS on purpose: `playwright` is a global install on this box, not a
-// project devDependency, and Node's ESM resolver ignores NODE_PATH (only
-// require() honours it) — so `import` would fail to find it here even
-// though `require` finds it fine. If the project ever adds playwright as a
-// real devDependency, this still works unchanged, with or without NODE_PATH.
+// Config shape (all top-level fields except `shots` are optional):
+// {
+//   "baseUrl": "http://localhost:3000",
+//   "outDir": "docs/screenshots",
+//   "viewport": { "width": 1280, "height": 900 },
+//   "deviceScaleFactor": 1.5,
+//   "format": "jpeg",              // "jpeg" or "png"
+//   "quality": 85,                  // jpeg only
+//   "chromiumPath": null,           // e.g. "/opt/pw-browsers/chromium" if a
+//                                   // system Chromium is preinstalled;
+//                                   // omit/null to let Playwright manage its
+//                                   // own (requires `npx playwright install
+//                                   // chromium` to have been run once)
+//   "shots": [
+//     {
+//       "name": "home-hero",        // -> <outDir>/home-hero.jpg
+//       "path": "/",                // URL path to load
+//       "waitFor": ".hero-title",   // selector that must appear before the
+//                                   // shot is trustworthy — pick one that
+//                                   // only exists once real content has
+//                                   // rendered, not the page shell
+//       "anchor": "#pricing",       // optional: scroll this into view for a
+//                                   // mid-page crop instead of the top
+//       "fullPage": false,          // optional: capture the whole
+//                                   // scrollable page, not one viewport
+//       "settle": 800               // optional: extra ms to wait after
+//                                   // waitFor appears, for animations,
+//                                   // lazy images, or client hydration
+//     }
+//   ]
+// }
+//
+// Requires the `playwright` package. If it's not a project dependency, a
+// global install is picked up via `NODE_PATH=$(npm root -g) node
+// capture-screenshots.cjs ...` — but only with `require` (used here), never
+// with `import`: Node's ESM resolver ignores NODE_PATH, only CommonJS
+// require() honours it. That's why this file is .cjs, not .mjs.
 
 const { chromium } = require('playwright');
-const { mkdirSync } = require('node:fs');
+const { mkdirSync, readFileSync } = require('node:fs');
 
-const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
-const OUT_DIR = process.env.OUT_DIR ?? 'docs/screenshots';
-const CHROMIUM_PATH = process.env.CHROMIUM_PATH ?? '/opt/pw-browsers/chromium';
+function loadConfig() {
+  const configPath = process.argv[2];
+  const raw = configPath ? readFileSync(configPath, 'utf8') : process.env.SHOTS_JSON;
+  if (!raw) {
+    console.error('Usage: node capture-screenshots.cjs <config.json>  (or set SHOTS_JSON)');
+    process.exit(1);
+  }
+  const cfg = JSON.parse(raw);
+  if (!Array.isArray(cfg.shots) || cfg.shots.length === 0) {
+    console.error('Config must have a non-empty "shots" array.');
+    process.exit(1);
+  }
+  return {
+    baseUrl: cfg.baseUrl ?? 'http://localhost:3000',
+    outDir: cfg.outDir ?? 'docs/screenshots',
+    viewport: cfg.viewport ?? { width: 1280, height: 900 },
+    deviceScaleFactor: cfg.deviceScaleFactor ?? 1.5,
+    format: cfg.format ?? 'jpeg',
+    quality: cfg.quality ?? 85,
+    chromiumPath: cfg.chromiumPath ?? null,
+    shots: cfg.shots,
+  };
+}
 
-// viewport width matches the site's editorial max content width, so cropped
-// sections don't show empty page margin either side.
-const VIEWPORT = { width: 1280, height: 900 };
-const DEVICE_SCALE = 1.5; // sharp on retina without ballooning file size
-const JPEG_QUALITY = 85; // visually lossless at this size, ~200-300KB/shot
-
-// path: URL path to load. anchor: CSS selector to scroll into view after
-// load, for a mid-page crop (viewport screenshot, not full page). fullPage:
-// capture the whole scrollable page instead of one viewport. waitFor: a
-// selector that must appear before the shot is trustworthy — pages here
-// render their hero data server-side, but client components (the explorer,
-// the atlas map) paint in after hydration, so waiting on the right selector
-// (not just `load`) is what keeps a shot from catching a loading state.
-const SHOTS = [
-  { name: 'home-hero', path: '/', waitFor: '.hero-title' },
-  { name: 'home-chart', path: '/', waitFor: '#reel', anchor: '#reel' },
-  { name: 'home-explorer', path: '/', waitFor: '#explorer', anchor: '#explorer', settle: 2200 },
-  { name: 'atlas', path: '/atlas', waitFor: '#territories', fullPage: true, settle: 1200 },
-  { name: 'reel', path: '/reel', waitFor: '.rl-masthead', settle: 1500 },
-  { name: 'methodology', path: '/methodology', waitFor: '.md-masthead' },
-];
-
-async function shootOne(browser, shot) {
-  const ctx = await browser.newContext({ viewport: VIEWPORT, deviceScaleFactor: DEVICE_SCALE });
+async function shootOne(browser, cfg, shot) {
+  const ctx = await browser.newContext({ viewport: cfg.viewport, deviceScaleFactor: cfg.deviceScaleFactor });
   const page = await ctx.newPage();
   try {
-    await page.goto(`${BASE_URL}${shot.path}`, { waitUntil: 'load', timeout: 30_000 });
-    try {
-      await page.waitForSelector(shot.waitFor, { timeout: 15_000 });
-    } catch {
-      console.warn(`  ! ${shot.name}: selector "${shot.waitFor}" never appeared — shot may be incomplete`);
+    // `networkidle` looks like the "safe" wait but hangs forever on anything
+    // with streaming media, websockets, or polling — `load` plus an explicit
+    // selector wait is more reliable across arbitrary projects.
+    await page.goto(`${cfg.baseUrl}${shot.path}`, { waitUntil: 'load', timeout: 30_000 });
+    if (shot.waitFor) {
+      try {
+        await page.waitForSelector(shot.waitFor, { timeout: 15_000 });
+      } catch {
+        console.warn(`  ! ${shot.name}: selector "${shot.waitFor}" never appeared — shot may be incomplete`);
+      }
     }
     if (shot.anchor) {
       await page.locator(shot.anchor).scrollIntoViewIfNeeded();
     }
-    // Charts and maps animate in and posters lazy-load; a fixed settle beats
-    // guessing at a "no more network activity" wait, which some of these
-    // client views never actually reach.
-    await page.waitForTimeout(shot.settle ?? 800);
-    const dest = `${OUT_DIR}/${shot.name}.jpg`;
-    await page.screenshot({ path: dest, type: 'jpeg', quality: JPEG_QUALITY, fullPage: !!shot.fullPage });
+    if (shot.settle) {
+      await page.waitForTimeout(shot.settle);
+    }
+    const ext = cfg.format === 'png' ? 'png' : 'jpg';
+    const dest = `${cfg.outDir}/${shot.name}.${ext}`;
+    const shotOpts = { path: dest, type: cfg.format, fullPage: !!shot.fullPage };
+    if (cfg.format === 'jpeg') shotOpts.quality = cfg.quality;
+    await page.screenshot(shotOpts);
     console.log(`  ✓ ${dest}`);
   } finally {
     await ctx.close();
@@ -68,11 +108,14 @@ async function shootOne(browser, shot) {
 }
 
 async function main() {
-  mkdirSync(OUT_DIR, { recursive: true });
-  const browser = await chromium.launch({ executablePath: CHROMIUM_PATH, args: ['--no-sandbox'] });
-  console.log(`Capturing ${SHOTS.length} shots from ${BASE_URL} into ${OUT_DIR}/ ...`);
-  for (const shot of SHOTS) {
-    await shootOne(browser, shot);
+  const cfg = loadConfig();
+  mkdirSync(cfg.outDir, { recursive: true });
+  const launchOpts = { args: ['--no-sandbox'] };
+  if (cfg.chromiumPath) launchOpts.executablePath = cfg.chromiumPath;
+  const browser = await chromium.launch(launchOpts);
+  console.log(`Capturing ${cfg.shots.length} shots from ${cfg.baseUrl} into ${cfg.outDir}/ ...`);
+  for (const shot of cfg.shots) {
+    await shootOne(browser, cfg, shot);
   }
   await browser.close();
   console.log('Done.');
