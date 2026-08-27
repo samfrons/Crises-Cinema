@@ -19,6 +19,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FAMILIES, family, type FamilyId } from '@/lib/taxonomy';
+import { monthLabel } from '@/lib/months';
 
 /* ── Shapes of the snapshot ───────────────────────────────────────────── */
 
@@ -67,13 +68,6 @@ export interface Dispatches {
 }
 
 /* ── Small shared helpers ─────────────────────────────────────────────── */
-
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-const monthLabel = (ym: string) => {
-  const [y, m] = ym.split('-');
-  return `${MONTH_NAMES[Number(m) - 1]} ${y}`;
-};
 
 const postMonth = (epoch: number) => new Date(epoch * 1000).toISOString().slice(0, 7);
 
@@ -279,15 +273,14 @@ function WitnessMap({ data }: { data: Dispatches }) {
 
   useEffect(() => {
     if (!playing) return;
+    // The updater stays a pure clamp; the end-of-record stop lives out here
+    // where a side effect belongs.
+    if (monthIx !== null && monthIx >= months.length - 1) { setPlaying(false); return; }
     const t = setInterval(() => {
-      setMonthIx((ix) => {
-        const next = ix === null ? 0 : ix + 1;
-        if (next >= months.length) { setPlaying(false); return months.length - 1; }
-        return next;
-      });
+      setMonthIx((ix) => Math.min(ix === null ? 0 : ix + 1, months.length - 1));
     }, 700);
     return () => clearInterval(t);
-  }, [playing, months.length]);
+  }, [playing, monthIx, months.length]);
 
   const monthTotal = currentMonth === null
     ? data.totalIndexed
@@ -502,8 +495,9 @@ function EvidenceWall({ data }: { data: Dispatches }) {
           <p className="eyebrow">Plate No. 2 · The evidence locker</p>
           <h2 className="section-title" id="evidence-title">The footage itself</h2>
           <p className="dis-plate-note">
-            The most upvoted dispatches with a surviving frame — {withMedia.length} of them,
-            straight off the wire. Every cell opens the original post and its thread.
+            The most upvoted dispatches with a surviving frame — the top {shown.length} of{' '}
+            {withMedia.length}, straight off the wire. Every cell opens the original post and
+            its thread.
           </p>
         </div>
 
@@ -601,9 +595,14 @@ function Uptick({ data }: { data: Dispatches }) {
   const ticks = useMemo(() => {
     const raw = max / 4;
     const mag = 10 ** Math.floor(Math.log10(raw));
-    const step = [1, 2, 2.5, 5, 10].map((s) => s * mag).find((s) => s >= raw) ?? mag * 10;
+    // Clamped to whole numbers and deduplicated: a near-empty history would
+    // otherwise yield fractional steps that round to repeated tick values.
+    const step = Math.max(1, [1, 2, 2.5, 5, 10].map((s) => s * mag).find((s) => s >= raw) ?? mag * 10);
     const out: number[] = [];
-    for (let v = 0; v <= max; v += step) out.push(Math.round(v));
+    for (let v = 0; v <= max; v += step) {
+      const r = Math.round(v);
+      if (out[out.length - 1] !== r) out.push(r);
+    }
     return out;
   }, [max]);
   const tickY = (v: number) => bottom - (v / max) * CH_PLOT_H;

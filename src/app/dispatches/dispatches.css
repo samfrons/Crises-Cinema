@@ -369,6 +369,12 @@
 /* The clip renders after the still, so it paints over it once playing. */
 .dis-card:hover .dis-shot img,
 .dis-card:hover .dis-shot video { transform: scale(1.04); }
+@media (prefers-reduced-motion: reduce) {
+  .dis-shot img,
+  .dis-shot video { transition: none; }
+  .dis-card:hover .dis-shot img,
+  .dis-card:hover .dis-shot video { transform: none; }
+}
 /* Behind the photo: the family colour, and its abbreviation — all a reader
    gets when an upload has died, and the loading state meanwhile. */
 .dis-shot-fill {

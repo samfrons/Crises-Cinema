@@ -155,7 +155,7 @@ const PLACES = [
   { id: 'oregon', label: 'Oregon', lat: 43.9, lon: -120.6, in: 'usa', re: /\bOregon\b|,\s?OR\b|\bPortland\b/ },
   { id: 'washington', label: 'Washington state', lat: 47.4, lon: -120.5, in: 'usa', re: /Washington [Ss]tate|,\s?WA\b|\bSpokane\b|\bTacoma\b/ },
   { id: 'alaska', label: 'Alaska', lat: 64.0, lon: -152.0, in: 'usa', re: /\bAlaska\b|,\s?AK\b|\bAnchorage\b|\bJuneau\b/ },
-  { id: 'hawaii', label: 'Hawaii', lat: 20.8, lon: -156.3, re: /\bHawaii\b|,\s?HI\b|\bHonolulu\b|\bKilauea\b|\bOahu\b|Big Island/ },
+  { id: 'hawaii', label: 'Hawaii', lat: 20.8, lon: -156.3, in: 'usa', re: /\bHawaii\b|,\s?HI\b|\bHonolulu\b|\bKilauea\b|\bOahu\b|Big Island/ },
   { id: 'pennsylvania', label: 'Pennsylvania', lat: 41.0, lon: -77.7, in: 'usa', re: /\bPennsylvania\b|,\s?PA\b|\bPittsburgh\b/ },
   { id: 'newjersey', label: 'New Jersey', lat: 40.1, lon: -74.6, in: 'usa', re: /New Jersey|,\s?NJ\b/ },
   { id: 'newyorkstate', label: 'New York State', lat: 42.9, lon: -75.6, in: 'usa', re: /,\s?NY\b|\bBuffalo\b|\bRochester\b/ },
@@ -225,7 +225,7 @@ const PLACES = [
   { id: 'himalayas', label: 'The Himalayas', lat: 28.0, lon: 86.9, re: /\bHimalaya|\bEverest\b|\bNepal\b|\bKathmandu\b|\bTibet\b|\bBhutan\b|\bK2\b|\bAnnapurna\b/ },
   { id: 'bangladesh', label: 'Bangladesh', lat: 23.7, lon: 90.4, re: /\bBangladesh\b|\bDhaka\b/ },
   { id: 'srilanka', label: 'Sri Lanka', lat: 7.9, lon: 80.7, re: /Sri Lanka|\bColombo\b/ },
-  { id: 'china', label: 'China', lat: 34.7, lon: 104.2, re: /\bChina\b|\bChinese\b|\bBeijing\b|\bShanghai\b|\bSichuan\b|\bGansu\b|\bYunnan\b|\bGuangzhou\b|\bShenzhen\b|\bWuhan\b|\bHenan\b|\bZhengzhou\b|\bChongqing\b|Three Gorges|\bTteton\b Dam|\bTibet\b Autonomous/ },
+  { id: 'china', label: 'China', lat: 34.7, lon: 104.2, re: /\bChina\b|\bChinese\b|\bBeijing\b|\bShanghai\b|\bSichuan\b|\bGansu\b|\bYunnan\b|\bGuangzhou\b|\bShenzhen\b|\bWuhan\b|\bHenan\b|\bZhengzhou\b|\bChongqing\b|Three Gorges|\bTibet\b Autonomous/ },
   { id: 'hongkong', label: 'Hong Kong', lat: 22.32, lon: 114.17, re: /Hong Kong|\bTai Po\b/ },
   { id: 'taiwan', label: 'Taiwan', lat: 23.8, lon: 121.0, re: /\bTaiwan\b|\bTaipei\b|\bHualien\b/ },
   { id: 'japan', label: 'Japan', lat: 36.6, lon: 138.2, re: /\bJapan\b|\bJapanese\b|\bTokyo\b|\bOsaka\b|\bFukushima\b|\bNoto\b|\bIshikawa\b|\bHokkaido\b|\bOkinawa\b|\bKyushu\b|\bSakurajima\b|Mt\.? Fuji/ },
@@ -255,7 +255,11 @@ async function get(url, tries = 10) {
   for (let i = 0; i < tries; i++) {
     try {
       calls += 1;
-      const res = await fetch(url, { headers: { 'User-Agent': 'crises-cinema dispatches build (contact: github.com/samfrons/Crises-Cinema)' } });
+      const res = await fetch(url, {
+        headers: { 'User-Agent': 'crises-cinema dispatches build (contact: github.com/samfrons/Crises-Cinema)' },
+        // A stalled connection becomes a retry instead of hanging the run.
+        signal: AbortSignal.timeout(60000),
+      });
       const body = await res.json();
       if (body.error) throw new Error(body.error);
       await sleep(2500);
@@ -288,10 +292,10 @@ async function cached(key, fn) {
 
 const ym = (iso, epoch) => {
   // Aggregate buckets come back at the previous month's 23:00 in winter —
-  // the archive bins in Central European time — so nudge by two hours
-  // before reading off the month.
-  const d = epoch ? new Date(epoch * 1000) : new Date(iso);
-  return new Date(d.getTime() + 2 * 3600 * 1000).toISOString().slice(0, 7);
+  // the archive bins in Central European time — so nudge those by two hours
+  // before reading off the month. Post epochs are already true UTC.
+  if (epoch) return new Date(epoch * 1000).toISOString().slice(0, 7);
+  return new Date(new Date(iso).getTime() + 2 * 3600 * 1000).toISOString().slice(0, 7);
 };
 
 async function fetchHistory(sub) {
@@ -359,6 +363,12 @@ function pin(title) {
 
 const unescapeUrl = (u) => u.replaceAll('&amp;', '&');
 
+// Only media served by Reddit's own hosts goes into the snapshot: the page
+// hotlinks these URLs, so an archive record with a doctored URL must not be
+// able to make readers' browsers call anywhere else.
+const SAFE_MEDIA = /^https:\/\/([a-z0-9-]+\.)+(redd\.it|redditmedia\.com)\//;
+const safeUrl = (u) => (u && SAFE_MEDIA.test(u) ? u : null);
+
 function mediaOf(full) {
   const url = full.url ?? '';
   const kind =
@@ -383,10 +393,10 @@ function mediaOf(full) {
     const fit = (img.resolutions ?? []).filter((r) => r.width >= 240).sort((a, b) => a.width - b.width)[0]
       ?? img.resolutions?.[img.resolutions.length - 1]
       ?? img.source;
-    if (fit?.url) { thumb = unescapeUrl(fit.url); w = fit.width; h = fit.height; }
+    if (fit?.url) { thumb = safeUrl(unescapeUrl(fit.url)); w = fit.width; h = fit.height; }
   }
   if (!thumb && /^https?:/.test(full.thumbnail ?? '') ) {
-    thumb = unescapeUrl(full.thumbnail);
+    thumb = safeUrl(unescapeUrl(full.thumbnail));
     w = full.thumbnail_width ?? 0;
     h = full.thumbnail_height ?? 0;
   }
@@ -397,8 +407,8 @@ function mediaOf(full) {
   const rv = full.media?.reddit_video ?? full.secure_media?.reddit_video ?? full.preview?.reddit_video_preview;
   const gif = img?.variants?.mp4?.source;
   let clip = null;
-  if (rv?.fallback_url) clip = unescapeUrl(rv.fallback_url);
-  else if (gif?.url) clip = unescapeUrl(gif.url);
+  if (rv?.fallback_url) clip = safeUrl(unescapeUrl(rv.fallback_url));
+  else if (gif?.url) clip = safeUrl(unescapeUrl(gif.url));
 
   return { kind, thumb, w, h, clip };
 }

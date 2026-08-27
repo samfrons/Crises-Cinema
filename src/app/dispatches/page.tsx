@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import dispatchesData from '../../data/dispatches.json';
 import landData from '../../../data/land-dots.json';
 import { family } from '@/lib/taxonomy';
+import { monthLabel } from '@/lib/months';
 import DispatchesView, { type Dispatches } from './DispatchesView';
 import './dispatches.css';
 
@@ -75,7 +76,7 @@ export default function DispatchesPage() {
               <div>
                 <dt>Busiest month</dt>
                 <dd>
-                  <span className="big">{formatYm(data.peakMonth.m)}</span>
+                  <span className="big">{monthLabel(data.peakMonth.m)}</span>
                   <span className="sub">{data.peakMonth.n.toLocaleString()} posts in one month</span>
                 </dd>
               </div>
@@ -110,7 +111,7 @@ export default function DispatchesPage() {
           <div className="table-scroll">
             <table className="counts dis-sub-table">
               <thead>
-                <tr><th>Subreddit</th><th>Filed under</th><th>Posts since 2012</th><th></th></tr>
+                <tr><th>Subreddit</th><th>Filed under</th><th>Posts since 2012</th><th>What it covers</th></tr>
               </thead>
               <tbody>
                 {data.subs.map((s) => (
@@ -140,10 +141,4 @@ export default function DispatchesPage() {
       </footer>
     </div>
   );
-}
-
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-function formatYm(ym: string) {
-  const [y, m] = ym.split('-');
-  return `${MONTHS[Number(m) - 1]} ${y}`;
 }
