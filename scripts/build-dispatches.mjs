@@ -302,9 +302,22 @@ async function fetchHistory(sub) {
   for (let y = Number(HISTORY_AFTER.slice(0, 4)); y <= lastYear; y++) {
     const before = y < lastYear ? `&before=${y + 1}-01-01` : '';
     // Cached per slice, not per subreddit, so a crash mid-sub loses one
-    // year of progress instead of all of it.
-    const d = await cached(`hist-${sub}-${y}`, () =>
-      get(`${BASE}/posts/search/aggregate?subreddit=${sub}&aggregate=created_utc&frequency=month&after=${y}-01-01${before}`));
+    // year of progress instead of all of it. A year the archive cannot
+    // aggregate inside its own timeout (a busy hurricane season, say)
+    // gets asked for again as four quarters.
+    let d;
+    try {
+      d = await cached(`hist-${sub}-${y}`, () =>
+        get(`${BASE}/posts/search/aggregate?subreddit=${sub}&aggregate=created_utc&frequency=month&after=${y}-01-01${before}`));
+    } catch {
+      d = [];
+      for (let q = 0; q < 4; q++) {
+        const qa = `${y}-${String(q * 3 + 1).padStart(2, '0')}-01`;
+        const qb = q < 3 ? `&before=${y}-${String(q * 3 + 4).padStart(2, '0')}-01` : before || `&before=${y + 1}-01-01`;
+        d.push(...await cached(`hist-${sub}-${y}q${q + 1}`, () =>
+          get(`${BASE}/posts/search/aggregate?subreddit=${sub}&aggregate=created_utc&frequency=month&after=${qa}${qb}`)) ?? []);
+      }
+    }
     for (const row of d ?? []) months[ym(row.created_utc)] = Number(row.count);
     process.stdout.write(`\r  history r/${sub}: through ${y}…  `);
   }
