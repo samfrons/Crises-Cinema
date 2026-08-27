@@ -84,6 +84,11 @@ export default function AtlasPage() {
             <a href="/#explorer">catalogue</a>. Full sausage-making in the{' '}
             <a href="/methodology">methodology</a>.
           </p>
+          <p>
+            And for the same map with the fiction stripped out — real disasters, pinned from
+            the corners of Reddit where witnesses post their footage — see{' '}
+            <a href="/dispatches">Dispatches from the Ground</a>.
+          </p>
         </div>
       </footer>
     </div>

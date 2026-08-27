@@ -42,3 +42,6 @@ next-env.d.ts
 
 # visual review artefacts for the redesign (kept on disk, not in git)
 /redesign-screenshots/
+
+# dispatches fetch cache (scripts/build-dispatches.mjs)
+/.cache/
