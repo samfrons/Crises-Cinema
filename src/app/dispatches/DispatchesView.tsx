@@ -35,6 +35,8 @@ export interface DisPost {
   thumb: string | null;
   w: number;
   h: number;
+  /** Reddit-hosted mp4 rendition, playable inline; absent on older snapshots. */
+  clip?: string | null;
 }
 
 export interface DisPlace {
@@ -156,6 +158,43 @@ function PlateTip({ tip }: { tip: Tip }) {
 
 /* ── One witness card, shared by the wall and the dossier ─────────────── */
 
+/** Muted looping footage that runs only while on screen — vivid without
+ *  sixty decoders running at once — and not at all for readers who asked
+ *  for reduced motion (the poster frame stands in). Any playback failure
+ *  falls back to the still underneath. */
+function Clip({ src, poster }: { src: string; poster: string | null }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [dead, setDead] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || dead) return;
+    if (typeof window.matchMedia === 'function'
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) el.play().catch(() => setDead(true));
+      else el.pause();
+    }, { rootMargin: '120px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [dead]);
+
+  if (dead) return null;
+  return (
+    <video
+      ref={ref}
+      src={src}
+      poster={poster ?? undefined}
+      muted
+      loop
+      playsInline
+      preload="none"
+      onError={() => setDead(true)}
+      aria-hidden
+    />
+  );
+}
+
 function WitnessCard({ post, dark }: { post: DisPost; dark?: boolean }) {
   const fam = family(post.family);
   const badge = KIND_BADGE[post.kind];
@@ -177,6 +216,7 @@ function WitnessCard({ post, dark }: { post: DisPost; dark?: boolean }) {
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
           />
         ) : null}
+        {post.clip && <Clip src={post.clip} poster={post.thumb} />}
         <span className="dis-shot-fill" style={{ background: fam.color }} aria-hidden>
           {fam.short}
         </span>

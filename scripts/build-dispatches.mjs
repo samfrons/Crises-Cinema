@@ -377,7 +377,17 @@ function mediaOf(full) {
     w = full.thumbnail_width ?? 0;
     h = full.thumbnail_height ?? 0;
   }
-  return { kind, thumb, w, h };
+
+  // Reddit-hosted footage carries a bare mp4 rendition (video track only —
+  // the wall plays it muted anyway) that can loop inline; animated uploads
+  // carry an mp4 variant of the same kind. Everything else stays a still.
+  const rv = full.media?.reddit_video ?? full.secure_media?.reddit_video ?? full.preview?.reddit_video_preview;
+  const gif = img?.variants?.mp4?.source;
+  let clip = null;
+  if (rv?.fallback_url) clip = unescapeUrl(rv.fallback_url);
+  else if (gif?.url) clip = unescapeUrl(gif.url);
+
+  return { kind, thumb, w, h, clip };
 }
 
 async function fetchEvidence(ids) {
@@ -493,7 +503,7 @@ const fullById = new Map((await fetchEvidence([...pool.keys()])).map((f) => [f.i
 
 const posts = [...pool.values()].map((p) => {
   const full = fullById.get(p.id);
-  const media = full ? mediaOf(full) : { kind: 'link', thumb: null, w: 0, h: 0 };
+  const media = full ? mediaOf(full) : { kind: 'link', thumb: null, w: 0, h: 0, clip: null };
   const removed = full?._meta?.removal_type != null;
   return {
     id: p.id,
@@ -535,7 +545,7 @@ for (const pl of places) {
   for (const id of pl.top) {
     if (known.has(id)) continue;
     const p = indexed.find((x) => x.id === id);
-    if (p) { extras.push({ id: p.id, title: p.title, score: p.score, n: 0, created: p.created, sub: p.sub, family: p.family, place: p.place, kind: 'link', thumb: null, w: 0, h: 0 }); known.add(id); }
+    if (p) { extras.push({ id: p.id, title: p.title, score: p.score, n: 0, created: p.created, sub: p.sub, family: p.family, place: p.place, kind: 'link', thumb: null, w: 0, h: 0, clip: null }); known.add(id); }
   }
 }
 

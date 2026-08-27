@@ -355,7 +355,8 @@
   border-radius: 2px;
   background: var(--paper-deep);
 }
-.dis-shot img {
+.dis-shot img,
+.dis-shot video {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -365,7 +366,9 @@
   filter: saturate(0.92) contrast(1.03);
   transition: transform 0.3s ease;
 }
-.dis-card:hover .dis-shot img { transform: scale(1.04); }
+/* The clip renders after the still, so it paints over it once playing. */
+.dis-card:hover .dis-shot img,
+.dis-card:hover .dis-shot video { transform: scale(1.04); }
 /* Behind the photo: the family colour, and its abbreviation — all a reader
    gets when an upload has died, and the loading state meanwhile. */
 .dis-shot-fill {
