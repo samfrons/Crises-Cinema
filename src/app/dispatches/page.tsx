@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export default function DispatchesPage() {
-  const topPlace = data.places[0];
+  const topPlace: Dispatches['places'][number] | undefined = data.places[0];
   const mixed = data.subs.filter((s) => s.mixed).length;
 
   return (
@@ -62,13 +62,15 @@ export default function DispatchesPage() {
               <dt>Subreddits watched</dt>
               <dd><span className="big">{data.subs.length}</span></dd>
             </div>
-            <div>
-              <dt>Loudest place</dt>
-              <dd>
-                <span className="big">{topPlace.label}</span>
-                <span className="sub">{topPlace.total.toLocaleString()} post{topPlace.total === 1 ? '' : 's'} on record</span>
-              </dd>
-            </div>
+            {topPlace && (
+              <div>
+                <dt>Loudest place</dt>
+                <dd>
+                  <span className="big">{topPlace.label}</span>
+                  <span className="sub">{topPlace.total.toLocaleString()} post{topPlace.total === 1 ? '' : 's'} on record</span>
+                </dd>
+              </div>
+            )}
             {data.peakMonth && (
               <div>
                 <dt>Busiest month</dt>

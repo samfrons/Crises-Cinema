@@ -726,6 +726,22 @@ function Uptick({ data }: { data: Dispatches }) {
 /* ── The view ─────────────────────────────────────────────────────────── */
 
 export default function DispatchesView({ data }: { data: Dispatches }) {
+  // An empty snapshot (fresh checkout before `npm run build:dispatches` has
+  // ever been run) still has to build and say what it is.
+  if (!data.months.length || !data.places.length) {
+    return (
+      <main id="main">
+        <section className="dis-plate-section" id="map">
+          <div className="wrap">
+            <p className="dis-plate-note">
+              The data snapshot is empty — run <code>npm run build:dispatches</code> to pull
+              the record from the archive.
+            </p>
+          </div>
+        </section>
+      </main>
+    );
+  }
   return (
     <main id="main">
       <WitnessMap data={data} />
