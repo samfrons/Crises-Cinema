@@ -233,6 +233,10 @@ function WitnessMap({ data }: { data: Dispatches }) {
     }).filter((p) => p.count > 0);
   }, [data.places, project, currentMonth]);
 
+  // Drawn back-to-front so the biggest circles sit on top; memoized since
+  // this recomputes on every tooltip hover otherwise.
+  const drawOrder = useMemo(() => [...pins].reverse(), [pins]);
+
   useEffect(() => {
     if (!playing) return;
     const t = setInterval(() => {
@@ -253,6 +257,27 @@ function WitnessMap({ data }: { data: Dispatches }) {
   const selectedPosts = selectedPlace
     ? selectedPlace.top.map((id) => postById.get(id)).filter((p): p is DisPost => Boolean(p))
     : [];
+
+  // Shared by hover and keyboard focus, so tabbing a pin surfaces the same
+  // tooltip a mouse would — the dossier's a click away either way.
+  const pinTip = (p: (typeof pins)[number]): Tip => ({
+    x: p.x / MAP_W,
+    y: p.y / h,
+    label: p.label,
+    n: p.count,
+    famId: p.famId,
+    lines: p.top.slice(0, 3)
+      .map((id) => postById.get(id)?.title)
+      .filter((t): t is string => Boolean(t))
+      .map((t) => (t.length > 64 ? `${t.slice(0, 63)}…` : t)),
+  });
+
+  // Presence per family for the legend, over the whole record rather than
+  // the scrubbed month, so it doesn't flicker while playing.
+  const presentFamilies = useMemo(
+    () => FAMILIES.filter((f) => data.places.some((p) => dominantFamily(p.families) === f.id)),
+    [data.places],
+  );
 
   return (
     <section className="dis-plate-section" id="map">
@@ -294,6 +319,7 @@ function WitnessMap({ data }: { data: Dispatches }) {
               type="button"
               className={`dis-alltime${monthIx === null ? ' on' : ''}`}
               onClick={() => { setPlaying(false); setMonthIx(null); }}
+              aria-pressed={monthIx === null}
             >
               ALL TIME
             </button>
@@ -312,7 +338,7 @@ function WitnessMap({ data }: { data: Dispatches }) {
                   aria-label={`World map of disaster posts: ${data.places.length} places, led by ${data.places[0].label} with ${data.places[0].total} posts. The same figures are in the table below.`}
                 >
                   <path className="dis-land" d={d} />
-                  {[...pins].reverse().map((p) => {
+                  {drawOrder.map((p) => {
                     const isSel = selected === p.id;
                     return (
                       <g
@@ -322,18 +348,9 @@ function WitnessMap({ data }: { data: Dispatches }) {
                         role="button"
                         aria-label={`${p.label}, ${p.count} post${p.count === 1 ? '' : 's'}`}
                         aria-pressed={isSel}
-                        onMouseEnter={() => setTip({
-                          x: p.x / MAP_W,
-                          y: p.y / h,
-                          label: p.label,
-                          n: p.count,
-                          famId: p.famId,
-                          lines: p.top.slice(0, 3)
-                            .map((id) => postById.get(id)?.title)
-                            .filter((t): t is string => Boolean(t))
-                            .map((t) => (t.length > 64 ? `${t.slice(0, 63)}…` : t)),
-                        })}
+                        onMouseEnter={() => setTip(pinTip(p))}
                         onMouseLeave={() => setTip(null)}
+                        onFocus={() => setTip(pinTip(p))}
                         onBlur={() => setTip(null)}
                         onClick={() => setSelected(isSel ? null : p.id)}
                         onKeyDown={(e) => {
@@ -365,7 +382,7 @@ function WitnessMap({ data }: { data: Dispatches }) {
 
           <figcaption className="dis-plate-foot">
             <span className="dis-legend" aria-hidden>
-              {FAMILIES.filter((f) => data.places.some((p) => dominantFamily(p.families) === f.id)).map((f) => (
+              {presentFamilies.map((f) => (
                 <span key={f.id}><i style={{ background: f.color }} />{f.short}</span>
               ))}
             </span>
@@ -596,7 +613,9 @@ function Uptick({ data }: { data: Dispatches }) {
                   <svg
                     viewBox={`0 0 ${width} ${height}`}
                     role="group"
-                    aria-label={`Quarterly disaster posts from ${quarters[0]?.key} to ${quarters[quarters.length - 1]?.key}, split by family. The same figures are in the table below.`}
+                    aria-label={quarters.length
+                      ? `Quarterly disaster posts from ${quarters[0].key} to ${quarters[quarters.length - 1].key}, split by family. The same figures are in the table below.`
+                      : 'Quarterly disaster posts: no history to chart yet.'}
                   >
                     {ticks.map((v) => (
                       <g key={v}>
