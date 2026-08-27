@@ -251,7 +251,7 @@ const PLACES = [
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let calls = 0;
 
-async function get(url, tries = 8) {
+async function get(url, tries = 10) {
   for (let i = 0; i < tries; i++) {
     try {
       calls += 1;
@@ -264,7 +264,7 @@ async function get(url, tries = 8) {
       if (i === tries - 1) throw new Error(`${url} → ${e.message ?? e}`);
       // The archive says "Timeout. Maybe slow down a bit" when crowded;
       // obliging is the whole strategy.
-      await sleep(8000 * (i + 1));
+      await sleep(Math.min(10000 * (i + 1), 60000));
     }
   }
 }
@@ -301,7 +301,10 @@ async function fetchHistory(sub) {
   const months = {};
   for (let y = Number(HISTORY_AFTER.slice(0, 4)); y <= lastYear; y++) {
     const before = y < lastYear ? `&before=${y + 1}-01-01` : '';
-    const d = await get(`${BASE}/posts/search/aggregate?subreddit=${sub}&aggregate=created_utc&frequency=month&after=${y}-01-01${before}`);
+    // Cached per slice, not per subreddit, so a crash mid-sub loses one
+    // year of progress instead of all of it.
+    const d = await cached(`hist-${sub}-${y}`, () =>
+      get(`${BASE}/posts/search/aggregate?subreddit=${sub}&aggregate=created_utc&frequency=month&after=${y}-01-01${before}`));
     for (const row of d ?? []) months[ym(row.created_utc)] = Number(row.count);
     process.stdout.write(`\r  history r/${sub}: through ${y}…  `);
   }
@@ -380,8 +383,13 @@ function mediaOf(full) {
 async function fetchEvidence(ids) {
   const out = [];
   for (let i = 0; i < ids.length; i += 40) {
-    const d = await get(`${BASE}/posts/ids?ids=${ids.slice(i, i + 40).join(',')}`);
-    out.push(...(d ?? []));
+    try {
+      const d = await get(`${BASE}/posts/ids?ids=${ids.slice(i, i + 40).join(',')}`);
+      out.push(...(d ?? []));
+    } catch (e) {
+      console.log(`\n  evidence batch at ${i}: FAILED (${e.message})`);
+      failures.push(`evidence batch ${i}`);
+    }
     process.stdout.write(`\r  evidence: ${out.length}/${ids.length}…  `);
   }
   process.stdout.write('\n');
@@ -392,17 +400,34 @@ async function fetchEvidence(ids) {
 
 console.log(`dispatches: ${SUBS.length} subreddits, index window ${INDEX_AFTER} → now`);
 
+// The archive has bad hours; one subreddit failing all its retries should
+// cost that subreddit, not the run. Failures are named at the end so a
+// re-run (which picks the gap up from cache) is an informed choice.
+const failures = [];
+
 const history = [];
 for (const s of SUBS) {
-  const months = await cached(`history-${s.name}`, () => fetchHistory(s.name));
-  const total = Object.values(months).reduce((a, b) => a + b, 0);
-  console.log(`  history r/${s.name}: ${total} posts since ${HISTORY_AFTER}`);
-  history.push({ sub: s.name, months });
+  try {
+    const months = await cached(`history-${s.name}`, () => fetchHistory(s.name));
+    const total = Object.values(months).reduce((a, b) => a + b, 0);
+    console.log(`  history r/${s.name}: ${total} posts since ${HISTORY_AFTER}`);
+    history.push({ sub: s.name, months });
+  } catch (e) {
+    console.log(`  history r/${s.name}: FAILED (${e.message})`);
+    failures.push(`history r/${s.name}`);
+    history.push({ sub: s.name, months: {} });
+  }
 }
 
 const indexed = [];
 for (const s of SUBS) {
-  const raw = await cached(`index-${s.name}`, () => fetchIndex(s.name));
+  let raw = [];
+  try {
+    raw = await cached(`index-${s.name}`, () => fetchIndex(s.name));
+  } catch (e) {
+    console.log(`  index r/${s.name}: FAILED (${e.message})`);
+    failures.push(`index r/${s.name}`);
+  }
   for (const p of raw) {
     if (p.over_18 || !p.title) continue;
     indexed.push({
@@ -546,5 +571,6 @@ writeFileSync(resolve(root, 'src/data/dispatches.json'), JSON.stringify(out));
 
 const kb = Math.round(JSON.stringify(out).length / 1024);
 console.log(`dispatches: wrote src/data/dispatches.json (${kb} KB, ${calls} API calls)`);
+if (failures.length) console.log(`  WITH GAPS — failed: ${failures.join(', ')}. Re-run to fill from cache.`);
 console.log(`  ${out.totalIndexed} posts indexed, ${out.located} pinned to ${places.length} places, ${posts.length} with evidence`);
 for (const p of places.slice(0, 10)) console.log(`  ${String(p.total).padStart(5)}  ${p.label}`);
