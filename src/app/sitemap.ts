@@ -18,6 +18,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: abs('/catalogue'), lastModified, changeFrequency: 'monthly', priority: 0.8 },
     { url: abs('/methodology'), lastModified, changeFrequency: 'yearly', priority: 0.6 },
     { url: abs('/reel'), lastModified, changeFrequency: 'yearly', priority: 0.6 },
+    { url: abs('/atlas'), lastModified, changeFrequency: 'monthly', priority: 0.7 },
+    { url: abs('/dispatches'), lastModified, changeFrequency: 'monthly', priority: 0.7 },
     ...DECADES.map(({ slug }) => ({
       url: abs(`/catalogue/${slug}`),
       lastModified,

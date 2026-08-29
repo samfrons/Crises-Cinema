@@ -1,0 +1,547 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   Dispatches from the Ground — /dispatches
+   The pressbook plates again, but wired to the news: a witness map with a
+   clock, a dark evidence locker of real footage, and the uptick chart.
+   Same three type roles as the rest of the site; ink and the ontology
+   colours carry the data, ember only ever the touched state. All classes
+   dis-prefixed; loads only with the /dispatches route.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Masthead ───────────────────────────────────────────────────────────── */
+
+.dis-masthead { padding: 64px 0 44px; }
+
+.dis-kicker {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin: 0 0 26px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dis-kicker::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+.dis-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; }
+.dis-kicker a:hover { color: var(--ember); }
+
+.dis-title {
+  font-family: var(--poster);
+  font-weight: 400;
+  margin: 0;
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+.dis-title .l1 { display: block; font-size: clamp(38px, 8.6vw, 104px); }
+.dis-title .l2 {
+  display: block;
+  font-size: clamp(18px, 3.2vw, 38px);
+  color: var(--ember);
+  margin-top: 0.12em;
+  padding-left: 0.1em;
+}
+
+.dis-lede {
+  font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.55;
+  max-width: 64ch;
+  margin: 30px 0 0;
+}
+.dis-lede em { font-style: italic; }
+
+.dis-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 20px 32px;
+  border-top: 2px solid var(--ink);
+  padding-top: 20px;
+  margin: 44px 0 0;
+}
+.dis-facts dt {
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+.dis-facts dd { margin: 0; }
+.dis-facts .big { font-family: var(--poster); font-size: 38px; line-height: 0.9; display: block; }
+.dis-facts .sub {
+  display: block;
+  font-family: var(--data);
+  font-size: 11px;
+  color: var(--ink-soft);
+  margin-top: 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Plates, shared ─────────────────────────────────────────────────────── */
+
+.dis-plate-section { padding: 56px 0 64px; }
+.dis-plate-note { font-size: 15.5px; color: var(--ink-soft); max-width: 60ch; margin: 0 0 28px; }
+
+.dis-plate {
+  margin: 0;
+  border: 1px solid var(--ink);
+  background: radial-gradient(120% 90% at 50% 12%, var(--paper-lit) 0%, var(--paper) 62%);
+  position: relative;
+  box-shadow: 4px 4px 0 var(--paper-deep);
+}
+.dis-plate::before,
+.dis-plate::after {
+  content: '+';
+  position: absolute;
+  font-family: var(--data);
+  font-size: 13px;
+  color: var(--ink-faint);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 2;
+}
+.dis-plate::before { top: 5px; left: 7px; }
+.dis-plate::after { bottom: 5px; right: 7px; }
+
+.dis-map-wrap { padding: 18px 14px 6px; }
+.dis-scroll { overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; }
+.dis-inner { position: relative; min-width: 760px; }
+.dis-inner.chart { min-width: 900px; }
+.dis-map-wrap svg { display: block; width: 100%; height: auto; }
+.dis-chart-box { position: relative; }
+
+.dis-scroll-hint {
+  display: none;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 8px 2px 0;
+}
+@media (max-width: 940px) { .dis-scroll-hint { display: block; } }
+
+.dis-tip { min-width: 210px; max-width: 300px; }
+
+.dis-plate-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 26px;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--rule);
+  margin: 8px 14px 0;
+  padding: 10px 2px 12px;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.dis-plate-no { color: var(--ink-faint); letter-spacing: 0.18em; }
+
+.dis-legend { display: inline-flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.dis-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.dis-legend i { width: 9px; height: 9px; border-radius: 1px; }
+
+.dis-table { margin-top: 30px; }
+
+/* ── Plate 1: the clock and the map ─────────────────────────────────────── */
+
+.dis-clock {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 14px 16px 4px;
+}
+
+.dis-play {
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border: 1px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper-lit);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--paper-deep);
+}
+.dis-play:hover, .dis-play.on { background: var(--ember); border-color: var(--ember); color: var(--paper-lit); }
+.dis-play:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--paper-deep); }
+
+.dis-scrub {
+  flex: 1;
+  min-width: 160px;
+  appearance: none;
+  height: 26px;
+  background: transparent;
+  cursor: pointer;
+}
+/* The rail is a strip of film: sprocket ticks punched into a dark band. */
+.dis-scrub::-webkit-slider-runnable-track {
+  height: 10px;
+  border-radius: 2px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 8px, var(--paper) 8px 12px),
+    var(--ink);
+  background-blend-mode: normal;
+}
+.dis-scrub::-moz-range-track {
+  height: 10px;
+  border-radius: 2px;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 8px, var(--paper) 8px 12px),
+    var(--ink);
+}
+.dis-scrub::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 22px;
+  margin-top: -6px;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  background: var(--ember);
+  box-shadow: 2px 2px 0 var(--paper-deep);
+}
+.dis-scrub::-moz-range-thumb {
+  width: 16px;
+  height: 20px;
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  background: var(--ember);
+  box-shadow: 2px 2px 0 var(--paper-deep);
+}
+
+.dis-alltime {
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  padding: 8px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.dis-alltime:hover { border-color: var(--ink); color: var(--ink); }
+.dis-alltime.on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+
+.dis-clock-read {
+  font-family: var(--data);
+  min-width: 150px;
+  text-align: right;
+  margin-left: auto;
+}
+.dis-clock-read b { display: block; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; }
+.dis-clock-read span { display: block; font-size: 10.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+.dis-land {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  opacity: 0.42;
+}
+
+.dis-pin { cursor: pointer; outline-offset: 3px; }
+.dis-pin:focus:not(:focus-visible) { outline: none; }
+.dis-pin-hit { fill: transparent; }
+.dis-pin-dot {
+  stroke: var(--paper);
+  stroke-width: 1.2;
+  fill-opacity: 0.88;
+  transition: fill 0.15s ease, r 0.45s ease;
+}
+.dis-pin:hover .dis-pin-dot,
+.dis-pin:focus-visible .dis-pin-dot,
+.dis-pin.sel .dis-pin-dot { fill: var(--ember) !important; fill-opacity: 1; }
+.dis-pin-halo {
+  fill: none;
+  stroke: var(--ember);
+  stroke-width: 1.4;
+  stroke-dasharray: 3 3;
+}
+/* This month's activity: a live ring around the pin. */
+.dis-pin-now {
+  fill: none;
+  stroke: var(--ember);
+  stroke-width: 1.6;
+  animation: dis-pulse 1.4s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes dis-pulse {
+  0% { stroke-opacity: 0.9; }
+  70% { stroke-opacity: 0.25; }
+  100% { stroke-opacity: 0.9; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dis-pin-now { animation: none; }
+  .dis-pin-dot { transition: none; }
+}
+
+/* ── The dossier and the witness cards ──────────────────────────────────── */
+
+.dis-dossier {
+  margin-top: 26px;
+  border-top: 2px solid var(--ink);
+  padding-top: 16px;
+}
+.dis-dossier-head { position: relative; padding-right: 40px; margin-bottom: 16px; }
+.dis-dossier-eyebrow {
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin: 0 0 6px;
+}
+.dis-dossier h3 {
+  font-family: var(--poster);
+  font-weight: 400;
+  font-size: clamp(26px, 4vw, 38px);
+  line-height: 0.95;
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.dis-dossier h3 .ct {
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+.dis-dossier-x {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  background: none;
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+.dis-dossier-x:hover { border-color: var(--ink); color: var(--ink); }
+
+.dis-dossier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+}
+
+/* A witness card: the frame on top, the caption under it, like a contact
+   print taped into the dossier. */
+.dis-card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+}
+.dis-shot {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid var(--ink);
+  border-bottom-width: 3px;
+  border-radius: 2px;
+  background: var(--paper-deep);
+}
+.dis-shot img,
+.dis-shot video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+  filter: saturate(0.92) contrast(1.03);
+  transition: transform 0.3s ease;
+}
+/* The clip renders after the still, so it paints over it once playing. */
+.dis-card:hover .dis-shot img,
+.dis-card:hover .dis-shot video { transform: scale(1.04); }
+@media (prefers-reduced-motion: reduce) {
+  .dis-shot img,
+  .dis-shot video { transition: none; }
+  .dis-card:hover .dis-shot img,
+  .dis-card:hover .dis-shot video { transform: none; }
+}
+/* Behind the photo: the family colour, and its abbreviation — all a reader
+   gets when an upload has died, and the loading state meanwhile. */
+.dis-shot-fill {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--paper-lit);
+  opacity: 0.85;
+}
+.dis-badge,
+.dis-score {
+  position: absolute;
+  bottom: 6px;
+  z-index: 2;
+  font-family: var(--data);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 3px 7px;
+  border-radius: 2px;
+  background: rgba(15, 11, 8, 0.82);
+  color: var(--paper-lit);
+}
+.dis-badge { left: 6px; }
+.dis-score { right: 6px; font-variant-numeric: tabular-nums; }
+
+.dis-card-body { padding: 8px 2px 0; }
+.dis-card-body b {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 13.5px;
+  line-height: 1.3;
+  font-weight: 600;
+}
+.dis-card:hover .dis-card-body b { color: var(--ember); }
+.dis-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--data);
+  font-size: 10px;
+  color: var(--ink-soft);
+  margin-top: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.dis-card-meta i { width: 8px; height: 8px; border-radius: 1px; flex: none; }
+
+/* ── Plate 2: the evidence locker (dark) ────────────────────────────────── */
+
+.dis-wall-section {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 64px 0 72px;
+}
+.dis-wall-section .eyebrow { color: #a1937c; }
+.dis-wall-section .section-title { color: var(--paper); }
+.dis-wall-section .dis-plate-note { color: #c4b89f; }
+
+.dis-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 22px;
+}
+.dis-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  padding: 8px 12px;
+  border: 1px solid #3d352b;
+  border-radius: 2px;
+  background: none;
+  color: #c4b89f;
+  cursor: pointer;
+}
+.dis-chip i { width: 9px; height: 9px; border-radius: 1px; }
+.dis-chip:hover { border-color: var(--paper); color: var(--paper); }
+.dis-chip.on { background: var(--paper); border-color: var(--paper); color: var(--ink); }
+
+.dis-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px 14px;
+}
+
+/* Dark cards sit on the locker wall. */
+.dis-card.dark .dis-shot {
+  border-color: #3d352b;
+  background: #241e18;
+  box-shadow: 3px 3px 0 #000;
+}
+.dis-card.dark .dis-card-body b { color: var(--paper); }
+.dis-card.dark:hover .dis-card-body b { color: #e88b70; }
+.dis-card.dark .dis-card-meta { color: #a1937c; }
+
+.dis-wall-foot {
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #a1937c;
+  margin: 26px 0 0;
+}
+
+/* ── Colophon ───────────────────────────────────────────────────────────── */
+
+.dis-colophon { padding: 64px 0 70px; }
+.dis-colophon h2 {
+  font-family: var(--poster);
+  font-weight: 400;
+  font-size: 32px;
+  margin: 0 0 14px;
+}
+.dis-colophon p {
+  font-size: 15.5px;
+  line-height: 1.62;
+  color: var(--ink-soft);
+  max-width: 70ch;
+  margin: 0 0 14px;
+}
+.dis-colophon a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--ember);
+  text-underline-offset: 2px;
+}
+
+.dis-sub-table { margin-top: 10px; }
+.dis-sub-table td { vertical-align: top; }
+.dis-swatch {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 1px;
+  margin-right: 7px;
+}
+.dis-gloss { font-style: italic; color: var(--ink-faint); }
+
+.dis-built {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  margin-top: 22px;
+}
+.dis-built code { background: var(--paper-deep); padding: 1px 5px; border-radius: 2px; }
+
+/* ── Small screens ──────────────────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  .dis-masthead { padding: 44px 0 36px; }
+  .dis-kicker { font-size: 10px; letter-spacing: 0.16em; gap: 9px; }
+  .dis-plate-section { padding: 40px 0 48px; }
+  .dis-map-wrap { padding: 12px 8px 4px; }
+  .dis-facts .big { font-size: 30px; }
+  .dis-wall-section { padding: 48px 0 56px; }
+  .dis-clock { padding: 10px 10px 2px; }
+  .dis-clock-read { min-width: 0; }
+  .dis-wall { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .dis-dossier-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+}
