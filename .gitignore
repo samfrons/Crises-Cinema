@@ -45,3 +45,8 @@ next-env.d.ts
 
 # dispatches fetch cache (scripts/build-dispatches.mjs)
 /.cache/
+
+# /preparedness raw data cache: re-fetched by npm run build:preparedness.
+# Never commit — the EM-DAT drop-in it may hold is CC BY-NC-ND and must not
+# be redistributed from this repository.
+data/preparedness/raw/

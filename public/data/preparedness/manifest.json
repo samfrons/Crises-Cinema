@@ -1,0 +1,47 @@
+{
+  "generated": "2026-08-31",
+  "layers": [
+    {
+      "id": "inform",
+      "file": "inform.json",
+      "status": "loaded",
+      "label": "INFORM Risk"
+    },
+    {
+      "id": "ndgain",
+      "file": "ndgain.json",
+      "status": "loaded",
+      "label": "ND-GAIN Country Index"
+    },
+    {
+      "id": "emdat",
+      "file": "emdat.json",
+      "status": "not_loaded",
+      "label": "EM-DAT (Emergency Events Database)"
+    },
+    {
+      "id": "idmc",
+      "file": "idmc.json",
+      "status": "not_loaded",
+      "label": "IDMC — Global Internal Displacement (disasters)"
+    },
+    {
+      "id": "spar",
+      "file": "spar.json",
+      "status": "loaded",
+      "label": "WHO SPAR (IHR core capacities)"
+    },
+    {
+      "id": "sendai",
+      "file": "sendai.json",
+      "status": "not_loaded",
+      "label": "Sendai Framework Target G — MHEWS coverage"
+    },
+    {
+      "id": "funding",
+      "file": "funding.json",
+      "status": "loaded",
+      "label": "OCHA FTS — humanitarian appeals"
+    }
+  ]
+}

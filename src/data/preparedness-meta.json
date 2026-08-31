@@ -1,0 +1,19 @@
+{
+  "generated": "2026-08-31",
+  "layersLoaded": [
+    "inform",
+    "ndgain",
+    "spar",
+    "funding"
+  ],
+  "layersStubbed": [
+    "emdat",
+    "idmc",
+    "sendai"
+  ],
+  "countryCount": 194,
+  "appealYears": [
+    2010,
+    2026
+  ]
+}
