@@ -107,6 +107,11 @@ export default function DispatchesPage() {
             Scores are the archive&rsquo;s snapshot, not live; removed posts are dropped from the
             evidence wall.
           </p>
+          <p>
+            These dispatches show disasters as they land; for who was ready for them — risk
+            indices, official inquiries and the funding arithmetic — see{' '}
+            <a href="/preparedness">the preparedness essay</a>.
+          </p>
 
           <div className="table-scroll">
             <table className="counts dis-sub-table">

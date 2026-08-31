@@ -84,6 +84,23 @@ export default function Page() {
                 Watch the first reels — ten public-domain films, 1900–1930 →
               </a>
             </p>
+            <p>
+              <a
+                href="/preparedness"
+                style={{
+                  fontFamily: 'var(--data)',
+                  fontSize: 11.5,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: 'var(--paper)',
+                  textDecoration: 'none',
+                  borderBottom: '1px solid var(--ember)',
+                  paddingBottom: 2,
+                }}
+              >
+                Ask who is actually ready — the preparedness essay →
+              </a>
+            </p>
           </div>
 
           <div>
