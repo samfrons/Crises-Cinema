@@ -88,8 +88,16 @@ function ringPath(pts) {
   for (const [x, y] of projected) {
     const rx = r1(x);
     const ry = r1(y);
-    if (px === null) d += `M${rx} ${ry}`;
-    else if (rx !== px || ry !== py) d += `L${rx} ${ry}`;
+    // A jump of more than half the frame means the ring crossed the
+    // antimeridian (Russia, Fiji): break the subpath rather than drawing a
+    // line the whole way across the world. At 1:110m the resulting open
+    // edge sits on the frame border and is invisible once filled.
+    if (px === null || Math.abs(rx - px) > W / 2) {
+      if (px !== null) d += 'Z';
+      d += `M${rx} ${ry}`;
+    } else if (rx !== px || ry !== py) {
+      d += `L${rx} ${ry}`;
+    }
     px = rx;
     py = ry;
   }
