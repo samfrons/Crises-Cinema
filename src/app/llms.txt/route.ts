@@ -61,6 +61,7 @@ function build(): string {
   L(`- [Methodology](${abs('/methodology')}): how ${total} messy records became eleven families, and what was thrown out.`);
   L(`- [The First Reels](${abs('/reel')}): ten public-domain disaster films, 1900–1930, with their licensing paperwork.`);
   L(`- [films.json](${abs('/data/films.json')}): the machine-readable catalogue the explorer fetches.`);
+  L(`- [Preparedness](${abs('/preparedness')}): the non-fiction companion — who is actually ready, on real risk indices (INFORM, ND-GAIN, WHO SPAR, Sendai Target G, OCHA FTS), with case files and sources at /data/preparedness/.`);
   L();
 
   L('## The finding');

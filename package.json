@@ -8,6 +8,7 @@
     "build:data": "node scripts/build-data.mjs && node scripts/build-atlas.mjs",
     "build:reel": "node scripts/build-reel.mjs",
     "build:dispatches": "node scripts/build-dispatches.mjs",
+    "build:preparedness": "node scripts/build-preparedness-geometry.mjs && node scripts/build-preparedness.mjs",
     "start": "next start",
     "lint": "next lint",
     "lint-build": "npm run lint && npm run build"

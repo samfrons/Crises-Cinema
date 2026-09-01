@@ -89,6 +89,11 @@ export default function AtlasPage() {
             the corners of Reddit where witnesses post their footage — see{' '}
             <a href="/dispatches">Dispatches from the Ground</a>.
           </p>
+          <p>
+            The films pin where the world ends; the harder question is who would cope. For the
+            same map redrawn with risk indices, case files and funding gaps, read{' '}
+            <a href="/preparedness">the preparedness essay</a>.
+          </p>
         </div>
       </footer>
     </div>
