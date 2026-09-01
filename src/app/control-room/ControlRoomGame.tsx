@@ -4,6 +4,38 @@ import { useMemo, useRef, useState } from 'react';
 import type { Citation, Option, Scenario, ScenarioBundle, Timestep } from './types';
 import { startSession, logChoice, completeSession, type ChoiceEvent } from './telemetry';
 import { scoreRun, historicalLeadTime, formatLead, type Choice } from './scoring';
+import DayStrip from './DayStrip';
+import OpsMap, { type ZoneState } from './OpsMap';
+import AlertTimingChart from './AlertTimingChart';
+import { KindGlyph, HazardGlyph } from './glyphs';
+
+/**
+ * What the wall map shows: zone states lit only by cited information already
+ * revealed (forecast → watch, gauge → signal, field report → flooding) and
+ * the zones the player's own choices have warned.
+ */
+const KIND_STATE: Partial<Record<string, ZoneState>> = { forecast: 'watch', gauge: 'signal', field_report: 'flooding' };
+const STATE_RANK: Record<ZoneState, number> = { quiet: 0, watch: 1, signal: 2, flooding: 3 };
+
+function deriveBoard(scenario: Scenario, uptoIndex: number, choices: Choice[]) {
+  const zoneStates: Record<string, ZoneState> = {};
+  for (const t of scenario.timesteps.slice(0, uptoIndex + 1)) {
+    for (const info of t.info_available) {
+      const state = KIND_STATE[info.kind];
+      if (!state) continue;
+      for (const z of info.zones ?? []) {
+        if (STATE_RANK[state] > STATE_RANK[zoneStates[z] ?? 'quiet']) zoneStates[z] = state;
+      }
+    }
+  }
+  const warnedZones = new Set<string>();
+  for (const c of choices) {
+    const e = c.option.effects;
+    if (e.warning_scope === 'province') scenario.scoring.at_risk_zones.forEach((z) => warnedZones.add(z.id));
+    else if (e.warning_scope === 'targeted' || e.protective) e.zones.forEach((z) => warnedZones.add(z));
+  }
+  return { zoneStates, warnedZones: Array.from(warnedZones) };
+}
 
 const KIND_LABEL: Record<string, string> = {
   forecast: 'Forecast',
@@ -41,6 +73,7 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
           <span className="cr-clock-tz">{scenario.clock.timezone} · {scenario.date}</span>
         </p>
         <h2 className="cr-step-title">{scenario.title}</h2>
+        <OpsMap scenario={scenario} zoneStates={{}} warnedZones={[]} />
         <p className="cr-brief">{scenario.location}. You hold the civil-protection desk. You will see only what
           officials could see at each moment — forecasts, gauge readings, messages — and choose what to do.
           The clock then advances along the real timeline: <strong>history does not branch here</strong>. Your
@@ -65,6 +98,7 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
         scenario={scenario}
         t={t}
         step={step}
+        choices={choices}
         onChoose={(option) => {
           const now = Date.now();
           const event: ChoiceEvent = {
@@ -92,6 +126,7 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
       <AftermathScreen
         scenario={scenario}
         choice={choice}
+        choices={choices}
         last={last}
         onAdvance={() => {
           if (last) {
@@ -123,6 +158,7 @@ function SelectScreen({ bundle, onPick }: { bundle: ScenarioBundle; onPick: (s: 
       <div className="cr-select-grid">
         {bundle.playable.map((s) => (
           <button key={s.id} className="cr-card" onClick={() => onPick(s)}>
+            <HazardGlyph hazard={s.hazard} size={26} className="cr-card-glyph" />
             <span className="cr-card-date">{s.date} · {s.hazard}</span>
             <span className="cr-card-title">{s.title}</span>
             <span className="cr-card-loc">{s.location}</span>
@@ -131,6 +167,7 @@ function SelectScreen({ bundle, onPick }: { bundle: ScenarioBundle; onPick: (s: 
         ))}
         {bundle.stubs.map((s) => (
           <div key={s.id} className="cr-card cr-card-stub" aria-disabled>
+            <HazardGlyph hazard={s.hazard} size={26} className="cr-card-glyph" />
             <span className="cr-card-date">{s.date} · {s.hazard}</span>
             <span className="cr-card-title">{s.title}</span>
             <span className="cr-card-loc">{s.location}</span>
@@ -146,22 +183,26 @@ function SelectScreen({ bundle, onPick }: { bundle: ScenarioBundle; onPick: (s: 
 
 /* ── Timestep ────────────────────────────────────────────────────────────── */
 
-function TimestepScreen({ scenario, t, step, onChoose }: {
-  scenario: Scenario; t: Timestep; step: number; onChoose: (o: Option) => void;
+function TimestepScreen({ scenario, t, step, choices, onChoose }: {
+  scenario: Scenario; t: Timestep; step: number; choices: Choice[]; onChoose: (o: Option) => void;
 }) {
   const sourceIndex = useSourceIndex(scenario);
+  const board = deriveBoard(scenario, step, choices);
   return (
     <section className="cr-stage wrap" aria-live="polite">
       <p className="cr-clock">
         <span className="cr-clock-time">{t.approx ? '≈' : ''}{t.time}</span>
         <span className="cr-clock-tz">{scenario.clock.timezone} · step {step + 1} of {scenario.timesteps.length}</span>
       </p>
+      <DayStrip scenario={scenario} currentIndex={step} />
       {t.time_label !== t.time && <p className="cr-time-label">{t.time_label}</p>}
+
+      <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones} />
 
       <div className="cr-feed">
         {t.info_available.map((info) => (
           <article key={info.id} className={`cr-info cr-info-${info.kind}`}>
-            <p className="cr-info-kind">{KIND_LABEL[info.kind]}</p>
+            <p className="cr-info-kind"><KindGlyph kind={info.kind} className="cr-kind-glyph" /> {KIND_LABEL[info.kind]}</p>
             <p className="cr-info-text">{info.text} <Cite c={info.citation} idx={sourceIndex} /></p>
           </article>
         ))}
@@ -182,17 +223,21 @@ function TimestepScreen({ scenario, t, step, onChoose }: {
 
 /* ── Aftermath of one choice ─────────────────────────────────────────────── */
 
-function AftermathScreen({ scenario, choice, last, onAdvance }: {
-  scenario: Scenario; choice: Choice; last: boolean; onAdvance: () => void;
+function AftermathScreen({ scenario, choice, choices, last, onAdvance }: {
+  scenario: Scenario; choice: Choice; choices: Choice[]; last: boolean; onAdvance: () => void;
 }) {
   const sourceIndex = useSourceIndex(scenario);
   const c = choice.option.consequence;
+  const stepIndex = scenario.timesteps.findIndex((t) => t.id === choice.timestep.id);
+  const board = deriveBoard(scenario, stepIndex, choices);
   return (
     <section className="cr-stage wrap" aria-live="polite">
       <p className="cr-clock">
         <span className="cr-clock-time">{choice.timestep.approx ? '≈' : ''}{choice.timestep.time}</span>
         <span className="cr-clock-tz">{scenario.clock.timezone}</span>
       </p>
+      <DayStrip scenario={scenario} currentIndex={stepIndex} />
+      <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones} />
       <p className="cr-chosen">You chose: <strong>{choice.option.label}</strong></p>
       {c.known ? (
         <div className="cr-consequence">
@@ -282,6 +327,7 @@ function DebriefScreen({ scenario, choices, onRestart }: {
 
       <div className="cr-score">
         <h3 className="cr-col-title">Your run, measured</h3>
+        <AlertTimingChart scenario={scenario} choices={choices} />
         <p className="cr-score-caveat">A scoring layer, not history: it measures your choices against the real
           clock and the documented impact at {scenario.scoring.impact.time} ({scenario.scoring.impact.label}{' '}
           <Cite c={scenario.scoring.impact.citation} idx={sourceIndex} />). It makes no claim about lives a
@@ -295,6 +341,7 @@ function DebriefScreen({ scenario, choices, onRestart }: {
           <div>
             <dt>Coverage of at-risk basins</dt>
             <dd className="big">{Math.round(score.coverage * 100)}%</dd>
+            <dd className="cr-meter"><span style={{ width: `${Math.round(score.coverage * 100)}%` }} /></dd>
             <dd className="sub">{scenario.scoring.at_risk_zones.map((z) => z.label).join(' · ')}</dd>
           </div>
           <div>
@@ -305,6 +352,11 @@ function DebriefScreen({ scenario, choices, onRestart }: {
           <div>
             <dt>Divergence from history</dt>
             <dd className="big">{score.divergence} / {choices.length}</dd>
+            <dd className="cr-meter">
+              {choices.map((c) => (
+                <i key={c.timestep.id} className={c.event.divergedFromHistory ? 'is-diverged' : ''} />
+              ))}
+            </dd>
             <dd className="sub">decision points where you left the historical path</dd>
           </div>
         </dl>

@@ -97,6 +97,11 @@ function validate(file, s) {
       chk.require(typeof info.text === 'string' && info.text.length > 0, q, 'needs text');
       chk.require(!PLACEHOLDER.test(info.text ?? ''), q, 'placeholder text in a playable scenario');
       checkCitation(chk, info.citation, `${q}.citation`, sourceIds, playable);
+      if (info.zones !== undefined) {
+        const known = new Set((s.scoring?.at_risk_zones ?? []).map((z) => z.id));
+        chk.require(Array.isArray(info.zones) && info.zones.every((z) => known.has(z)),
+          `${q}.zones`, 'zones must be an array of scoring.at_risk_zones ids');
+      }
     }
 
     chk.require(Array.isArray(t.options) && t.options.length >= 2 && t.options.length <= 4, `${p}.options`, 'needs 2–4 options');
@@ -151,6 +156,10 @@ function validate(file, s) {
   chk.require(s.scoring && HHMM.test(s.scoring.impact?.time ?? ''), 'scoring.impact.time', 'must be HH:MM');
   chk.require(typeof s.scoring?.impact?.label === 'string', 'scoring.impact.label', 'required');
   checkCitation(chk, s.scoring?.impact?.citation, 'scoring.impact.citation', sourceIds, playable);
+  if (s.scoring?.impact?.window_minutes !== undefined) {
+    chk.require(Number.isFinite(s.scoring.impact.window_minutes) && s.scoring.impact.window_minutes > 0,
+      'scoring.impact.window_minutes', 'must be a positive number of minutes when present');
+  }
   chk.require(Array.isArray(s.scoring?.at_risk_zones) && s.scoring.at_risk_zones.length >= 1, 'scoring.at_risk_zones', 'required');
   chk.require(HHMM.test(s.scoring?.historical_first_public_alert ?? ''), 'scoring.historical_first_public_alert', 'must be HH:MM');
 

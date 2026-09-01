@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-01T05:19:50.341Z",
+  "generated": "2026-09-01T05:35:31.418Z",
   "playable": [
     {
       "id": "valencia-dana-2024",
@@ -28,7 +28,10 @@
               "citation": {
                 "sourceId": "aemet-2024",
                 "detail": "Red-level warning issued 07:36 CET, 29 Oct 2024, litoral norte de Valencia"
-              }
+              },
+              "zones": [
+                "poyo-horta-sud"
+              ]
             },
             {
               "id": "t1-i2",
@@ -113,7 +116,10 @@
               "citation": {
                 "sourceId": "chj-record",
                 "detail": "CHJ hydrological alert for the Rambla del Poyo, 12:20 CET, as entered in the court record"
-              }
+              },
+              "zones": [
+                "poyo-horta-sud"
+              ]
             },
             {
               "id": "t2-i2",
@@ -122,7 +128,10 @@
               "citation": {
                 "sourceId": "press-recon",
                 "detail": "Reconstructions of the flooding of Utiel around midday, 29 Oct"
-              }
+              },
+              "zones": [
+                "magro-utiel"
+              ]
             },
             {
               "id": "t2-i3",
@@ -131,7 +140,10 @@
               "citation": {
                 "sourceId": "aemet-2024",
                 "detail": "Warning bulletins for the province of Valencia through 29 Oct"
-              }
+              },
+              "zones": [
+                "magro-utiel"
+              ]
             }
           ],
           "options": [
@@ -217,7 +229,10 @@
               "citation": {
                 "sourceId": "press-recon",
                 "detail": "Afternoon situation in the interior comarcas, 29 Oct"
-              }
+              },
+              "zones": [
+                "magro-utiel"
+              ]
             }
           ],
           "options": [
@@ -300,7 +315,10 @@
               "citation": {
                 "sourceId": "press-recon",
                 "detail": "CECOPI's focus on the Forata dam during the evening session"
-              }
+              },
+              "zones": [
+                "magro-utiel"
+              ]
             },
             {
               "id": "t4-i3",
@@ -309,7 +327,10 @@
               "citation": {
                 "sourceId": "chj-record",
                 "detail": "Gap in CHJ notifications on the Poyo between 16:13 and 18:43, per the court record"
-              }
+              },
+              "zones": [
+                "poyo-horta-sud"
+              ]
             }
           ],
           "options": [
@@ -399,7 +420,10 @@
               "citation": {
                 "sourceId": "chj-record",
                 "detail": "CHJ email of 18:43 CET reporting the surge in the Poyo, as entered in the court record"
-              }
+              },
+              "zones": [
+                "poyo-horta-sud"
+              ]
             },
             {
               "id": "t5-i2",
@@ -408,7 +432,10 @@
               "citation": {
                 "sourceId": "press-recon",
                 "detail": "Evening warnings on the state of the Forata dam"
-              }
+              },
+              "zones": [
+                "magro-utiel"
+              ]
             }
           ],
           "options": [
@@ -484,7 +511,10 @@
               "citation": {
                 "sourceId": "press-recon",
                 "detail": "The flood's arrival in the Horta Sud towns during the 19:00–20:00 hour"
-              }
+              },
+              "zones": [
+                "poyo-horta-sud"
+              ]
             },
             {
               "id": "t6-i2",
@@ -654,7 +684,8 @@
           "citation": {
             "sourceId": "court-catarroja",
             "detail": "Timing of the flood's arrival and of the deaths, per the interlocutory orders"
-          }
+          },
+          "window_minutes": 60
         },
         "at_risk_zones": [
           {

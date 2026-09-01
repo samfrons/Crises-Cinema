@@ -7,6 +7,8 @@ export type InfoItem = {
   kind: 'forecast' | 'gauge' | 'message' | 'media' | 'field_report';
   text: string;
   citation: Citation;
+  /** At-risk zone ids this item concerns — lights the ops board, nothing more. */
+  zones?: string[];
 };
 
 export type WarningScope = 'none' | 'targeted' | 'province';
@@ -60,7 +62,7 @@ export type Scenario = {
     citation: Citation;
   };
   scoring: {
-    impact: { time: string; label: string; citation: Citation };
+    impact: { time: string; label: string; citation: Citation; window_minutes?: number };
     at_risk_zones: { id: string; label: string }[];
     historical_first_public_alert: string;
   };
