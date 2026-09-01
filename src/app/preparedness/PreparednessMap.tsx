@@ -375,9 +375,10 @@ export default function PreparednessMap() {
                 <span className="pr-legend-dir">
                   {!live
                     ? 'no scale — this layer is not loaded'
-                    : flipped
-                      ? 'ramp inverted: dark = low readiness'
-                      : 'dark = worse / more of it'}
+                    : (flipped
+                        ? 'ramp inverted: dark = low readiness'
+                        : 'dark = worse / more of it') +
+                      (scale?.transform === 'log' ? ' · log scale' : '')}
                 </span>
                 <span>{live && scale?.max != null ? scale.max.toLocaleString() : '—'}</span>
               </p>

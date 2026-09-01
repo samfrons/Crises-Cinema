@@ -60,6 +60,10 @@ export interface LayerScale {
   min: number;
   max: number | null;
   higherIs: 'worse' | 'better';
+  /** 'log' for layers whose values span orders of magnitude (deaths,
+   *  displacements) — a linear ramp would leave everything but the worst
+   *  outlier unreadably pale. The legend says so when it is set. */
+  transform?: 'log';
 }
 
 export interface LayerCountry {

@@ -167,7 +167,12 @@ export const RAMP_STEPS = Array.from({ length: 9 }, (_, i) => rampColor(i / 8));
 export function normalise(value: number, scale: LayerScale): number {
   if (typeof scale?.max !== 'number') return 0;
   const span = scale.max - scale.min;
-  const t = span === 0 ? 0 : (value - scale.min) / span;
+  const t =
+    span === 0
+      ? 0
+      : scale.transform === 'log'
+        ? Math.log1p(Math.max(0, value - scale.min)) / Math.log1p(span)
+        : (value - scale.min) / span;
   const clamped = Math.min(1, Math.max(0, t));
   return scale.higherIs === 'better' ? 1 - clamped : clamped;
 }

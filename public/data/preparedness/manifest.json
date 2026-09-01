@@ -1,5 +1,5 @@
 {
-  "generated": "2026-08-31",
+  "generated": "2026-09-01",
   "layers": [
     {
       "id": "inform",
@@ -16,13 +16,13 @@
     {
       "id": "emdat",
       "file": "emdat.json",
-      "status": "not_loaded",
+      "status": "loaded",
       "label": "EM-DAT (Emergency Events Database)"
     },
     {
       "id": "idmc",
       "file": "idmc.json",
-      "status": "not_loaded",
+      "status": "loaded",
       "label": "IDMC — Global Internal Displacement (disasters)"
     },
     {

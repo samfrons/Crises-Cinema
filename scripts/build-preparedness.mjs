@@ -397,17 +397,46 @@ async function buildNdgain() {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   3. EM-DAT (CRED / UCLouvain) — registration-gated, no scraping.
-   ══════════════════════════════════════════════════════════════════════════ */
+   3. EM-DAT (CRED / UCLouvain) — registration-gated, no scraping directly.
+   ══════════════════════════════════════════════════════════════════════════
+   CRED will not hand over a bulk export without a free account, but they
+   license per-country, per-hazard-type EM-DAT death series to Our World in
+   Data, which republishes them openly as a processed CSV mirror — same
+   underlying EM-DAT records, citation intact, no registration wall. That's
+   the automatic path below. A registered EM-DAT export dropped in at
+   data/preparedness/raw/emdat.csv is still read first when present: it
+   carries affected-persons and damage figures OWID's mirror does not, so
+   it remains the higher-fidelity, canonical upgrade path.               */
 
-const EMDAT_INSTRUCTIONS = 'EM-DAT requires a free account at https://public.emdat.be to export data — this '
-  + 'script never scrapes it. Register, run a query for all disaster types from 2000 onward, export, and if the '
-  + 'export is .xlsx convert it to .csv (e.g. open in a spreadsheet app and "Save As CSV" — this script parses '
-  + 'CSV only, to stay dependency-free; it does not read .xlsx). Save the file as '
-  + 'data/preparedness/raw/emdat.csv, keeping EM-DAT\'s own column headers, then rerun npm run build:preparedness. '
+const EMDAT_INSTRUCTIONS = 'This layer is currently filled from Our World in Data\'s mirror of EM-DAT (see below) '
+  + 'rather than a registered EM-DAT export, so it carries deaths only — no affected-persons or damage figures, '
+  + 'which OWID\'s processed mirror does not carry per-country/per-type. For the canonical, fuller EM-DAT figures: '
+  + 'register a free account at https://public.emdat.be, run a query for all disaster types from 2000 onward, '
+  + 'export, and if the export is .xlsx convert it to .csv (e.g. open in a spreadsheet app and "Save As CSV" — '
+  + 'this script parses CSV only, to stay dependency-free; it does not read .xlsx). Save the file as '
+  + 'data/preparedness/raw/emdat.csv, keeping EM-DAT\'s own column headers, then rerun npm run build:preparedness '
+  + '— a file at that path always takes priority over the OWID mirror. '
   + 'IMPORTANT — EM-DAT is licensed CC BY-NC-ND: non-commercial, no derivatives. This layer must not be sold, '
   + 'and any figures shown from it should be presented as EM-DAT\'s own numbers, not adapted or recombined into '
   + 'a derivative statistic (see data/preparedness/README.md).';
+
+// Our World in Data's EM-DAT mirror, per hazard type, as annual death
+// counts per country (grapher slug "deaths-from-natural-disasters-by-type",
+// which 301-redirects from its old "natural-disasters-deaths" chart URL).
+// Column -> canonical hazard. OWID also carries volcanic activity,
+// landslide, extreme temperature and a mixed/other bucket with no canonical
+// key here — dropped rather than stretched onto the wrong hazard, same
+// treatment as tsunami in the INFORM layer.
+const OWID_EMDAT_URL = 'https://ourworldindata.org/grapher/deaths-from-natural-disasters-by-type.csv?useColumnShortNames=true';
+const OWID_EMDAT_META_URL = 'https://ourworldindata.org/grapher/deaths-from-natural-disasters-by-type.metadata.json';
+const OWID_HAZARD_COLUMNS = {
+  earthquake: 'total_dead_earthquake_yearly',
+  flood: 'total_dead_flood_yearly',
+  storm: 'total_dead_extreme_weather_yearly', // OWID's own column title for this is "Deaths - Storms"
+  wildfire: 'total_dead_wildfire_yearly',
+  drought: 'total_dead_drought_yearly',
+};
+const OWID_TOTAL_COLUMN = 'total_dead_all_disasters_yearly';
 
 const EMDAT_HAZARD_MAP = [
   [/earthquake|tsunami/i, 'earthquake'],
@@ -447,33 +476,17 @@ function parseCsv(text) {
   return rows.slice(1).map((r) => Object.fromEntries(header.map((h, i) => [h, r[i] ?? ''])));
 }
 
-async function buildEmdat(population) {
-  const id = 'emdat';
-  const label = 'EM-DAT (Emergency Events Database)';
-  const source = {
-    publisher: 'CRED / UCLouvain — EM-DAT: The International Disaster Database',
-    url: 'https://www.emdat.be',
-    license: 'CC BY-NC-ND (non-commercial, no derivatives — see data/preparedness/README.md for what this means for this site)',
-    asOf: null,
-    retrieved: TODAY,
-    limitations: [
-      'Small and slow-onset disasters are systematically under-recorded, especially in lower-income and lower-capacity states where local reporting infrastructure is thinner — the database reflects what got reported, not every event that occurred.',
-      'Economic damage figures are missing for most recorded events (EM-DAT itself estimates coverage well under half); totals here are a floor, not a true sum.',
-      'Entry into the database requires a minimum severity threshold (deaths, people affected, declared emergency, or international appeal) — chronic, below-threshold hazard exposure never appears.',
-      'A single named event (e.g. one cyclone) can cross several countries and years; this build\'s per-country, 2000-onward aggregation is EM-DAT\'s own country attribution, not independently verified.',
-    ],
-  };
-  const hazards = Object.values(EMDAT_HAZARD_MAP.reduce((m, [, k]) => ({ ...m, [k]: k }), {}));
+// Real, observed maximum of a set of scores — the UI treats a null scale
+// max as "not loaded", so every loaded layer built from an open-ended
+// count (deaths/100k, displacement totals, ...) sets its scale.max to
+// whatever the data itself topped out at, not a guessed ceiling.
+const scaleMax = (values) => (values.length ? round2(Math.max(...values)) : null);
 
+async function buildEmdatFromDropIn(population) {
   const csvPath = resolve(rawDir, 'emdat.csv');
-  if (!existsSync(csvPath)) {
-    return stub({ id, label, hazardDimension: true, hazards, unit: 'Deaths per 100,000 population, 2000–latest', scale: { min: 0, max: null, higherIs: 'worse' }, source, instructions: EMDAT_INSTRUCTIONS });
-  }
-
+  if (!existsSync(csvPath)) return null;
   const rows = parseCsv(readFileSync(csvPath, 'utf8'));
-  if (!rows.length) {
-    return stub({ id, label, hazardDimension: true, hazards, unit: 'Deaths per 100,000 population, 2000–latest', scale: { min: 0, max: null, higherIs: 'worse' }, source, instructions: EMDAT_INSTRUCTIONS + ' (the dropped-in file parsed to zero rows — check it is EM-DAT\'s CSV export, not the xlsx.)' });
-  }
+  if (!rows.length) return { error: 'the dropped-in file parsed to zero rows — check it is EM-DAT\'s CSV export, not the xlsx.' };
 
   // EM-DAT's own export column names vary slightly by vintage; take
   // whichever of the known aliases is present rather than hardcoding one.
@@ -483,7 +496,7 @@ async function buildEmdat(population) {
   const TYPE_COLS = ['Disaster Type', 'Disaster type'];
   const DEATHS_COLS = ['Total Deaths', 'Total deaths'];
   const AFFECTED_COLS = ['Total Affected', 'Total affected'];
-  const DAMAGE_COLS = ["Total Damage, Adjusted ('000 US$)", 'Total Damage (\'000 US$)', "Total Damage, Adjusted ('000 US$)"];
+  const DAMAGE_COLS = ["Total Damage, Adjusted ('000 US$)", 'Total Damage (\'000 US$)'];
 
   let minYear = null;
   let maxYear = null;
@@ -507,11 +520,14 @@ async function buildEmdat(population) {
     const hazard = EMDAT_HAZARD_MAP.find(([re]) => re.test(type))?.[1];
     if (hazard) acc.byHazard[hazard] = (acc.byHazard[hazard] ?? 0) + deaths;
   }
+  if (!byCountry.size) return { error: 'the dropped-in file parsed but produced no usable per-country rows.' };
 
   const countries = {};
+  const scores = [];
   for (const [iso3, acc] of byCountry) {
     const pop = population.get(iso3);
     const per100k = pop ? (acc.deaths / pop) * 100000 : null;
+    if (per100k != null) scores.push(per100k);
     countries[iso3] = {
       score: per100k != null ? round2(per100k) : null,
       components: {
@@ -519,51 +535,162 @@ async function buildEmdat(population) {
         'Total affected (period)': acc.affected,
         'Total damage, USD (period)': Math.round(acc.damageUsd),
       },
-      ...(Object.keys(acc.byHazard).length ? { byHazard: Object.fromEntries(Object.entries(acc.byHazard).map(([k, v]) => [k, v])) } : {}),
+      ...(Object.keys(acc.byHazard).length ? { byHazard: acc.byHazard } : {}),
     };
   }
-  source.asOf = `${minYear}–${maxYear}`;
 
   return {
-    id, label, status: 'loaded', hazardDimension: true, hazards,
-    unit: 'Deaths per 100,000 population, 2000–latest (score); components are period totals',
-    scale: { min: 0, max: null, higherIs: 'worse' },
-    source, countries,
+    countries, asOf: `${minYear}–${maxYear}`, scaleMax: scaleMax(scores),
+    hazards: Object.values(EMDAT_HAZARD_MAP.reduce((m, [, k]) => ({ ...m, [k]: k }), {})),
+    publisher: 'CRED / UCLouvain — EM-DAT: The International Disaster Database (registered export)',
+    unit: 'Deaths per 100,000 population, 2000–latest (score, scale capped at the observed maximum); components are period totals',
   };
 }
 
-/* ══════════════════════════════════════════════════════════════════════════
-   4. IDMC GIDD — API needs a client key this build doesn't have.
-   ══════════════════════════════════════════════════════════════════════════ */
+/** The OWID mirror only carries deaths, by hazard type, per country per
+    year — no affected-persons or damage figures (those aren't in OWID's
+    processed columns), so this path's `components` is thinner than the
+    registered-export path's. */
+async function buildEmdatFromOwid(population) {
+  let meta;
+  let csvText;
+  try {
+    meta = await cachedJson(OWID_EMDAT_META_URL, 'owid-emdat-deaths-by-type.metadata.json');
+    csvText = await cachedText(OWID_EMDAT_URL, 'owid-emdat-deaths-by-type.csv');
+  } catch (e) {
+    return { error: `OWID mirror fetch failed (${e.message})` };
+  }
+  const rows = parseCsv(csvText);
+  if (!rows.length) return { error: 'OWID mirror returned an empty CSV' };
 
-async function buildIdmc() {
-  const id = 'idmc';
-  const label = 'IDMC — Global Internal Displacement (disasters)';
-  const source = {
-    publisher: 'Internal Displacement Monitoring Centre (IDMC) — Global Internal Displacement Database (GIDD)',
-    url: 'https://www.internal-displacement.org/database/displacement-data',
-    license: 'CC BY',
-    asOf: null,
-    retrieved: TODAY,
-    limitations: [
-      'Disaster displacement figures are modeled estimates built from media, government, and cluster reports of varying quality by country, not a census.',
-      'Numbers are a "flow" (new displacements during a year) — the same person displaced twice in one year by two events is counted twice, and the figure says nothing about how many people remain displaced (the "stock").',
-      'Small-scale or slow-onset displacement (e.g. gradual drought-driven movement) is under-captured relative to sudden, visible events like storms and floods.',
-    ],
-  };
-  const hazards = ['earthquake', 'flood', 'storm', 'wildfire', 'drought'];
-  const instructions = 'The IDMC GIDD API (helix-tools-api.idmcdb.org) requires a client key this build does not '
-    + 'have. Either request one at https://www.internal-displacement.org (Data → API access) and wire it into '
-    + 'this script, or download the disaster displacement dataset from '
-    + 'https://www.internal-displacement.org/database/displacement-data as a CSV (its own export is Excel by '
-    + 'default — convert to CSV, e.g. "Save As CSV" in a spreadsheet app, since this loader reads CSV only) and '
-    + 'save it as data/preparedness/raw/idmc-gidd.csv, then rerun npm run build:preparedness.';
+  let minYear = null;
+  let maxYear = null;
+  const byCountry = new Map();
+  for (const row of rows) {
+    const iso3 = row.code;
+    const year = Number(row.year);
+    if (!iso3 || iso3.length !== 3 || !Number.isFinite(year) || year < 2000) continue;
+    minYear = minYear ? Math.min(minYear, year) : year;
+    maxYear = maxYear ? Math.max(maxYear, year) : year;
+    if (!byCountry.has(iso3)) byCountry.set(iso3, { totalDeaths: 0, byHazard: {} });
+    const acc = byCountry.get(iso3);
+    acc.totalDeaths += Number(row[OWID_TOTAL_COLUMN]) || 0;
+    for (const [hazard, colName] of Object.entries(OWID_HAZARD_COLUMNS)) {
+      const v = Number(row[colName]) || 0;
+      if (v) acc.byHazard[hazard] = (acc.byHazard[hazard] ?? 0) + v;
+    }
+  }
+  if (!byCountry.size) return { error: 'OWID mirror parsed but produced no usable per-country rows' };
 
-  const csvPath = resolve(rawDir, 'idmc-gidd.csv');
-  if (!existsSync(csvPath)) {
-    return stub({ id, label, hazardDimension: true, hazards, unit: 'New disaster displacements, 2008–latest (sum)', scale: { min: 0, max: null, higherIs: 'worse' }, source, instructions });
+  const countries = {};
+  const scores = [];
+  for (const [iso3, acc] of byCountry) {
+    const pop = population.get(iso3);
+    const per100k = pop ? (acc.totalDeaths / pop) * 100000 : null;
+    if (per100k != null) scores.push(per100k);
+    countries[iso3] = {
+      score: per100k != null ? round2(per100k) : null,
+      components: { 'Total deaths (period)': acc.totalDeaths },
+      ...(Object.keys(acc.byHazard).length ? { byHazard: acc.byHazard } : {}),
+    };
   }
 
+  const citation = meta?.columns?.[Object.keys(meta.columns)[0]]?.citationLong ?? null;
+  return {
+    countries, asOf: `${minYear}–${maxYear}`, scaleMax: scaleMax(scores),
+    hazards: Object.keys(OWID_HAZARD_COLUMNS),
+    publisher: 'EM-DAT, CRED / UCLouvain — via Our World in Data (processed mirror)',
+    unit: 'Deaths per 100,000 population, 2000–latest (score, scale capped at the observed maximum); components are deaths only — OWID\'s mirror does not carry affected-persons or damage figures',
+    citation,
+  };
+}
+
+async function buildEmdat(population) {
+  const id = 'emdat';
+  const label = 'EM-DAT (Emergency Events Database)';
+  const baseSource = {
+    url: 'https://www.emdat.be',
+    license: 'CC BY-NC-ND (non-commercial, no derivatives — see data/preparedness/README.md for what this means for this site)',
+    retrieved: TODAY,
+    limitations: [
+      'Small and slow-onset disasters are systematically under-recorded, especially in lower-income and lower-capacity states where local reporting infrastructure is thinner — the database reflects what got reported, not every event that occurred.',
+      'Entry into the database requires a minimum severity threshold (deaths, people affected, declared emergency, or international appeal) — chronic, below-threshold hazard exposure never appears.',
+      'A single named event (e.g. one cyclone) can cross several countries and years; this build\'s per-country, 2000-onward aggregation is EM-DAT\'s own (or, via the OWID mirror, OWID\'s reprocessing of EM-DAT\'s own) country attribution, not independently verified.',
+      'The scale\'s maximum is the highest score actually observed in this run, not a fixed ceiling — it will shift release to release as new data comes in.',
+    ],
+  };
+  const allHazards = Object.values(EMDAT_HAZARD_MAP.reduce((m, [, k]) => ({ ...m, [k]: k }), {}));
+
+  const dropIn = await buildEmdatFromDropIn(population);
+  if (dropIn && !dropIn.error) {
+    const source = {
+      ...baseSource,
+      publisher: dropIn.publisher,
+      asOf: dropIn.asOf,
+      limitations: [
+        ...baseSource.limitations,
+        'Economic damage figures are missing for most recorded events (EM-DAT itself estimates coverage well under half); totals here are a floor, not a true sum.',
+      ],
+    };
+    return {
+      id, label, status: 'loaded', hazardDimension: true, hazards: dropIn.hazards,
+      unit: dropIn.unit, scale: { min: 0, max: dropIn.scaleMax, higherIs: 'worse', transform: 'log' },
+      source, countries: dropIn.countries,
+    };
+  }
+  if (dropIn?.error) console.log(`  emdat: dropped-in file present but unusable (${dropIn.error}) — trying the OWID mirror instead`);
+
+  const owid = await buildEmdatFromOwid(population);
+  if (!owid.error) {
+    const source = {
+      ...baseSource,
+      publisher: owid.publisher,
+      asOf: owid.asOf,
+      limitations: [
+        ...baseSource.limitations,
+        'Retrieved via Our World in Data\'s processed mirror of EM-DAT, not a direct EM-DAT export — OWID\'s own reprocessing (unit conversion, entity naming) sits between this figure and EM-DAT\'s raw record. Drop in a registered EM-DAT export (see instructions) for the canonical figures, including affected-persons and damage totals this mirror does not carry.',
+      ],
+    };
+    return {
+      id, label, status: 'loaded', hazardDimension: true, hazards: owid.hazards,
+      unit: owid.unit, scale: { min: 0, max: owid.scaleMax, higherIs: 'worse', transform: 'log' },
+      source, countries: owid.countries,
+    };
+  }
+  console.log(`  emdat: OWID mirror also failed (${owid.error})`);
+
+  return stub({
+    id, label, hazardDimension: true, hazards: allHazards,
+    unit: 'Deaths per 100,000 population, 2000–latest', scale: { min: 0, max: null, higherIs: 'worse' },
+    source: { ...baseSource, publisher: 'CRED / UCLouvain — EM-DAT: The International Disaster Database', asOf: null },
+    instructions: EMDAT_INSTRUCTIONS,
+  });
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   4. IDMC GIDD — no client key needed after all: IDMC republishes its own
+      disaster-displacement event table openly on HDX.
+   ══════════════════════════════════════════════════════════════════════════
+   helix-tools-api.idmcdb.org (the live GIDD API) still 403s without a
+   client key this build doesn't have — but IDMC's HDX page
+   ("idmc-internal-displacements-new-displacements-associated-with-disasters",
+   found by searching HDX's package_search for "idmc") turns out to be
+   genuinely event-level: one row per disaster event with its own iso3,
+   year, hazard_type_name and new_displacement count. That's better than
+   the aggregate the brief expected — hazardDimension can stay true.      */
+
+const IDMC_HDX_PACKAGE = 'idmc-internal-displacements-new-displacements-associated-with-disasters';
+const IDMC_HAZARD_MAP = [
+  [/^Earthquake$/i, 'earthquake'], [/^Flood$/i, 'flood'], [/^Storm$/i, 'storm'],
+  [/^Wildfire$/i, 'wildfire'], [/^Drought$/i, 'drought'],
+  // Present in the data but with no canonical key here, so dropped rather
+  // than stretched: Volcanic activity, Mass Movement, Extreme Temperature,
+  // Erosion, Wave action, Sea level Rise, Mixed disasters.
+];
+
+async function buildIdmcFromDropIn() {
+  const csvPath = resolve(rawDir, 'idmc-gidd.csv');
+  if (!existsSync(csvPath)) return null;
   const rows = parseCsv(readFileSync(csvPath, 'utf8'));
   const col = (row, names) => names.map((n) => row[n]).find((v) => v !== undefined && v !== '');
   const ISO3_COLS = ['ISO3', 'Iso3'];
@@ -591,15 +718,129 @@ async function buildIdmc() {
     const hazard = HAZARD_MAP.find(([re]) => re.test(col(row, HAZARD_COLS) ?? ''))?.[1];
     if (hazard) acc.byHazard[hazard] = (acc.byHazard[hazard] ?? 0) + value;
   }
-  if (!byCountry.size) {
-    return stub({ id, label, hazardDimension: true, hazards, unit: 'New disaster displacements, 2008–latest (sum)', scale: { min: 0, max: null, higherIs: 'worse' }, source, instructions: instructions + ' (the dropped-in file parsed to zero usable rows.)' });
-  }
-  source.asOf = `${minYear}–${maxYear}`;
+  if (!byCountry.size) return { error: 'the dropped-in file parsed to zero usable rows.' };
+
   const countries = {};
+  const scores = [];
   for (const [iso3, acc] of byCountry) {
+    scores.push(acc.total);
     countries[iso3] = { score: acc.total, ...(Object.keys(acc.byHazard).length ? { byHazard: acc.byHazard } : {}) };
   }
-  return { id, label, status: 'loaded', hazardDimension: true, hazards, unit: 'New disaster displacements, 2008–latest (sum)', scale: { min: 0, max: null, higherIs: 'worse' }, source, countries };
+  return { countries, asOf: `${minYear}–${maxYear}`, scaleMax: scaleMax(scores) };
+}
+
+async function buildIdmcFromHdx() {
+  let pkg;
+  try {
+    pkg = await cachedJson(
+      `https://data.humdata.org/api/3/action/package_show?id=${IDMC_HDX_PACKAGE}`,
+      'idmc-hdx-package.json',
+    );
+  } catch (e) {
+    return { error: `HDX package lookup failed (${e.message})` };
+  }
+  const resource = pkg.result?.resources?.find((r) => /\.csv$/i.test(r.url ?? ''));
+  if (!resource) return { error: 'HDX package has no CSV resource' };
+
+  let csvText;
+  try {
+    csvText = await cachedText(resource.url, 'idmc-disasters.csv', { timeout: 60000 });
+  } catch (e) {
+    return { error: `HDX CSV download failed (${e.message})` };
+  }
+  const rows = parseCsv(csvText);
+  if (!rows.length) return { error: 'HDX CSV parsed to zero rows' };
+
+  let minYear = null;
+  let maxYear = null;
+  const byCountry = new Map();
+  for (const row of rows) {
+    const iso3 = row.iso3;
+    const year = Number(row.year);
+    const value = Number(row.new_displacement) || 0;
+    if (!iso3 || iso3.length !== 3 || !Number.isFinite(year) || year < 2008) continue;
+    minYear = minYear ? Math.min(minYear, year) : year;
+    maxYear = maxYear ? Math.max(maxYear, year) : year;
+    if (!byCountry.has(iso3)) byCountry.set(iso3, { total: 0, byHazard: {} });
+    const acc = byCountry.get(iso3);
+    acc.total += value;
+    const hazard = IDMC_HAZARD_MAP.find(([re]) => re.test(row.hazard_type_name ?? ''))?.[1];
+    if (hazard) acc.byHazard[hazard] = (acc.byHazard[hazard] ?? 0) + value;
+  }
+  if (!byCountry.size) return { error: 'HDX CSV parsed but produced no usable per-country rows' };
+
+  const countries = {};
+  const scores = [];
+  for (const [iso3, acc] of byCountry) {
+    scores.push(acc.total);
+    countries[iso3] = { score: acc.total, ...(Object.keys(acc.byHazard).length ? { byHazard: acc.byHazard } : {}) };
+  }
+  return {
+    countries, asOf: `${minYear}–${maxYear}`, scaleMax: scaleMax(scores),
+    lastModified: resource.last_modified ? String(resource.last_modified).slice(0, 10) : null,
+  };
+}
+
+async function buildIdmc() {
+  const id = 'idmc';
+  const label = 'IDMC — Global Internal Displacement (disasters)';
+  const hazards = ['earthquake', 'flood', 'storm', 'wildfire', 'drought'];
+  const unit = 'New disaster displacements, 2008–latest (sum, scale capped at the observed maximum)';
+  const baseLimitations = [
+    'Disaster displacement figures are modeled estimates built from media, government, and cluster reports of varying quality by country, not a census.',
+    'Numbers are a "flow" (new displacements during a year) — the same person displaced twice in one year by two events is counted twice, and the figure says nothing about how many people remain displaced (the "stock").',
+    'Small-scale or slow-onset displacement (e.g. gradual drought-driven movement) is under-captured relative to sudden, visible events like storms and floods.',
+    'This layer is disaster displacement only, not conflict displacement — IDMC tracks both, but the source table behind this layer (its disaster-events export) does not carry a conflict figure to show as a comparison component.',
+    'The scale\'s maximum is the highest total actually observed in this run, not a fixed ceiling.',
+  ];
+  const baseSource = {
+    publisher: 'Internal Displacement Monitoring Centre (IDMC) — Global Internal Displacement Database (GIDD)',
+    url: 'https://www.internal-displacement.org/database/displacement-data',
+    license: 'CC BY-IGO',
+    retrieved: TODAY,
+  };
+  const instructions = 'The live IDMC GIDD API (helix-tools-api.idmcdb.org) still requires a client key this '
+    + 'build does not have. This layer is instead filled automatically from IDMC\'s own event-level disaster-'
+    + 'displacement table published on HDX (package "' + IDMC_HDX_PACKAGE + '"). If HDX ever moves or renames '
+    + 'that package, either request an API key at https://www.internal-displacement.org (Data → API access) and '
+    + 'wire it into this script, or re-search https://data.humdata.org for the current package id and update '
+    + 'IDMC_HDX_PACKAGE in scripts/build-preparedness.mjs. A file dropped in at data/preparedness/raw/idmc-gidd.csv '
+    + 'always takes priority over the HDX pull, if you have a different export you\'d rather use.';
+
+  const dropIn = await buildIdmcFromDropIn();
+  if (dropIn && !dropIn.error) {
+    return {
+      id, label, status: 'loaded', hazardDimension: true, hazards, unit,
+      scale: { min: 0, max: dropIn.scaleMax, higherIs: 'worse', transform: 'log' },
+      source: { ...baseSource, asOf: dropIn.asOf, limitations: baseLimitations },
+      countries: dropIn.countries,
+    };
+  }
+  if (dropIn?.error) console.log(`  idmc: dropped-in file present but unusable (${dropIn.error}) — trying HDX instead`);
+
+  const hdx = await buildIdmcFromHdx();
+  if (!hdx.error) {
+    return {
+      id, label, status: 'loaded', hazardDimension: true, hazards, unit,
+      scale: { min: 0, max: hdx.scaleMax, higherIs: 'worse', transform: 'log' },
+      source: {
+        ...baseSource, asOf: hdx.asOf,
+        limitations: [
+          ...baseLimitations,
+          `HDX lists this resource's own last-modified date as ${hdx.lastModified ?? 'unknown'} — IDMC revises past years as better information arrives, so re-running this build later can change earlier-year totals, not just add new ones.`,
+        ],
+      },
+      countries: hdx.countries,
+    };
+  }
+  console.log(`  idmc: HDX fetch failed (${hdx.error})`);
+
+  return stub({
+    id, label, hazardDimension: true, hazards, unit,
+    scale: { min: 0, max: null, higherIs: 'worse' },
+    source: { ...baseSource, asOf: null, limitations: baseLimitations },
+    instructions,
+  });
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -692,13 +933,23 @@ async function buildSpar() {
 /* ══════════════════════════════════════════════════════════════════════════
    6. Sendai Framework Target G (multi-hazard early warning coverage)
    ══════════════════════════════════════════════════════════════════════════
-   The brief's hypothesis was that Target G surfaces as an SDG series in the
-   UNStats API. It does not: the SDG indicator framework tracks Sendai
-   Target E (national/local DRR strategies, series SG_DSR_*) but has no
-   MHEWS-coverage series at all — Target G is monitored only through the
-   Sendai Monitor itself, which has no open bulk API. Confirmed by pulling
-   the full SDG series list and searching it; see data/preparedness/raw/
-   sdg-series-list.json for the evidence this script based that call on. */
+   Still not_loaded, on real evidence gathered twice now:
+     - The UN SDG API's full series list (unstats.un.org/sdgapi) carries no
+       MHEWS/early-warning series under any plausible code — checked again
+       this pass against a much wider net (every SG_*, EN_*, VC_* series,
+       plus a text search for "warning"/"EWS"/"MHEWS"/"multi-hazard"), not
+       just the earlier narrow one. The SDG framework tracks Sendai Target E
+       (national/local DRR strategies, series SG_DSR_*) but Target G has no
+       SDG-mirrored series at all.
+     - sendaimonitor.undrr.org's dashboard API is not usable without a real
+       browser session either way: several guessed REST paths (/api,
+       /api/graphql, several guessed shapes) return HTTP 403 behind a
+       Cloudflare "Managed Challenge" (a JS/cookie challenge, not a data
+       response), and the one real endpoint found (/api/dashboard) returns
+       HTTP 401 — it exists, but needs session auth this script doesn't have.
+     - HDX carries no UNDRR/Sendai Target G or early-warning dataset either.
+   Evidence cached at data/preparedness/raw/sdg-series-list.json (full
+   series list) and sendai-challenge-page.html (the /api/dashboard response). */
 
 async function buildSendai() {
   const id = 'sendai';
@@ -717,13 +968,31 @@ async function buildSendai() {
   };
 
   await cachedJson('https://unstats.un.org/sdgapi/v1/sdg/Series/List', 'sdg-series-list.json').catch(() => null);
+  // The bare root ("/") is just the site's client-rendered SPA shell and
+  // returns 200 with no data either way — the actual evidence is that its
+  // /api/* endpoints (where any dashboard data would have to come from)
+  // 403 behind a Cloudflare Managed Challenge for every path tried.
+  try {
+    const res = await fetch('https://sendaimonitor.undrr.org/api/dashboard', {
+      headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+      signal: AbortSignal.timeout(20000),
+    });
+    writeFileSync(resolve(rawDir, 'sendai-challenge-page.html'), await res.text());
+    console.log(`  sendai: sendaimonitor.undrr.org/api/dashboard -> HTTP ${res.status} (response cached as evidence)`);
+  } catch (e) {
+    console.log(`  sendai: sendaimonitor.undrr.org/api/dashboard fetch errored (${e.message})`);
+  }
 
   return stub({
     id, label, hazardDimension: false, unit: 'MHEWS coverage indicator (Target G-1), 0–1', scale: { min: 0, max: 1, higherIs: 'better' },
-    source, instructions: 'The UN SDG API (unstats.un.org/sdgapi) tracks Sendai Target E (DRR strategies) but '
-      + 'carries no Target G / multi-hazard early-warning series — confirmed by fetching the full SDG series list '
-      + '(cached at data/preparedness/raw/sdg-series-list.json) and finding no early-warning entry in it. Export '
-      + 'Target G country data directly from the Sendai Framework Monitor at https://sendaimonitor.undrr.org '
+    source, instructions: 'No open, machine-readable source for Sendai Target G was found. The UN SDG API '
+      + '(unstats.un.org/sdgapi) tracks Sendai Target E (DRR strategies) but carries no Target G / multi-hazard '
+      + 'early-warning series at all — confirmed twice, most recently against every SG_/EN_/VC_ series in the '
+      + 'full list (cached at data/preparedness/raw/sdg-series-list.json). sendaimonitor.undrr.org\'s own '
+      + 'dashboard API is unreachable by script either way — guessed REST paths return HTTP 403 behind a '
+      + 'Cloudflare Managed Challenge, and its real /api/dashboard endpoint returns HTTP 401, requiring a '
+      + 'session login this script does not have (cached at data/preparedness/raw/sendai-challenge-page.html). '
+      + 'Export Target G country data by hand from https://sendaimonitor.undrr.org in a browser '
       + '(Data → Target G), save it as data/preparedness/raw/sendai-target-g.csv with at minimum columns '
       + 'iso3,score, and wire a small parser into buildSendai() in scripts/build-preparedness.mjs, then rerun '
       + 'npm run build:preparedness.',
@@ -784,14 +1053,43 @@ async function buildFunding() {
   appeals.sort((a, b) => a.year - b.year);
   if (appeals.length) source.asOf = `${appeals[0].year}–${appeals[appeals.length - 1].year}`;
 
+  // Real attempts, each cached as evidence, before falling back to the
+  // drop-in-file stub: unfccc.int sits behind Imperva/Incapsula bot
+  // protection (a 200 that resolves to a 212-byte JS-redirect shell, no
+  // content), frld.org sits behind a Cloudflare challenge, and fund.frld.org
+  // is rejected outright by this environment's egress proxy. None of the
+  // three hands back HTML with a parseable number in it.
+  const ldEvidence = [];
+  for (const [name, url] of [
+    ['unfccc', 'https://unfccc.int/loss-and-damage-fund'],
+    ['frld', 'https://www.frld.org'],
+  ]) {
+    try {
+      const res = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15' },
+        signal: AbortSignal.timeout(20000),
+      });
+      const text = await res.text();
+      writeFileSync(resolve(rawDir, `frld-${name}-page.html`), text);
+      const hasPledgeFigure = /\$\s?[\d,.]+\s?(billion|million)/i.test(text) && text.length > 2000;
+      ldEvidence.push(`${url} -> HTTP ${res.status}, ${text.length} bytes${hasPledgeFigure ? ', contains a dollar figure' : ', no parseable pledge figure'}`);
+    } catch (e) {
+      ldEvidence.push(`${url} -> fetch failed (${e.message})`);
+    }
+  }
+  console.log(`  lossAndDamage: ${ldEvidence.join(' | ')}`);
+
   const lossAndDamage = {
     status: 'not_loaded',
-    instructions: 'No machine-readable pledge feed for the Loss and Damage Fund (FRLD) was found — unfccc.int '
-      + 'and fund.frld.org publish pledge totals as prose/press releases, not a structured API or CSV, and this '
-      + 'script does not hand-enter figures from memory. Assemble a CSV yourself from official FRLD/COP '
-      + 'communications with columns contributor,pledgedUsd,announcedDate,sourceUrl (one row per pledge, cite '
-      + 'the exact page each figure came from) and save it as data/preparedness/raw/frld-pledges.csv, then '
-      + 'rerun npm run build:preparedness.',
+    instructions: 'No machine-readable pledge figure for the Loss and Damage Fund (FRLD) was found. Evidence '
+      + `from this run: ${ldEvidence.join('; ')}. unfccc.int/loss-and-damage-fund sits behind Imperva/Incapsula `
+      + 'bot protection (its 200 response is a small Incapsula challenge iframe, no page content); '
+      + 'frld.org sits behind a Cloudflare Managed Challenge; fund.frld.org is blocked outright by this build '
+      + 'environment\'s egress proxy. Raw responses cached at data/preparedness/raw/frld-unfccc-page.html and '
+      + 'frld-frld-page.html. This script will not hand-enter a pledge figure from memory or a news article — '
+      + 'assemble a CSV yourself from official FRLD/COP communications with columns '
+      + 'contributor,pledgedUsd,announcedDate,sourceUrl (one row per pledge, cite the exact page each figure '
+      + 'came from) and save it as data/preparedness/raw/frld-pledges.csv, then rerun npm run build:preparedness.',
   };
   const ldPath = resolve(rawDir, 'frld-pledges.csv');
   if (existsSync(ldPath)) {
