@@ -1,0 +1,770 @@
+{
+  "generated": "2026-09-01T06:15:22.700Z",
+  "playable": [
+    {
+      "id": "valencia-dana-2024",
+      "status": "playable",
+      "title": "The Day of the DANA",
+      "date": "2024-10-29",
+      "location": "Province of Valencia, Spain",
+      "hazard": "flash flood",
+      "clock": {
+        "timezone": "CET",
+        "start": "07:36",
+        "end": "20:11"
+      },
+      "record_caveat": "The record here is a judicial instruction still in progress, not a closed inquiry. Times and gauge figures come from official AEMET warnings, CHJ notifications entered in the Catarroja court file, and press reconstructions of that file; quotes from the investigating judge come from interlocutory orders as reproduced in press coverage, and are provisional. Where this scenario cannot say what a different decision would have caused, it says so: the record is silent on every path not taken. Deep links to primary documents are still to be added by the author.",
+      "timesteps": [
+        {
+          "id": "t1",
+          "time": "07:36",
+          "time_label": "07:36",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t1-i1",
+              "kind": "forecast",
+              "text": "AEMET, the state meteorological agency, raises its warning for the coastal north of the province of Valencia to RED — the highest level, meaning torrential rain above roughly 90 mm in a single hour is expected. The warning is broadcast on morning radio and television.",
+              "citation": {
+                "sourceId": "aemet-2024",
+                "detail": "Red-level warning issued 07:36 CET, 29 Oct 2024, litoral norte de Valencia"
+              },
+              "zones": [
+                "poyo-horta-sud"
+              ]
+            },
+            {
+              "id": "t1-i2",
+              "kind": "message",
+              "text": "Some inland municipalities, acting on their own authority, begin suspending classes for the day. There is no province-wide instruction.",
+              "citation": {
+                "sourceId": "press-recon",
+                "detail": "Timeline reconstructions of local school suspensions on the morning of 29 Oct"
+              }
+            }
+          ],
+          "options": [
+            {
+              "id": "t1-a1",
+              "label": "Send a province-wide phone alert now",
+              "detail": "Trigger ES-Alert to every handset in the province: red warning in force, avoid travel, stay away from ravines and watercourses.",
+              "effects": {
+                "warning_scope": "province",
+                "zones": [
+                  "poyo-horta-sud",
+                  "magro-utiel"
+                ],
+                "protective": true,
+                "false_alarm_weight": 1
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t1-a2",
+              "label": "Order preventive suspensions in the warned comarcas",
+              "detail": "Suspend classes, sport and non-essential activity across the areas under red warning, and tell mayors to prepare.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "magro-utiel"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0.5
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t1-a3",
+              "label": "Monitor and wait",
+              "detail": "A red warning is a forecast, not a flood. Watch the gauges, keep in touch with AEMET, decide when there is data.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is the path the day took: the morning proceeded on a normal footing, with no general warning from the regional government; action was left to individual municipalities.",
+                "citation": {
+                  "sourceId": "press-recon",
+                  "detail": "Reconstructions of the morning of 29 Oct: no regional-level protective measures ordered"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t1-a3",
+          "historical_citation": {
+            "sourceId": "press-recon",
+            "detail": "No province-wide warning or suspension ordered on the morning of 29 Oct"
+          }
+        },
+        {
+          "id": "t2",
+          "time": "12:20",
+          "time_label": "12:20",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t2-i1",
+              "kind": "gauge",
+              "text": "12:20 — the Júcar basin authority (CHJ) notifies the regional emergency service that flow in the Rambla del Poyo, the normally dry ravine that runs above the dense towns south of Valencia city, has passed its alert threshold.",
+              "citation": {
+                "sourceId": "chj-record",
+                "detail": "CHJ hydrological alert for the Rambla del Poyo, 12:20 CET, as entered in the court record"
+              },
+              "zones": [
+                "poyo-horta-sud"
+              ]
+            },
+            {
+              "id": "t2-i2",
+              "kind": "field_report",
+              "text": "Inland, the Magro basin is already flooding. Utiel is under water by midday; the town asks for help for people trapped in their homes.",
+              "citation": {
+                "sourceId": "press-recon",
+                "detail": "Reconstructions of the flooding of Utiel around midday, 29 Oct"
+              },
+              "zones": [
+                "magro-utiel"
+              ]
+            },
+            {
+              "id": "t2-i3",
+              "kind": "forecast",
+              "text": "AEMET's red warnings remain in force and are extended across further zones of the province during the day.",
+              "citation": {
+                "sourceId": "aemet-2024",
+                "detail": "Warning bulletins for the province of Valencia through 29 Oct"
+              },
+              "zones": [
+                "magro-utiel"
+              ]
+            }
+          ],
+          "options": [
+            {
+              "id": "t2-a1",
+              "label": "Send a province-wide phone alert",
+              "detail": "A gauge has crossed its threshold and a town is already under water. Alert every handset in the province.",
+              "effects": {
+                "warning_scope": "province",
+                "zones": [
+                  "poyo-horta-sud",
+                  "magro-utiel"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0.5
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t2-a2",
+              "label": "Warn the riverside municipalities directly",
+              "detail": "Targeted warning and pre-evacuation notice to the municipalities along the Poyo and the Magro.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "poyo-horta-sud",
+                  "magro-utiel"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t2-a3",
+              "label": "Keep tracking the episode",
+              "detail": "Let the emergency service follow the gauges and the rescues in Utiel; escalate if the coastal basins move.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is what happened: the emergency service tracked the episode, rescues continued inland, and no population-wide warning was issued at this hour.",
+                "citation": {
+                  "sourceId": "press-recon",
+                  "detail": "No general warning followed the 12:20 CHJ alert"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t2-a3",
+          "historical_citation": {
+            "sourceId": "press-recon",
+            "detail": "No population-wide warning issued after the midday hydrological alert"
+          }
+        },
+        {
+          "id": "t3",
+          "time": "14:00",
+          "time_label": "early afternoon",
+          "approx": true,
+          "info_available": [
+            {
+              "id": "t3-i1",
+              "kind": "media",
+              "text": "The regional president posts a video message: the storm is expected to move away towards the Serranía de Cuenca, with intensity easing across the region from around 18:00. (The video was later deleted.)",
+              "citation": {
+                "sourceId": "press-recon",
+                "detail": "The early-afternoon video message of 29 Oct, later deleted; widely reproduced in press reconstructions"
+              }
+            },
+            {
+              "id": "t3-i2",
+              "kind": "field_report",
+              "text": "Rain continues over the interior of the province. Emergency calls keep coming from the Magro and Utiel–Requena.",
+              "citation": {
+                "sourceId": "press-recon",
+                "detail": "Afternoon situation in the interior comarcas, 29 Oct"
+              },
+              "zones": [
+                "magro-utiel"
+              ]
+            }
+          ],
+          "options": [
+            {
+              "id": "t3-a1",
+              "label": "Contradict the reassurance — warn now",
+              "detail": "Issue your own public warning that the emergency is not over, and alert the basins under red warning.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "poyo-horta-sud",
+                  "magro-utiel"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t3-a2",
+              "label": "Convene the crisis committee immediately",
+              "detail": "Pull every agency — AEMET, the basin authority, national delegation — into one room now rather than later.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t3-a3",
+              "label": "Let the president's message stand",
+              "detail": "The forecast office of the region's own government has spoken. Stay the course.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is what happened: the reassurance stood through the afternoon, and no public warning from the regional government followed it.",
+                "citation": {
+                  "sourceId": "press-recon",
+                  "detail": "No corrective warning issued after the video message"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t3-a3",
+          "historical_citation": {
+            "sourceId": "press-recon",
+            "detail": "The reassuring message stood; the coordination committee did not meet until 17:00"
+          }
+        },
+        {
+          "id": "t4",
+          "time": "17:00",
+          "time_label": "17:00",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t4-i1",
+              "kind": "message",
+              "text": "17:00 — CECOPI, the integrated emergency coordination committee, finally convenes, with the regional interior minister presiding.",
+              "citation": {
+                "sourceId": "court-catarroja",
+                "detail": "CECOPI convened at 17:00 on 29 Oct, per the court record and press reconstructions"
+              }
+            },
+            {
+              "id": "t4-i2",
+              "kind": "message",
+              "text": "Discussion is dominated by the Forata dam on the river Magro, which is filling fast towards its limit and which the basin authority warns may fail.",
+              "citation": {
+                "sourceId": "press-recon",
+                "detail": "CECOPI's focus on the Forata dam during the evening session"
+              },
+              "zones": [
+                "magro-utiel"
+              ]
+            },
+            {
+              "id": "t4-i3",
+              "kind": "gauge",
+              "text": "The most recent CHJ email on the Rambla del Poyo, from 16:13, showed the flow falling. No further update on the Poyo has arrived since.",
+              "citation": {
+                "sourceId": "chj-record",
+                "detail": "Gap in CHJ notifications on the Poyo between 16:13 and 18:43, per the court record"
+              },
+              "zones": [
+                "poyo-horta-sud"
+              ]
+            }
+          ],
+          "options": [
+            {
+              "id": "t4-a1",
+              "label": "Send the province-wide phone alert now",
+              "detail": "Red warnings all day, a town flooded, a dam at risk: alert every handset in the province while there is daylight left.",
+              "effects": {
+                "warning_scope": "province",
+                "zones": [
+                  "poyo-horta-sud",
+                  "magro-utiel"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t4-a2",
+              "label": "Alert and evacuate downstream of Forata",
+              "detail": "Focus on the visible danger: warn and begin moving the municipalities below the dam.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "magro-utiel"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t4-a3",
+              "label": "Request national reinforcements",
+              "detail": "Ask Madrid for the UME, the military emergency unit, in strength — and keep deliberating on the message.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t4-a4",
+              "label": "Keep deliberating",
+              "detail": "The committee has only just assembled. Establish the picture before deciding anything irreversible.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is what happened: the committee deliberated, with attention on the Forata dam, and no mobile alert was decided at this point.",
+                "citation": {
+                  "sourceId": "court-catarroja",
+                  "detail": "Course of the CECOPI session as reconstructed in the court record"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t4-a4",
+          "historical_citation": {
+            "sourceId": "court-catarroja",
+            "detail": "No alert decided in the first hours of the CECOPI session"
+          }
+        },
+        {
+          "id": "t5",
+          "time": "18:43",
+          "time_label": "18:43",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t5-i1",
+              "kind": "gauge",
+              "text": "18:43 — after a silence of two and a half hours, the CHJ emails the emergency service: flow in the Rambla del Poyo has surged to 1,686 cubic metres per second — an extraordinary rise, and the water is heading for the towns of the Horta Sud.",
+              "citation": {
+                "sourceId": "chj-record",
+                "detail": "CHJ email of 18:43 CET reporting the surge in the Poyo, as entered in the court record"
+              },
+              "zones": [
+                "poyo-horta-sud"
+              ]
+            },
+            {
+              "id": "t5-i2",
+              "kind": "message",
+              "text": "The basin authority maintains its warning that the Forata dam may break.",
+              "citation": {
+                "sourceId": "press-recon",
+                "detail": "Evening warnings on the state of the Forata dam"
+              },
+              "zones": [
+                "magro-utiel"
+              ]
+            }
+          ],
+          "options": [
+            {
+              "id": "t5-a1",
+              "label": "Alert the whole province immediately",
+              "detail": "Send ES-Alert now: torrential flood in progress, do not travel, move to upper floors, stay away from ravines and garages.",
+              "effects": {
+                "warning_scope": "province",
+                "zones": [
+                  "poyo-horta-sud",
+                  "magro-utiel"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t5-a2",
+              "label": "Alert the Poyo towns directly",
+              "detail": "Target the message at the Horta Sud municipalities in the path of the surge.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "poyo-horta-sud"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t5-a3",
+              "label": "Draft the message by committee",
+              "detail": "Agree the wording, the scope and the legal basis with the full committee before anything is sent.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is what happened: the wording and scope of a mobile alert were still being discussed in the committee while the flood wave came down the Poyo.",
+                "citation": {
+                  "sourceId": "court-catarroja",
+                  "detail": "Sequence between the 18:43 CHJ email and the 20:11 alert, as reconstructed in the court record"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t5-a3",
+          "historical_citation": {
+            "sourceId": "court-catarroja",
+            "detail": "No alert sent in the hour and a half after the 18:43 email"
+          }
+        },
+        {
+          "id": "t6",
+          "time": "19:45",
+          "time_label": "≈19:45",
+          "approx": true,
+          "info_available": [
+            {
+              "id": "t6-i1",
+              "kind": "field_report",
+              "text": "Water is in the streets of the Horta Sud — Paiporta, Catarroja, Alfafar and their neighbours. The 112 line is overwhelmed with calls from people trapped in ground floors, garages and cars.",
+              "citation": {
+                "sourceId": "press-recon",
+                "detail": "The flood's arrival in the Horta Sud towns during the 19:00–20:00 hour"
+              },
+              "zones": [
+                "poyo-horta-sud"
+              ]
+            },
+            {
+              "id": "t6-i2",
+              "kind": "message",
+              "text": "In the committee, a mobile alert message is being drafted; its wording and scope are still under discussion.",
+              "citation": {
+                "sourceId": "court-catarroja",
+                "detail": "Drafting of the ES-Alert message before 20:11, per the court record"
+              }
+            }
+          ],
+          "options": [
+            {
+              "id": "t6-a1",
+              "label": "Send the alert this minute, as drafted",
+              "detail": "Whatever the wording, get it out. Seconds matter now.",
+              "effects": {
+                "warning_scope": "province",
+                "zones": [
+                  "poyo-horta-sud",
+                  "magro-utiel"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t6-a2",
+              "label": "Add survival instructions, then send",
+              "detail": "A minute more to tell people to move upwards, not outwards — then send.",
+              "effects": {
+                "warning_scope": "province",
+                "zones": [
+                  "poyo-horta-sud",
+                  "magro-utiel"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t6-a3",
+              "label": "Finish the committee's process",
+              "detail": "Settle the wording and the scope properly before it goes out.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is what happened: the ES-Alert reached every phone in the province at 20:11, telling people to avoid travel. By then, according to the investigating court, most of the dead were already dying or dead — the majority of deaths came between about 19:00 and 20:00.",
+                "citation": {
+                  "sourceId": "court-catarroja",
+                  "detail": "Timing of deaths relative to the 20:11 alert, per the court's interlocutory orders"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t6-a3",
+          "historical_citation": {
+            "sourceId": "es-alert",
+            "detail": "ES-Alert issued at 20:11 CET, 29 Oct 2024"
+          }
+        }
+      ],
+      "historical_path": [
+        {
+          "timestep_id": "t1",
+          "action": "No province-wide warning at the red alert. The morning proceeded on a normal footing; a few municipalities suspended classes on their own authority.",
+          "citation": {
+            "sourceId": "press-recon",
+            "detail": "Morning of 29 Oct 2024"
+          }
+        },
+        {
+          "timestep_id": "t2",
+          "action": "The 12:20 hydrological alert on the Poyo was received and tracked. No population-wide warning followed it.",
+          "citation": {
+            "sourceId": "chj-record",
+            "detail": "CHJ notification of 12:20 and its handling"
+          }
+        },
+        {
+          "timestep_id": "t3",
+          "action": "The regional president's video said the storm would move away and ease by around 18:00. It was later deleted. No warning corrected it.",
+          "citation": {
+            "sourceId": "press-recon",
+            "detail": "The deleted early-afternoon video message"
+          }
+        },
+        {
+          "timestep_id": "t4",
+          "action": "CECOPI convened at 17:00 — more than nine hours after the red warning — and its attention centred on the Forata dam.",
+          "citation": {
+            "sourceId": "court-catarroja",
+            "detail": "CECOPI session of 29 Oct as reconstructed in the instruction"
+          }
+        },
+        {
+          "timestep_id": "t5",
+          "action": "The 18:43 email reporting 1,686 m³/s in the Poyo was followed not by an alert but by further discussion of wording and scope.",
+          "citation": {
+            "sourceId": "court-catarroja",
+            "detail": "Sequence between 18:43 and 20:11"
+          }
+        },
+        {
+          "timestep_id": "t6",
+          "action": "The ES-Alert went to every phone in the province at 20:11, asking people to avoid travel. The flood had reached the Horta Sud towns roughly an hour earlier.",
+          "citation": {
+            "sourceId": "es-alert",
+            "detail": "ES-Alert of 20:11 CET"
+          }
+        }
+      ],
+      "inquiry_findings": [
+        {
+          "kind": "verbatim",
+          "quote": "tardía y errónea",
+          "translation": "\"late and erroneous\" — the investigating judge's description of the 20:11 alert message.",
+          "citation": {
+            "sourceId": "court-catarroja",
+            "detail": "Interlocutory order of the investigating judge, as reproduced in press coverage"
+          }
+        },
+        {
+          "kind": "paraphrase",
+          "quote": "The court found that when the alert sounded at 20:11, most of the victims were already dead or in the process of dying: the majority of the deaths occurred between about 19:00 and 20:00, before any phone in the province had received a warning.",
+          "citation": {
+            "sourceId": "court-catarroja",
+            "detail": "Findings on the timing of deaths in the interlocutory orders"
+          }
+        },
+        {
+          "kind": "paraphrase",
+          "quote": "The instruction centres on the regional officials responsible for civil protection that day; the regional interior minister and a senior deputy were placed under formal investigation. The case remains open — these are provisional findings from a court of instruction, not a final verdict.",
+          "citation": {
+            "sourceId": "court-catarroja",
+            "detail": "Status of the instruction as of 2025"
+          }
+        }
+      ],
+      "outcome": {
+        "deaths": {
+          "min": 227,
+          "max": 229,
+          "contested": true,
+          "note": "227 confirmed dead in the province of Valencia; national totals of up to 229 include victims elsewhere in Spain, and official counts shifted across successive updates."
+        },
+        "citation": {
+          "sourceId": "court-catarroja",
+          "detail": "Victim counts per the instruction and official casualty updates, as reported"
+        }
+      },
+      "scoring": {
+        "impact": {
+          "time": "19:00",
+          "label": "the flood wave reaches the towns of the Horta Sud; per the court file, most deaths fall in the following hour",
+          "citation": {
+            "sourceId": "court-catarroja",
+            "detail": "Timing of the flood's arrival and of the deaths, per the interlocutory orders"
+          },
+          "window_minutes": 60
+        },
+        "at_risk_zones": [
+          {
+            "id": "poyo-horta-sud",
+            "label": "Rambla del Poyo / Horta Sud towns"
+          },
+          {
+            "id": "magro-utiel",
+            "label": "Magro basin — Utiel, Requena, downstream of Forata"
+          }
+        ],
+        "historical_first_public_alert": "20:11"
+      },
+      "sources": [
+        {
+          "id": "aemet-2024",
+          "label": "AEMET (Agencia Estatal de Meteorología) — official meteorological warnings for the province of Valencia, 29 October 2024, beginning with the red-level warning of 07:36 CET.",
+          "url": null,
+          "note": "Official warning log; deep link or archive capture to be added by the author."
+        },
+        {
+          "id": "chj-record",
+          "label": "Confederación Hidrográfica del Júcar (CHJ) — SAIH gauge data and notification emails of 29 October 2024 concerning the Rambla del Poyo and the Forata dam, as entered in the Catarroja court record.",
+          "url": null,
+          "note": "Cited as reproduced in the judicial instruction and in press coverage of it."
+        },
+        {
+          "id": "court-catarroja",
+          "label": "Juzgado de Primera Instancia e Instrucción nº 3 de Catarroja — instruction into the deaths of the 29 October 2024 DANA; interlocutory orders (autos) of the investigating judge, 2024–2025.",
+          "url": null,
+          "note": "Ongoing judicial instruction; quotes and findings as reproduced in press coverage of the orders. Primary-document links to be added."
+        },
+        {
+          "id": "es-alert",
+          "label": "ES-Alert message broadcast to mobile phones in the province of Valencia at 20:11 CET, 29 October 2024 — as confirmed officially and reproduced in the court record and press.",
+          "url": null,
+          "note": null
+        },
+        {
+          "id": "press-recon",
+          "label": "Press reconstructions of 29 October 2024 published from October–November 2024 onward (El País, RTVE, eldiario.es and others), cross-checked against the court file as it emerged.",
+          "url": null,
+          "note": "Specific article URLs to be added by the author before publication."
+        }
+      ]
+    }
+  ],
+  "stubs": [
+    {
+      "id": "derna-2023",
+      "status": "stub",
+      "title": "The Night the Dams Broke",
+      "date": "2023-09-10",
+      "location": "Derna, Libya",
+      "hazard": "dam failure / flash flood"
+    },
+    {
+      "id": "haiyan-2013",
+      "status": "stub",
+      "title": "Storm Surge Warning",
+      "date": "2013-11-08",
+      "location": "Tacloban and Eastern Visayas, Philippines",
+      "hazard": "tropical cyclone / storm surge"
+    },
+    {
+      "id": "katrina-2005",
+      "status": "stub",
+      "title": "The Levees",
+      "date": "2005-08-29",
+      "location": "New Orleans, Louisiana, United States",
+      "hazard": "hurricane / levee failure"
+    },
+    {
+      "id": "odisha-phailin-2013",
+      "status": "stub",
+      "title": "The Million-Person Evacuation",
+      "date": "2013-10-12",
+      "location": "Odisha, India",
+      "hazard": "tropical cyclone"
+    }
+  ]
+}
