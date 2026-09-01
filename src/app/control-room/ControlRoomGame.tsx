@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Citation, Option, Scenario, ScenarioBundle, Timestep } from './types';
 import { startSession, logChoice, completeSession, type ChoiceEvent } from './telemetry';
 import { scoreRun, historicalLeadTime, formatLead, type Choice } from './scoring';
@@ -55,9 +55,28 @@ type Phase =
 export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) {
   const [phase, setPhase] = useState<Phase>({ name: 'select' });
 
+  // Each phase change is a scene change: snap back to the top of the desk so
+  // the clock is the first thing seen, and let the CSS entry animation play
+  // (screens below are keyed on this, so they remount per scene).
+  const sceneKey = phase.name === 'deciding' || phase.name === 'aftermath'
+    ? `${phase.name}-${phase.step}`
+    : phase.name;
+  const firstScene = useRef(true);
+  useEffect(() => {
+    if (firstScene.current) {
+      firstScene.current = false;
+      return;
+    }
+    const desk = document.getElementById('desk');
+    // 'instant' sidesteps the site's global scroll-behavior: smooth, which
+    // would otherwise animate (and let a fast tap cancel) the scene snap.
+    if (desk) window.scrollTo({ top: desk.getBoundingClientRect().top + window.scrollY, behavior: 'instant' as ScrollBehavior });
+  }, [sceneKey]);
+
   if (phase.name === 'select') {
     return (
       <SelectScreen
+        key={sceneKey}
         bundle={bundle}
         onPick={(scenario) => setPhase({ name: 'briefing', scenario })}
       />
@@ -67,7 +86,7 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
   if (phase.name === 'briefing') {
     const { scenario } = phase;
     return (
-      <section className="cr-stage wrap" aria-live="polite">
+      <section key={sceneKey} className="cr-stage wrap" aria-live="polite">
         <p className="cr-clock">
           <span className="cr-clock-time">{scenario.clock.start}</span>
           <span className="cr-clock-tz">{scenario.clock.timezone} · {scenario.date}</span>
@@ -95,6 +114,7 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
     const t = scenario.timesteps[step];
     return (
       <TimestepScreen
+        key={sceneKey}
         scenario={scenario}
         t={t}
         step={step}
@@ -124,6 +144,7 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
     const last = step >= scenario.timesteps.length - 1;
     return (
       <AftermathScreen
+        key={sceneKey}
         scenario={scenario}
         choice={choice}
         choices={choices}
@@ -142,10 +163,54 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
 
   return (
     <DebriefScreen
+      key={sceneKey}
       scenario={phase.scenario}
       choices={phase.choices}
       onRestart={() => setPhase({ name: 'select' })}
     />
+  );
+}
+
+/* ── The desk bar and the situation board ────────────────────────────────
+   On a phone the desk behaves like an app: a thin bar stays pinned to the
+   top of the screen (current time, one dot per decision, a MAP button), and
+   the operations board slides up from the bottom as a sheet. From 760px the
+   bar's MAP button disappears and the board sits inline as before. */
+
+function DeskBar({ scenario, stepIndex, boardLit, onToggleBoard }: {
+  scenario: Scenario; stepIndex: number; boardLit: boolean; onToggleBoard: () => void;
+}) {
+  const t = scenario.timesteps[stepIndex];
+  return (
+    <div className="cr-deskbar">
+      <span className="cr-deskbar-time">{t.approx ? '≈' : ''}{t.time}</span>
+      <span className="cr-deskbar-dots" role="img" aria-label={`Decision ${stepIndex + 1} of ${scenario.timesteps.length}`}>
+        {scenario.timesteps.map((s, i) => (
+          <i key={s.id} className={i < stepIndex ? 'is-done' : i === stepIndex ? 'is-now' : ''} />
+        ))}
+      </span>
+      <button className="cr-deskbar-board" onClick={onToggleBoard}>
+        Map{boardLit && <i className="cr-deskbar-lit" aria-hidden />}
+      </button>
+    </div>
+  );
+}
+
+function SituationBoard({ scenario, zoneStates, warnedZones, open, onClose }: {
+  scenario: Scenario; zoneStates: Record<string, ZoneState>; warnedZones: string[];
+  open: boolean; onClose: () => void;
+}) {
+  return (
+    <>
+      <div className={`cr-board-scrim${open ? ' is-open' : ''}`} onClick={onClose} aria-hidden />
+      <div className={`cr-board${open ? ' is-open' : ''}`} aria-label="Situation board">
+        <div className="cr-board-head">
+          <span>Situation board</span>
+          <button className="cr-board-close" onClick={onClose}>Close</button>
+        </div>
+        <OpsMap scenario={scenario} zoneStates={zoneStates} warnedZones={warnedZones} />
+      </div>
+    </>
   );
 }
 
@@ -188,16 +253,20 @@ function TimestepScreen({ scenario, t, step, choices, onChoose }: {
 }) {
   const sourceIndex = useSourceIndex(scenario);
   const board = deriveBoard(scenario, step, choices);
+  const boardLit = board.warnedZones.length > 0 || Object.values(board.zoneStates).some((s) => s !== 'quiet');
+  const [boardOpen, setBoardOpen] = useState(false);
   return (
     <section className="cr-stage wrap" aria-live="polite">
+      <DeskBar scenario={scenario} stepIndex={step} boardLit={boardLit} onToggleBoard={() => setBoardOpen((o) => !o)} />
       <p className="cr-clock">
         <span className="cr-clock-time">{t.approx ? '≈' : ''}{t.time}</span>
-        <span className="cr-clock-tz">{scenario.clock.timezone} · step {step + 1} of {scenario.timesteps.length}</span>
+        <span className="cr-clock-tz">{scenario.clock.timezone}</span>
       </p>
       <DayStrip scenario={scenario} currentIndex={step} />
       {t.time_label !== t.time && <p className="cr-time-label">{t.time_label}</p>}
 
-      <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones} />
+      <SituationBoard scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones}
+        open={boardOpen} onClose={() => setBoardOpen(false)} />
 
       <div className="cr-feed">
         {t.info_available.map((info) => (
@@ -230,14 +299,18 @@ function AftermathScreen({ scenario, choice, choices, last, onAdvance }: {
   const c = choice.option.consequence;
   const stepIndex = scenario.timesteps.findIndex((t) => t.id === choice.timestep.id);
   const board = deriveBoard(scenario, stepIndex, choices);
+  const boardLit = board.warnedZones.length > 0 || Object.values(board.zoneStates).some((s) => s !== 'quiet');
+  const [boardOpen, setBoardOpen] = useState(false);
   return (
     <section className="cr-stage wrap" aria-live="polite">
+      <DeskBar scenario={scenario} stepIndex={stepIndex} boardLit={boardLit} onToggleBoard={() => setBoardOpen((o) => !o)} />
       <p className="cr-clock">
         <span className="cr-clock-time">{choice.timestep.approx ? '≈' : ''}{choice.timestep.time}</span>
         <span className="cr-clock-tz">{scenario.clock.timezone}</span>
       </p>
       <DayStrip scenario={scenario} currentIndex={stepIndex} />
-      <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones} />
+      <SituationBoard scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones}
+        open={boardOpen} onClose={() => setBoardOpen(false)} />
       <p className="cr-chosen">You chose: <strong>{choice.option.label}</strong></p>
       {c.known ? (
         <div className="cr-consequence">
@@ -251,9 +324,11 @@ function AftermathScreen({ scenario, choice, choices, last, onAdvance }: {
             logged and scored; the clock moves on along the real timeline.</p>
         </div>
       )}
-      <button className="cr-btn cr-btn-primary" onClick={onAdvance}>
-        {last ? 'To the debrief →' : 'Advance the clock →'}
-      </button>
+      <div className="cr-advance">
+        <button className="cr-btn cr-btn-primary" onClick={onAdvance}>
+          {last ? 'To the debrief →' : 'Advance the clock →'}
+        </button>
+      </div>
     </section>
   );
 }
@@ -267,6 +342,10 @@ function DebriefScreen({ scenario, choices, onRestart }: {
   const score = useMemo(() => scoreRun(scenario, choices), [scenario, choices]);
   const histLead = historicalLeadTime(scenario);
   const d = scenario.outcome.deaths;
+  // On a phone the three columns become tabs; from 880px the tab bar
+  // disappears and all three sit side by side as before.
+  const [activeCol, setActiveCol] = useState(0);
+  const colClass = (i: number) => `cr-col${i === activeCol ? ' is-active' : ''}`;
 
   return (
     <section className="cr-stage wrap cr-debrief" aria-live="polite">
@@ -279,8 +358,17 @@ function DebriefScreen({ scenario, choices, onRestart }: {
         </span>
       </p>
 
+      <div className="cr-tabs" role="tablist" aria-label="Debrief columns">
+        {['You did', 'They did', 'The inquiry'].map((label, i) => (
+          <button key={label} role="tab" aria-selected={i === activeCol}
+            className={i === activeCol ? 'is-active' : ''} onClick={() => setActiveCol(i)}>
+            {label}
+          </button>
+        ))}
+      </div>
+
       <div className="cr-columns">
-        <div className="cr-col">
+        <div className={colClass(0)}>
           <h3 className="cr-col-title">You did</h3>
           <ol className="cr-col-list">
             {choices.map((c) => (
@@ -294,7 +382,7 @@ function DebriefScreen({ scenario, choices, onRestart }: {
             ))}
           </ol>
         </div>
-        <div className="cr-col">
+        <div className={colClass(1)}>
           <h3 className="cr-col-title">They did</h3>
           <ol className="cr-col-list">
             {scenario.historical_path.map((h) => {
@@ -308,7 +396,7 @@ function DebriefScreen({ scenario, choices, onRestart }: {
             })}
           </ol>
         </div>
-        <div className="cr-col">
+        <div className={colClass(2)}>
           <h3 className="cr-col-title">The inquiry said</h3>
           <ol className="cr-col-list">
             {scenario.inquiry_findings.map((f, i) => (

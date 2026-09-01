@@ -536,3 +536,230 @@
 .cr-meter span { display: block; height: 100%; background: var(--paper); }
 .cr-meter i { flex: 1; height: 100%; background: rgba(241, 232, 213, 0.25); }
 .cr-meter i.is-diverged { background: var(--ember); }
+
+/* ══ Mobile-native layer ═════════════════════════════════════════════════
+   Under 760px the desk behaves like an app, in the pudding.cool manner:
+   each decision is a full-height scene entered with a rise, a thin bar
+   stays pinned to the top (time, one dot per decision, MAP), the
+   operations board slides up as a bottom sheet, the advance action pins
+   to the thumb at the bottom, and the debrief's three columns become
+   tabs. From 760px (board inline) and 880px (columns side by side) the
+   page relaxes back into the desktop layout. */
+
+/* Scene entry: every screen rises into place. */
+@keyframes cr-scene {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.cr-stage { animation: cr-scene 0.4s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .cr-stage { animation: none; }
+}
+
+/* App-feel touch behaviour everywhere on the desk. */
+.cr-btn, .cr-card, .cr-tabs button, .cr-deskbar-board, .cr-board-close {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.cr-btn:active, .cr-card:active, .cr-tabs button:active { transform: translateY(1px); }
+
+/* ── The desk bar ───────────────────────────────────────────────────────── */
+
+.cr-deskbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 -28px 18px;
+  padding: 10px 28px calc(10px + 1px);
+  background: rgba(25, 20, 16, 0.93);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  border-bottom: 1px solid rgba(241, 232, 213, 0.18);
+}
+.cr-deskbar-time {
+  font-family: var(--data);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: var(--ember);
+  font-variant-numeric: tabular-nums;
+  min-width: 58px;
+}
+.cr-deskbar-dots { display: flex; gap: 7px; flex: 1; }
+.cr-deskbar-dots i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid rgba(241, 232, 213, 0.45);
+  background: transparent;
+}
+.cr-deskbar-dots i.is-done { background: rgba(241, 232, 213, 0.7); border-color: transparent; }
+.cr-deskbar-dots i.is-now { background: var(--ember); border-color: var(--ember); }
+.cr-deskbar-board {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: transparent;
+  border: 1px solid rgba(241, 232, 213, 0.45);
+  padding: 7px 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.cr-deskbar-lit {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ember);
+  animation: cr-pulse 2.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) { .cr-deskbar-lit { animation: none; } }
+
+/* ── The situation board: inline plate on wide screens, sheet on phones ── */
+
+.cr-board-scrim { display: none; }
+.cr-board-head { display: none; }
+
+@media (max-width: 759px) {
+  .cr-board-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(10, 8, 6, 0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .cr-board-scrim.is-open { opacity: 1; pointer-events: auto; }
+
+  .cr-board {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 41;
+    max-height: 82svh;
+    overflow-y: auto;
+    background: var(--ink);
+    border-top: 2px solid var(--ember);
+    padding: 12px 18px calc(20px + env(safe-area-inset-bottom));
+    transform: translateY(104%);
+    transition: transform 0.3s ease;
+  }
+  .cr-board.is-open { transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .cr-board { transition: none; }
+    .cr-board-scrim { transition: none; }
+  }
+
+  .cr-board-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--data);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(241, 232, 213, 0.6);
+    margin: 0 0 10px;
+  }
+  .cr-board-head::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    width: 40px;
+    height: 3px;
+    margin-left: -20px;
+    border-radius: 2px;
+    background: rgba(241, 232, 213, 0.3);
+  }
+  .cr-board-close {
+    font-family: var(--data);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: transparent;
+    border: 1px solid rgba(241, 232, 213, 0.4);
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .cr-board .cr-map { margin-top: 6px; }
+}
+
+@media (min-width: 760px) {
+  .cr-deskbar-board { display: none; }
+  .cr-deskbar { margin: 0 0 18px; padding: 10px 0; background: transparent; border-bottom: 0; backdrop-filter: none; -webkit-backdrop-filter: none; position: static; }
+}
+
+/* ── Phone-scale type, targets, and the pinned advance ──────────────────── */
+
+@media (max-width: 759px) {
+  .cr-stage { padding-top: 0; min-height: 92svh; display: flex; flex-direction: column; }
+  .cr-stage > :last-child { margin-top: auto; }
+
+  .cr-clock { margin-top: 10px; }
+  .cr-clock-time { font-size: clamp(52px, 17vw, 72px); }
+
+  .cr-info { padding: 13px 15px 15px; }
+  .cr-info-text { font-size: 16px; }
+
+  .cr-option { min-height: 64px; padding: 15px 16px; }
+  .cr-option-label { font-size: 14.5px; }
+
+  /* The advance action rides above the thumb, on its own gradient shelf. */
+  .cr-advance {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    margin: 26px -28px 0;
+    padding: 22px 28px calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(25, 20, 16, 0) 0%, var(--ink) 34%);
+    display: grid;
+  }
+  .cr-advance .cr-btn-primary { margin-top: 0; width: 100%; text-align: center; padding: 16px 26px; }
+
+  .cr-toll-number { font-size: clamp(88px, 26vw, 140px); }
+}
+
+/* ── Debrief tabs (phone only) ──────────────────────────────────────────── */
+
+.cr-tabs { display: none; }
+
+@media (max-width: 879px) {
+  .cr-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    position: sticky;
+    top: 8px;
+    z-index: 25;
+    margin: 0 0 20px;
+  }
+  .cr-tabs button {
+    font-family: var(--data);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(241, 232, 213, 0.7);
+    background: var(--ink);
+    border: 1px solid rgba(241, 232, 213, 0.4);
+    padding: 11px 4px;
+    cursor: pointer;
+  }
+  .cr-tabs button.is-active {
+    color: #fff;
+    background: var(--ember);
+    border-color: var(--ember);
+  }
+  .cr-columns .cr-col { display: none; }
+  .cr-columns .cr-col.is-active { display: block; animation: cr-scene 0.3s ease; }
+  @media (prefers-reduced-motion: reduce) { .cr-columns .cr-col.is-active { animation: none; } }
+}
