@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "npm run build:data && next dev",
     "build": "npm run build:data && next build",
-    "build:data": "node scripts/build-data.mjs && node scripts/build-atlas.mjs",
+    "build:data": "node scripts/build-data.mjs && node scripts/build-atlas.mjs && node scripts/build-scenarios.mjs",
+    "build:scenarios": "node scripts/build-scenarios.mjs",
     "build:reel": "node scripts/build-reel.mjs",
     "build:dispatches": "node scripts/build-dispatches.mjs",
     "build:preparedness": "node scripts/build-preparedness-geometry.mjs && node scripts/build-preparedness.mjs",

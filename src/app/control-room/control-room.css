@@ -1,0 +1,765 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   The Control Room — /control-room
+   The same pressbook stock as the rest of the site, but the desk itself is
+   played after dark: the stage is set in ink with paper type, a projector-
+   booth negative of the site's cream pages. Ember is the alarm colour — the
+   clock, the primary action, the divergence mark — and nothing else. Mono for
+   every time, label and reading; the poster face only for titles and the
+   toll. All classes cr- prefixed; loads only with the /control-room route.
+   Mobile-first: single column, thumb-sized options; the debrief's three
+   columns appear only from 880px.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Masthead (on paper, like every other page) ─────────────────────────── */
+
+.cr-masthead { padding: 56px 0 36px; }
+
+.cr-kicker {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin: 0 0 26px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cr-kicker::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+.cr-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; }
+.cr-kicker a:hover { color: var(--ember); }
+
+.cr-title {
+  font-family: var(--poster);
+  font-weight: 400;
+  margin: 0;
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+.cr-title .l1 { display: block; font-size: clamp(44px, 11vw, 132px); }
+.cr-title .l2 {
+  display: block;
+  font-size: clamp(16px, 2.9vw, 32px);
+  color: var(--ember);
+  margin-top: 0.16em;
+  padding-left: 0.1em;
+  line-height: 1.05;
+}
+
+.cr-lede {
+  font-size: clamp(17px, 2vw, 20px);
+  line-height: 1.55;
+  max-width: 64ch;
+  margin: 28px 0 0;
+}
+
+/* ── The stage: everything the player touches ───────────────────────────── */
+
+.cr-desk {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 8px 0 64px;
+  min-height: 62vh;
+}
+
+.cr-stage { padding-top: 44px; }
+
+.cr-clock {
+  font-family: var(--data);
+  margin: 0 0 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.cr-clock-time {
+  font-size: clamp(40px, 9vw, 72px);
+  letter-spacing: 0.04em;
+  color: var(--ember);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.cr-clock-tz {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.55);
+}
+.cr-time-label {
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.55);
+  margin: 0 0 8px;
+}
+
+.cr-step-title {
+  font-family: var(--poster);
+  font-weight: 400;
+  font-size: clamp(30px, 6vw, 54px);
+  line-height: 0.95;
+  margin: 10px 0 14px;
+  text-transform: uppercase;
+}
+
+.cr-brief { max-width: 62ch; line-height: 1.6; color: rgba(241, 232, 213, 0.85); }
+.cr-brief strong { color: var(--paper); }
+
+/* Incoming information: a spike file of teletype slips. */
+.cr-feed { margin: 26px 0 8px; display: grid; gap: 12px; max-width: 720px; }
+
+.cr-info {
+  border: 1px solid rgba(241, 232, 213, 0.22);
+  border-left: 3px solid rgba(241, 232, 213, 0.4);
+  background: rgba(241, 232, 213, 0.05);
+  padding: 12px 16px 14px;
+}
+.cr-info-forecast, .cr-info-gauge { border-left-color: var(--ember); }
+.cr-info-kind {
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.5);
+  margin: 0 0 6px;
+}
+.cr-info-text { margin: 0; font-size: 15.5px; line-height: 1.55; color: rgba(241, 232, 213, 0.92); }
+
+.cr-prompt {
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin: 26px 0 12px;
+}
+
+/* Options: full-width, thumb-height, no hierarchy between them — the point
+   is that no choice looks like the designed answer. */
+.cr-options { display: grid; gap: 10px; max-width: 720px; }
+
+.cr-btn {
+  font-family: var(--data);
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid rgba(241, 232, 213, 0.45);
+  background: transparent;
+  color: var(--paper);
+  padding: 14px 18px;
+  transition: border-color 0.12s, background 0.12s;
+}
+.cr-btn:hover, .cr-btn:focus-visible { border-color: var(--ember); background: rgba(184, 50, 26, 0.12); }
+
+.cr-option { display: grid; gap: 5px; min-height: 56px; }
+.cr-option-label { font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; }
+.cr-option-detail {
+  font-family: var(--read);
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(241, 232, 213, 0.65);
+  text-transform: none;
+}
+
+.cr-btn-primary {
+  display: inline-block;
+  margin-top: 28px;
+  border-color: var(--ember);
+  background: var(--ember);
+  color: #fff;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 14px 26px;
+}
+.cr-btn-primary:hover, .cr-btn-primary:focus-visible { background: #9c2a15; border-color: #9c2a15; }
+
+.cr-chosen { font-size: 16px; margin: 18px 0 20px; color: rgba(241, 232, 213, 0.85); }
+.cr-chosen strong { color: var(--paper); }
+
+.cr-consequence {
+  max-width: 680px;
+  border-left: 3px solid var(--paper);
+  padding: 4px 0 4px 18px;
+}
+.cr-consequence p { margin: 0; line-height: 1.6; }
+.cr-consequence-tag {
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.55);
+  margin: 0 0 8px !important;
+}
+.cr-consequence-silent { border-left-color: var(--ember); }
+.cr-consequence-silent .cr-consequence-tag { color: var(--ember); }
+.cr-consequence-silent p:last-child { color: rgba(241, 232, 213, 0.75); font-style: italic; }
+
+/* ── Scenario select ────────────────────────────────────────────────────── */
+
+.cr-select-grid { display: grid; gap: 14px; grid-template-columns: 1fr; max-width: 980px; }
+@media (min-width: 700px) { .cr-select-grid { grid-template-columns: 1fr 1fr; } }
+
+.cr-card {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  cursor: pointer;
+  border: 1px solid rgba(241, 232, 213, 0.35);
+  background: rgba(241, 232, 213, 0.04);
+  color: var(--paper);
+  padding: 18px 20px 16px;
+  font-family: var(--read);
+  transition: border-color 0.12s, background 0.12s;
+}
+.cr-card:hover, .cr-card:focus-visible { border-color: var(--ember); background: rgba(184, 50, 26, 0.1); }
+.cr-card-date {
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.55);
+}
+.cr-card-title { font-family: var(--poster); font-size: 26px; line-height: 1; text-transform: uppercase; }
+.cr-card-loc { font-size: 14px; color: rgba(241, 232, 213, 0.75); }
+.cr-card-cta {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ember);
+  margin-top: 8px;
+}
+.cr-card-stub { cursor: default; opacity: 0.5; }
+.cr-card-stub:hover { border-color: rgba(241, 232, 213, 0.35); background: rgba(241, 232, 213, 0.04); }
+.cr-card-stub .cr-card-cta { color: rgba(241, 232, 213, 0.55); }
+
+.cr-footnote {
+  font-family: var(--data);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: rgba(241, 232, 213, 0.5);
+  max-width: 62ch;
+  margin: 22px 0 0;
+}
+
+/* ── Debrief ────────────────────────────────────────────────────────────── */
+
+.cr-debrief .eyebrow { color: rgba(241, 232, 213, 0.55); }
+
+.cr-toll { margin: 6px 0 34px; }
+.cr-toll-number {
+  display: block;
+  font-family: var(--poster);
+  font-size: clamp(64px, 16vw, 140px);
+  line-height: 0.9;
+  color: var(--ember);
+}
+.cr-toll-label { display: block; font-family: var(--data); font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; margin-top: 8px; }
+.cr-toll-note {
+  display: block;
+  font-family: var(--read);
+  font-size: 13.5px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: rgba(241, 232, 213, 0.65);
+  max-width: 56ch;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.cr-columns { display: grid; gap: 30px; grid-template-columns: 1fr; margin: 8px 0 44px; }
+@media (min-width: 880px) { .cr-columns { grid-template-columns: 1fr 1fr 1fr; gap: 34px; } }
+
+.cr-col-title {
+  font-family: var(--poster);
+  font-weight: 400;
+  font-size: 24px;
+  text-transform: uppercase;
+  margin: 0 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--paper);
+}
+.cr-col:first-child .cr-col-title { border-bottom-color: var(--ember); }
+
+.cr-col-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.cr-col-list li { display: grid; grid-template-columns: 58px 1fr; gap: 10px; font-size: 14.5px; line-height: 1.5; }
+.cr-col-list li:has(> .cr-col-body:only-child) { grid-template-columns: 1fr; }
+.cr-col-time { font-family: var(--data); font-size: 12px; color: rgba(241, 232, 213, 0.55); padding-top: 2px; font-variant-numeric: tabular-nums; }
+.cr-col-body { color: rgba(241, 232, 213, 0.9); }
+.cr-hesitation { font-family: var(--data); font-size: 11px; color: rgba(241, 232, 213, 0.5); }
+.cr-diverged .cr-col-time { color: var(--ember); }
+.cr-diverged .cr-hesitation { color: var(--ember); }
+.cr-verbatim { font-style: italic; quotes: '“' '”'; }
+.cr-translation { color: rgba(241, 232, 213, 0.7); }
+.cr-paraphrase-tag {
+  font-family: var(--data);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.45);
+}
+
+.cr-score { margin: 0 0 40px; border-top: 1px solid rgba(241, 232, 213, 0.25); padding-top: 28px; }
+.cr-score-caveat { font-size: 14px; line-height: 1.6; color: rgba(241, 232, 213, 0.7); max-width: 66ch; margin: 0 0 22px; }
+
+.cr-score-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px 30px;
+  margin: 0;
+}
+.cr-score-grid dt {
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.55);
+  margin-bottom: 6px;
+}
+.cr-score-grid dd { margin: 0; }
+.cr-score-grid .big { font-family: var(--poster); font-size: 30px; line-height: 1; }
+.cr-score-grid .sub {
+  font-family: var(--data);
+  font-size: 11px;
+  line-height: 1.5;
+  color: rgba(241, 232, 213, 0.6);
+  margin-top: 6px;
+}
+
+.cr-caveat {
+  border: 1px dashed rgba(241, 232, 213, 0.4);
+  border-left: 3px solid var(--ember);
+  padding: 16px 18px;
+  max-width: 74ch;
+  margin: 0 0 36px;
+}
+.cr-caveat p { margin: 0; font-size: 14px; line-height: 1.6; color: rgba(241, 232, 213, 0.8); }
+
+.cr-sources ol { margin: 0; padding: 0 0 0 2px; list-style: none; display: grid; gap: 10px; max-width: 76ch; }
+.cr-sources li { font-size: 13.5px; line-height: 1.55; color: rgba(241, 232, 213, 0.8); }
+.cr-src-num { font-family: var(--data); font-size: 11px; color: var(--ember); margin-right: 4px; }
+.cr-src-note { font-style: italic; color: rgba(241, 232, 213, 0.55); }
+.cr-sources a { color: var(--paper); text-decoration: underline; text-decoration-color: var(--ember); }
+
+.cr-cite a {
+  font-family: var(--data);
+  font-size: 0.7em;
+  color: var(--ember);
+  text-decoration: none;
+}
+.cr-cite a:hover { text-decoration: underline; }
+
+/* ── Colophon back on paper ─────────────────────────────────────────────── */
+
+.cr-colophon { padding: 44px 0 72px; }
+.cr-colophon p { max-width: 66ch; font-size: 15px; line-height: 1.65; color: var(--ink-soft); margin: 0 0 14px; }
+.cr-colophon a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--ember); text-underline-offset: 2px; }
+
+/* ══ Graphics layer ══════════════════════════════════════════════════════ */
+
+/* Faint scanlines over the desk: the room is lit by monitors. */
+.cr-desk {
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(241, 232, 213, 0.025) 0 1px,
+    transparent 1px 4px
+  );
+  background-color: var(--ink);
+}
+
+/* ── The day strip ──────────────────────────────────────────────────────── */
+
+.cr-daystrip { max-width: 720px; margin: 4px 0 18px; }
+.cr-daystrip-rail {
+  position: relative;
+  height: 8px;
+  border: 1px solid rgba(241, 232, 213, 0.3);
+  background: rgba(241, 232, 213, 0.05);
+}
+.cr-daystrip-elapsed {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: rgba(241, 232, 213, 0.22);
+}
+.cr-daystrip-tick {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  background: rgba(241, 232, 213, 0.6);
+}
+.cr-daystrip-tick.is-now { background: var(--ember); width: 3px; }
+.cr-daystrip-fog {
+  position: absolute;
+  inset: -5px 0 -5px auto;
+  width: 26%;
+  background: linear-gradient(90deg, transparent, var(--ink) 85%);
+}
+.cr-daystrip-labels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: rgba(241, 232, 213, 0.5);
+  margin-top: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.cr-daystrip-unknown { letter-spacing: 0.3em; }
+
+/* ── The operations board ───────────────────────────────────────────────── */
+
+.cr-map { margin: 20px 0 6px; max-width: 720px; }
+.cr-map svg { display: block; width: 100%; height: auto; color: var(--paper); }
+
+.cr-map-coast { fill: none; stroke: rgba(241, 232, 213, 0.65); stroke-width: 1.6; }
+.cr-map-water { fill: rgba(241, 232, 213, 0.1); stroke: rgba(241, 232, 213, 0.5); stroke-width: 1; }
+.cr-map-city { fill: rgba(241, 232, 213, 0.18); stroke: rgba(241, 232, 213, 0.7); stroke-width: 1.2; }
+.cr-map-river { fill: none; stroke: rgba(241, 232, 213, 0.55); stroke-width: 1.4; }
+.cr-map-dam { fill: var(--ink); stroke: rgba(241, 232, 213, 0.8); stroke-width: 1.4; }
+.cr-map-town { fill: rgba(241, 232, 213, 0.85); }
+
+.cr-map-plate {
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  fill: rgba(241, 232, 213, 0.8);
+}
+.cr-map-label { font-family: var(--data); font-size: 11px; letter-spacing: 0.14em; fill: rgba(241, 232, 213, 0.8); }
+.cr-map-minor { font-family: var(--data); font-size: 9px; letter-spacing: 0.12em; fill: rgba(241, 232, 213, 0.5); }
+.cr-map-sea-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.5em; fill: rgba(241, 232, 213, 0.35); }
+.cr-map-north path { fill: rgba(241, 232, 213, 0.6); }
+.cr-map-north text { font-family: var(--data); font-size: 10px; fill: rgba(241, 232, 213, 0.6); }
+
+/* Zone states: pattern + label as well as colour, never colour alone. */
+.cr-zone .cr-zone-shape {
+  fill: transparent;
+  stroke: rgba(241, 232, 213, 0.25);
+  stroke-width: 1;
+  transition: fill 0.4s, stroke 0.4s;
+}
+.cr-zone .cr-zone-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.16em; fill: rgba(241, 232, 213, 0.65); }
+.cr-zone .cr-zone-state { font-family: var(--data); font-size: 9px; letter-spacing: 0.16em; fill: rgba(241, 232, 213, 0.45); }
+
+.cr-zone.is-watch .cr-zone-shape { stroke: rgba(241, 232, 213, 0.7); stroke-dasharray: 5 4; stroke-width: 1.4; }
+.cr-zone.is-watch .cr-zone-state { fill: rgba(241, 232, 213, 0.8); }
+
+.cr-zone.is-signal .cr-zone-shape { stroke: var(--paper); stroke-width: 1.8; fill: rgba(241, 232, 213, 0.05); }
+.cr-zone.is-signal .cr-zone-state { fill: var(--paper); }
+.cr-zone.is-signal .cr-map-river { stroke: var(--paper); stroke-width: 2; }
+
+.cr-zone.is-flooding .cr-zone-shape { stroke: var(--ember); stroke-width: 2; fill: url(#cr-flood); }
+.cr-zone.is-flooding .cr-zone-state { fill: var(--ember); }
+.cr-zone.is-flooding .cr-map-river { stroke: var(--ember); stroke-width: 2.4; }
+.cr-zone.is-flooding .cr-zone-label { fill: var(--paper); }
+
+.cr-zone.is-warned .cr-zone-shape { stroke-dasharray: none; }
+.cr-zone.is-warned .cr-zone-label { fill: var(--paper); }
+
+/* The pulse of an active board — stilled for reduced motion. */
+@keyframes cr-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+.cr-zone.is-signal .cr-zone-shape, .cr-zone.is-flooding .cr-zone-shape { animation: cr-pulse 2.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .cr-zone .cr-zone-shape { animation: none !important; }
+}
+
+.cr-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  margin-top: 8px;
+  font-family: var(--data);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.55);
+}
+.cr-leg { display: inline-flex; align-items: center; gap: 6px; }
+.cr-leg::before { content: ''; width: 14px; height: 9px; border: 1px solid rgba(241, 232, 213, 0.35); }
+.cr-leg.is-watch::before { border: 1.4px dashed rgba(241, 232, 213, 0.8); }
+.cr-leg.is-signal::before { border: 1.6px solid var(--paper); }
+.cr-leg.is-flooding::before {
+  border: 1.6px solid var(--ember);
+  background: repeating-linear-gradient(90deg, rgba(184, 50, 26, 0.55) 0 2px, transparent 2px 4px);
+}
+.cr-leg.is-warned::before { border: 1px double var(--paper); box-shadow: 0 0 0 2px var(--ink), 0 0 0 3px rgba(241, 232, 213, 0.6); }
+
+/* ── Feed and card glyphs ───────────────────────────────────────────────── */
+
+.cr-kind-glyph { vertical-align: -3px; margin-right: 4px; opacity: 0.9; }
+.cr-info-forecast .cr-kind-glyph, .cr-info-gauge .cr-kind-glyph { color: var(--ember); }
+.cr-card-glyph { color: var(--ember); opacity: 0.9; }
+.cr-card-stub .cr-card-glyph { color: rgba(241, 232, 213, 0.6); }
+
+/* ── The debrief timing chart ───────────────────────────────────────────── */
+
+.cr-timing { margin: 4px 0 26px; max-width: 720px; }
+.cr-timing svg { display: block; width: 100%; height: auto; }
+
+.cr-timing-impact { fill: rgba(184, 50, 26, 0.16); stroke: var(--ember); stroke-width: 1; stroke-dasharray: 2 3; }
+.cr-timing-impact-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.14em; fill: var(--ember); }
+.cr-timing-axis { stroke: rgba(241, 232, 213, 0.5); stroke-width: 1.2; }
+.cr-timing-tick { stroke: rgba(241, 232, 213, 0.4); stroke-width: 1; }
+.cr-timing-hour { font-family: var(--data); font-size: 10px; fill: rgba(241, 232, 213, 0.5); }
+.cr-timing-lane { font-family: var(--data); font-size: 10px; letter-spacing: 0.2em; fill: rgba(241, 232, 213, 0.55); }
+.cr-timing-lanerail { stroke: rgba(241, 232, 213, 0.18); stroke-width: 1; }
+.cr-timing-dot { fill: var(--ink); stroke: var(--paper); stroke-width: 1.6; }
+.cr-timing-dot.is-alert { fill: var(--paper); }
+.cr-timing-dot.is-they { fill: rgba(241, 232, 213, 0.55); stroke: rgba(241, 232, 213, 0.55); }
+.cr-timing-flag line { stroke: var(--paper); stroke-width: 1; }
+.cr-timing-flag text { font-family: var(--data); font-size: 10px; letter-spacing: 0.1em; fill: var(--paper); }
+.cr-timing-flag.is-they line { stroke: rgba(241, 232, 213, 0.55); stroke-dasharray: 3 3; }
+.cr-timing-flag.is-they text { fill: rgba(241, 232, 213, 0.65); }
+.cr-timing-flag-muted { font-family: var(--data); font-size: 10px; letter-spacing: 0.1em; fill: var(--ember); }
+.cr-timing-caption {
+  font-family: var(--data);
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: rgba(241, 232, 213, 0.55);
+  margin-top: 6px;
+  max-width: 62ch;
+}
+
+/* ── Score meters ───────────────────────────────────────────────────────── */
+
+.cr-meter {
+  display: flex;
+  gap: 3px;
+  height: 8px;
+  margin-top: 8px !important;
+  max-width: 180px;
+  border: 1px solid rgba(241, 232, 213, 0.3);
+  padding: 1px;
+}
+.cr-meter span { display: block; height: 100%; background: var(--paper); }
+.cr-meter i { flex: 1; height: 100%; background: rgba(241, 232, 213, 0.25); }
+.cr-meter i.is-diverged { background: var(--ember); }
+
+/* ══ Mobile-native layer ═════════════════════════════════════════════════
+   Under 760px the desk behaves like an app, in the pudding.cool manner:
+   each decision is a full-height scene entered with a rise, a thin bar
+   stays pinned to the top (time, one dot per decision, MAP), the
+   operations board slides up as a bottom sheet, the advance action pins
+   to the thumb at the bottom, and the debrief's three columns become
+   tabs. From 760px (board inline) and 880px (columns side by side) the
+   page relaxes back into the desktop layout. */
+
+/* Scene entry: every screen rises into place. */
+@keyframes cr-scene {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+.cr-stage { animation: cr-scene 0.4s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .cr-stage { animation: none; }
+}
+
+/* App-feel touch behaviour everywhere on the desk. */
+.cr-btn, .cr-card, .cr-tabs button, .cr-deskbar-board, .cr-board-close {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.cr-btn:active, .cr-card:active, .cr-tabs button:active { transform: translateY(1px); }
+
+/* ── The desk bar ───────────────────────────────────────────────────────── */
+
+.cr-deskbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 -28px 18px;
+  padding: 10px 28px calc(10px + 1px);
+  background: rgba(25, 20, 16, 0.93);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  border-bottom: 1px solid rgba(241, 232, 213, 0.18);
+}
+.cr-deskbar-time {
+  font-family: var(--data);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  color: var(--ember);
+  font-variant-numeric: tabular-nums;
+  min-width: 58px;
+}
+.cr-deskbar-dots { display: flex; gap: 7px; flex: 1; }
+.cr-deskbar-dots i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid rgba(241, 232, 213, 0.45);
+  background: transparent;
+}
+.cr-deskbar-dots i.is-done { background: rgba(241, 232, 213, 0.7); border-color: transparent; }
+.cr-deskbar-dots i.is-now { background: var(--ember); border-color: var(--ember); }
+.cr-deskbar-board {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: transparent;
+  border: 1px solid rgba(241, 232, 213, 0.45);
+  padding: 7px 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+.cr-deskbar-lit {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ember);
+  animation: cr-pulse 2.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) { .cr-deskbar-lit { animation: none; } }
+
+/* ── The situation board: inline plate on wide screens, sheet on phones ── */
+
+.cr-board-scrim { display: none; }
+.cr-board-head { display: none; }
+
+@media (max-width: 759px) {
+  .cr-board-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(10, 8, 6, 0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .cr-board-scrim.is-open { opacity: 1; pointer-events: auto; }
+
+  .cr-board {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 41;
+    max-height: 82svh;
+    overflow-y: auto;
+    background: var(--ink);
+    border-top: 2px solid var(--ember);
+    padding: 12px 18px calc(20px + env(safe-area-inset-bottom));
+    transform: translateY(104%);
+    transition: transform 0.3s ease;
+  }
+  .cr-board.is-open { transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .cr-board { transition: none; }
+    .cr-board-scrim { transition: none; }
+  }
+
+  .cr-board-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--data);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(241, 232, 213, 0.6);
+    margin: 0 0 10px;
+  }
+  .cr-board-head::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    width: 40px;
+    height: 3px;
+    margin-left: -20px;
+    border-radius: 2px;
+    background: rgba(241, 232, 213, 0.3);
+  }
+  .cr-board-close {
+    font-family: var(--data);
+    font-size: 10.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: transparent;
+    border: 1px solid rgba(241, 232, 213, 0.4);
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .cr-board .cr-map { margin-top: 6px; }
+}
+
+@media (min-width: 760px) {
+  .cr-deskbar-board { display: none; }
+  .cr-deskbar { margin: 0 0 18px; padding: 10px 0; background: transparent; border-bottom: 0; backdrop-filter: none; -webkit-backdrop-filter: none; position: static; }
+}
+
+/* ── Phone-scale type, targets, and the pinned advance ──────────────────── */
+
+@media (max-width: 759px) {
+  .cr-stage { padding-top: 0; min-height: 92svh; display: flex; flex-direction: column; }
+  .cr-stage > :last-child { margin-top: auto; }
+
+  .cr-clock { margin-top: 10px; }
+  .cr-clock-time { font-size: clamp(52px, 17vw, 72px); }
+
+  .cr-info { padding: 13px 15px 15px; }
+  .cr-info-text { font-size: 16px; }
+
+  .cr-option { min-height: 64px; padding: 15px 16px; }
+  .cr-option-label { font-size: 14.5px; }
+
+  /* The advance action rides above the thumb, on its own gradient shelf. */
+  .cr-advance {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    margin: 26px -28px 0;
+    padding: 22px 28px calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(25, 20, 16, 0) 0%, var(--ink) 34%);
+    display: grid;
+  }
+  .cr-advance .cr-btn-primary { margin-top: 0; width: 100%; text-align: center; padding: 16px 26px; }
+
+  .cr-toll-number { font-size: clamp(88px, 26vw, 140px); }
+}
+
+/* ── Debrief tabs (phone only) ──────────────────────────────────────────── */
+
+.cr-tabs { display: none; }
+
+@media (max-width: 879px) {
+  .cr-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    position: sticky;
+    top: 8px;
+    z-index: 25;
+    margin: 0 0 20px;
+  }
+  .cr-tabs button {
+    font-family: var(--data);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(241, 232, 213, 0.7);
+    background: var(--ink);
+    border: 1px solid rgba(241, 232, 213, 0.4);
+    padding: 11px 4px;
+    cursor: pointer;
+  }
+  .cr-tabs button.is-active {
+    color: #fff;
+    background: var(--ember);
+    border-color: var(--ember);
+  }
+  .cr-columns .cr-col { display: none; }
+  .cr-columns .cr-col.is-active { display: block; animation: cr-scene 0.3s ease; }
+  @media (prefers-reduced-motion: reduce) { .cr-columns .cr-col.is-active { animation: none; } }
+}

@@ -1,0 +1,39 @@
+{
+  "id": "haiyan-2013",
+  "status": "stub",
+  "title": "Storm Surge Warning",
+  "date": "2013-11-08",
+  "location": "Tacloban and Eastern Visayas, Philippines",
+  "hazard": "tropical cyclone / storm surge",
+  "research_notes": "SOURCE NEEDED — every timestep, option, historical action, inquiry finding and outcome figure must be filled from primary sources (official inquiry reports, meteorological archives, court or commission records) before this scenario can be marked playable. The validator will reject it otherwise.",
+  "clock": {
+    "timezone": "SOURCE NEEDED",
+    "start": "00:00",
+    "end": "00:00"
+  },
+  "record_caveat": "SOURCE NEEDED",
+  "timesteps": [],
+  "historical_path": [],
+  "inquiry_findings": [],
+  "outcome": {
+    "deaths": {
+      "min": 0,
+      "max": 0,
+      "contested": true,
+      "note": "SOURCE NEEDED"
+    },
+    "citation": {
+      "sourceId": "SOURCE NEEDED",
+      "detail": "SOURCE NEEDED"
+    }
+  },
+  "scoring": null,
+  "sources": [
+    {
+      "id": "todo",
+      "label": "SOURCE NEEDED — primary inquiry / meteorological / judicial records",
+      "url": null,
+      "note": null
+    }
+  ]
+}
