@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import summaryData from '../data/summary.json';
 import type { Summary } from '@/lib/taxonomy';
 import { SITE_URL, abs } from '@/lib/site';
+import SiteNav from './components/SiteNav';
 import './globals.css';
 
 const summary = summaryData as unknown as Summary;
@@ -49,7 +50,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <SiteNav />
+        {children}
+      </body>
     </html>
   );
 }
