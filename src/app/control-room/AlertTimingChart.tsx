@@ -16,13 +16,19 @@ const minutes = (hhmm: string) => {
 };
 const hhmm = (m: number) => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
 
-const W = 720;
-const H = 190;
 const PAD = { left: 14, right: 14, top: 30, bottom: 30 };
 const LANE_YOU = 78;
 const LANE_THEY = 128;
 
-export default function AlertTimingChart({ scenario, choices }: { scenario: Scenario; choices: Choice[] }) {
+/** `compact` redraws the plate at phone width (rather than shrinking the
+ *  720-unit plate until its labels are unreadable): fewer hour labels,
+ *  larger type, same marks. */
+export default function AlertTimingChart({ scenario, choices, compact = false }: {
+  scenario: Scenario; choices: Choice[]; compact?: boolean;
+}) {
+  const W = compact ? 360 : 720;
+  const H = compact ? 200 : 190;
+  const labelEvery = compact ? 3 : 2;
   const t0 = Math.floor(minutes(scenario.clock.start) / 60) * 60;
   const impactStart = minutes(scenario.scoring.impact.time);
   const window = scenario.scoring.impact.window_minutes ?? 60;
@@ -36,7 +42,7 @@ export default function AlertTimingChart({ scenario, choices }: { scenario: Scen
   for (let m = t0; m <= t1; m += 60) hours.push(m);
 
   return (
-    <figure className="cr-timing">
+    <figure className={`cr-timing${compact ? ' is-compact' : ''}`}>
       <svg viewBox={`0 0 ${W} ${H}`} role="img"
         aria-label={`Timeline comparing your first warning with the official alert at ${scenario.scoring.historical_first_public_alert} and the impact at ${scenario.scoring.impact.time}`}>
         {/* impact window — the status band everything is measured against */}
@@ -50,14 +56,14 @@ export default function AlertTimingChart({ scenario, choices }: { scenario: Scen
         {hours.map((m) => (
           <g key={m}>
             <line className="cr-timing-tick" x1={x(m)} y1={H - PAD.bottom} x2={x(m)} y2={H - PAD.bottom + 5} />
-            {(m / 60) % 2 === 0 && (
-              <text className="cr-timing-hour" x={x(m)} y={H - PAD.bottom + 18} textAnchor="middle">{hhmm(m)}</text>
+            {((m - t0) / 60) % labelEvery === 0 && (
+              <text className="cr-timing-hour" x={m === t0 ? x(m) - 2 : x(m)} y={H - PAD.bottom + 18} textAnchor={m === t0 ? 'start' : 'middle'}>{hhmm(m)}</text>
             )}
           </g>
         ))}
 
         {/* YOUR lane: every decision, warnings filled */}
-        <text className="cr-timing-lane" x={PAD.left} y={LANE_YOU - 18}>YOU</text>
+        <text className="cr-timing-lane" x={PAD.left} y={LANE_YOU + 20}>YOU</text>
         <line className="cr-timing-lanerail" x1={PAD.left} y1={LANE_YOU} x2={W - PAD.right} y2={LANE_YOU} />
         {choices.map((c) => {
           const m = minutes(c.timestep.time);
@@ -70,7 +76,7 @@ export default function AlertTimingChart({ scenario, choices }: { scenario: Scen
         })}
         {yourFirst && (() => {
           const fx = x(minutes(yourFirst.timestep.time));
-          const flip = fx > W * 0.62; // keep the label inside the plate
+          const flip = fx > W * (compact ? 0.5 : 0.62); // keep the label inside the plate
           return (
             <g className="cr-timing-flag">
               <line x1={fx} y1={LANE_YOU - 8} x2={fx} y2={LANE_YOU - 34} />
@@ -85,7 +91,7 @@ export default function AlertTimingChart({ scenario, choices }: { scenario: Scen
         )}
 
         {/* THEIR lane: the one documented alert */}
-        <text className="cr-timing-lane" x={PAD.left} y={LANE_THEY - 18}>THEY</text>
+        <text className="cr-timing-lane" x={PAD.left} y={LANE_THEY + 20}>THEY</text>
         <line className="cr-timing-lanerail is-they" x1={PAD.left} y1={LANE_THEY} x2={W - PAD.right} y2={LANE_THEY} />
         <g className="cr-timing-flag is-they">
           <circle className="cr-timing-dot is-alert is-they" cx={x(theirAlert)} cy={LANE_THEY} r={6}>
