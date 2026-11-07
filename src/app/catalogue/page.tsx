@@ -41,18 +41,18 @@ export default function CatalogueIndex() {
 
       <header className="cat-masthead">
         <div className="wrap">
-          <p className="cat-kicker">
+          <p className="cat-kicker rise rise-1">
             The full index · <a href="/">← Back to Disasters by the Decade</a>
           </p>
-          <h1 className="cat-title">The Catalogue</h1>
-          <p className="cat-lede">
+          <h1 className="cat-title rise rise-2">The Catalogue</h1>
+          <p className="cat-lede rise rise-3">
             All {summary.total} films, {summary.firstYear}–{summary.lastYear}, filed under what
             actually goes wrong in them and split one page per decade. The <a href="/">essay</a> is
             the better way to read this — it filters, searches and shows the posters. These pages are
             the same data with nothing between you and it.
           </p>
 
-          <ul className="cat-legend">
+          <ul className="cat-legend rise rise-4">
             {FAMILIES.map((f) => (
               <li key={f.id}>
                 <span className="cat-swatch" style={{ background: f.color }} aria-hidden="true" />

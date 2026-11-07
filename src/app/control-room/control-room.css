@@ -105,7 +105,7 @@
   font-family: var(--data);
   font-weight: 400;
   font-size: 11px;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-soft);
   margin: 0 0 16px;
@@ -134,10 +134,10 @@
   padding: 18px 20px 16px;
   font-family: var(--read);
   box-shadow: 4px 4px 0 var(--ink);
-  transition: box-shadow 0.12s, transform 0.12s, border-color 0.12s;
+  transition: box-shadow var(--t-mid) var(--ease), transform var(--t-mid) var(--ease), border-color var(--t-fast) var(--ease);
 }
-@media (hover: hover) { .cr-card:hover { border-color: var(--ember); box-shadow: 4px 4px 0 var(--ember); } }
-.cr-card:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); }
+@media (hover: hover) { .cr-card:hover { border-color: var(--ember); box-shadow: 6px 6px 0 var(--ember); transform: translate(-2px, -2px); } }
+.cr-card:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); transition-duration: var(--t-fast); transition-timing-function: var(--ease-press); }
 .cr-card-date, .cr-card-meta {
   font-family: var(--data);
   font-size: 11px;
@@ -162,7 +162,7 @@
   gap: 8px;
 }
 .cr-card-meta { margin-bottom: 10px; }
-.cr-card-arrow { display: inline-block; transition: transform 0.15s; }
+.cr-card-arrow { display: inline-block; transition: transform var(--t-mid) var(--ease); }
 @media (hover: hover) { .cr-card:hover .cr-card-arrow { transform: translateX(4px); } }
 .cr-card:focus-visible .cr-card-arrow { transform: translateX(4px); }
 .cr-card:focus-visible { border-color: var(--ember); box-shadow: 4px 4px 0 var(--ember); }
@@ -175,7 +175,7 @@
   background: transparent;
   color: var(--ink-soft);
 }
-.cr-card-stub:hover { border-color: var(--ink-soft); box-shadow: none; }
+.cr-card-stub:hover { border-color: var(--ink-soft); box-shadow: none; transform: none; }
 .cr-card-stub:active { transform: none; }
 .cr-card-stub .cr-card-cta, .cr-card-stub .cr-card-glyph { color: var(--ink-soft); }
 .cr-card-stub .cr-card-cta { border-top-style: dashed; }
@@ -365,7 +365,7 @@
   padding: 0 0 var(--s5) 18px;
   border-left: 2px solid var(--ink);
   scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 14px);
-  animation: cr-arrive 0.45s ease both;
+  animation: cr-arrive var(--t-slow) var(--ease) both;
 }
 .cr-entry::before {
   content: '';
@@ -381,9 +381,18 @@
 .cr-entry:last-child { border-left-style: dashed; border-left-color: var(--ink-soft); }
 @media (min-width: 760px) { .cr-entry { padding-left: 28px; } }
 
+/* The log's one cadence: every part of an entry lands on the house curve in
+   350ms over 6px, each 90ms behind the one before — stamp, slips, board
+   line, then the call — so an hour reads top to bottom as it is typed, and
+   the whole entry is down inside a second however many slips it carries. */
 @keyframes cr-arrive {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
+}
+/* The stamp's rule is typed across under the new time. */
+@keyframes cr-rule {
+  from { background-size: 0% 1px; }
+  to { background-size: 100% 1px; }
 }
 
 /* The time stamp at the head of every entry. */
@@ -396,7 +405,8 @@
   gap: 2px 12px;
   margin: 0 0 var(--s3);
   padding-bottom: var(--s1);
-  border-bottom: 1px solid var(--ink);
+  background: linear-gradient(var(--ink), var(--ink)) left bottom / 100% 1px no-repeat;
+  animation: cr-rule var(--t-slow) var(--ease) 60ms both;
 }
 /* Stamps and titles take focus only so keyboard and screen-reader users land
    on the new entry; they are not controls, so no focus ring. */
@@ -442,8 +452,8 @@
   border: 1px solid var(--rule);
   border-left: 3px solid var(--ink-soft);
   padding: 12px 16px 14px 14px;
-  animation: cr-arrive 0.45s ease both;
-  animation-delay: calc(var(--i, 0) * 120ms + 120ms);
+  animation: cr-arrive var(--t-slow) var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 120ms);
 }
 .cr-slip-forecast, .cr-slip-gauge { border-left-color: var(--ink); }
 .cr-slip-field_report { border-left: 6px solid var(--ink); }
@@ -476,8 +486,8 @@
   letter-spacing: 0.02em;
   margin: var(--s2) 0 0;
   color: var(--ink);
-  animation: cr-arrive 0.45s ease both;
-  animation-delay: calc(var(--i, 0) * 120ms + 120ms);
+  animation: cr-arrive var(--t-slow) var(--ease) both;
+  animation-delay: calc(var(--i, 0) * 90ms + 120ms);
 }
 .cr-boardline strong { font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
 .cr-boardline-tag {
@@ -497,7 +507,7 @@
 .cr-boardline-you .cr-boardline-item::before { content: '▪'; display: inline-block; width: 1.3em; text-indent: 0; color: var(--ink); }
 
 /* Your call */
-.cr-call { margin-top: var(--s4); animation: cr-arrive 0.45s ease both; animation-delay: calc(var(--i, 0) * 120ms + 160ms); }
+.cr-call { margin-top: var(--s4); animation: cr-arrive var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 90ms + 180ms); }
 .cr-call-head {
   font-family: var(--data);
   font-size: 12px;
@@ -523,10 +533,10 @@
   border: 1.5px solid var(--ink);
   box-shadow: 3px 3px 0 var(--ink);
   font: inherit;
-  transition: box-shadow 0.12s, transform 0.12s, border-color 0.12s;
+  transition: box-shadow var(--t-mid) var(--ease), transform var(--t-mid) var(--ease), border-color var(--t-fast) var(--ease);
 }
 @media (hover: hover) {
-  .cr-option:hover { border-color: var(--ember); box-shadow: 3px 3px 0 var(--ember); }
+  .cr-option:hover { border-color: var(--ember); box-shadow: 5px 5px 0 var(--ember); transform: translate(-2px, -2px); }
   .cr-option:hover .cr-option-label { color: var(--ember); }
 }
 /* Keyboard focus: the hover state plus a ring set off the shadow, so the
@@ -537,12 +547,20 @@
   border-color: var(--ember);
   box-shadow: 3px 3px 0 var(--ember);
 }
-.cr-option:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
-.cr-option-label { font-family: var(--data); font-size: 14.5px; line-height: 1.35; letter-spacing: 0.05em; text-transform: uppercase; transition: color 0.12s; }
+.cr-option:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); transition-duration: var(--t-fast); transition-timing-function: var(--ease-press); }
+.cr-option-label { font-family: var(--data); font-size: 14.5px; line-height: 1.35; letter-spacing: 0.05em; text-transform: uppercase; transition: color var(--t-fast) var(--ease); }
 .cr-option-detail { font-size: 15px; line-height: 1.45; color: var(--ink-soft); }
 
 /* A call once made, kept in the log. */
-.cr-record { margin-top: var(--s4); animation: cr-arrive 0.4s ease both; scroll-margin-bottom: 110px; }
+.cr-record { margin-top: var(--s4); animation: cr-arrive var(--t-slow) var(--ease) both; scroll-margin-bottom: 110px; }
+/* The call you took is stamped down: the ink bar lands a beat after the
+   record opens, from a hair larger, like a rubber stamp settling. */
+@keyframes cr-stamp-down {
+  0% { opacity: 0; transform: scale(1.025); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+.cr-record .cr-taken .is-chosen { animation: cr-stamp-down var(--t-mid) var(--ease-press) 80ms both; }
 .cr-taken { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s1); }
 .cr-taken li { display: grid; gap: 2px; }
 .cr-taken-mark { font-family: var(--data); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
@@ -623,17 +641,35 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.12s, box-shadow 0.12s, transform 0.12s;
+  transition: background-color var(--t-fast) var(--ease), box-shadow var(--t-mid) var(--ease), transform var(--t-mid) var(--ease);
 }
 .cr-btn-primary {
+  gap: 12px;
   background: var(--ember);
   color: #fff;
   border: 1.5px solid var(--ink);
   box-shadow: 3px 3px 0 var(--ink);
 }
-@media (hover: hover) { .cr-btn-primary:hover { background: #9c2a15; } }
+/* The game's one button has a signature press. Hover lifts it off the sheet
+   (a deeper block shadow) and drops its arrow a step, toward the next hour.
+   The press drives it all the way down into its own shadow — flush with the
+   paper, no shadow left — on a quick, firm curve, and the arrow lands with
+   it: a key struck on the teleprinter. */
+.cr-btn-arrow { display: inline-block; transition: transform var(--t-mid) var(--ease); }
+@media (hover: hover) {
+  .cr-btn-primary:hover { background: #9c2a15; box-shadow: 5px 5px 0 var(--ink); transform: translate(-2px, -2px); }
+  .cr-btn-primary:hover .cr-btn-arrow { transform: translateY(3px); }
+}
 .cr-desk .cr-btn-primary:focus-visible { outline-color: var(--ink); }
-.cr-btn-primary:active, .cr-btn-quiet:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.cr-btn-primary:active {
+  transform: translate(3px, 3px);
+  box-shadow: 0 0 0 var(--ink);
+  background: #9c2a15;
+  transition-duration: var(--t-fast);
+  transition-timing-function: var(--ease-press);
+}
+.cr-btn-primary:active .cr-btn-arrow { transform: translateY(5px); transition-duration: var(--t-fast); }
+.cr-btn-quiet:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
 .cr-btn-quiet { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
 @media (hover: hover) { .cr-btn-quiet:hover { border-color: var(--ember); color: var(--ember); } }
 
@@ -798,7 +834,11 @@
 .cr-zone.is-warned .cr-zone-shape { stroke-dasharray: none; stroke-width: 4; }
 .cr-zone .cr-zone-warned { fill: var(--ink); font-weight: 700; }
 
-/* The pulse of an active board — stilled for reduced motion. */
+/* The pulse of an active board. For reduced motion the pulse is replaced,
+   not just stopped (see the end of this file): a live zone is printed twice,
+   the second impression offset a few units down-right like a mis-registered
+   plate, so "this is live" still reads at a glance — and it does not borrow
+   the heavier solid stroke, which already means "warned by you". */
 @keyframes cr-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 .cr-zone.is-signal .cr-zone-shape, .cr-zone.is-impact .cr-zone-shape { animation: cr-pulse 2.4s ease-in-out infinite; }
 
@@ -999,7 +1039,7 @@
 .cr-plate[open] > summary { align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
 .cr-plate[open] .cr-plate-toggle { background: var(--ink); color: var(--paper); }
 .cr-plate[open] .cr-plate-toggle::before { content: '−'; }
-.cr-plate[open] .cr-figure { margin-top: var(--s2); animation: cr-arrive 0.3s ease both; }
+.cr-plate[open] .cr-figure { margin-top: var(--s2); animation: cr-arrive var(--t-mid) var(--ease) both; }
 .cr-desk .cr-plate > summary:focus-visible { outline-offset: 4px; }
 
 /* ── Sources under the log, during play ─────────────────────────────────── */
@@ -1010,14 +1050,40 @@
 
 /* ══ The debrief: the log's last entry ═══════════════════════════════════ */
 
-.cr-debrief { padding: 0; scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h)); animation: cr-arrive 0.6s ease both; }
+/* The debrief fades in without travel: it is scrolled to the instant it
+   mounts, and any rise would leave it short of its scroll margin — tucking
+   the band's ember head-rule under the console. */
+@keyframes cr-fade { from { opacity: 0; } to { opacity: 1; } }
+.cr-debrief { padding: 0; scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h)); animation: cr-fade var(--t-slow) var(--ease) both; }
 
 .cr-endband {
   background-color: var(--ink);
   background-image: repeating-linear-gradient(0deg, rgba(241, 232, 213, 0.03) 0 1px, transparent 1px 4px);
   color: var(--paper);
-  padding: 40px 0 44px;
-  border-top: 6px solid var(--ember);
+  padding: 46px 0 44px;
+  position: relative;
+}
+/* The closing beat: the ember head-rule is drawn across the band, then the
+   toll is set down — held a moment after the title, then pressed in from a
+   touch larger, settling like a stamp. 350ms each; the whole beat is down
+   inside a second. Reduced motion: the band is simply printed, rule full. */
+.cr-endband::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 6px;
+  background: var(--ember);
+  transform-origin: left center;
+  animation: rule-draw var(--t-slow) var(--ease) 280ms both;
+}
+@keyframes cr-toll-set {
+  0% { opacity: 0; transform: scale(1.06); }
+  55% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes cr-label-in {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
 }
 .cr-endband-stamp {
   font-family: var(--data);
@@ -1066,6 +1132,8 @@
   line-height: 0.85;
   color: var(--paper);
   font-variant-numeric: tabular-nums;
+  transform-origin: left bottom;
+  animation: cr-toll-set var(--t-slow) var(--ease-press) 640ms both;
 }
 .cr-toll-label {
   font-family: var(--data);
@@ -1075,6 +1143,7 @@
   background: var(--ember);
   color: #fff;
   padding: 4px 10px;
+  animation: cr-label-in var(--t-mid) var(--ease) 940ms both;
 }
 .cr-toll-label .cr-cite a { color: #fff; }
 .cr-toll-note {
@@ -1129,10 +1198,20 @@
 .cr-vs .is-diverged .cr-vs-time { color: var(--ember); }
 .cr-vs .is-diverged .cr-vs-time::after { content: ' ◆'; }
 .cr-vs .is-diverged .cr-vs-meta strong { color: var(--ember); }
+/* Desktop: three columns sharing one first baseline — the time, then each
+   side's tag set on the same line as its text, the text hanging beside the
+   tag so a wrapped line never slides back under it. One tag width, one row
+   padding, so every row starts and ends on the same beat. */
 @media (min-width: 760px) {
-  .cr-vs li { grid-template-columns: 84px 1fr 1fr; gap: 24px; }
-  .cr-vs-you, .cr-vs-they { grid-template-columns: 1fr; gap: 6px; }
-  .cr-vs-who { justify-self: start; padding: 2px 8px; }
+  .cr-vs li {
+    grid-template-columns: 84px minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: 28px;
+    align-items: first baseline;
+    padding: 16px 0 18px;
+  }
+  .cr-vs-you, .cr-vs-they { grid-template-columns: 50px minmax(0, 1fr); gap: 12px; align-items: first baseline; }
+  .cr-vs-who { justify-self: stretch; padding: 2px 0; }
+  .cr-vs-time { white-space: nowrap; }
 }
 
 /* Score */
@@ -1300,7 +1379,20 @@
 
 @media (prefers-reduced-motion: reduce) {
   .cr-entry, .cr-slip, .cr-boardline, .cr-call, .cr-record, .cr-debrief, .cr-sheet[open] { animation: none !important; }
+  .cr-stamp, .cr-record .cr-taken .is-chosen, .cr-endband::before, .cr-toll-number, .cr-toll-label { animation: none !important; }
   .cr-zone .cr-zone-shape { animation: none !important; }
+  /* The live-zone emphasis that stands in for the pulse: a second, offset
+     impression of the zone (outline and hatch both), in the zone's own ink. */
+  .cr-map .cr-zone.is-signal .cr-zone-shape { filter: drop-shadow(4px 4px 0 rgba(25, 20, 16, 0.55)); }
+  .cr-map .cr-zone.is-impact .cr-zone-shape { filter: drop-shadow(4px 4px 0 rgba(184, 50, 26, 0.6)); }
+  /* The key shows the same second impression, at swatch scale. */
+  .cr-map .cr-leg-swatch.is-signal .cr-zone-shape { filter: drop-shadow(1.5px 1.5px 0 rgba(25, 20, 16, 0.55)); }
+  .cr-map .cr-leg-swatch.is-impact .cr-zone-shape { filter: drop-shadow(1.5px 1.5px 0 rgba(184, 50, 26, 0.6)); }
+  .cr-btn-arrow { transition: none; }
+  .cr-btn-primary:hover, .cr-btn-primary:active, .cr-option:hover, .cr-card:hover { transform: none !important; }
+  .cr-btn-primary:hover .cr-btn-arrow, .cr-btn-primary:active .cr-btn-arrow { transform: none; }
+  /* Pressed, still: the button goes flush and dark, the shadow gone. */
+  .cr-btn-primary:active { box-shadow: 0 0 0 var(--ink); }
   .cr-daystrip-elapsed, .cr-daystrip-hour, .cr-daystrip-tick, .cr-daystrip-needle, .cr-pips i { transition: none; }
   .cr-plate[open] .cr-figure { animation: none !important; }
   .cr-card-arrow, .cr-card, .cr-option, .cr-option-label, .cr-btn-primary, .cr-btn-quiet { transition: none; }

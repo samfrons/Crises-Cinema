@@ -24,7 +24,7 @@
   color: var(--ink);
   text-decoration: none;
   box-shadow: 5px 5px 0 var(--paper-deep);
-  transition: transform 0.16s ease-out, box-shadow 0.16s ease-out;
+  transition: transform var(--t-mid) var(--ease), box-shadow var(--t-mid) var(--ease);
 }
 .pg-card::before {
   /* inner keyline, like a printed lobby-card border */
@@ -44,7 +44,7 @@
   background: var(--ember);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.2s ease-out;
+  transition: transform var(--t-slow) var(--ease);
 }
 .pg-card:hover,
 .pg-card:focus-visible {
@@ -53,6 +53,13 @@
 }
 .pg-card:hover::after,
 .pg-card:focus-visible::after { transform: scaleX(1); }
+/* The press: the card is set back down onto the stock, past where it rests. */
+.pg-card:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--paper-deep);
+  transition-duration: var(--t-fast);
+  transition-timing-function: var(--ease-press);
+}
 .pg-card:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
 
 .pg-eyebrow {
@@ -62,7 +69,16 @@
   text-transform: uppercase;
   color: var(--ink-soft);
 }
-.pg-motif { display: block; margin: 20px 0 14px; color: var(--ink); }
+.pg-motif {
+  display: block;
+  margin: 20px 0 14px;
+  color: var(--ink);
+  transition: transform var(--t-slow) var(--ease), color var(--t-mid) var(--ease);
+}
+/* The card answers in three beats on one curve: it lifts, its motif takes
+   the hand's colour and rises a touch further, and the cue steps forward. */
+.pg-card:hover .pg-motif,
+.pg-card:focus-visible .pg-motif { color: var(--ember); transform: translateY(-3px); }
 .pg-title {
   font-family: var(--poster);
   font-size: clamp(26px, 2.6vw, 32px);
@@ -82,9 +98,10 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--ink);
+  transition: transform var(--t-mid) var(--ease), color var(--t-fast) var(--ease);
 }
 .pg-card:hover .pg-go,
-.pg-card:focus-visible .pg-go { color: var(--ember); }
+.pg-card:focus-visible .pg-go { color: var(--ember); transform: translateX(4px); }
 
 @media (max-width: 960px) {
   .pg-grid { grid-template-columns: repeat(2, 1fr); gap: 22px; }
@@ -97,6 +114,13 @@
   .pg-card { padding: 20px 18px 18px; }
   .pg-card::after { left: 18px; right: 18px; }
 }
+/* Reduced motion: no lift, no travel — the card answers in ink alone: the
+   ember rule is simply there, the motif and cue take the ember, and the
+   keyline darkens so the hovered card still reads as picked up. */
 @media (prefers-reduced-motion: reduce) {
-  .pg-card, .pg-card::after { transition: none; }
+  .pg-card, .pg-card::after, .pg-motif, .pg-go { transition: none; }
+  .pg-card:hover, .pg-card:focus-visible, .pg-card:active { transform: none; box-shadow: 5px 5px 0 var(--paper-deep); }
+  .pg-card:hover .pg-motif, .pg-card:focus-visible .pg-motif,
+  .pg-card:hover .pg-go, .pg-card:focus-visible .pg-go { transform: none; }
+  .pg-card:hover::before, .pg-card:focus-visible::before { border-color: var(--ink-faint); }
 }

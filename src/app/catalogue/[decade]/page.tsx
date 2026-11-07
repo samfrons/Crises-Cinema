@@ -65,11 +65,11 @@ export default function DecadePage({ params }: Props) {
 
       <header className="cat-masthead cat-masthead-tight">
         <div className="wrap">
-          <p className="cat-kicker">
+          <p className="cat-kicker rise rise-1">
             <a href="/catalogue">← The Catalogue</a> · <a href="/">the essay</a>
           </p>
-          <h1 className="cat-title">{slug}</h1>
-          <p className="cat-decade-meta">
+          <h1 className="cat-title rise rise-2">{slug}</h1>
+          <p className="cat-decade-meta rise rise-3">
             {/* One interpolation, not three: React separates adjacent text nodes
                 with comment markers, which HTML-to-text converters — the tools
                 reading this page — turn into "90 film s of 831". */}

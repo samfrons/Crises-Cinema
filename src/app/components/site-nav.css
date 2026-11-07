@@ -49,9 +49,12 @@
   white-space: nowrap;
   color: var(--ink-soft);
   text-decoration: none;
+  transition: color var(--t-fast) var(--ease);
 }
 .sn-list li:first-child .sn-link { padding-left: 0; }
 .sn-link:hover { color: var(--ink); }
+/* Pressed: the rule runs the full width before the next page paints. */
+.sn-link:active::after { transform: scaleX(1); transition-duration: var(--t-fast); }
 .sn-link:focus-visible { outline-offset: -3px; }
 .sn-link::after {
   content: '';
@@ -63,7 +66,7 @@
   background: var(--ember);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.18s ease-out;
+  transition: transform var(--t-mid) var(--ease);
 }
 .sn-list li:first-child .sn-link::after { left: 0; }
 .sn-link:hover::after { transform: scaleX(0.35); }
@@ -71,7 +74,7 @@
 .sn-link[aria-current='page']::after { transform: scaleX(1); }
 
 @media (prefers-reduced-motion: reduce) {
-  .sn-link::after { transition: none; }
+  .sn-link, .sn-link::after { transition: none; }
 }
 
 @media (max-width: 900px) {

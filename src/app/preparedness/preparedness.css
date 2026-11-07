@@ -467,7 +467,7 @@
 .pr-panel-eyebrow {
   font-family: var(--data);
   font-size: 10px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ember);
   margin: 0 0 6px;
@@ -613,7 +613,7 @@
 .pr-col-eyebrow {
   font-family: var(--data);
   font-size: 10px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ember);
   margin: 0 0 6px;
@@ -642,11 +642,52 @@
   margin-bottom: 5px;
 }
 .pr-weight-pct { color: var(--ink-faint); font-variant-numeric: tabular-nums; }
+/* The weight sliders, drawn as print rather than as browser chrome: a
+   hairline ink rule for the track, a squared ink block for the thumb with a
+   paper keyline. Hover and focus take the hand's ember; dragging presses the
+   block down a size, so the control answers under the thumb. */
 .pr-weight input[type='range'] {
   width: 100%;
-  accent-color: var(--ember);
   height: 22px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
 }
+.pr-weight input[type='range']::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--ink);
+}
+.pr-weight input[type='range']::-moz-range-track { height: 2px; background: var(--ink); }
+.pr-weight input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 18px;
+  margin-top: -8px;
+  background: var(--ink);
+  border: 0;
+  border-radius: 0;
+  box-shadow: 0 0 0 2px var(--paper-lit), 2px 2px 0 2px var(--paper-deep);
+  transition: background-color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease-press);
+}
+.pr-weight input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 18px;
+  background: var(--ink);
+  border: 0;
+  border-radius: 0;
+  box-shadow: 0 0 0 2px var(--paper-lit), 2px 2px 0 2px var(--paper-deep);
+  transition: background-color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease-press);
+}
+.pr-weight input[type='range']:hover::-webkit-slider-thumb,
+.pr-weight input[type='range']:focus-visible::-webkit-slider-thumb { background: var(--ember); }
+.pr-weight input[type='range']:hover::-moz-range-thumb,
+.pr-weight input[type='range']:focus-visible::-moz-range-thumb { background: var(--ember); }
+.pr-weight input[type='range']:active::-webkit-slider-thumb { background: var(--ember); transform: scale(0.86); }
+.pr-weight input[type='range']:active::-moz-range-thumb { background: var(--ember); transform: scale(0.86); }
+.pr-weight input[type='range']:focus-visible { outline: 2px solid var(--ember); outline-offset: 4px; }
 .pr-weight-note {
   font-family: var(--data);
   font-size: 10px;
@@ -991,8 +1032,33 @@
   .pr-map-notice span { font-size: 13px; }
 }
 
+/* Pacing: as the essay scrolls, each plate and figure block is laid onto
+   the page as it enters — a short rise and settle tied to scroll position,
+   finished by the time it is a third of the way up the screen — so the
+   figures arrive as beats rather than as one long unbroken column. CSS
+   scroll timelines only; browsers without them simply show the page set. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes pr-lay {
+      from { opacity: 0.001; transform: translateY(18px); }
+      to { opacity: 1; transform: none; }
+    }
+    .pr-plate, .pr-bars, .pr-headline, .pr-strip, .pr-case, .pr-panel-col, .pr-hypothesis {
+      animation: pr-lay linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+  }
+}
+
+/* Reduced motion: no scroll choreography, and the slider thumb answers in
+   colour alone (ember on hover, focus and drag) without changing size. */
 @media (prefers-reduced-motion: reduce) {
   .pr-country, .pr-pin-ring, .pr-pin-dot { transition: none; }
+  .pr-weight input[type='range']::-webkit-slider-thumb { transition: none; }
+  .pr-weight input[type='range']::-moz-range-thumb { transition: none; }
+  .pr-weight input[type='range']:active::-webkit-slider-thumb { transform: none; }
+  .pr-weight input[type='range']:active::-moz-range-thumb { transform: none; }
 }
 
 /* ── Touch targets ──────────────────────────────────────────────────────── */

@@ -41,8 +41,9 @@ Control Room (`/control-room`, a playable scenario game), The Last Mile
 - Navigation: the programme strip (`SiteNav`) is rendered once in
   `src/app/layout.tsx`. Never add a per-page nav, header bar or tab strip.
 - Motion: 150–350 ms for microinteractions (hover, press, toggles), CSS-only (no JS
-  animation libraries for decoration). Page-entrance choreography (the `.rise`
-  stagger, ~0.72 s) is the one sanctioned exception. Every
+  animation libraries for decoration). Use the shared motion tokens in globals.css
+  (one arrival/hover easing, one press easing, 150/240/350 ms durations); the
+  `.rise` masthead stagger composes them to land the whole masthead in ~0.65 s. Every
   animation needs a designed `prefers-reduced-motion` equivalent, not just
   `animation: none`.
 - Accessibility: WCAG AA minimum. Tap targets at least 40px. No horizontal page

@@ -511,7 +511,8 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, onChoose, on
       {choice && isCurrent && (
         <div className="cr-dock">
           <button type="button" id="cr-advance-btn" className="cr-btn-primary" onClick={onAdvance}>
-            {isLast ? 'Close the log — to the debrief ↓' : 'Advance the clock ↓'}
+            {isLast ? 'Close the log — to the debrief' : 'Advance the clock'}
+            <span className="cr-btn-arrow" aria-hidden>↓</span>
           </button>
         </div>
       )}
