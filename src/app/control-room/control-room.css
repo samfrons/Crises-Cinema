@@ -19,7 +19,23 @@
   --cr-nav: var(--site-nav-h, 0px);
   --cr-console-h: 60px;
   --cr-sheet: #f8f2e4;
+  /* One spacing scale for the log: 6 · 12 · 18 · 24 · 36. Inside a group
+     (slips, a record's parts) things sit s2 apart; groups sit s4 apart;
+     entries s5. */
+  --s1: 6px;
+  --s2: 12px;
+  --s3: 18px;
+  --s4: 24px;
+  --s5: 36px;
   overflow-x: clip;
+}
+.cr-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 @media (max-width: 599px) {
   .cr-page .wrap { padding-left: 18px; padding-right: 18px; }
@@ -107,7 +123,8 @@
 @media (min-width: 700px) { .cr-select-grid { grid-template-columns: 1fr 1fr; } }
 
 .cr-card {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 6px;
   text-align: left;
   cursor: pointer;
@@ -128,7 +145,8 @@
   text-transform: uppercase;
   color: var(--ink-soft);
 }
-.cr-card-title { font-family: var(--poster); font-size: 28px; line-height: 1; text-transform: uppercase; }
+.cr-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.cr-card-title { font-family: var(--poster); font-size: 28px; line-height: 1; text-transform: uppercase; text-wrap: balance; }
 .cr-card-loc { font-size: 15px; color: var(--ink-soft); }
 .cr-card-cta {
   font-family: var(--data);
@@ -136,9 +154,19 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ember);
-  margin-top: 8px;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
-.cr-card-glyph { color: var(--ember); }
+.cr-card-meta { margin-bottom: 10px; }
+.cr-card-arrow { display: inline-block; transition: transform 0.15s; }
+@media (hover: hover) { .cr-card:hover .cr-card-arrow { transform: translateX(4px); } }
+.cr-card:focus-visible .cr-card-arrow { transform: translateX(4px); }
+.cr-card:focus-visible { border-color: var(--ember); box-shadow: 4px 4px 0 var(--ember); }
+.cr-card-glyph { color: var(--ember); flex-shrink: 0; }
 .cr-card-stub {
   cursor: default;
   border-style: dashed;
@@ -150,6 +178,7 @@
 .cr-card-stub:hover { border-color: var(--ink-soft); box-shadow: none; }
 .cr-card-stub:active { transform: none; }
 .cr-card-stub .cr-card-cta, .cr-card-stub .cr-card-glyph { color: var(--ink-soft); }
+.cr-card-stub .cr-card-cta { border-top-style: dashed; }
 
 .cr-footnote {
   font-family: var(--data);
@@ -237,8 +266,10 @@
   transition: background 0.3s, transform 0.3s, border-color 0.3s;
 }
 .cr-pips i.is-kept { background: var(--paper); border-color: var(--paper); }
-.cr-pips i.is-diverged { background: var(--ember); border-color: var(--paper); transform: rotate(45deg) scale(0.92); }
-.cr-pips i.is-now { border: 2px solid var(--paper); border-radius: 50%; box-shadow: 0 0 0 3px rgba(184, 50, 26, 0.9); }
+/* A diamond is a square turned 45°: scaled so its diagonal matches the
+   squares' side, the row reads as evenly spaced marks, not a jitter. */
+.cr-pips i.is-diverged { background: var(--ember); border-color: var(--paper); transform: rotate(45deg) scale(0.78); }
+.cr-pips i.is-now { border: 2px solid var(--paper); border-radius: 50%; box-shadow: 0 0 0 2.5px var(--ember); }
 @media (min-width: 720px) { .cr-pips { gap: 9px; } .cr-pips i { width: 12px; height: 12px; } }
 
 .cr-console-map {
@@ -260,6 +291,7 @@
   flex-shrink: 0;
 }
 .cr-console-map:active { background: rgba(241, 232, 213, 0.12); }
+@media (hover: hover) { .cr-console-map:hover { border-color: var(--paper); } }
 .cr-console-lit { width: 7px; height: 7px; border-radius: 50%; background: var(--ember); box-shadow: 0 0 0 1.5px var(--paper); }
 
 /* ── The day strip: the console's bottom edge ───────────────────────────── */
@@ -330,7 +362,7 @@
    your run. The node on the spine is ember on the decision now on the desk. */
 .cr-entry {
   position: relative;
-  padding: 0 0 34px 18px;
+  padding: 0 0 var(--s5) 18px;
   border-left: 2px solid var(--ink);
   scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 14px);
   animation: cr-arrive 0.45s ease both;
@@ -362,8 +394,8 @@
   align-items: baseline;
   flex-wrap: wrap;
   gap: 2px 12px;
-  margin: 0 0 14px;
-  padding-bottom: 6px;
+  margin: 0 0 var(--s3);
+  padding-bottom: var(--s1);
   border-bottom: 1px solid var(--ink);
 }
 /* Stamps and titles take focus only so keyboard and screen-reader users land
@@ -404,12 +436,12 @@
 .cr-brief-taken { text-transform: uppercase; letter-spacing: 0.14em; }
 
 /* Incoming traffic: teletype slips, arriving one after another. */
-.cr-dispatches { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cr-dispatches { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s2); }
 .cr-slip {
   background: var(--paper);
   border: 1px solid var(--rule);
   border-left: 3px solid var(--ink-soft);
-  padding: 10px 14px 12px;
+  padding: 12px 16px 14px 14px;
   animation: cr-arrive 0.45s ease both;
   animation-delay: calc(var(--i, 0) * 120ms + 120ms);
 }
@@ -422,18 +454,27 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  margin: 0 0 5px;
+  margin: 0 0 var(--s1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
-.cr-kind-glyph { display: inline-block; vertical-align: -3px; margin-right: 4px; }
+.cr-kind-glyph { display: block; flex-shrink: 0; }
 .cr-slip-text { margin: 0; font-size: 16px; line-height: 1.55; }
 
 /* What the board did, in words. */
+/* Tag in its own column, entries hang beside it one per line — a wrapped
+   zone name never slides back under the tag. */
 .cr-boardline {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  column-gap: 10px;
   font-family: var(--data);
   font-size: 12px;
-  line-height: 1.7;
-  letter-spacing: 0.03em;
-  margin: 12px 0 0;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  margin: var(--s2) 0 0;
   color: var(--ink);
   animation: cr-arrive 0.45s ease both;
   animation-delay: calc(var(--i, 0) * 120ms + 120ms);
@@ -446,24 +487,29 @@
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  padding: 1px 6px;
-  margin-right: 8px;
+  padding: 2px 6px 1px;
+  white-space: nowrap;
 }
+.cr-boardline-body { display: grid; gap: 3px; }
+.cr-boardline-item { display: block; }
+.cr-boardline-lead { display: block; color: var(--ink-soft); text-transform: uppercase; letter-spacing: 0.12em; font-size: 10.5px; }
+.cr-boardline-you .cr-boardline-item { padding-left: 1.3em; text-indent: -1.3em; }
+.cr-boardline-you .cr-boardline-item::before { content: '▪'; display: inline-block; width: 1.3em; text-indent: 0; color: var(--ink); }
 
 /* Your call */
-.cr-call { margin-top: 22px; animation: cr-arrive 0.45s ease both; animation-delay: calc(var(--i, 0) * 120ms + 160ms); }
+.cr-call { margin-top: var(--s4); animation: cr-arrive 0.45s ease both; animation-delay: calc(var(--i, 0) * 120ms + 160ms); }
 .cr-call-head {
   font-family: var(--data);
   font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--ember);
-  margin: 0 0 10px;
+  margin: 0 0 var(--s2);
 }
 
 /* Options: full-width, thumb-height, block-printed. No hierarchy between
    them — no choice may look like the designed answer. */
-.cr-options { display: grid; gap: 12px; }
+.cr-options { display: grid; gap: 14px; }
 .cr-option {
   display: grid;
   gap: 5px;
@@ -479,21 +525,32 @@
   font: inherit;
   transition: box-shadow 0.12s, transform 0.12s, border-color 0.12s;
 }
-@media (hover: hover) { .cr-option:hover { border-color: var(--ember); box-shadow: 3px 3px 0 var(--ember); } }
+@media (hover: hover) {
+  .cr-option:hover { border-color: var(--ember); box-shadow: 3px 3px 0 var(--ember); }
+  .cr-option:hover .cr-option-label { color: var(--ember); }
+}
+/* Keyboard focus: the hover state plus a ring set off the shadow, so the
+   focused option is unmistakable without any option looking pre-chosen. */
+.cr-desk .cr-option:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 5px;
+  border-color: var(--ember);
+  box-shadow: 3px 3px 0 var(--ember);
+}
 .cr-option:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
-.cr-option-label { font-family: var(--data); font-size: 14.5px; line-height: 1.35; letter-spacing: 0.05em; text-transform: uppercase; }
+.cr-option-label { font-family: var(--data); font-size: 14.5px; line-height: 1.35; letter-spacing: 0.05em; text-transform: uppercase; transition: color 0.12s; }
 .cr-option-detail { font-size: 15px; line-height: 1.45; color: var(--ink-soft); }
 
 /* A call once made, kept in the log. */
-.cr-record { margin-top: 22px; animation: cr-arrive 0.4s ease both; scroll-margin-bottom: 110px; }
-.cr-taken { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.cr-record { margin-top: var(--s4); animation: cr-arrive 0.4s ease both; scroll-margin-bottom: 110px; }
+.cr-taken { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s1); }
 .cr-taken li { display: grid; gap: 2px; }
 .cr-taken-mark { font-family: var(--data); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; }
 .cr-taken .is-chosen {
   background: var(--ink);
   color: var(--paper);
   padding: 10px 14px 12px;
-  margin-bottom: 4px;
+  margin: 4px 0;
 }
 .cr-taken .is-chosen .cr-taken-mark { color: rgba(241, 232, 213, 0.8); }
 .cr-taken .is-chosen .cr-taken-label { font-family: var(--data); font-size: 14.5px; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1.35; }
@@ -502,7 +559,7 @@
   align-items: baseline;
   gap: 8px;
   color: var(--ink-soft);
-  padding: 2px 14px;
+  padding: 0 14px;
 }
 .cr-taken .is-not .cr-taken-label {
   font-family: var(--data);
@@ -515,10 +572,11 @@
 .cr-boardline-you { animation: none; }
 
 .cr-consequence {
-  margin-top: 16px;
+  margin-top: var(--s3);
   border-left: 3px solid var(--ink);
   padding: 2px 0 2px 14px;
 }
+.cr-record > .cr-boardline { margin-top: var(--s3); }
 .cr-consequence p { margin: 0; line-height: 1.6; }
 .cr-consequence-tag {
   font-family: var(--data);
@@ -528,14 +586,15 @@
   color: var(--ink-soft);
   margin: 0 0 6px !important;
 }
+/* The silent record: the same left-ruled block as "The record", but the
+   rule is ember and broken — a gap in the record, drawn as one. No box. */
 .cr-consequence-silent {
-  border: 1px dashed var(--ember);
-  border-left: 3px solid var(--ember);
-  background: rgba(184, 50, 26, 0.05);
-  padding: 12px 14px;
+  border-left: 3px dashed var(--ember);
+  background: linear-gradient(90deg, rgba(184, 50, 26, 0.06), rgba(184, 50, 26, 0) 70%);
+  padding: 10px 14px 12px;
 }
 .cr-consequence-silent .cr-consequence-tag { color: var(--ember); }
-.cr-consequence-silent p:last-child { color: var(--ink-soft); font-style: italic; }
+.cr-consequence-silent p:last-child { color: var(--ink-soft); font-style: italic; font-size: 15.5px; max-width: 58ch; }
 
 /* The action dock: on phones it rides above the thumb on its own shelf for
    as long as the current entry is on screen. */
@@ -543,13 +602,13 @@
   position: sticky;
   bottom: 0;
   z-index: 20;
-  margin-top: 18px;
+  margin-top: var(--s3);
   padding: 16px 0 calc(12px + env(safe-area-inset-bottom));
   background: linear-gradient(180deg, rgba(248, 242, 228, 0) 0%, var(--cr-sheet) 32%);
 }
 .cr-dock .cr-btn-primary { width: 100%; }
 @media (min-width: 760px) {
-  .cr-dock { position: static; background: none; padding: 0; margin-top: 24px; }
+  .cr-dock { position: static; background: none; padding: 0; margin-top: var(--s4); }
   .cr-dock .cr-btn-primary { width: auto; }
 }
 
@@ -573,9 +632,10 @@
   box-shadow: 3px 3px 0 var(--ink);
 }
 @media (hover: hover) { .cr-btn-primary:hover { background: #9c2a15; } }
+.cr-desk .cr-btn-primary:focus-visible { outline-color: var(--ink); }
 .cr-btn-primary:active, .cr-btn-quiet:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
 .cr-btn-quiet { background: transparent; color: var(--ink); border: 1.5px solid var(--ink); }
-.cr-btn-quiet:hover { border-color: var(--ember); }
+@media (hover: hover) { .cr-btn-quiet:hover { border-color: var(--ember); color: var(--ember); } }
 
 /* ── Map on the briefing (phones) ───────────────────────────────────────── */
 .cr-entry-brief .cr-map { margin: 18px 0 4px; }
@@ -682,7 +742,7 @@
    large in plate units to stay legible at phone and side-panel scale. */
 
 .cr-map { margin: 0; }
-.cr-map svg { display: block; width: 100%; height: auto; color: var(--ink); background: var(--paper); border: 1px solid var(--ink); }
+.cr-map > svg { display: block; width: 100%; height: auto; color: var(--ink); background: var(--paper); border: 1px solid var(--ink); }
 
 .cr-map-coast { fill: none; stroke: rgba(25, 20, 16, 0.75); stroke-width: 2; }
 .cr-map-water { fill: rgba(25, 20, 16, 0.07); stroke: rgba(25, 20, 16, 0.55); stroke-width: 1.4; }
@@ -697,7 +757,13 @@
 .cr-map-inset { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 2 4; }
 .cr-map-contour path, .cr-map-ridge path { fill: none; stroke: rgba(25, 20, 16, 0.35); stroke-width: 1.4; }
 
-.cr-map-plate { font-family: var(--data); font-size: 17px; letter-spacing: 0.12em; fill: var(--ink); }
+/* The title block: a paper band ruled off the top of the plate. */
+.cr-map-plateband { fill: var(--paper); }
+.cr-map-platerule { stroke: var(--ink); stroke-width: 1.2; }
+.cr-map-plate { font-family: var(--data); font-size: 17px; font-weight: 700; letter-spacing: 0.1em; fill: var(--ink); }
+.cr-map-scale { font-family: var(--data); font-size: 12px; letter-spacing: 0.16em; fill: var(--ink-soft); }
+/* Road names a size below place names, the cartographer's convention. */
+.cr-map-roadname { font-family: var(--data); font-size: 12px; letter-spacing: 0.05em; fill: var(--ink-soft); }
 .cr-map-label { font-family: var(--data); font-size: 17px; letter-spacing: 0.08em; fill: var(--ink); }
 .cr-map-minor { font-family: var(--data); font-size: 14px; letter-spacing: 0.06em; fill: var(--ink-soft); }
 .cr-map-sea-label { font-family: var(--data); font-size: 13px; letter-spacing: 0.4em; fill: var(--ink-soft); }
@@ -706,7 +772,7 @@
 
 /* Labels sit on a paper halo so rivers and zone edges never cut through them. */
 .cr-map text { paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; }
-.cr-map .cr-map-sea-label { stroke-width: 0; }
+.cr-map .cr-map-sea-label, .cr-map-platehead text { stroke-width: 0; }
 
 /* Zone states: pattern + label as well as colour, never colour alone. */
 .cr-zone .cr-zone-shape {
@@ -715,8 +781,8 @@
   stroke-width: 1.4;
   transition: fill 0.4s, stroke 0.4s;
 }
-.cr-zone .cr-zone-label { font-family: var(--data); font-size: 15px; font-weight: 700; letter-spacing: 0.06em; fill: var(--ink); }
-.cr-zone .cr-zone-state { font-family: var(--data); font-size: 13.5px; letter-spacing: 0.08em; fill: var(--ink-soft); }
+.cr-zone .cr-zone-label { font-family: var(--data); font-size: 14px; font-weight: 700; letter-spacing: 0.05em; fill: var(--ink); }
+.cr-zone .cr-zone-state { font-family: var(--data); font-size: 12.5px; letter-spacing: 0.06em; fill: var(--ink-soft); }
 
 .cr-zone.is-watch .cr-zone-shape { stroke: var(--ink); stroke-dasharray: 8 6; stroke-width: 2; }
 .cr-zone.is-watch .cr-zone-state { fill: var(--ink); }
@@ -739,27 +805,51 @@
 .cr-map-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px 14px;
-  margin-top: 8px;
+  align-items: center;
+  gap: 10px 16px;
+  margin-top: 10px;
   font-family: var(--data);
   font-size: 10.5px;
-  letter-spacing: 0.12em;
+  line-height: 1.3;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
+/* The four states as a track: swatch, then a ruled arrow on to the next. */
+.cr-map-legend-scale { flex: 1 1 100%; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .cr-leg { display: inline-flex; align-items: center; gap: 6px; }
-.cr-leg::before { content: ''; width: 14px; height: 9px; border: 1px solid rgba(25, 20, 16, 0.35); }
-.cr-leg.is-watch::before { border: 1.5px dashed var(--ink); }
-.cr-leg.is-signal::before { border: 2px solid var(--ink); }
-.cr-leg.is-impact::before {
-  border: 2px solid var(--ember);
-  background: repeating-linear-gradient(90deg, rgba(184, 50, 26, 0.5) 0 2px, transparent 2px 4px);
+.cr-map-legend-scale .cr-leg { display: grid; gap: 5px; align-content: start; }
+.cr-leg-track { display: flex; align-items: center; }
+.cr-leg-arrow { flex: 1; height: 1px; margin: 0 8px 0 6px; background: var(--rule); position: relative; }
+.cr-leg-arrow::after {
+  content: '';
+  position: absolute;
+  right: -1px;
+  top: -3px;
+  border: 3.5px solid transparent;
+  border-left: 5px solid var(--rule);
+  border-right: 0;
 }
-.cr-map-fire .cr-leg.is-impact::before {
-  background: repeating-linear-gradient(135deg, rgba(184, 50, 26, 0.55) 0 1.5px, transparent 1.5px 4px),
-    repeating-linear-gradient(45deg, rgba(184, 50, 26, 0.55) 0 1.5px, transparent 1.5px 4px);
+.cr-leg-name { padding-right: 6px; }
+.cr-leg-you { color: var(--ink); }
+.cr-leg-swatch { width: 20px; height: 13px; flex-shrink: 0; overflow: visible; color: var(--ink); }
+/* The key is drawn with the board's own classes; it must not pulse, and its
+   strokes are re-set for a 20px swatch rather than a 720-unit plate. */
+.cr-leg-swatch .cr-zone-shape { animation: none !important; stroke-width: 1.4; }
+.cr-leg-swatch.is-watch .cr-zone-shape { stroke-dasharray: 3.5 2.5; stroke-width: 1.6; }
+.cr-leg-swatch.is-signal .cr-zone-shape { stroke-width: 2.4; }
+.cr-leg-swatch.is-impact .cr-zone-shape { stroke-width: 2.2; }
+.cr-leg-swatch.is-warned .cr-zone-shape { stroke: var(--ink); stroke-width: 3.2; }
+.cr-map-note {
+  flex-basis: 100%;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  border-top: 1px solid var(--rule);
+  padding-top: 8px;
 }
-.cr-leg.is-warned::before { border: 3px solid var(--ink); }
 
 /* ── Figures: cited imagery printed into the log ────────────────────────── */
 /* A pasted-in plate on the slip: ruled frame on cream, mono caption under
@@ -782,23 +872,59 @@
   background: rgba(25, 20, 16, 0.08);
   object-fit: contain;
 }
-.cr-figure figcaption { display: grid; gap: 4px; margin-top: 8px; }
+.cr-figure figcaption { display: grid; gap: 6px; margin-top: 10px; }
+/* Caption in the reading face, at reading size: it carries the meaning. */
 .cr-figure-caption {
-  font-family: var(--data);
-  font-size: 12.5px;
-  line-height: 1.55;
-  letter-spacing: 0.02em;
+  font-family: var(--read);
+  font-size: 15px;
+  line-height: 1.5;
   color: var(--ink);
+  max-width: 64ch;
 }
+/* Credit: one compact mono line — by · licence · source · terms. The
+   credit itself gives way (ellipsis) before the links do; its full text is
+   in the title and in Terms. */
 .cr-figure-credit {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  min-width: 0;
   font-family: var(--data);
   font-size: 10.5px;
   line-height: 1.5;
   letter-spacing: 0.04em;
   color: var(--ink-soft);
-  overflow-wrap: anywhere;
 }
-.cr-desk .cr-figure .cr-figure-credit a { color: inherit; text-decoration-color: rgba(25, 20, 16, 0.4); text-underline-offset: 2px; }
+/* The credit yields its width to the licence links, never the reverse: it
+   may take whatever the links leave and truncates beyond that. Phones give
+   the credit its own (still single, truncating) line above the links. */
+.cr-figure-by { flex: 0 1 auto; min-width: 0; max-width: calc(100% - 38ch); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 599px) {
+  .cr-figure-by { flex-basis: 100%; max-width: 100%; }
+  .cr-figure-by + .cr-figure-sep { display: none; }
+}
+.cr-figure-credit > a, .cr-figure-sep, .cr-figure-terms > summary { flex: none; white-space: pre; }
+.cr-figure-terms > summary { cursor: pointer; list-style: none; display: inline; }
+.cr-figure-terms > summary::-webkit-details-marker { display: none; }
+.cr-figure-terms-label { text-decoration: underline dotted; text-underline-offset: 2px; }
+.cr-figure-terms-label::after { content: ' +'; }
+.cr-figure-terms[open] { flex-basis: 100%; }
+.cr-figure-terms[open] .cr-figure-sep { display: none; }
+.cr-figure-terms[open] .cr-figure-terms-label::after { content: ' −'; }
+.cr-figure-terms-body {
+  display: grid;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-left: 2px solid var(--rule);
+  background: rgba(25, 20, 16, 0.03);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  letter-spacing: 0.02em;
+}
+.cr-figure-terms-body b { font-weight: 400; text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink); margin-right: 6px; }
+.cr-desk .cr-figure-terms > summary:focus-visible { outline-width: 2px; outline-offset: 2px; }
+.cr-desk .cr-figure .cr-figure-credit a { color: var(--ink); text-decoration-color: rgba(25, 20, 16, 0.35); text-underline-offset: 2px; }
 .cr-desk .cr-figure .cr-figure-credit a:hover { color: var(--ember); }
 /* On a slip, the plate runs the slip's full width. */
 .cr-slip .cr-figure { margin-left: -9px; margin-right: -9px; }
@@ -808,8 +934,73 @@
 .cr-entry-brief .cr-figure { margin: 18px 0 6px; max-width: 700px; }
 
 .cr-dsec-note { font-size: 15px; line-height: 1.55; color: var(--ink-soft); margin: -6px 0 18px; max-width: 62ch; font-style: italic; }
-.cr-figures { display: grid; gap: 26px; }
-@media (min-width: 860px) { .cr-figures { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 28px; } }
+.cr-figures { display: grid; gap: var(--s5); }
+@media (min-width: 860px) { .cr-figures { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px 28px; align-items: start; } }
+
+/* Phones: the debrief imagery as a two-up contact sheet; a plate opens in
+   place across both columns. */
+.cr-contact { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3) var(--s2); }
+.cr-plate[open] { grid-column: 1 / -1; }
+.cr-plate > summary {
+  list-style: none;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 8px;
+  align-items: start;
+}
+.cr-plate > summary::-webkit-details-marker { display: none; }
+.cr-plate-thumb {
+  grid-column: 1 / -1;
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--ink);
+  padding: 3px;
+  background: var(--cr-sheet);
+  box-shadow: 2px 2px 0 rgba(25, 20, 16, 0.18);
+}
+.cr-plate-thumb img, .cr-plate-blank { display: block; width: 100%; height: 100%; object-fit: cover; background: rgba(25, 20, 16, 0.08); }
+.cr-plate-play {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  font-size: 11px;
+  line-height: 1;
+  padding: 5px 6px 5px 7px;
+  background: var(--ink);
+  color: var(--paper);
+}
+.cr-plate-label { display: grid; gap: 2px; min-width: 0; }
+.cr-plate-num { font-family: var(--data); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); }
+.cr-plate-what {
+  font-family: var(--read);
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.cr-plate[open] .cr-plate-what { -webkit-line-clamp: 1; }
+.cr-plate-toggle {
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--ink);
+  display: grid;
+  place-items: center;
+  font-family: var(--data);
+  font-size: 13px;
+  line-height: 1;
+}
+.cr-plate-toggle::before { content: '+'; }
+.cr-plate[open] .cr-plate-thumb { display: none; }
+.cr-plate[open] > summary { align-items: center; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
+.cr-plate[open] .cr-plate-toggle { background: var(--ink); color: var(--paper); }
+.cr-plate[open] .cr-plate-toggle::before { content: '−'; }
+.cr-plate[open] .cr-figure { margin-top: var(--s2); animation: cr-arrive 0.3s ease both; }
+.cr-desk .cr-plate > summary:focus-visible { outline-offset: 4px; }
 
 /* ── Sources under the log, during play ─────────────────────────────────── */
 
@@ -846,13 +1037,29 @@
   font-size: clamp(28px, 6vw, 52px);
   line-height: 0.98;
   text-transform: uppercase;
-  margin: 0 0 22px;
-  max-width: 20ch;
+  margin: 0 0 var(--s5);
   outline-offset: 6px;
 }
+.cr-endband-kicker {
+  display: block;
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  color: rgba(241, 232, 213, 0.8);
+  margin-bottom: 10px;
+}
+.cr-endband-name { display: block; max-width: 16ch; text-wrap: balance; }
 .cr-endband :focus-visible { outline-color: var(--paper); }
 
-.cr-toll { margin: 0; display: grid; justify-items: start; gap: 10px; }
+.cr-toll { margin: 0; display: grid; justify-items: start; gap: 12px; border-top: 1px solid rgba(241, 232, 213, 0.3); padding-top: var(--s4); }
+/* Wide: the figure and its label on the left, the note beside it, both
+   resting on the same baseline rule — a closing plate, not a stack. */
+@media (min-width: 860px) {
+  .cr-toll { grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 48px; align-items: end; }
+  .cr-toll-number { grid-row: 1; grid-column: 1; }
+  .cr-toll-label { grid-row: 2; grid-column: 1; }
+  .cr-toll-note { grid-row: 1 / 3; grid-column: 2; align-self: end; padding-left: 24px; border-left: 1px solid rgba(241, 232, 213, 0.3); }
+}
 .cr-toll-number {
   font-family: var(--poster);
   font-size: clamp(72px, 21vw, 190px);
@@ -872,22 +1079,24 @@
 .cr-toll-label .cr-cite a { color: #fff; }
 .cr-toll-note {
   font-family: var(--read);
-  font-size: 15px;
+  font-size: 15.5px;
   color: rgba(241, 232, 213, 0.82);
   max-width: 58ch;
   line-height: 1.55;
 }
 
-.cr-debrief-body { padding-top: 40px; padding-bottom: 64px; }
+.cr-debrief-body { padding-top: 48px; padding-bottom: 64px; }
 .cr-debrief-body > * { max-width: 920px; }
 
-.cr-dsec { margin: 0 0 48px; }
+.cr-dsec { margin: 0 0 56px; }
+@media (max-width: 599px) { .cr-dsec { margin-bottom: 44px; } }
 .cr-dsec-title {
+  text-wrap: balance;
   font-family: var(--poster);
   font-weight: 400;
   font-size: clamp(26px, 5vw, 34px);
   text-transform: uppercase;
-  margin: 0 0 16px;
+  margin: 0 0 var(--s4);
   padding-bottom: 8px;
   border-bottom: 2px solid var(--ink);
   line-height: 1;
@@ -927,12 +1136,15 @@
 }
 
 /* Score */
+/* Two by two from tablet up, so every label sits on one line and the four
+   figures share baselines across each row. */
 .cr-score-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 22px 30px;
-  margin: 8px 0 20px;
+  grid-template-columns: 1fr;
+  gap: var(--s4) 40px;
+  margin: var(--s4) 0 var(--s4);
 }
+@media (min-width: 600px) { .cr-score-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .cr-score-grid > div { border-top: 1px solid var(--ink); padding-top: 10px; }
 .cr-score-grid dt {
   font-family: var(--data);
@@ -943,7 +1155,7 @@
   margin-bottom: 6px;
 }
 .cr-score-grid dd { margin: 0; }
-.cr-score-grid .big { font-family: var(--poster); font-size: 30px; line-height: 1; text-transform: uppercase; }
+.cr-score-grid .big { font-family: var(--poster); font-size: 34px; line-height: 1; text-transform: uppercase; }
 .cr-score-grid .sub { font-family: var(--data); font-size: 11.5px; line-height: 1.5; color: var(--ink-soft); margin-top: 6px; }
 .cr-score-caveat { font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); max-width: 66ch; margin: 0; }
 
@@ -961,18 +1173,35 @@
 .cr-meter i.is-diverged { background: var(--ember); }
 
 /* The timing chart, on paper */
-.cr-timing { margin: 0 0 20px; max-width: 760px; }
-.cr-timing svg { display: block; width: 100%; height: auto; }
-.cr-timing-impact { fill: rgba(184, 50, 26, 0.12); stroke: var(--ember); stroke-width: 1; stroke-dasharray: 2 3; }
+.cr-timing { margin: 0 0 var(--s3); max-width: 760px; }
+.cr-timing-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0 0 6px;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.cr-timing-key span { display: inline-flex; align-items: center; gap: 6px; }
+.cr-timing-key svg { width: 13px; height: 12px; overflow: visible; }
+.cr-timing-plot { position: relative; }
+.cr-timing-plot > svg { display: block; width: 100%; height: auto; }
+.cr-timing-impact { fill: rgba(184, 50, 26, 0.12); stroke: var(--ember); stroke-width: 1; }
 .cr-timing-impact-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.14em; fill: var(--ember); }
 .cr-timing-axis { stroke: var(--ink); stroke-width: 1.2; }
 .cr-timing-tick { stroke: var(--ink-soft); stroke-width: 1; }
-.cr-timing-hour { font-family: var(--data); font-size: 10px; fill: var(--ink-soft); }
+.cr-timing-hour { font-family: var(--data); font-size: 10px; fill: var(--ink-soft); font-variant-numeric: tabular-nums; }
 .cr-timing-lane { font-family: var(--data); font-size: 10px; letter-spacing: 0.2em; fill: var(--ink-soft); }
 .cr-timing-lanerail { stroke: var(--rule); stroke-width: 1; }
+.cr-timing-ring { fill: var(--cr-sheet); }
 .cr-timing-dot { fill: var(--paper); stroke: var(--ink); stroke-width: 1.6; }
 .cr-timing-dot.is-alert { fill: var(--ink); }
 .cr-timing-dot.is-they { fill: var(--ink-soft); stroke: var(--ink-soft); }
+.cr-timing-hit { fill: transparent; cursor: crosshair; }
+.cr-timing-mark:hover .cr-timing-dot { stroke: var(--ember); stroke-width: 2.2; }
 .cr-timing-flag line { stroke: var(--ink); stroke-width: 1; }
 .cr-timing-flag text { font-family: var(--data); font-size: 10px; letter-spacing: 0.1em; fill: var(--ink); }
 .cr-timing-flag.is-they line { stroke: var(--ink-soft); stroke-dasharray: 3 3; }
@@ -983,14 +1212,37 @@
 .cr-timing.is-compact .cr-timing-impact-label,
 .cr-timing.is-compact .cr-timing-flag text,
 .cr-timing.is-compact .cr-timing-flag-muted { font-size: 11.5px; letter-spacing: 0.06em; }
+/* Hover read-out: a slip of ink above the mark. */
+.cr-timing-tip {
+  position: absolute;
+  z-index: 2;
+  transform: translate(-12px, calc(-100% - 14px));
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  max-width: min(280px, 70vw);
+  padding: 8px 10px 9px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--data);
+  font-size: 11px;
+  line-height: 1.4;
+  pointer-events: none;
+  box-shadow: 3px 3px 0 rgba(25, 20, 16, 0.18);
+}
+.cr-timing-tip.is-left { transform: translate(calc(-100% + 12px), calc(-100% - 14px)); }
+.cr-timing-tip-head { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(241, 232, 213, 0.75); }
+.cr-timing-tip-text { text-transform: uppercase; letter-spacing: 0.04em; }
+.cr-timing-tip-note { color: rgba(241, 232, 213, 0.75); text-transform: capitalize; }
 .cr-timing-caption {
   font-family: var(--data);
   font-size: 11.5px;
   line-height: 1.6;
   color: var(--ink-soft);
-  margin-top: 6px;
+  margin-top: 8px;
   max-width: 62ch;
 }
+.cr-timing-caption em { font-style: normal; color: var(--ink); }
 
 /* The inquiry */
 .cr-findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; max-width: 70ch; }
@@ -1050,4 +1302,7 @@
   .cr-entry, .cr-slip, .cr-boardline, .cr-call, .cr-record, .cr-debrief, .cr-sheet[open] { animation: none !important; }
   .cr-zone .cr-zone-shape { animation: none !important; }
   .cr-daystrip-elapsed, .cr-daystrip-hour, .cr-daystrip-tick, .cr-daystrip-needle, .cr-pips i { transition: none; }
+  .cr-plate[open] .cr-figure { animation: none !important; }
+  .cr-card-arrow, .cr-card, .cr-option, .cr-option-label, .cr-btn-primary, .cr-btn-quiet { transition: none; }
+  .cr-card:hover .cr-card-arrow, .cr-card:focus-visible .cr-card-arrow { transform: none; }
 }

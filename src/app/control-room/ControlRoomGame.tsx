@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Citation, MediaAttachment, Option, Scenario, ScenarioBundle, Timestep } from './types';
 import { startSession, logChoice, completeSession, type ChoiceEvent } from './telemetry';
 import { scoreRun, historicalLeadTime, formatLead, type Choice } from './scoring';
@@ -323,6 +323,13 @@ function BoardList({ scenario, board }: { scenario: Scenario; board: ReturnType<
   );
 }
 
+/** Why the board is blank on the briefing: it lights only from traffic the
+ *  player has been shown, so the first decision's items (which may report a
+ *  fire already burning, or a warning already in force) light it all at once
+ *  at the opening time. Said up front, that first frame is expected. */
+const boardNote = (scenario: Scenario) =>
+  `Quiet until you take the desk. At ${scenario.timesteps[0].time} the board lights from the first traffic you are shown — including anything already under way before the clock starts.`;
+
 /* ── Wide screens: the board and your run, alongside the log ────────────── */
 
 function SidePanel({ scenario, board, choices, started }: {
@@ -331,7 +338,8 @@ function SidePanel({ scenario, board, choices, started }: {
   return (
     <aside className="cr-side" aria-label="Situation board and your run">
       <p className="cr-side-head">Situation board</p>
-      <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones} />
+      <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones}
+        note={started ? undefined : boardNote(scenario)} />
       <BoardList scenario={scenario} board={board} />
       <p className="cr-side-head">Your run so far</p>
       {started && choices.length ? (
@@ -364,18 +372,22 @@ function SelectScreen({ bundle, onPick }: { bundle: ScenarioBundle; onPick: (s: 
       <div className="cr-select-grid">
         {bundle.playable.map((s) => (
           <button type="button" key={s.id} className="cr-card" onClick={() => onPick(s)}>
-            <HazardGlyph hazard={s.hazard} size={26} className="cr-card-glyph" />
-            <span className="cr-card-date">{s.date} · {s.hazard}</span>
+            <span className="cr-card-head">
+              <HazardGlyph hazard={s.hazard} size={22} className="cr-card-glyph" />
+              <span className="cr-card-date">{s.date} · {s.hazard}</span>
+            </span>
             <span className="cr-card-title">{s.title}</span>
             <span className="cr-card-loc">{s.location}</span>
             <span className="cr-card-meta">{s.timesteps.length} decisions · {s.clock.start}–{s.clock.end} {tzLabel(s)}</span>
-            <span className="cr-card-cta">Take the desk →</span>
+            <span className="cr-card-cta">Take the desk <span className="cr-card-arrow" aria-hidden>→</span></span>
           </button>
         ))}
         {bundle.stubs.map((s) => (
           <div key={s.id} className="cr-card cr-card-stub" aria-disabled>
-            <HazardGlyph hazard={s.hazard} size={26} className="cr-card-glyph" />
-            <span className="cr-card-date">{s.date} · {s.hazard}</span>
+            <span className="cr-card-head">
+              <HazardGlyph hazard={s.hazard} size={22} className="cr-card-glyph" />
+              <span className="cr-card-date">{s.date} · {s.hazard}</span>
+            </span>
             <span className="cr-card-title">{s.title}</span>
             <span className="cr-card-loc">{s.location}</span>
             <span className="cr-card-cta">In research — sources needed</span>
@@ -411,7 +423,7 @@ function Briefing({ scenario, started, inlineMap, onStart }: {
         The console above keeps the clock and your progress.</p>
       {scenario.briefing_media && <Figure scenario={scenario} m={scenario.briefing_media} />}
       {inlineMap && !started && (
-        <OpsMap scenario={scenario} zoneStates={{}} warnedZones={[]} />
+        <OpsMap scenario={scenario} zoneStates={{}} warnedZones={[]} note={boardNote(scenario)} />
       )}
       {started ? (
         <p className="cr-brief-taken">Desk taken at {scenario.clock.start} {tzLabel(scenario)}.</p>
@@ -468,13 +480,14 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, onChoose, on
 
       {changes.length > 0 && (
         <p className="cr-boardline" style={{ '--i': t.info_available.length } as React.CSSProperties}>
-          <span className="cr-boardline-tag">Board</span>
-          {changes.map((c, i) => (
-            <Fragment key={c.label}>
-              {i > 0 && <span aria-hidden> · </span>}
-              <span>{c.label} → <strong>{vocab.states[c.state]}</strong></span>
-            </Fragment>
-          ))}
+          <span className="cr-boardline-tag">{index === 0 ? 'Board opens' : 'Board'}</span>
+          <span className="cr-boardline-body">
+            {changes.map((c) => (
+              <span key={c.label} className="cr-boardline-item">
+                {c.label} <span aria-hidden>→</span><span className="cr-sr"> now </span> <strong>{vocab.states[c.state]}</strong>
+              </span>
+            ))}
+          </span>
         </p>
       )}
 
@@ -520,7 +533,7 @@ function CallRecord({ scenario, t, choice, sourceIndex }: {
       <ul className="cr-taken" aria-label="Options at this hour">
         {t.options.map((o) => (
           <li key={o.id} className={o.id === choice.option.id ? 'is-chosen' : 'is-not'}>
-            <span className="cr-taken-mark">{o.id === choice.option.id ? 'Your call' : 'Not taken'}</span>
+            <span className="cr-taken-mark">{o.id === choice.option.id ? 'Taken' : 'Not taken'}</span>
             <span className="cr-taken-label">{o.label}</span>
           </li>
         ))}
@@ -528,7 +541,10 @@ function CallRecord({ scenario, t, choice, sourceIndex }: {
       {warned.length > 0 && (
         <p className="cr-boardline cr-boardline-you">
           <span className="cr-boardline-tag">Board</span>
-          Marked warned by you: {warned.map(zoneLabel).join(' · ')}
+          <span className="cr-boardline-body">
+            <span className="cr-boardline-lead">Marked warned by you</span>
+            {warned.map((z) => <span key={z} className="cr-boardline-item">{zoneLabel(z)}</span>)}
+          </span>
         </p>
       )}
       {c.known ? (
@@ -568,7 +584,8 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
             <span>End of record</span>
           </p>
           <h2 id="cr-debrief-title" className="cr-endband-title" tabIndex={-1}>
-            Debrief — {scenario.title}, {scenario.date}
+            <span className="cr-endband-kicker">Debrief<span className="cr-sr"> —</span> <span aria-hidden>·</span> {scenario.date}</span>
+            <span className="cr-endband-name">{scenario.title}</span>
           </h2>
           <p className="cr-toll">
             <span className="cr-toll-number">{d.min === d.max ? d.min : `${d.min}–${d.max}`}</span>
@@ -617,10 +634,14 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
           <div className="cr-dsec">
             <h3 className="cr-dsec-title">After the clock stopped</h3>
             <p className="cr-dsec-note">Imagery from after the last decision point. None of it was on the desk:
-              the log showed only what existed at each hour.</p>
-            <div className="cr-figures">
-              {scenario.debrief_media.map((m) => <Figure key={m.file} scenario={scenario} m={m} />)}
-            </div>
+              the log showed only what existed at each hour.{compact ? ' Tap a plate to open it.' : ''}</p>
+            {compact ? (
+              <ContactSheet scenario={scenario} media={scenario.debrief_media} />
+            ) : (
+              <div className="cr-figures">
+                {scenario.debrief_media.map((m) => <Figure key={m.file} scenario={scenario} m={m} />)}
+              </div>
+            )}
           </div>
         )}
 
@@ -693,16 +714,36 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
 
 /* ── Figures ───────────────────────────────────────────────────────────────
    A cited image or clip, printed into the log like a pasted-in plate: ruled
-   frame, the caption beneath it, then credit and licence in small mono with
-   the licence linked. Width and height are always set and the frame keeps
-   the aspect ratio, so nothing shifts as a lazy image arrives. The image is
-   informative, so its caption is its alt text. Video never autoplays and
-   loads nothing until asked. Files are served exactly as vetted (no image
-   optimiser re-encoding them). */
+   frame, then the caption in the reading face, then ONE compact mono credit
+   line — who made it · the licence by its short name (linked to the licence
+   or its guidance) · the source page. The full credit and the full licence
+   wording are kept, folded into a "Terms" disclosure at the end of that line
+   (and on the links' titles), so nothing about the licence is dropped from
+   the page; it simply stops outweighing the caption. Width and height are
+   always set and the frame keeps the aspect ratio, so nothing shifts as a
+   lazy image arrives. The image is informative, so its caption is its alt
+   text. Video never autoplays and loads nothing until asked. Files are
+   served exactly as vetted (no image optimiser re-encoding them). */
+
+/** "CC0 1.0 (NASA data-use guidance: …)" → "CC0 1.0"; "Public domain (U.S.
+ *  military work; …)" → "Public domain". */
+const shortLicense = (license: string) => license.split(' (')[0].trim();
+
+/** The credit as one line can carry it: the first clause, then without a
+ *  trailing parenthetical, then the first comma-part — only as far as needed. */
+function shortCredit(credit: string) {
+  let s = credit.split(/;|: /)[0].trim();
+  if (s.length > 52) s = s.replace(/\s*\([^)]*\)\s*$/, '');
+  if (s.length > 52) s = s.split(', ')[0];
+  return s;
+}
 
 function Figure({ scenario, m }: { scenario: Scenario; m: MediaAttachment }) {
   const base = `/control-room/${scenario.id}/`;
   const ratio = { aspectRatio: `${m.width} / ${m.height}` };
+  const credit = shortCredit(m.credit);
+  const license = shortLicense(m.license);
+  const folded = credit !== m.credit || license !== m.license;
   return (
     <figure className={`cr-figure cr-figure-${m.type}`}>
       <div className="cr-figure-frame">
@@ -718,11 +759,68 @@ function Figure({ scenario, m }: { scenario: Scenario; m: MediaAttachment }) {
       <figcaption>
         <span className="cr-figure-caption">{m.caption}</span>
         <span className="cr-figure-credit">
-          {m.credit} · <a href={m.licenseUrl ?? m.sourcePage}>{m.license}</a>
-          {m.licenseUrl ? <> · <a href={m.sourcePage}>source</a></> : null}
+          <span className="cr-figure-by" title={m.credit}>{credit}</span>
+          <span className="cr-figure-sep" aria-hidden> · </span>
+          <a href={m.licenseUrl ?? m.sourcePage} title={m.license}>{license}</a>
+          {m.licenseUrl ? <><span className="cr-figure-sep" aria-hidden> · </span><a href={m.sourcePage}>Source</a></> : null}
+          {folded && (
+            <details className="cr-figure-terms">
+              <summary><span className="cr-figure-sep" aria-hidden> · </span><span className="cr-figure-terms-label">Terms</span></summary>
+              <span className="cr-figure-terms-body">
+                <span><b>Credit</b> {m.credit}</span>
+                <span><b>Licence</b> {m.license}</span>
+              </span>
+            </details>
+          )}
         </span>
       </figcaption>
     </figure>
+  );
+}
+
+/** Phones, debrief only: the after-the-clock imagery as a two-up contact
+ *  sheet. Each plate is a disclosure — its thumbnail and short label are the
+ *  summary; opening it prints the full figure (caption, credit, licence)
+ *  across both columns, in place. No lightbox, no dependency; the summary's
+ *  label names the plate, and the full caption is the opened figure's. */
+/** A plate's short label: the caption's lead clause (usually its date and
+ *  place — "9 August, Upcountry Maui"), never a dangling parenthesis. CSS
+ *  clamps it to three lines; the full caption is in the opened plate. */
+function plateLabel(caption: string) {
+  let s = caption.split(/:\s|\.\s|\s—\s/)[0];
+  const open = s.lastIndexOf('(');
+  if (open > 0 && s.indexOf(')', open) < 0) s = s.slice(0, open).trim();
+  return s.replace(/[,;]$/, '');
+}
+
+function ContactSheet({ scenario, media }: { scenario: Scenario; media: MediaAttachment[] }) {
+  const base = `/control-room/${scenario.id}/`;
+  return (
+    <div className="cr-contact">
+      {media.map((m, i) => {
+        const thumb = m.type === 'image' ? m.file : m.poster;
+        const label = plateLabel(m.caption);
+        return (
+          <details key={m.file} className="cr-plate">
+            <summary>
+              <span className="cr-plate-thumb">
+                {thumb ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- same vetted file as the plate, not re-encoded
+                  <img src={base + thumb} alt="" loading="lazy" decoding="async" width={m.width} height={m.height} />
+                ) : <span className="cr-plate-blank" />}
+                {m.type === 'video' && <span className="cr-plate-play" aria-hidden>▶</span>}
+              </span>
+              <span className="cr-plate-label">
+                <span className="cr-plate-num">Plate {i + 1}{m.type === 'video' ? ' · clip' : ''}</span>
+                <span className="cr-plate-what">{label}</span>
+              </span>
+              <span className="cr-plate-toggle" aria-hidden />
+            </summary>
+            <Figure scenario={scenario} m={m} />
+          </details>
+        );
+      })}
+    </div>
   );
 }
 

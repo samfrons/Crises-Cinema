@@ -19,6 +19,8 @@ type Props = {
   scenario: Scenario;
   zoneStates: Record<string, ZoneState>;
   warnedZones: string[];
+  /** A line printed under the legend, e.g. why the board is still blank. */
+  note?: string;
 };
 
 /** What every hand-drawn board gets: state lookups and per-instance ids. */
@@ -38,7 +40,7 @@ const BOARDS: Record<string, (b: Board) => JSX.Element> = {
   'lahaina-2023': LahainaBoard,
 };
 
-export default function OpsMap({ scenario, zoneStates, warnedZones }: Props) {
+export default function OpsMap({ scenario, zoneStates, warnedZones, note }: Props) {
   // Pattern ids are per instance, so a board in the side panel and one in
   // the briefing or the phone sheet never resolve to each other's patterns.
   const uid = useId().replace(/:/g, '');
@@ -69,11 +71,32 @@ export default function OpsMap({ scenario, zoneStates, warnedZones }: Props) {
         </defs>
         <Draw {...board} />
       </svg>
+      {/* The key: the four states as the progression they are (a zone only
+          ever moves rightward along it, and may skip a step when the cited
+          traffic does), then your own mark, set apart. Each swatch is drawn
+          with the board's own strokes and pattern, so key and plate match. */}
       <figcaption className="cr-map-legend">
-        {(['quiet', 'watch', 'signal', 'impact'] as ZoneState[]).map((s) => (
-          <span key={s} className={`cr-leg is-${s}`}>{vocab.states[s]}</span>
-        ))}
-        <span className="cr-leg is-warned">warned by you</span>
+        <span className="cr-map-legend-scale">
+          {(['quiet', 'watch', 'signal', 'impact'] as ZoneState[]).map((s, i) => (
+            <span key={s} className="cr-leg">
+              <span className="cr-leg-track" aria-hidden>
+                <svg className={`cr-leg-swatch cr-zone is-${s}`} viewBox="0 0 18 12">
+                  <rect className="cr-zone-shape" x="1.5" y="1.5" width="15" height="9"
+                    style={{ fill: s === 'impact' ? `url(#${impact})` : undefined }} />
+                </svg>
+                {i < 3 && <span className="cr-leg-arrow" />}
+              </span>
+              <span className="cr-leg-name">{vocab.states[s]}</span>
+            </span>
+          ))}
+        </span>
+        <span className="cr-leg cr-leg-you">
+          <svg className="cr-leg-swatch cr-zone is-warned" viewBox="0 0 18 12" aria-hidden>
+            <rect className="cr-zone-shape" x="2" y="2" width="14" height="8" />
+          </svg>
+          warned by you
+        </span>
+        {note && <span className="cr-map-note">{note}</span>}
       </figcaption>
     </figure>
   );
@@ -100,6 +123,19 @@ function ImpactPattern({ id, vocab }: { id: string; vocab: HazardVocab }) {
   );
 }
 
+/** The plate's title block: a paper band ruled off the top of the board, so
+ *  no coastline, road or river ever runs through the title. */
+function PlateHead({ title }: { title: string }) {
+  return (
+    <g className="cr-map-platehead">
+      <rect x="0" y="0" width="720" height="52" className="cr-map-plateband" />
+      <line x1="0" y1="52" x2="720" y2="52" className="cr-map-platerule" />
+      <text className="cr-map-plate" x="16" y="25">{title}</text>
+      <text className="cr-map-scale" x="16" y="42">SCHEMATIC · NOT TO SCALE</text>
+    </g>
+  );
+}
+
 function North({ x, y }: { x: number; y: number }) {
   return (
     <g className="cr-map-north" transform={`translate(${x}, ${y})`}>
@@ -121,48 +157,47 @@ function ValenciaBoard({ zoneClass, fill, word, warned, sea }: Board) {
 
       {/* Albufera lagoon */}
       <ellipse cx="600" cy="312" rx="34" ry="22" className="cr-map-water" />
-      <text className="cr-map-minor" x="600" y="356" textAnchor="middle">L&apos;ALBUFERA</text>
+      <text className="cr-map-minor" x="628" y="356" textAnchor="end">L&apos;ALBUFERA</text>
 
       {/* Valencia city */}
       <rect x="586" y="120" width="40" height="34" className="cr-map-city" />
-      <text className="cr-map-label" x="606" y="110" textAnchor="middle">VALÈNCIA</text>
+      <text className="cr-map-label" x="626" y="110" textAnchor="end">VALÈNCIA</text>
 
       {/* ZONE — Magro basin: Utiel, Requena, the Forata dam */}
       <g className={zoneClass('magro-utiel')}>
-        <path className="cr-zone-shape" style={{ fill: fill('magro-utiel') }} d="M40 96l150-34 96 44 40 74-52 60-118-16-92-60z" />
-        {/* the Magro, down through Forata towards the Júcar */}
-        <path className="cr-map-river" d="M56 132c40-6 74-22 108-14s52 34 74 44 44 24 56 46 16 44 34 62 40 26 54 48" />
+        <path className="cr-zone-shape" style={{ fill: fill('magro-utiel') }} d="M40 96l150-34 96 44 40 74-48 68-128-2-94-68z" />
+        {/* the Magro, down through Forata and on south towards the Júcar */}
+        <path className="cr-map-river" d="M56 132c40-6 74-22 108-14s52 34 74 44 44 24 56 46 6 50 4 90-4 70 0 102" />
         <rect x="272" y="188" width="18" height="7" className="cr-map-dam" transform="rotate(28 281 191)" />
-        <text className="cr-map-minor" x="304" y="182">FORATA DAM</text>
+        <text className="cr-map-minor" x="334" y="196">FORATA DAM</text>
         <circle cx="96" cy="122" r="4" className="cr-map-town" />
         <text className="cr-map-minor" x="96" y="108" textAnchor="middle">UTIEL</text>
         <circle cx="152" cy="140" r="4" className="cr-map-town" />
         <text className="cr-map-minor" x="152" y="162" textAnchor="middle">REQUENA</text>
-        <text className="cr-zone-label" x="160" y="188">MAGRO BASIN</text>
-        <text className="cr-zone-state" x="160" y="204">{word('magro-utiel')}</text>
-        {warned('magro-utiel') && <text className="cr-zone-state cr-zone-warned" x="160" y="220">WARNED BY YOU</text>}
+        <text className="cr-zone-label" x="128" y="184">MAGRO BASIN</text>
+        <text className="cr-zone-state" x="128" y="201">{word('magro-utiel')}</text>
+        {warned('magro-utiel') && <text className="cr-zone-state cr-zone-warned" x="128" y="217">WARNED BY YOU</text>}
       </g>
 
-      {/* ZONE — Rambla del Poyo and the Horta Sud towns */}
+      {/* ZONE — Rambla del Poyo and the Horta Sud towns. The zone runs east
+          to the lagoon so the towns can be named clear of the ravine. */}
       <g className={zoneClass('poyo-horta-sud')}>
-        <path className="cr-zone-shape" style={{ fill: fill('poyo-horta-sud') }} d="M336 236l112-46 118 32 4 84-96 50-124-38z" />
+        <path className="cr-zone-shape" style={{ fill: fill('poyo-horta-sud') }} d="M336 236L460 200L612 214L618 276L568 296L476 356L346 326z" />
         {/* the ravine, west hills to the Albufera */}
-        <path className="cr-map-river cr-map-rambla" d="M340 250c30-16 58-24 88-22s58 16 86 26 40 22 56 46" />
-        <circle cx="500" cy="264" r="4" className="cr-map-town" />
-        <text className="cr-map-minor" x="492" y="250" textAnchor="middle">PAIPORTA</text>
-        <circle cx="534" cy="286" r="4" className="cr-map-town" />
-        <text className="cr-map-minor" x="544" y="281">CATARROJA</text>
-        <circle cx="556" cy="308" r="4" className="cr-map-town" />
-        <text className="cr-map-minor" x="547" y="306" textAnchor="end">ALFAFAR</text>
-        <text className="cr-zone-label" x="356" y="270">RAMBLA DEL POYO</text>
-        <text className="cr-zone-label" x="356" y="286">HORTA SUD</text>
-        <text className="cr-zone-state" x="356" y="303">{word('poyo-horta-sud')}</text>
-        {warned('poyo-horta-sud') && <text className="cr-zone-state cr-zone-warned" x="356" y="319">WARNED BY YOU</text>}
+        <path className="cr-map-river cr-map-rambla" d="M340 250c30-16 58-24 88-22s58 16 86 26 52 26 66 40" />
+        <circle cx="500" cy="248" r="4" className="cr-map-town" />
+        <text className="cr-map-minor" x="508" y="236">PAIPORTA</text>
+        <circle cx="536" cy="276" r="4" className="cr-map-town" />
+        <text className="cr-map-minor" x="528" y="281" textAnchor="end">CATARROJA</text>
+        <circle cx="556" cy="296" r="4" className="cr-map-town" />
+        <text className="cr-map-minor" x="548" y="301" textAnchor="end">ALFAFAR</text>
+        <text className="cr-zone-label" x="352" y="262">RAMBLA DEL POYO</text>
+        <text className="cr-zone-label" x="352" y="278">HORTA SUD</text>
+        <text className="cr-zone-state" x="352" y="295">{word('poyo-horta-sud')}</text>
+        {warned('poyo-horta-sud') && <text className="cr-zone-state cr-zone-warned" x="352" y="311">WARNED BY YOU</text>}
       </g>
 
-      {/* Plate furniture */}
-      <text className="cr-map-plate" x="16" y="24">PROVINCE OF VALENCIA — OPERATIONS BOARD</text>
-      <text className="cr-map-minor" x="16" y="40">SCHEMATIC · NOT TO SCALE</text>
+      <PlateHead title="PROVINCE OF VALENCIA — OPERATIONS BOARD" />
       <North x={30} y={366} />
     </>
   );
@@ -183,57 +218,56 @@ function LahainaBoard({ zoneClass, fill, word, warned, sea }: Board) {
       <path d="M108 0c-8 34 8 58-2 92s12 60 2 96 10 62 0 98 8 66-4 114" className="cr-map-coast" />
       <text className="cr-map-sea-label" x="50" y="236" transform="rotate(-90 50 236)" textAnchor="middle">PACIFIC OCEAN</text>
 
-      {/* The West Maui Mountains, mauka */}
+      {/* The West Maui Mountains, mauka — kept clear of the Bypass's swing */}
       <g className="cr-map-ridge">
-        <path d="M430 66l14-14 14 14M438 132l14-14 14 14M428 200l14-14 14 14M440 268l14-14 14 14M430 336l14-14 14 14" />
+        <path d="M444 74l14-14 14 14M452 136l14-14 14 14M444 198l14-14 14 14M452 304l14-14 14 14M444 362l14-14 14 14" />
       </g>
-      <text className="cr-map-minor" x="476" y="210" transform="rotate(90 476 210)" textAnchor="middle">WEST MAUI MTS</text>
+      <text className="cr-map-minor" x="482" y="214" transform="rotate(90 482 214)" textAnchor="middle">WEST MAUI MTS</text>
 
       {/* ZONE — Front Street, Kahoma and the waterfront: shore to the highway */}
       <g className={zoneClass('lahaina-front-street')}>
         <path className="cr-zone-shape" style={{ fill: fill('lahaina-front-street') }}
           d="M114 104L244 100L246 344L108 348c6-30 0-58 4-86s-6-56 2-92-8-40 0-66z" />
-        <text className="cr-zone-label" x="128" y="132">FRONT STREET</text>
-        <text className="cr-zone-label" x="128" y="148">WATERFRONT</text>
-        <text className="cr-zone-state" x="128" y="166">{word('lahaina-front-street')}</text>
-        {warned('lahaina-front-street') && <text className="cr-zone-state cr-zone-warned" x="128" y="182">WARNED BY YOU</text>}
+        <text className="cr-zone-label" x="128" y="130">FRONT STREET</text>
+        <text className="cr-zone-label" x="128" y="146">WATERFRONT</text>
+        <text className="cr-zone-state" x="128" y="163">{word('lahaina-front-street')}</text>
+        {warned('lahaina-front-street') && <text className="cr-zone-state cr-zone-warned" x="128" y="179">WARNED BY YOU</text>}
       </g>
 
-      {/* ZONE — Lahainaluna and Kelawea: the slope east of Highway 30 */}
+      {/* ZONE — Lahainaluna and Kelawea: the slope between Highway 30 and the Bypass */}
       <g className={zoneClass('lahaina-lahainaluna')}>
         <path className="cr-zone-shape" style={{ fill: fill('lahaina-lahainaluna') }}
-          d="M256 168L404 176L420 306L258 324z" />
-        <text className="cr-zone-label" x="268" y="194">LAHAINALUNA</text>
-        <text className="cr-zone-label" x="268" y="210">KELAWEA</text>
-        <text className="cr-zone-state" x="268" y="228">{word('lahaina-lahainaluna')}</text>
-        {warned('lahaina-lahainaluna') && <text className="cr-zone-state cr-zone-warned" x="268" y="306">WARNED BY YOU</text>}
+          d="M256 166L380 174L396 298L258 322z" />
+        <text className="cr-zone-label" x="266" y="192">LAHAINALUNA</text>
+        <text className="cr-zone-label" x="266" y="208">KELAWEA</text>
+        <text className="cr-zone-state" x="266" y="225">{word('lahaina-lahainaluna')}</text>
+        {warned('lahaina-lahainaluna') && <text className="cr-zone-state cr-zone-warned" x="266" y="241">WARNED BY YOU</text>}
       </g>
 
-      {/* Roads, drawn over the zones */}
+      {/* Roads, drawn over the zones; road names set a size below place names */}
       <path className="cr-map-road" d="M120 104c-4 40 4 74-2 110s4 70 0 120" />
-      <text className="cr-map-minor" x="132" y="322" transform="rotate(-90 132 322)">FRONT ST</text>
-      <path className="cr-map-road cr-map-highway" d="M250 0c-4 60 4 120-2 200s4 140 0 200" />
-      <text className="cr-map-minor" x="258" y="364">HWY 30</text>
-      <path className="cr-map-road cr-map-highway" d="M250 376c70-14 128-58 130-122s-54-104-128-116" />
-      <text className="cr-map-minor" x="388" y="140" textAnchor="middle">BYPASS</text>
-      <path className="cr-map-road" d="M118 252c60-2 120-4 180-8s92-6 124-12" />
-      <text className="cr-map-minor" x="268" y="268">LAHAINALUNA RD</text>
+      <text className="cr-map-roadname" x="138" y="342" transform="rotate(-90 138 342)">FRONT ST</text>
+      <path className="cr-map-road cr-map-highway" d="M250 52c-4 50 4 98-2 156s4 132 0 192" />
+      <text className="cr-map-roadname" x="258" y="352">HWY 30</text>
+      <path className="cr-map-road cr-map-highway" d="M250 384C336 372 436 318 436 250S346 128 252 116" />
+      <text className="cr-map-roadname" x="382" y="146">BYPASS</text>
+      <path className="cr-map-road" d="M118 268c60-2 120-4 180-8s110-8 150-14" />
+      <text className="cr-map-roadname" x="266" y="282">LAHAINALUNA RD</text>
 
       {/* Shelter on the highway north of town */}
-      <rect x="244" y="74" width="12" height="12" className="cr-map-shelter" />
-      <text className="cr-map-minor" x="264" y="85">CIVIC CENTER</text>
-      <text className="cr-map-minor" x="258" y="64">↑ KAPALUA</text>
+      <rect x="244" y="76" width="12" height="12" className="cr-map-shelter" />
+      <text className="cr-map-minor" x="264" y="87">CIVIC CENTER</text>
+      <text className="cr-map-minor" x="262" y="68">↑ KAPALUA</text>
 
       {/* Inset — Upcountry, on the slope of Haleakalā */}
-      <rect x="500" y="58" width="206" height="326" className="cr-map-inset" />
-      <text className="cr-map-minor" x="512" y="78">INSET · UPCOUNTRY</text>
-      <text className="cr-map-minor" x="512" y="94">OTHER SCALE</text>
+      <rect x="500" y="62" width="206" height="322" className="cr-map-inset" />
+      <text className="cr-map-minor" x="512" y="82">INSET · UPCOUNTRY</text>
+      <text className="cr-map-minor" x="512" y="98">OTHER SCALE</text>
       <g className="cr-map-contour">
-        <path d="M520 360c40-60 120-96 176-104" />
-        <path d="M540 384c40-46 104-78 156-84" />
-        <path d="M512 320c54-66 128-110 184-124" />
+        <path d="M512 336c60-28 124-42 184-44" />
+        <path d="M512 362c60-24 124-36 184-38" />
       </g>
-      <text className="cr-map-minor" x="696" y="372" textAnchor="end">HALEAKALĀ ↘</text>
+      <text className="cr-map-minor" x="694" y="372" textAnchor="end">HALEAKALĀ ↘</text>
       <circle cx="540" cy="128" r="4" className="cr-map-town" />
       <text className="cr-map-minor" x="550" y="133">PUKALANI</text>
       <text className="cr-map-minor" x="550" y="149">SHELTER</text>
@@ -244,16 +278,14 @@ function LahainaBoard({ zoneClass, fill, word, warned, sea }: Board) {
           d="M520 176L612 156L690 166L688 280L604 300L522 276z" />
         <circle cx="664" cy="184" r="4" className="cr-map-town" />
         <text className="cr-map-minor" x="654" y="190" textAnchor="end">OLINDA</text>
-        <circle cx="548" cy="258" r="4" className="cr-map-town" />
-        <text className="cr-map-minor" x="558" y="263">KULA</text>
-        <text className="cr-zone-label" x="532" y="224">KULA · OLINDA</text>
-        <text className="cr-zone-state" x="532" y="242">{word('upcountry-kula')}</text>
-        {warned('upcountry-kula') && <text className="cr-zone-state cr-zone-warned" x="532" y="322">WARNED BY YOU</text>}
+        <circle cx="548" cy="263" r="4" className="cr-map-town" />
+        <text className="cr-map-minor" x="558" y="268">KULA</text>
+        <text className="cr-zone-label" x="532" y="212">KULA · OLINDA</text>
+        <text className="cr-zone-state" x="532" y="229">{word('upcountry-kula')}</text>
+        {warned('upcountry-kula') && <text className="cr-zone-state cr-zone-warned" x="532" y="245">WARNED BY YOU</text>}
       </g>
 
-      {/* Plate furniture */}
-      <text className="cr-map-plate" x="16" y="24">LAHAINA, WEST MAUI — OPERATIONS BOARD</text>
-      <text className="cr-map-minor" x="16" y="40">SCHEMATIC · NOT TO SCALE</text>
+      <PlateHead title="LAHAINA, WEST MAUI — OPERATIONS BOARD" />
       <North x={60} y={372} />
     </>
   );
