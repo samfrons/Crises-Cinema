@@ -295,7 +295,9 @@ export default function MethodologyPage() {
             </p>
 
             <a className="md-back" href="/">← Back to the decades</a>
-            <Elsewhere current="/methodology" />
+            <footer>
+              <Elsewhere current="/methodology" />
+            </footer>
           </div>
         </section>
       </main>

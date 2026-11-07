@@ -143,7 +143,9 @@ export default function ReelPage() {
             </div>
 
             <a className="rl-back" href="/">← Back to the decades</a>
-            <Elsewhere current="/reel" />
+            <footer>
+              <Elsewhere current="/reel" />
+            </footer>
           </div>
         </section>
       </main>

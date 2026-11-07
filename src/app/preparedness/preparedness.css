@@ -167,6 +167,7 @@
 }
 
 .pr-notloaded {
+  overflow-wrap: anywhere; /* drop-in file paths are unbreakable tokens; let them wrap at 320px */
   border: 1px dashed var(--ink-faint);
   background: var(--paper-lit);
   padding: 16px 18px;
@@ -605,7 +606,7 @@
 
 .pr-two-col {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr));
   gap: 34px;
 }
 .pr-panel-col { border-top: 2px solid var(--ink); padding-top: 16px; min-width: 0; }
@@ -750,7 +751,7 @@
 
 .pr-case-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(330px, 100%), 1fr));
   gap: 34px 32px;
   margin-top: 28px;
 }
