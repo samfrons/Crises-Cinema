@@ -7,6 +7,7 @@ import ScoringView from './ScoringView';
 import CaseStudyCards from './CaseStudyCards';
 import TwoNumbers from './TwoNumbers';
 import './preparedness.css';
+import Elsewhere from '@/app/components/Elsewhere';
 
 /**
  * The field report.
@@ -376,12 +377,7 @@ export default function PreparednessPage() {
             </div>
           </dl>
 
-          <h3>Elsewhere on this site</h3>
-          <p className="pr-siblings">
-            <a href="/">The essay</a> · <a href="/atlas">The Atlas of Ruin</a> ·{' '}
-            <a href="/dispatches">Dispatches from the Ground</a> · <a href="/reel">The Reel</a> ·{' '}
-            <a href="/methodology">Methodology</a> · <a href="/catalogue">The Catalogue</a>
-          </p>
+          <Elsewhere current="/preparedness" tone="dark" />
           <p className="pr-built">
             Case-study cards are editorial drafts written from the public record and pending the
             site owner&rsquo;s review. Inquiry findings are quoted or paraphrased from the named

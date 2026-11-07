@@ -77,13 +77,15 @@
 @media (max-width: 900px) {
   .sn-inner { padding: 0; }
   .sn-list {
-    padding: 0 20px;
+    padding: 0 28px;
     /* Edge fades hint that the strip scrolls. */
-    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 28px), transparent 100%);
-    mask-image: linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 28px), transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 28px), transparent 100%);
+    mask-image: linear-gradient(90deg, transparent 0, #000 16px, #000 calc(100% - 28px), transparent 100%);
   }
   .sn-link { min-height: 42px; padding: 0 11px; }
-  .sn-list li:first-child .sn-link { padding-left: 11px; }
-  .sn-list li:first-child .sn-link::after { left: 11px; }
   .sn-link::after { left: 11px; right: 11px; }
+  .sn-list li:first-child .sn-link { padding-left: 0; }
+}
+@media (max-width: 640px) {
+  .sn-list { padding: 0 18px; }
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import atlasData from '../../data/atlas.json';
 import AtlasView, { type Atlas } from './AtlasView';
+import Elsewhere from '@/app/components/Elsewhere';
 import './atlas.css';
 
 const atlas = atlasData as unknown as Atlas;
@@ -94,6 +95,7 @@ export default function AtlasPage() {
             same map redrawn with risk indices, case files and funding gaps, read{' '}
             <a href="/preparedness">the preparedness essay</a>.
           </p>
+          <Elsewhere current="/atlas" />
         </div>
       </footer>
     </div>

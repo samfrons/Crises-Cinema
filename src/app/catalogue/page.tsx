@@ -3,6 +3,7 @@ import { FAMILIES, family } from '@/lib/taxonomy';
 import { abs } from '@/lib/site';
 import { DECADES, summary } from './films';
 import './catalogue.css';
+import Elsewhere from '@/app/components/Elsewhere';
 
 /**
  * The static catalogue, split one page per decade.
@@ -92,6 +93,7 @@ export default function CatalogueIndex() {
             in plain text: <a href="/llms.txt">/llms.txt</a>. How these categories were made:{' '}
             <a href="/methodology">the methodology</a>.
           </p>
+          <Elsewhere current="/catalogue" />
         </div>
       </footer>
     </div>

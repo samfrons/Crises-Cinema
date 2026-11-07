@@ -23,7 +23,7 @@
   gap: 12px;
 }
 .at-kicker::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
-.at-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; }
+.at-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; padding: 12px 0; margin: -12px 0; }
 .at-kicker a:hover { color: var(--ember); }
 
 .at-title {
@@ -320,7 +320,7 @@
 .at-plate.dark::after { color: #6b5f4d; }
 
 .at-plate-foot.dark { border-top-color: #3d352b; color: #a1937c; }
-.at-plate-foot.dark .at-plate-no { color: #6b5f4d; }
+.at-plate-foot.dark .at-plate-no { color: #978a73; }
 
 .at-star { fill: var(--paper); opacity: 0.5; pointer-events: none; }
 .at-star.dim { opacity: 0.18; }

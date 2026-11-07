@@ -32,7 +32,7 @@
   --paper-deep: #e4d8bd;
   --ink: #191410;
   --ink-soft: #5f5445;
-  --ink-faint: #8d8171;
+  --ink-faint: #675c4d; /* 4.6:1 on --paper-deep, 5.4:1 on --paper: passes AA for the small mono labels */
   --rule: #cbbd9f;
   /* The one-sheet red. Accent only — never a data colour, so it can never be
      mistaken for a category. */
@@ -129,7 +129,7 @@ section { padding: 76px 0; }
 
 /* ══ Hero ════════════════════════════════════════════════════════════════ */
 
-.hero { position: relative; padding: 72px 0 60px; overflow: hidden; }
+.hero { position: relative; padding: 64px 0 60px; overflow: hidden; }
 
 /* Projector spill: a warm pool of light behind the title. */
 .hero::after {
@@ -265,6 +265,8 @@ section { padding: 76px 0; }
   cursor: pointer;
 }
 .toggle button + button { border-left: 1px solid var(--ink); }
+/* The group clips its overflow, so the ring sits inside the button. */
+.toggle button:focus-visible { outline-offset: -3px; }
 .toggle button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
 
 /* On narrow screens the strip scrolls sideways, which suits a reel. The wrapper
@@ -524,7 +526,7 @@ table.counts td.zero { color: var(--rule); }
   color: var(--ink);
 }
 .search input::placeholder { color: var(--ink-faint); }
-.search input:focus { border-color: var(--ink); outline: none; }
+.search input:focus { border-color: var(--ink); }
 .search .clear {
   position: absolute;
   right: 5px;
@@ -821,4 +823,26 @@ table.counts td.zero { color: var(--rule); }
   .sheet { padding: 0; align-items: flex-end; }
   .sheet-card { max-height: 92vh; border-radius: 3px 3px 0 0; padding: 24px 20px; }
   .sheet-top img { width: 86px; }
+}
+
+/* ══ Touch targets ═══════════════════════════════════════════════════════
+   Filters, chips and disclosures reach 40px on a phone without changing the
+   desktop rhythm. */
+@media (max-width: 720px) {
+  .toggle button { min-height: 40px; }
+  .chip { min-height: 40px; }
+  .reset { min-height: 40px; padding: 0 2px 1px; }
+  .decades button { min-height: 40px; }
+  .search .clear { min-width: 40px; min-height: 40px; }
+  .table-toggle summary { padding: 11px 0; } /* keeps the disclosure marker */
+}
+
+/* Page kickers carry a long back-link that cannot share a 354px line with
+   its trailing rule; set them as a flowing line instead of two stranded
+   flex columns. */
+@media (max-width: 720px) {
+  body .at-kicker, body .dis-kicker, body .rl-kicker, body .md-kicker, body .pr-kicker, body .cat-kicker { display: block; line-height: 1.5; }
+  body .at-kicker::after, body .dis-kicker::after, body .rl-kicker::after, body .md-kicker::after,
+  body .pr-kicker::after, body .cat-kicker::after { display: none; }
+  body .at-kicker a, body .dis-kicker a, body .rl-kicker a, body .md-kicker a, body .pr-kicker a, body .cat-kicker a { display: inline-block; }
 }

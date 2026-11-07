@@ -4,6 +4,7 @@ import type { Summary } from '@/lib/taxonomy';
 import { DISASTER_TAXONOMY, THEMES, CLASSIFICATION_PASSES, THEME_CROSSMAP, PIPELINE } from './data';
 import { abs } from '@/lib/site';
 import './methodology.css';
+import Elsewhere from '@/app/components/Elsewhere';
 
 const summary = summaryData as unknown as Summary;
 
@@ -294,6 +295,7 @@ export default function MethodologyPage() {
             </p>
 
             <a className="md-back" href="/">← Back to the decades</a>
+            <Elsewhere current="/methodology" />
           </div>
         </section>
       </main>

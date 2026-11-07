@@ -1,6 +1,7 @@
 import Hero from './components/Hero';
 import FearIndex from './components/FearIndex';
 import ProgrammeGallery from './components/ProgrammeGallery';
+import Elsewhere from '@/app/components/Elsewhere';
 import summaryData from '../data/summary.json';
 import type { Summary } from '@/lib/taxonomy';
 
@@ -193,6 +194,7 @@ export default function Page() {
               </a>
             </p>
           </div>
+          <Elsewhere current="/" tone="dark" />
         </div>
       </footer>
     </>

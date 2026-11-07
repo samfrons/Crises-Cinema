@@ -23,7 +23,7 @@
   gap: 12px;
 }
 .dis-kicker::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
-.dis-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; }
+.dis-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; padding: 12px 0; margin: -12px 0; }
 .dis-kicker a:hover { color: var(--ember); }
 
 .dis-title {
@@ -544,4 +544,9 @@
   .dis-clock-read { min-width: 0; }
   .dis-wall { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
   .dis-dossier-grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .dis-chip, .dis-alltime { min-height: 40px; }
+  .dis-scrub { height: 40px; }
 }

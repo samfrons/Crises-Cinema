@@ -23,7 +23,7 @@
   gap: 12px;
 }
 .pr-kicker::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
-.pr-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; }
+.pr-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; padding: 12px 0; margin: -12px 0; }
 .pr-kicker a:hover { color: var(--ember); }
 
 .pr-title {
@@ -241,7 +241,7 @@
 .pr-layer-short {
   display: block;
   font-family: var(--data);
-  font-size: 9.5px;
+  font-size: 10.5px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -629,7 +629,7 @@
   color: var(--ink-faint);
   margin: 0 0 12px;
 }
-.pr-weights-head span { text-transform: none; letter-spacing: 0.04em; opacity: 0.8; margin-left: 8px; }
+.pr-weights-head span { text-transform: none; letter-spacing: 0.04em; margin-left: 8px; }
 
 .pr-weight { margin-bottom: 14px; }
 .pr-weight label {
@@ -687,6 +687,7 @@
   cursor: pointer;
 }
 .pr-toggle-sm button + button { border-left: 1px solid var(--ink); }
+.pr-toggle-sm button:focus-visible { outline-offset: -3px; }
 .pr-toggle-sm button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
 
 .pr-search {
@@ -700,7 +701,7 @@
   border-radius: 2px;
   color: var(--ink);
 }
-.pr-search:focus { border-color: var(--ink); outline: none; }
+.pr-search:focus { border-color: var(--ink); }
 
 .pr-rank { list-style: none; margin: 0; padding: 0; counter-reset: rank; }
 .pr-rank li {
@@ -720,7 +721,7 @@
   flex-direction: column;
   min-width: 0;
 }
-.pr-rank-iso { font-size: 9.5px; letter-spacing: 0.14em; color: var(--ink-faint); }
+.pr-rank-iso { font-size: 10.5px; letter-spacing: 0.14em; color: var(--ink-faint); }
 .pr-rank-track { grid-area: track; height: 11px; background: var(--paper-deep); display: block; }
 .pr-rank-bar { display: block; height: 100%; }
 .pr-rank-score {
@@ -736,7 +737,7 @@
   flex-wrap: wrap;
   gap: 4px 12px;
   font-family: var(--data);
-  font-size: 9.5px;
+  font-size: 10.5px;
   letter-spacing: 0.06em;
   color: var(--ink-faint);
   font-variant-numeric: tabular-nums;
@@ -771,7 +772,7 @@
   gap: 10px;
 }
 .pr-badge {
-  font-size: 9px;
+  font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   border: 1px solid var(--ember);
@@ -880,7 +881,7 @@
   line-height: 1.3;
   white-space: nowrap;
 }
-.pr-bar-gap span { display: block; letter-spacing: 0.16em; text-transform: uppercase; font-size: 9px; color: var(--ink-faint); }
+.pr-bar-gap span { display: block; letter-spacing: 0.16em; text-transform: uppercase; font-size: 10px; color: var(--ink-faint); }
 .pr-bar-gap b { font-weight: 400; font-size: 13px; font-variant-numeric: tabular-nums; }
 
 .pr-headline {
@@ -903,7 +904,7 @@
   color: var(--ink-faint);
   margin: 0 0 14px;
 }
-.pr-strip-head span { text-transform: none; letter-spacing: 0.04em; opacity: 0.85; margin-left: 10px; }
+.pr-strip-head span { text-transform: none; letter-spacing: 0.04em; margin-left: 10px; }
 .pr-strip-bars {
   list-style: none;
   margin: 0;
@@ -925,7 +926,7 @@
 .pr-strip-pct {
   display: block;
   font-family: var(--data);
-  font-size: 9.5px;
+  font-size: 10.5px;
   color: var(--ink-faint);
   font-variant-numeric: tabular-nums;
   margin-top: 4px;
@@ -963,7 +964,7 @@
 .pr-sources dd { margin: 4px 0 0; font-size: 14px; line-height: 1.5; color: #ded4be; }
 .pr-sources dd b { color: var(--paper); font-weight: 400; }
 .pr-siblings { font-family: var(--data); font-size: 12.5px; }
-.pr-built { font-family: var(--data); font-size: 11.5px; line-height: 1.6; color: #a1937c; margin-top: 28px; }
+.pr-colophon .pr-built { font-family: var(--data); font-size: 11.5px; line-height: 1.6; color: #a1937c; margin-top: 28px; }
 
 /* ── Small screens ──────────────────────────────────────────────────────── */
 
@@ -991,4 +992,20 @@
 
 @media (prefers-reduced-motion: reduce) {
   .pr-country, .pr-pin-ring, .pr-pin-dot { transition: none; }
+}
+
+/* ── Touch targets ──────────────────────────────────────────────────────── */
+@media (max-width: 820px) {
+  .pr-haz { min-height: 40px; padding: 8px 12px; }
+  .pr-toggle-sm button { min-height: 40px; }
+  .pr-search { min-height: 40px; }
+  .pr-layer-btn { min-height: 44px; }
+  .pr-check { min-height: 40px; }
+  .pr-check input { width: 20px; height: 20px; }
+  .pr-weight input[type='range'] { height: 40px; }
+  .pr-panel-x { width: 40px; height: 40px; }
+  .pr-case-sources summary { padding: 11px 0; }
+}
+@media (max-width: 820px) {
+  .pr-case-films a { padding: 11px 2px; }
 }
