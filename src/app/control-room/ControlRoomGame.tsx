@@ -1,27 +1,43 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Citation, Option, Scenario, ScenarioBundle, Timestep } from './types';
+import type { Citation, MediaAttachment, Option, Scenario, ScenarioBundle, Timestep } from './types';
 import { startSession, logChoice, completeSession, type ChoiceEvent } from './telemetry';
 import { scoreRun, historicalLeadTime, formatLead, type Choice } from './scoring';
 import DayStrip from './DayStrip';
-import OpsMap, { type ZoneState } from './OpsMap';
+import OpsMap from './OpsMap';
+import { itemState, STATE_RANK, vocabFor, type ZoneState } from './hazards';
 import AlertTimingChart from './AlertTimingChart';
 import { KindGlyph, HazardGlyph } from './glyphs';
 
+/* ══════════════════════════════════════════════════════════════════════════
+   One continuous desk. Once a day is chosen, everything happens in a single
+   dispatch log that grows downward as the clock advances: the briefing, then
+   each decision point's incoming traffic, your call, and what the record
+   says followed — and finally the debrief, appended as the log's last entry.
+   A console strip stays pinned above the log (clock, decision pips, the day
+   on a rail), and the situation board rides beside the log on wide screens
+   or opens as a sheet on phones. Nothing here invents an outcome: every line
+   is either cited, the player's own action, or a statement that the record
+   is silent.
+   ══════════════════════════════════════════════════════════════════════════ */
+
 /**
  * What the wall map shows: zone states lit only by cited information already
- * revealed (forecast → watch, gauge → signal, field report → flooding) and
- * the zones the player's own choices have warned.
+ * revealed and the zones the player's own choices have warned. Which state an
+ * item lights is the hazard's default for its kind (flood: forecast → watch,
+ * gauge → signal, field report → flooding; fire: forecast → red flag, sensor
+ * and field report → fire reported) unless the item names its own
+ * board_state — "burning" only where the cited text says so, "none" where a
+ * zoned report is not about the hazard at all (a pole down is not a fire).
+ * The board only ever escalates; it never invents a state.
  */
-const KIND_STATE: Partial<Record<string, ZoneState>> = { forecast: 'watch', gauge: 'signal', field_report: 'flooding' };
-const STATE_RANK: Record<ZoneState, number> = { quiet: 0, watch: 1, signal: 2, flooding: 3 };
-
 function deriveBoard(scenario: Scenario, uptoIndex: number, choices: Choice[]) {
+  const vocab = vocabFor(scenario);
   const zoneStates: Record<string, ZoneState> = {};
   for (const t of scenario.timesteps.slice(0, uptoIndex + 1)) {
     for (const info of t.info_available) {
-      const state = KIND_STATE[info.kind];
+      const state = itemState(info, vocab);
       if (!state) continue;
       for (const z of info.zones ?? []) {
         if (STATE_RANK[state] > STATE_RANK[zoneStates[z] ?? 'quiet']) zoneStates[z] = state;
@@ -29,188 +45,321 @@ function deriveBoard(scenario: Scenario, uptoIndex: number, choices: Choice[]) {
     }
   }
   const warnedZones = new Set<string>();
-  for (const c of choices) {
-    const e = c.option.effects;
-    if (e.warning_scope === 'province') scenario.scoring.at_risk_zones.forEach((z) => warnedZones.add(z.id));
-    else if (e.warning_scope === 'targeted' || e.protective) e.zones.forEach((z) => warnedZones.add(z));
-  }
+  for (const c of choices) warnedBy(scenario, c.option).forEach((z) => warnedZones.add(z));
   return { zoneStates, warnedZones: Array.from(warnedZones) };
 }
 
-const KIND_LABEL: Record<string, string> = {
-  forecast: 'Forecast',
-  gauge: 'Gauge',
-  message: 'Message',
-  media: 'Media',
-  field_report: 'From the field',
-};
-
-type Phase =
-  | { name: 'select' }
-  | { name: 'briefing'; scenario: Scenario }
-  | { name: 'deciding'; scenario: Scenario; step: number; sessionId: string; choices: Choice[]; presentedAt: number }
-  | { name: 'aftermath'; scenario: Scenario; step: number; sessionId: string; choices: Choice[] }
-  | { name: 'debrief'; scenario: Scenario; choices: Choice[] };
-
-export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) {
-  const [phase, setPhase] = useState<Phase>({ name: 'select' });
-
-  // Each phase change is a scene change: snap back to the top of the desk so
-  // the clock is the first thing seen, and let the CSS entry animation play
-  // (screens below are keyed on this, so they remount per scene).
-  const sceneKey = phase.name === 'deciding' || phase.name === 'aftermath'
-    ? `${phase.name}-${phase.step}`
-    : phase.name;
-  const firstScene = useRef(true);
-  useEffect(() => {
-    if (firstScene.current) {
-      firstScene.current = false;
-      return;
-    }
-    const desk = document.getElementById('desk');
-    // 'instant' sidesteps the site's global scroll-behavior: smooth, which
-    // would otherwise animate (and let a fast tap cancel) the scene snap.
-    if (desk) window.scrollTo({ top: desk.getBoundingClientRect().top + window.scrollY, behavior: 'instant' as ScrollBehavior });
-  }, [sceneKey]);
-
-  if (phase.name === 'select') {
-    return (
-      <SelectScreen
-        key={sceneKey}
-        bundle={bundle}
-        onPick={(scenario) => setPhase({ name: 'briefing', scenario })}
-      />
-    );
-  }
-
-  if (phase.name === 'briefing') {
-    const { scenario } = phase;
-    return (
-      <section key={sceneKey} className="cr-stage wrap" aria-live="polite">
-        <p className="cr-clock">
-          <span className="cr-clock-time">{scenario.clock.start}</span>
-          <span className="cr-clock-tz">{scenario.clock.timezone} · {scenario.date}</span>
-        </p>
-        <h2 className="cr-step-title">{scenario.title}</h2>
-        <OpsMap scenario={scenario} zoneStates={{}} warnedZones={[]} />
-        <p className="cr-brief">{scenario.location}. You hold the civil-protection desk. You will see only what
-          officials could see at each moment — forecasts, gauge readings, messages — and choose what to do.
-          The clock then advances along the real timeline: <strong>history does not branch here</strong>. Your
-          choices are recorded and, at the end, set beside what officials actually did and what the inquiry
-          found. Where you leave the historical path, the record is silent about what would have followed —
-          and the game will say so rather than invent it.</p>
-        <button className="cr-btn cr-btn-primary" onClick={() => {
-          const session = startSession(scenario.id);
-          setPhase({ name: 'deciding', scenario, step: 0, sessionId: session.sessionId, choices: [], presentedAt: Date.now() });
-        }}>
-          Take the desk — {scenario.clock.start}
-        </button>
-      </section>
-    );
-  }
-
-  if (phase.name === 'deciding') {
-    const { scenario, step, sessionId, choices, presentedAt } = phase;
-    const t = scenario.timesteps[step];
-    return (
-      <TimestepScreen
-        key={sceneKey}
-        scenario={scenario}
-        t={t}
-        step={step}
-        choices={choices}
-        onChoose={(option) => {
-          const now = Date.now();
-          const event: ChoiceEvent = {
-            timestepId: t.id,
-            optionId: option.id,
-            presentedAt,
-            chosenAt: now,
-            hesitationMs: now - presentedAt,
-            warningScope: option.effects.warning_scope,
-            divergedFromHistory: t.historical_option_id !== null && option.id !== t.historical_option_id,
-          };
-          logChoice(sessionId, event);
-          const next = [...choices, { timestep: t, option, event }];
-          setPhase({ name: 'aftermath', scenario, step, sessionId, choices: next });
-        }}
-      />
-    );
-  }
-
-  if (phase.name === 'aftermath') {
-    const { scenario, step, sessionId, choices } = phase;
-    const choice = choices[choices.length - 1];
-    const last = step >= scenario.timesteps.length - 1;
-    return (
-      <AftermathScreen
-        key={sceneKey}
-        scenario={scenario}
-        choice={choice}
-        choices={choices}
-        last={last}
-        onAdvance={() => {
-          if (last) {
-            completeSession(sessionId, scoreRun(scenario, choices));
-            setPhase({ name: 'debrief', scenario, choices });
-          } else {
-            setPhase({ name: 'deciding', scenario, step: step + 1, sessionId, choices, presentedAt: Date.now() });
-          }
-        }}
-      />
-    );
-  }
-
-  return (
-    <DebriefScreen
-      key={sceneKey}
-      scenario={phase.scenario}
-      choices={phase.choices}
-      onRestart={() => setPhase({ name: 'select' })}
-    />
-  );
+function warnedBy(scenario: Scenario, option: Option): string[] {
+  const e = option.effects;
+  if (e.warning_scope === 'province') return scenario.scoring.at_risk_zones.map((z) => z.id);
+  if (e.warning_scope === 'targeted' || e.protective) return e.zones;
+  return [];
 }
 
-/* ── The desk bar and the situation board ────────────────────────────────
-   On a phone the desk behaves like an app: a thin bar stays pinned to the
-   top of the screen (current time, one dot per decision, a MAP button), and
-   the operations board slides up from the bottom as a sheet. From 760px the
-   bar's MAP button disappears and the board sits inline as before. */
+/** The clock's zone as players read it: an IANA region ("Pacific/Honolulu")
+ *  becomes its short name on the scenario's date ("HST"); a name that is
+ *  already short ("CET") is shown as given. */
+function tzLabel(s: Pick<Scenario, 'clock' | 'date'>) {
+  const tz = s.clock.timezone;
+  if (!tz.includes('/')) return tz;
+  try {
+    const part = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'short' })
+      .formatToParts(new Date(`${s.date}T12:00:00Z`))
+      .find((p) => p.type === 'timeZoneName')?.value;
+    return part && !/^GMT/.test(part) ? part : tz;
+  } catch {
+    return tz;
+  }
+}
 
-function DeskBar({ scenario, stepIndex, boardLit, onToggleBoard }: {
-  scenario: Scenario; stepIndex: number; boardLit: boolean; onToggleBoard: () => void;
-}) {
-  const t = scenario.timesteps[stepIndex];
+const stamp = (t: Timestep) => `${t.approx ? '≈' : ''}${t.time}`;
+const stepId = (t: Timestep) => `cr-step-${t.id}`;
+
+type Run = {
+  scenario: Scenario;
+  sessionId: string | null; // null while still on the briefing
+  cursor: number; // the decision point currently on the desk
+  choices: Choice[];
+  presentedAt: number;
+  done: boolean;
+};
+
+/** After a render: where focus lands and what scrolls into view. */
+type Pending = { focus?: string; scroll?: string; block?: ScrollLogicalPosition };
+
+function useMedia(query: string) {
+  const [match, setMatch] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(query);
+    const sync = () => setMatch(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, [query]);
+  return match;
+}
+
+const reducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) {
+  const [run, setRun] = useState<Run | null>(null);
+  const wide = useMedia('(min-width: 1024px)');
+
+  const pending = useRef<Pending | null>(null);
+  useEffect(() => {
+    const p = pending.current;
+    if (!p) return;
+    pending.current = null;
+    // Focus without the browser's own jump, then one deliberate scroll so the
+    // new entry settles just under the console strip (scroll-margin-top).
+    if (p.focus) document.getElementById(p.focus)?.focus({ preventScroll: true });
+    if (p.scroll) {
+      document.getElementById(p.scroll)?.scrollIntoView({
+        block: p.block ?? 'start',
+        behavior: reducedMotion() ? 'auto' : 'smooth',
+      });
+    }
+  });
+
+  const pick = (scenario: Scenario) => {
+    pending.current = { focus: 'cr-brief-title', scroll: 'desk' };
+    setRun({ scenario, sessionId: null, cursor: 0, choices: [], presentedAt: 0, done: false });
+  };
+
+  if (!run) {
+    return <SelectScreen bundle={bundle} onPick={pick} />;
+  }
+
+  const { scenario, sessionId, cursor, choices, done } = run;
+  const started = sessionId !== null;
+  const steps = scenario.timesteps;
+  const current = steps[cursor];
+  const lastIndex = steps.length - 1;
+  const decided = choices.length > cursor;
+
+  const start = () => {
+    const session = startSession(scenario.id);
+    pending.current = { focus: `${stepId(steps[0])}-h`, scroll: stepId(steps[0]) };
+    setRun({ ...run, sessionId: session.sessionId, cursor: 0, presentedAt: Date.now() });
+  };
+
+  const choose = (option: Option) => {
+    if (!sessionId || decided) return;
+    const now = Date.now();
+    const event: ChoiceEvent = {
+      timestepId: current.id,
+      optionId: option.id,
+      presentedAt: run.presentedAt,
+      chosenAt: now,
+      hesitationMs: now - run.presentedAt,
+      warningScope: option.effects.warning_scope,
+      divergedFromHistory: current.historical_option_id !== null && option.id !== current.historical_option_id,
+    };
+    logChoice(sessionId, event);
+    pending.current = { focus: 'cr-advance-btn', scroll: `${stepId(current)}-record`, block: 'nearest' };
+    setRun({ ...run, choices: [...choices, { timestep: current, option, event }] });
+  };
+
+  const advance = () => {
+    if (!sessionId || !decided) return;
+    if (cursor >= lastIndex) {
+      completeSession(sessionId, scoreRun(scenario, choices));
+      pending.current = { focus: 'cr-debrief-title', scroll: 'cr-debrief' };
+      setRun({ ...run, done: true });
+    } else {
+      const next = steps[cursor + 1];
+      pending.current = { focus: `${stepId(next)}-h`, scroll: stepId(next) };
+      setRun({ ...run, cursor: cursor + 1, presentedAt: Date.now() });
+    }
+  };
+
+  const replay = () => {
+    pending.current = { focus: 'cr-brief-title', scroll: 'desk' };
+    setRun({ scenario, sessionId: null, cursor: 0, choices: [], presentedAt: 0, done: false });
+  };
+  const leave = () => {
+    pending.current = { scroll: 'desk' };
+    setRun(null);
+  };
+
+  const board = deriveBoard(scenario, started ? cursor : -1, choices);
+
   return (
-    <div className="cr-deskbar">
-      <span className="cr-deskbar-time">{t.approx ? '≈' : ''}{t.time}</span>
-      <span className="cr-deskbar-dots" role="img" aria-label={`Decision ${stepIndex + 1} of ${scenario.timesteps.length}`}>
-        {scenario.timesteps.map((s, i) => (
-          <i key={s.id} className={i < stepIndex ? 'is-done' : i === stepIndex ? 'is-now' : ''} />
-        ))}
-      </span>
-      <button className="cr-deskbar-board" onClick={onToggleBoard}>
-        Map{boardLit && <i className="cr-deskbar-lit" aria-hidden />}
-      </button>
+    <div className="cr-run">
+      <Console scenario={scenario} started={started} cursor={cursor} choices={choices} done={done}
+        board={board} showMapButton={!wide} />
+
+      <div className="cr-play wrap">
+        <div className="cr-log" role="log" aria-label="Dispatch log" aria-live="polite">
+          <Briefing scenario={scenario} started={started} inlineMap={!wide} onStart={start} />
+
+          {started && steps.slice(0, cursor + 1).map((t, i) => (
+            <StepEntry
+              key={t.id}
+              scenario={scenario}
+              t={t}
+              index={i}
+              choice={choices[i]}
+              isCurrent={i === cursor && !done}
+              isLast={i === lastIndex}
+              onChoose={choose}
+              onAdvance={advance}
+            />
+          ))}
+        </div>
+
+        {wide && <SidePanel scenario={scenario} board={board} choices={choices} started={started} />}
+      </div>
+
+      {done ? (
+        <Debrief scenario={scenario} choices={choices} onReplay={replay} onLeave={leave} />
+      ) : (
+        <div className="wrap cr-play-sources">
+          <Sources scenario={scenario} title="Sources for this day" />
+        </div>
+      )}
     </div>
   );
 }
 
-function SituationBoard({ scenario, zoneStates, warnedZones, open, onClose }: {
-  scenario: Scenario; zoneStates: Record<string, ZoneState>; warnedZones: string[];
-  open: boolean; onClose: () => void;
+/* ── The console strip ───────────────────────────────────────────────────
+   Pinned to the top of the viewport for the whole run, ~60px tall: the
+   current time (a link back to the decision on the desk), the decision
+   count in words, one pip per decision point, and the day as a rail along
+   its bottom edge. On phones it also carries the MAP button. */
+
+function Console({ scenario, started, cursor, choices, done, board, showMapButton }: {
+  scenario: Scenario; started: boolean; cursor: number; choices: Choice[]; done: boolean;
+  board: ReturnType<typeof deriveBoard>; showMapButton: boolean;
+}) {
+  const steps = scenario.timesteps;
+  const t = steps[cursor];
+  const time = done ? scenario.clock.end : started ? stamp(t) : scenario.clock.start;
+  const status = done
+    ? 'End of record'
+    : started
+      ? `Decision ${cursor + 1} of ${steps.length}`
+      : 'Briefing';
+  const target = done ? 'cr-debrief' : started ? stepId(t) : 'cr-briefing';
+  const boardLit = board.warnedZones.length > 0 || Object.values(board.zoneStates).some((s) => s !== 'quiet');
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  return (
+    <div className="cr-console">
+      <div className="cr-console-row wrap">
+        <a className="cr-console-clock" href={`#${target}`}
+          aria-label={`${time} ${tzLabel(scenario)}, ${status}. Jump to the desk.`}>
+          <span className="cr-console-time">{time}</span>
+          <span className="cr-console-status"><span className="cr-console-tz">{tzLabel(scenario)} · </span>{status}</span>
+        </a>
+        <span className="cr-console-title" aria-hidden>{scenario.title}</span>
+        <span className="cr-pips" aria-hidden>
+          {steps.map((s, i) => {
+            const c = choices[i];
+            const cls = c
+              ? c.event.divergedFromHistory ? 'is-diverged' : 'is-kept'
+              : started && i === cursor && !done ? 'is-now' : '';
+            return <i key={s.id} className={cls} />;
+          })}
+        </span>
+        {showMapButton && (
+          <button type="button" className="cr-console-map" onClick={() => setSheetOpen(true)}
+            aria-haspopup="dialog" aria-label={`Situation board${boardLit ? ' (zones lit)' : ''}`}>
+            Map{boardLit && <i className="cr-console-lit" aria-hidden />}
+          </button>
+        )}
+      </div>
+      <DayStrip scenario={scenario} currentIndex={started ? cursor : -1} choices={choices} ended={done} />
+      {showMapButton && (
+        <BoardSheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
+          <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones} />
+          <BoardList scenario={scenario} board={board} />
+        </BoardSheet>
+      )}
+    </div>
+  );
+}
+
+/** Phone situation board: a native modal dialog styled as a bottom sheet —
+ *  focus is held inside while open, Escape and the scrim close it, and focus
+ *  returns to the MAP button. */
+function BoardSheet({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (open && !d.open) d.showModal();
+    if (!open && d.open) d.close();
+  }, [open]);
+  return (
+    <dialog ref={ref} className="cr-sheet" aria-labelledby="cr-sheet-title" onClose={onClose}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="cr-sheet-head">
+        <h2 id="cr-sheet-title">Situation board</h2>
+        <button type="button" className="cr-sheet-close" onClick={onClose}>Close</button>
+      </div>
+      {open && children}
+    </dialog>
+  );
+}
+
+/** The board's state in words — what the map shows, never by colour alone. */
+function BoardList({ scenario, board }: { scenario: Scenario; board: ReturnType<typeof deriveBoard> }) {
+  const { states } = vocabFor(scenario);
+  return (
+    <ul className="cr-boardlist">
+      {scenario.scoring.at_risk_zones.map((z) => {
+        const s = board.zoneStates[z.id] ?? 'quiet';
+        const warned = board.warnedZones.includes(z.id);
+        return (
+          <li key={z.id} className={`is-${s}`}>
+            <span className="cr-boardlist-zone">{z.label}</span>
+            <span className="cr-boardlist-state">{states[s]}{warned ? ' · warned by you' : ''}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/** Why the board is blank on the briefing: it lights only from traffic the
+ *  player has been shown, so the first decision's items (which may report a
+ *  fire already burning, or a warning already in force) light it all at once
+ *  at the opening time. Said up front, that first frame is expected. */
+const boardNote = (scenario: Scenario) =>
+  `Quiet until you take the desk. At ${scenario.timesteps[0].time} the board lights from the first traffic you are shown — including anything already under way before the clock starts.`;
+
+/* ── Wide screens: the board and your run, alongside the log ────────────── */
+
+function SidePanel({ scenario, board, choices, started }: {
+  scenario: Scenario; board: ReturnType<typeof deriveBoard>; choices: Choice[]; started: boolean;
 }) {
   return (
-    <>
-      <div className={`cr-board-scrim${open ? ' is-open' : ''}`} onClick={onClose} aria-hidden />
-      <div className={`cr-board${open ? ' is-open' : ''}`} aria-label="Situation board">
-        <div className="cr-board-head">
-          <span>Situation board</span>
-          <button className="cr-board-close" onClick={onClose}>Close</button>
-        </div>
-        <OpsMap scenario={scenario} zoneStates={zoneStates} warnedZones={warnedZones} />
-      </div>
-    </>
+    <aside className="cr-side" aria-label="Situation board and your run">
+      <p className="cr-side-head">Situation board</p>
+      <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones}
+        note={started ? undefined : boardNote(scenario)} />
+      <BoardList scenario={scenario} board={board} />
+      <p className="cr-side-head">Your run so far</p>
+      {started && choices.length ? (
+        <ol className="cr-trace">
+          {choices.map((c) => (
+            <li key={c.timestep.id} className={c.event.divergedFromHistory ? 'is-diverged' : ''}>
+              <a href={`#${stepId(c.timestep)}`}>
+                <span className="cr-trace-time">{stamp(c.timestep)}</span>
+                <span className="cr-trace-label">
+                  {c.option.label}
+                  {c.event.divergedFromHistory && <span className="cr-trace-tag"> · off the historical path</span>}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="cr-side-empty">No calls made yet. Each one will be listed here as you make it.</p>
+      )}
+    </aside>
   );
 }
 
@@ -218,22 +367,27 @@ function SituationBoard({ scenario, zoneStates, warnedZones, open, onClose }: {
 
 function SelectScreen({ bundle, onPick }: { bundle: ScenarioBundle; onPick: (s: Scenario) => void }) {
   return (
-    <section className="cr-stage wrap">
-      <p className="eyebrow">Choose a day to hold the desk</p>
+    <section className="cr-select wrap" aria-labelledby="cr-select-title">
+      <h2 id="cr-select-title" className="cr-section-eyebrow">Choose a day to hold the desk</h2>
       <div className="cr-select-grid">
         {bundle.playable.map((s) => (
-          <button key={s.id} className="cr-card" onClick={() => onPick(s)}>
-            <HazardGlyph hazard={s.hazard} size={26} className="cr-card-glyph" />
-            <span className="cr-card-date">{s.date} · {s.hazard}</span>
+          <button type="button" key={s.id} className="cr-card" onClick={() => onPick(s)}>
+            <span className="cr-card-head">
+              <HazardGlyph hazard={s.hazard} size={22} className="cr-card-glyph" />
+              <span className="cr-card-date">{s.date} · {s.hazard}</span>
+            </span>
             <span className="cr-card-title">{s.title}</span>
             <span className="cr-card-loc">{s.location}</span>
-            <span className="cr-card-cta">Take the desk →</span>
+            <span className="cr-card-meta">{s.timesteps.length} decisions · {s.clock.start}–{s.clock.end} {tzLabel(s)}</span>
+            <span className="cr-card-cta">Take the desk <span className="cr-card-arrow" aria-hidden>→</span></span>
           </button>
         ))}
         {bundle.stubs.map((s) => (
           <div key={s.id} className="cr-card cr-card-stub" aria-disabled>
-            <HazardGlyph hazard={s.hazard} size={26} className="cr-card-glyph" />
-            <span className="cr-card-date">{s.date} · {s.hazard}</span>
+            <span className="cr-card-head">
+              <HazardGlyph hazard={s.hazard} size={22} className="cr-card-glyph" />
+              <span className="cr-card-date">{s.date} · {s.hazard}</span>
+            </span>
             <span className="cr-card-title">{s.title}</span>
             <span className="cr-card-loc">{s.location}</span>
             <span className="cr-card-cta">In research — sources needed</span>
@@ -246,72 +400,154 @@ function SelectScreen({ bundle, onPick }: { bundle: ScenarioBundle; onPick: (s: 
   );
 }
 
-/* ── Timestep ────────────────────────────────────────────────────────────── */
+/* ── Log entry 0: the briefing ───────────────────────────────────────────── */
 
-function TimestepScreen({ scenario, t, step, choices, onChoose }: {
-  scenario: Scenario; t: Timestep; step: number; choices: Choice[]; onChoose: (o: Option) => void;
+function Briefing({ scenario, started, inlineMap, onStart }: {
+  scenario: Scenario; started: boolean; inlineMap: boolean; onStart: () => void;
 }) {
-  const sourceIndex = useSourceIndex(scenario);
-  const board = deriveBoard(scenario, step, choices);
-  const boardLit = board.warnedZones.length > 0 || Object.values(board.zoneStates).some((s) => s !== 'quiet');
-  const [boardOpen, setBoardOpen] = useState(false);
+  const vocab = vocabFor(scenario);
   return (
-    <section className="cr-stage wrap" aria-live="polite">
-      <DeskBar scenario={scenario} stepIndex={step} boardLit={boardLit} onToggleBoard={() => setBoardOpen((o) => !o)} />
-      <p className="cr-clock">
-        <span className="cr-clock-time">{t.approx ? '≈' : ''}{t.time}</span>
-        <span className="cr-clock-tz">{scenario.clock.timezone}</span>
+    <article id="cr-briefing" className="cr-entry cr-entry-brief" aria-labelledby="cr-brief-title">
+      <p className="cr-stamp">
+        <span className="cr-stamp-time">{scenario.clock.start}</span>
+        <span className="cr-stamp-meta">{tzLabel(scenario)} · {scenario.date} · Briefing</span>
       </p>
-      <DayStrip scenario={scenario} currentIndex={step} />
-      {t.time_label !== t.time && <p className="cr-time-label">{t.time_label}</p>}
-
-      <SituationBoard scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones}
-        open={boardOpen} onClose={() => setBoardOpen(false)} />
-
-      <div className="cr-feed">
-        {t.info_available.map((info) => (
-          <article key={info.id} className={`cr-info cr-info-${info.kind}`}>
-            <p className="cr-info-kind"><KindGlyph kind={info.kind} className="cr-kind-glyph" /> {KIND_LABEL[info.kind]}</p>
-            <p className="cr-info-text">{info.text} <Cite c={info.citation} idx={sourceIndex} /></p>
-          </article>
-        ))}
-      </div>
-
-      <p className="cr-prompt">Your call.</p>
-      <div className="cr-options">
-        {t.options.map((o) => (
-          <button key={o.id} className="cr-btn cr-option" onClick={() => onChoose(o)}>
-            <span className="cr-option-label">{o.label}</span>
-            {o.detail && <span className="cr-option-detail">{o.detail}</span>}
+      <h2 id="cr-brief-title" className="cr-brief-title" tabIndex={-1}>{scenario.title}</h2>
+      <p className="cr-brief">{scenario.location}. You hold the {vocab.desk}. You will see only what
+        officials could see at each moment — {vocab.feeds} — and choose what to do.
+        The clock then advances along the real timeline: <strong>history does not branch here</strong>. Each
+        call you make stays in this log; at the end, it is set beside what officials actually did and what the
+        inquiry found. Where you leave the historical path, the record is silent about what would have
+        followed — and the log will say so rather than invent it.</p>
+      <p className="cr-brief-count">{scenario.timesteps.length} decision points, from {scenario.clock.start} {tzLabel(scenario)}.
+        The console above keeps the clock and your progress.</p>
+      {scenario.briefing_media && <Figure scenario={scenario} m={scenario.briefing_media} />}
+      {inlineMap && !started && (
+        <OpsMap scenario={scenario} zoneStates={{}} warnedZones={[]} note={boardNote(scenario)} />
+      )}
+      {started ? (
+        <p className="cr-brief-taken">Desk taken at {scenario.clock.start} {tzLabel(scenario)}.</p>
+      ) : (
+        <div className="cr-dock">
+          <button type="button" className="cr-btn-primary" onClick={onStart}>
+            Take the desk — {scenario.clock.start}
           </button>
-        ))}
-      </div>
-    </section>
+        </div>
+      )}
+    </article>
   );
 }
 
-/* ── Aftermath of one choice ─────────────────────────────────────────────── */
+/* ── Log entries 1…n: one decision point each ────────────────────────────── */
 
-function AftermathScreen({ scenario, choice, choices, last, onAdvance }: {
-  scenario: Scenario; choice: Choice; choices: Choice[]; last: boolean; onAdvance: () => void;
+function StepEntry({ scenario, t, index, choice, isCurrent, isLast, onChoose, onAdvance }: {
+  scenario: Scenario; t: Timestep; index: number; choice?: Choice;
+  isCurrent: boolean; isLast: boolean; onChoose: (o: Option) => void; onAdvance: () => void;
 }) {
   const sourceIndex = useSourceIndex(scenario);
-  const c = choice.option.consequence;
-  const stepIndex = scenario.timesteps.findIndex((t) => t.id === choice.timestep.id);
-  const board = deriveBoard(scenario, stepIndex, choices);
-  const boardLit = board.warnedZones.length > 0 || Object.values(board.zoneStates).some((s) => s !== 'quiet');
-  const [boardOpen, setBoardOpen] = useState(false);
+  const vocab = vocabFor(scenario);
+  const id = stepId(t);
+  // What this hour's traffic changed on the board — derived only from the
+  // cited items shown here, compared with the board before them.
+  const changes = useMemo(() => {
+    const before = deriveBoard(scenario, index - 1, []).zoneStates;
+    const after = deriveBoard(scenario, index, []).zoneStates;
+    return scenario.scoring.at_risk_zones
+      .filter((z) => (after[z.id] ?? 'quiet') !== (before[z.id] ?? 'quiet'))
+      .map((z) => ({ label: z.label, state: after[z.id] as ZoneState }));
+  }, [scenario, index]);
+
   return (
-    <section className="cr-stage wrap" aria-live="polite">
-      <DeskBar scenario={scenario} stepIndex={stepIndex} boardLit={boardLit} onToggleBoard={() => setBoardOpen((o) => !o)} />
-      <p className="cr-clock">
-        <span className="cr-clock-time">{choice.timestep.approx ? '≈' : ''}{choice.timestep.time}</span>
-        <span className="cr-clock-tz">{scenario.clock.timezone}</span>
-      </p>
-      <DayStrip scenario={scenario} currentIndex={stepIndex} />
-      <SituationBoard scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones}
-        open={boardOpen} onClose={() => setBoardOpen(false)} />
-      <p className="cr-chosen">You chose: <strong>{choice.option.label}</strong></p>
+    <article id={id} className={`cr-entry${isCurrent ? ' is-current' : ''}`} aria-labelledby={`${id}-h`}>
+      <h3 id={`${id}-h`} className="cr-stamp" tabIndex={-1}>
+        <span className="cr-stamp-time">{stamp(t)}</span>
+        <span className="cr-stamp-meta">
+          {tzLabel(scenario)}
+          {t.time_label !== t.time && t.time_label !== stamp(t) ? ` · ${t.time_label}` : ''}
+          {' · '}Decision {index + 1} of {scenario.timesteps.length}
+        </span>
+      </h3>
+
+      <ul className="cr-dispatches" aria-label={`Incoming at ${stamp(t)}`}>
+        {t.info_available.map((info, i) => (
+          <li key={info.id} className={`cr-slip cr-slip-${info.kind}`} style={{ '--i': i } as React.CSSProperties}>
+            <p className="cr-slip-kind"><KindGlyph kind={info.kind} className="cr-kind-glyph" /> {vocab.kindLabel[info.kind]}</p>
+            <p className="cr-slip-text">{info.text} <Cite c={info.citation} idx={sourceIndex} /></p>
+            {info.media && <Figure scenario={scenario} m={info.media} />}
+          </li>
+        ))}
+      </ul>
+
+      {changes.length > 0 && (
+        <p className="cr-boardline" style={{ '--i': t.info_available.length } as React.CSSProperties}>
+          <span className="cr-boardline-tag">{index === 0 ? 'Board opens' : 'Board'}</span>
+          <span className="cr-boardline-body">
+            {changes.map((c) => (
+              <span key={c.label} className="cr-boardline-item">
+                {c.label} <span aria-hidden>→</span><span className="cr-sr"> now </span> <strong>{vocab.states[c.state]}</strong>
+              </span>
+            ))}
+          </span>
+        </p>
+      )}
+
+      {choice ? (
+        <CallRecord scenario={scenario} t={t} choice={choice} sourceIndex={sourceIndex} />
+      ) : (
+        <div className="cr-call" role="group" aria-labelledby={`${id}-call`}
+          style={{ '--i': t.info_available.length + 1 } as React.CSSProperties}>
+          <p id={`${id}-call`} className="cr-call-head">Your call · {stamp(t)}</p>
+          <div className="cr-options">
+            {t.options.map((o) => (
+              <button type="button" key={o.id} className="cr-option" onClick={() => onChoose(o)}>
+                <span className="cr-option-label">{o.label}</span>
+                {o.detail && <span className="cr-option-detail">{o.detail}</span>}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {choice && isCurrent && (
+        <div className="cr-dock">
+          <button type="button" id="cr-advance-btn" className="cr-btn-primary" onClick={onAdvance}>
+            {isLast ? 'Close the log — to the debrief' : 'Advance the clock'}
+            <span className="cr-btn-arrow" aria-hidden>↓</span>
+          </button>
+        </div>
+      )}
+    </article>
+  );
+}
+
+/** A decision once made: your call stamped, the others left as not taken,
+ *  and what the record says — or that it is silent. Stays in the log. */
+function CallRecord({ scenario, t, choice, sourceIndex }: {
+  scenario: Scenario; t: Timestep; choice: Choice; sourceIndex: Map<string, number>;
+}) {
+  const c = choice.option.consequence;
+  const warned = warnedBy(scenario, choice.option);
+  const zoneLabel = (z: string) => scenario.scoring.at_risk_zones.find((x) => x.id === z)?.label ?? z;
+  return (
+    <div id={`${stepId(t)}-record`} className="cr-record">
+      <p className="cr-call-head">Your call · {stamp(t)}</p>
+      <ul className="cr-taken" aria-label="Options at this hour">
+        {t.options.map((o) => (
+          <li key={o.id} className={o.id === choice.option.id ? 'is-chosen' : 'is-not'}>
+            <span className="cr-taken-mark">{o.id === choice.option.id ? 'Taken' : 'Not taken'}</span>
+            <span className="cr-taken-label">{o.label}</span>
+          </li>
+        ))}
+      </ul>
+      {warned.length > 0 && (
+        <p className="cr-boardline cr-boardline-you">
+          <span className="cr-boardline-tag">Board</span>
+          <span className="cr-boardline-body">
+            <span className="cr-boardline-lead">Marked warned by you</span>
+            {warned.map((z) => <span key={z} className="cr-boardline-item">{zoneLabel(z)}</span>)}
+          </span>
+        </p>
+      )}
       {c.known ? (
         <div className="cr-consequence">
           <p className="cr-consequence-tag">The record</p>
@@ -320,167 +556,298 @@ function AftermathScreen({ scenario, choice, choices, last, onAdvance }: {
       ) : (
         <div className="cr-consequence cr-consequence-silent">
           <p className="cr-consequence-tag">The record is silent</p>
-          <p>No one took this path on the day, so no source can say what it would have changed. Your choice is
+          <p>No one took this path on the day, so no source can say what it would have changed. Your call is
             logged and scored; the clock moves on along the real timeline.</p>
         </div>
       )}
-      <div className="cr-advance">
-        <button className="cr-btn cr-btn-primary" onClick={onAdvance}>
-          {last ? 'To the debrief →' : 'Advance the clock →'}
-        </button>
-      </div>
-    </section>
+    </div>
   );
 }
 
-/* ── Debrief ─────────────────────────────────────────────────────────────── */
+/* ── The last entry: the debrief ─────────────────────────────────────────── */
 
-function DebriefScreen({ scenario, choices, onRestart }: {
-  scenario: Scenario; choices: Choice[]; onRestart: () => void;
+function Debrief({ scenario, choices, onReplay, onLeave }: {
+  scenario: Scenario; choices: Choice[]; onReplay: () => void; onLeave: () => void;
 }) {
   const sourceIndex = useSourceIndex(scenario);
   const score = useMemo(() => scoreRun(scenario, choices), [scenario, choices]);
   const histLead = historicalLeadTime(scenario);
+  const compact = !useMedia('(min-width: 640px)');
+  const vocab = vocabFor(scenario);
   const d = scenario.outcome.deaths;
-  // On a phone the three columns become tabs; from 880px the tab bar
-  // disappears and all three sit side by side as before.
-  const [activeCol, setActiveCol] = useState(0);
-  const colClass = (i: number) => `cr-col${i === activeCol ? ' is-active' : ''}`;
 
   return (
-    <section className="cr-stage wrap cr-debrief" aria-live="polite">
-      <p className="eyebrow">Debrief — {scenario.title}, {scenario.date}</p>
-      <p className="cr-toll">
-        <span className="cr-toll-number">{d.min === d.max ? d.min : `${d.min}–${d.max}`}</span>
-        <span className="cr-toll-label">
-          dead <Cite c={scenario.outcome.citation} idx={sourceIndex} />
-          {d.contested && d.note ? <span className="cr-toll-note"> {d.note}</span> : null}
-        </span>
-      </p>
-
-      <div className="cr-tabs" role="tablist" aria-label="Debrief columns">
-        {['You did', 'They did', 'The inquiry'].map((label, i) => (
-          <button key={label} role="tab" aria-selected={i === activeCol}
-            className={i === activeCol ? 'is-active' : ''} onClick={() => setActiveCol(i)}>
-            {label}
-          </button>
-        ))}
+    <section id="cr-debrief" className="cr-debrief" aria-labelledby="cr-debrief-title">
+      <div className="cr-endband">
+        <div className="wrap">
+          <p className="cr-endband-stamp">
+            <span>{scenario.clock.end} {tzLabel(scenario)}</span>
+            <span>End of record</span>
+          </p>
+          <h2 id="cr-debrief-title" className="cr-endband-title" tabIndex={-1}>
+            <span className="cr-endband-kicker">Debrief<span className="cr-sr"> —</span> <span aria-hidden>·</span> {scenario.date}</span>
+            <span className="cr-endband-name">{scenario.title}</span>
+          </h2>
+          <p className="cr-toll">
+            <span className="cr-toll-number">{d.min === d.max ? d.min : `${d.min}–${d.max}`}</span>
+            <span className="cr-toll-label">
+              dead <Cite c={scenario.outcome.citation} idx={sourceIndex} />
+            </span>
+            {d.contested && d.note ? <span className="cr-toll-note">{d.note}</span> : null}
+          </p>
+        </div>
       </div>
 
-      <div className="cr-columns">
-        <div className={colClass(0)}>
-          <h3 className="cr-col-title">You did</h3>
-          <ol className="cr-col-list">
-            {choices.map((c) => (
-              <li key={c.timestep.id} className={c.event.divergedFromHistory ? 'cr-diverged' : ''}>
-                <span className="cr-col-time">{c.timestep.approx ? '≈' : ''}{c.timestep.time}</span>
-                <span className="cr-col-body">
-                  {c.option.label}
-                  <span className="cr-hesitation"> · decided in {Math.round(c.event.hesitationMs / 1000)}s{c.event.divergedFromHistory ? ' · off the historical path' : ''}</span>
-                </span>
-              </li>
-            ))}
-          </ol>
-        </div>
-        <div className={colClass(1)}>
-          <h3 className="cr-col-title">They did</h3>
-          <ol className="cr-col-list">
-            {scenario.historical_path.map((h) => {
-              const t = scenario.timesteps.find((x) => x.id === h.timestep_id);
+      <div className="wrap cr-debrief-body">
+        <div className="cr-dsec">
+          <h3 className="cr-dsec-title">Your day beside theirs</h3>
+          <ol className="cr-vs">
+            {scenario.timesteps.map((t) => {
+              const c = choices.find((x) => x.timestep.id === t.id);
+              const h = scenario.historical_path.find((x) => x.timestep_id === t.id);
+              const diverged = !!c?.event.divergedFromHistory;
               return (
-                <li key={h.timestep_id}>
-                  <span className="cr-col-time">{t ? `${t.approx ? '≈' : ''}${t.time}` : ''}</span>
-                  <span className="cr-col-body">{h.action} <Cite c={h.citation} idx={sourceIndex} /></span>
+                <li key={t.id} className={diverged ? 'is-diverged' : ''}>
+                  <span className="cr-vs-time">{stamp(t)}</span>
+                  <div className="cr-vs-you">
+                    <span className="cr-vs-who">You</span>
+                    <span>
+                      {c ? c.option.label : '—'}
+                      {c && (
+                        <span className="cr-vs-meta">
+                          {' '}· decided in {Math.round(c.event.hesitationMs / 1000)}s
+                          {diverged ? <strong> · off the historical path</strong> : ' · as on the day'}
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                  <div className="cr-vs-they">
+                    <span className="cr-vs-who">They</span>
+                    <span>{h ? <>{h.action} <Cite c={h.citation} idx={sourceIndex} /></> : 'The record does not say.'}</span>
+                  </div>
                 </li>
               );
             })}
           </ol>
         </div>
-        <div className={colClass(2)}>
-          <h3 className="cr-col-title">The inquiry said</h3>
-          <ol className="cr-col-list">
+
+        {scenario.debrief_media && scenario.debrief_media.length > 0 && (
+          <div className="cr-dsec">
+            <h3 className="cr-dsec-title">After the clock stopped</h3>
+            <p className="cr-dsec-note">Imagery from after the last decision point. None of it was on the desk:
+              the log showed only what existed at each hour.{compact ? ' Tap a plate to open it.' : ''}</p>
+            {compact ? (
+              <ContactSheet scenario={scenario} media={scenario.debrief_media} />
+            ) : (
+              <div className="cr-figures">
+                {scenario.debrief_media.map((m) => <Figure key={m.file} scenario={scenario} m={m} />)}
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="cr-dsec">
+          <h3 className="cr-dsec-title">Your run, measured</h3>
+          <AlertTimingChart scenario={scenario} choices={choices} compact={compact} />
+          <dl className="cr-score-grid">
+            <div>
+              <dt>Warning lead time</dt>
+              <dd className="big">{formatLead(score.leadTimeMinutes)}</dd>
+              <dd className="sub">officials: {formatLead(histLead)} (first alert {scenario.scoring.historical_first_public_alert})</dd>
+            </div>
+            <div>
+              <dt>Coverage of at-risk {vocab.zoneNoun}</dt>
+              <dd className="big">{Math.round(score.coverage * 100)}%</dd>
+              <dd className="cr-meter"><span style={{ width: `${Math.round(score.coverage * 100)}%` }} /></dd>
+              <dd className="sub">{scenario.scoring.at_risk_zones.map((z) => z.label).join(' · ')}</dd>
+            </div>
+            <div>
+              <dt>False-alarm cost</dt>
+              <dd className="big">{score.falseAlarmWeight}</dd>
+              <dd className="sub">weight of warnings issued before the signals warranted them</dd>
+            </div>
+            <div>
+              <dt>Divergence from history</dt>
+              <dd className="big">{score.divergence} / {choices.length}</dd>
+              <dd className="cr-meter">
+                {choices.map((c) => (
+                  <i key={c.timestep.id} className={c.event.divergedFromHistory ? 'is-diverged' : ''} />
+                ))}
+              </dd>
+              <dd className="sub">decision points where you left the historical path</dd>
+            </div>
+          </dl>
+          <p className="cr-score-caveat">A scoring layer, not history: it measures your choices against the real
+            clock and the documented impact at {scenario.scoring.impact.time} ({scenario.scoring.impact.label}{' '}
+            <Cite c={scenario.scoring.impact.citation} idx={sourceIndex} />). It makes no claim about lives a
+            different decision would have saved — the record is silent on paths not taken.</p>
+        </div>
+
+        <div className="cr-dsec">
+          <h3 className="cr-dsec-title">The inquiry said</h3>
+          <ol className="cr-findings">
             {scenario.inquiry_findings.map((f, i) => (
-              <li key={i}>
-                <span className="cr-col-body">
-                  {f.kind === 'verbatim' ? <q className="cr-verbatim">{f.quote}</q> : f.quote}
-                  {f.translation ? <span className="cr-translation"> {f.translation}</span> : null}
-                  {' '}<Cite c={f.citation} idx={sourceIndex} />
-                  {f.kind === 'paraphrase' && <span className="cr-paraphrase-tag"> paraphrase</span>}
-                </span>
+              <li key={i} className={f.kind === 'verbatim' ? 'is-verbatim' : ''}>
+                {f.kind === 'verbatim' ? <q className="cr-verbatim">{f.quote}</q> : f.quote}
+                {f.translation ? <span className="cr-translation"> {f.translation}</span> : null}
+                {' '}<Cite c={f.citation} idx={sourceIndex} />
+                {f.kind === 'paraphrase' && <span className="cr-paraphrase-tag"> paraphrase</span>}
               </li>
             ))}
           </ol>
         </div>
-      </div>
 
-      <div className="cr-score">
-        <h3 className="cr-col-title">Your run, measured</h3>
-        <AlertTimingChart scenario={scenario} choices={choices} />
-        <p className="cr-score-caveat">A scoring layer, not history: it measures your choices against the real
-          clock and the documented impact at {scenario.scoring.impact.time} ({scenario.scoring.impact.label}{' '}
-          <Cite c={scenario.scoring.impact.citation} idx={sourceIndex} />). It makes no claim about lives a
-          different decision would have saved — the record is silent on paths not taken.</p>
-        <dl className="cr-score-grid">
-          <div>
-            <dt>Warning lead time</dt>
-            <dd className="big">{formatLead(score.leadTimeMinutes)}</dd>
-            <dd className="sub">officials: {formatLead(histLead)} (first alert {scenario.scoring.historical_first_public_alert})</dd>
-          </div>
-          <div>
-            <dt>Coverage of at-risk basins</dt>
-            <dd className="big">{Math.round(score.coverage * 100)}%</dd>
-            <dd className="cr-meter"><span style={{ width: `${Math.round(score.coverage * 100)}%` }} /></dd>
-            <dd className="sub">{scenario.scoring.at_risk_zones.map((z) => z.label).join(' · ')}</dd>
-          </div>
-          <div>
-            <dt>False-alarm cost</dt>
-            <dd className="big">{score.falseAlarmWeight}</dd>
-            <dd className="sub">weight of warnings issued before the signals warranted them</dd>
-          </div>
-          <div>
-            <dt>Divergence from history</dt>
-            <dd className="big">{score.divergence} / {choices.length}</dd>
-            <dd className="cr-meter">
-              {choices.map((c) => (
-                <i key={c.timestep.id} className={c.event.divergedFromHistory ? 'is-diverged' : ''} />
-              ))}
-            </dd>
-            <dd className="sub">decision points where you left the historical path</dd>
-          </div>
-        </dl>
-      </div>
+        <div className="cr-caveat">
+          <p className="cr-consequence-tag">The state of the record</p>
+          <p>{scenario.record_caveat}</p>
+        </div>
 
-      <div className="cr-caveat">
-        <p className="cr-consequence-tag">The state of the record</p>
-        <p>{scenario.record_caveat}</p>
-      </div>
+        <Sources scenario={scenario} title="Sources" />
 
-      <div className="cr-sources">
-        <h3 className="cr-col-title">Sources</h3>
-        <ol>
-          {scenario.sources.map((s, i) => (
-            <li key={s.id} id={`src-${s.id}`}>
-              <span className="cr-src-num">[{i + 1}]</span> {s.label}
-              {s.url ? <> — <a href={s.url}>{s.url}</a></> : null}
-              {s.note ? <span className="cr-src-note"> {s.note}</span> : null}
-            </li>
-          ))}
-        </ol>
+        <div className="cr-end-actions">
+          <button type="button" className="cr-btn-primary" onClick={onReplay}>Replay this day</button>
+          <button type="button" className="cr-btn-quiet" onClick={onLeave}>Choose another day</button>
+        </div>
       </div>
-
-      <button className="cr-btn cr-btn-primary" onClick={onRestart}>Back to the scenarios</button>
     </section>
+  );
+}
+
+/* ── Figures ───────────────────────────────────────────────────────────────
+   A cited image or clip, printed into the log like a pasted-in plate: ruled
+   frame, then the caption in the reading face, then ONE compact mono credit
+   line — who made it · the licence by its short name (linked to the licence
+   or its guidance) · the source page. The full credit and the full licence
+   wording are kept, folded into a "Terms" disclosure at the end of that line
+   (and on the links' titles), so nothing about the licence is dropped from
+   the page; it simply stops outweighing the caption. Width and height are
+   always set and the frame keeps the aspect ratio, so nothing shifts as a
+   lazy image arrives. The image is informative, so its caption is its alt
+   text. Video never autoplays and loads nothing until asked. Files are
+   served exactly as vetted (no image optimiser re-encoding them). */
+
+/** "CC0 1.0 (NASA data-use guidance: …)" → "CC0 1.0"; "Public domain (U.S.
+ *  military work; …)" → "Public domain". */
+const shortLicense = (license: string) => license.split(' (')[0].trim();
+
+/** The credit as one line can carry it: the first clause, then without a
+ *  trailing parenthetical, then the first comma-part — only as far as needed. */
+function shortCredit(credit: string) {
+  let s = credit.split(/;|: /)[0].trim();
+  if (s.length > 52) s = s.replace(/\s*\([^)]*\)\s*$/, '');
+  if (s.length > 52) s = s.split(', ')[0];
+  return s;
+}
+
+function Figure({ scenario, m }: { scenario: Scenario; m: MediaAttachment }) {
+  const base = `/control-room/${scenario.id}/`;
+  const ratio = { aspectRatio: `${m.width} / ${m.height}` };
+  const credit = shortCredit(m.credit);
+  const license = shortLicense(m.license);
+  const folded = credit !== m.credit || license !== m.license;
+  return (
+    <figure className={`cr-figure cr-figure-${m.type}`}>
+      <div className="cr-figure-frame">
+        {m.type === 'image' ? (
+          // eslint-disable-next-line @next/next/no-img-element -- served byte-for-byte as licence-vetted, not re-encoded
+          <img src={base + m.file} alt={m.caption} width={m.width} height={m.height} style={ratio}
+            loading="lazy" decoding="async" />
+        ) : (
+          <video src={base + m.file} poster={m.poster ? base + m.poster : undefined} width={m.width} height={m.height} style={ratio}
+            controls preload="none" playsInline aria-label={m.caption} />
+        )}
+      </div>
+      <figcaption>
+        <span className="cr-figure-caption">{m.caption}</span>
+        <span className="cr-figure-credit">
+          <span className="cr-figure-by" title={m.credit}>{credit}</span>
+          <span className="cr-figure-sep" aria-hidden> · </span>
+          <a href={m.licenseUrl ?? m.sourcePage} title={m.license}>{license}</a>
+          {m.licenseUrl ? <><span className="cr-figure-sep" aria-hidden> · </span><a href={m.sourcePage}>Source</a></> : null}
+          {folded && (
+            <details className="cr-figure-terms">
+              <summary><span className="cr-figure-sep" aria-hidden> · </span><span className="cr-figure-terms-label">Terms</span></summary>
+              <span className="cr-figure-terms-body">
+                <span><b>Credit</b> {m.credit}</span>
+                <span><b>Licence</b> {m.license}</span>
+              </span>
+            </details>
+          )}
+        </span>
+      </figcaption>
+    </figure>
+  );
+}
+
+/** Phones, debrief only: the after-the-clock imagery as a two-up contact
+ *  sheet. Each plate is a disclosure — its thumbnail and short label are the
+ *  summary; opening it prints the full figure (caption, credit, licence)
+ *  across both columns, in place. No lightbox, no dependency; the summary's
+ *  label names the plate, and the full caption is the opened figure's. */
+/** A plate's short label: the caption's lead clause (usually its date and
+ *  place — "9 August, Upcountry Maui"), never a dangling parenthesis. CSS
+ *  clamps it to three lines; the full caption is in the opened plate. */
+function plateLabel(caption: string) {
+  let s = caption.split(/:\s|\.\s|\s—\s/)[0];
+  const open = s.lastIndexOf('(');
+  if (open > 0 && s.indexOf(')', open) < 0) s = s.slice(0, open).trim();
+  return s.replace(/[,;]$/, '');
+}
+
+function ContactSheet({ scenario, media }: { scenario: Scenario; media: MediaAttachment[] }) {
+  const base = `/control-room/${scenario.id}/`;
+  return (
+    <div className="cr-contact">
+      {media.map((m, i) => {
+        const thumb = m.type === 'image' ? m.file : m.poster;
+        const label = plateLabel(m.caption);
+        return (
+          <details key={m.file} className="cr-plate">
+            <summary>
+              <span className="cr-plate-thumb">
+                {thumb ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- same vetted file as the plate, not re-encoded
+                  <img src={base + thumb} alt="" loading="lazy" decoding="async" width={m.width} height={m.height} />
+                ) : <span className="cr-plate-blank" />}
+                {m.type === 'video' && <span className="cr-plate-play" aria-hidden>▶</span>}
+              </span>
+              <span className="cr-plate-label">
+                <span className="cr-plate-num">Plate {i + 1}{m.type === 'video' ? ' · clip' : ''}</span>
+                <span className="cr-plate-what">{label}</span>
+              </span>
+              <span className="cr-plate-toggle" aria-hidden />
+            </summary>
+            <Figure scenario={scenario} m={m} />
+          </details>
+        );
+      })}
+    </div>
   );
 }
 
 /* ── Citations ───────────────────────────────────────────────────────────── */
 
+/** The numbered source list every [n] in the log points at. Rendered once:
+ *  under the log during play, inside the debrief at the end. */
+function Sources({ scenario, title }: { scenario: Scenario; title: string }) {
+  return (
+    <div className="cr-sources">
+      <h3 className="cr-dsec-title">{title}</h3>
+      <ol>
+        {scenario.sources.map((s, i) => (
+          <li key={s.id} id={`src-${s.id}`}>
+            <span className="cr-src-num">[{i + 1}]</span> {s.label}
+            {s.url ? <> — <a href={s.url}>{s.url}</a></> : null}
+            {s.note ? <span className="cr-src-note"> {s.note}</span> : null}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 function useSourceIndex(scenario: Scenario) {
-  const ref = useRef<Map<string, number> | null>(null);
-  if (!ref.current) {
-    ref.current = new Map(scenario.sources.map((s, i) => [s.id, i + 1]));
-  }
-  return ref.current;
+  return useMemo(() => new Map(scenario.sources.map((s, i) => [s.id, i + 1])), [scenario]);
 }
 
 function Cite({ c, idx }: { c: Citation; idx: Map<string, number> }) {
@@ -488,7 +855,7 @@ function Cite({ c, idx }: { c: Citation; idx: Map<string, number> }) {
   if (!n) return null;
   return (
     <sup className="cr-cite">
-      <a href={`#src-${c.sourceId}`} title={c.detail ?? c.sourceId}>[{n}]</a>
+      <a href={`#src-${c.sourceId}`} title={c.detail ?? c.sourceId} aria-label={`Source ${n}`}>[{n}]</a>
     </sup>
   );
 }

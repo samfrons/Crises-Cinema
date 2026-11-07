@@ -4,6 +4,7 @@ import type { Summary } from '@/lib/taxonomy';
 import { DISASTER_TAXONOMY, THEMES, CLASSIFICATION_PASSES, THEME_CROSSMAP, PIPELINE } from './data';
 import { abs } from '@/lib/site';
 import './methodology.css';
+import Elsewhere from '@/app/components/Elsewhere';
 
 const summary = summaryData as unknown as Summary;
 
@@ -27,13 +28,13 @@ export default function MethodologyPage() {
 
       <header className="md-masthead">
         <div className="wrap">
-          <p className="md-kicker">
+          <p className="md-kicker rise rise-1">
             Behind the numbers · <a href="/">← Back to Disasters by the Decade</a>
           </p>
-          <h1 className="md-mast-title">
+          <h1 className="md-mast-title rise rise-2">
             <span className="l1">Methodology</span>
           </h1>
-          <p className="md-lede">
+          <p className="md-lede rise rise-3">
             Before there was a dataset, there was a bigger question: what is a disaster movie
             even <em>made of</em>? This page is the answer the project started with, kept next
             to an honest account of how much of it actually made it into the chart.
@@ -294,6 +295,9 @@ export default function MethodologyPage() {
             </p>
 
             <a className="md-back" href="/">← Back to the decades</a>
+            <footer>
+              <Elsewhere current="/methodology" />
+            </footer>
           </div>
         </section>
       </main>

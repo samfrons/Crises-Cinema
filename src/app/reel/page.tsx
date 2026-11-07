@@ -4,6 +4,7 @@ import reelData from '../../data/reel.json';
 import { licenseLabel, type ReelManifest } from '@/lib/reel';
 import { abs } from '@/lib/site';
 import './reel.css';
+import Elsewhere from '@/app/components/Elsewhere';
 
 const manifest = reelData as unknown as ReelManifest;
 const { clips, rejected } = manifest;
@@ -142,6 +143,9 @@ export default function ReelPage() {
             </div>
 
             <a className="rl-back" href="/">← Back to the decades</a>
+            <footer>
+              <Elsewhere current="/reel" />
+            </footer>
           </div>
         </section>
       </main>

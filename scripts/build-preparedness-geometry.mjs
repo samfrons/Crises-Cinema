@@ -116,6 +116,7 @@ for (const geom of topo.objects.countries.geometries) {
   let area = 0;
   let cx = 0;
   let cy = 0;
+  let biggestRing = null;
   for (const poly of polys) {
     for (const [i, arcIndexes] of poly.entries()) {
       const pts = ring(arcIndexes);
@@ -136,8 +137,20 @@ for (const geom of topo.objects.countries.geometries) {
         area = a;
         cx = sx / (3 * a);
         cy = sy / (3 * a);
+        biggestRing = pts;
       }
     }
+  }
+  // The signed-area centroid is garbage for a ring that crosses the
+  // antimeridian (Russia lands mid-Pacific): when it leaves the frame, fall
+  // back to the mean of the outer ring's points on the majority side, so
+  // keyboard nearest-neighbour nav stays sane.
+  if (cx < 0 || cx > W) {
+    const pr = biggestRing.map(project);
+    const east = pr.filter(([x]) => x >= W / 2);
+    const side = east.length >= pr.length / 2 ? east : pr.filter(([x]) => x < W / 2);
+    cx = side.reduce((s, [x]) => s + x, 0) / side.length;
+    cy = side.reduce((s, [, y]) => s + y, 0) / side.length;
   }
   countries.push({
     iso3: code.iso3,

@@ -32,7 +32,7 @@
   --paper-deep: #e4d8bd;
   --ink: #191410;
   --ink-soft: #5f5445;
-  --ink-faint: #8d8171;
+  --ink-faint: #675c4d; /* 4.6:1 on --paper-deep, 5.4:1 on --paper: passes AA for the small mono labels */
   --rule: #cbbd9f;
   /* The one-sheet red. Accent only — never a data colour, so it can never be
      mistaken for a category. */
@@ -43,6 +43,15 @@
   --data: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
   --page: 1180px;
+
+  /* Motion. One house curve for anything that arrives or answers a hand
+     (a fast start that settles like a sheet laid on a desk), one for the
+     press, and a three-step duration scale inside 150–350ms. */
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-press: cubic-bezier(0.3, 0, 0.2, 1);
+  --t-fast: 150ms;
+  --t-mid: 240ms;
+  --t-slow: 350ms;
 }
 
 * { box-sizing: border-box; }
@@ -129,7 +138,7 @@ section { padding: 76px 0; }
 
 /* ══ Hero ════════════════════════════════════════════════════════════════ */
 
-.hero { position: relative; padding: 72px 0 60px; overflow: hidden; }
+.hero { position: relative; padding: 64px 0 60px; overflow: hidden; }
 
 /* Projector spill: a warm pool of light behind the title. */
 .hero::after {
@@ -198,7 +207,11 @@ section { padding: 76px 0; }
   font-size: 12px;
   color: var(--ink-soft);
 }
-.hero-foot b { font-weight: 400; color: var(--ink); font-size: 15px; }
+.hero-foot b { font-weight: 400; color: var(--ink); font-size: 15px; font-variant-numeric: tabular-nums; }
+/* Two printed lines, not one ragged run: the three counts, then the three
+   ways in — a forced break between them so a link is never orphaned. */
+.hero-foot::after { content: ''; flex-basis: 100%; order: 1; height: 0; }
+.hero-foot > span:nth-child(n + 4) { order: 2; }
 
 /* The split: one bar showing the four groups across the whole set. */
 .split { margin-top: 50px; }
@@ -265,6 +278,8 @@ section { padding: 76px 0; }
   cursor: pointer;
 }
 .toggle button + button { border-left: 1px solid var(--ink); }
+/* The group clips its overflow, so the ring sits inside the button. */
+.toggle button:focus-visible { outline-offset: -3px; }
 .toggle button[aria-pressed='true'] { background: var(--ink); color: var(--paper); }
 
 /* On narrow screens the strip scrolls sideways, which suits a reel. The wrapper
@@ -402,6 +417,42 @@ section { padding: 76px 0; }
   text-transform: uppercase;
   color: var(--ink-soft);
 }
+/* Every disclosure on the site (data tables, case sources, the reel's
+   rejects) shares one toggle. */
+.table-toggle > summary, .pr-case-sources > summary, .rl-rejects details > summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  transition: color var(--t-fast) var(--ease);
+}
+/* The disclosure marker, set as a boxed mono +/−: the same mark the control
+   room uses on its plates, so every toggle on the site reads as one part. */
+.table-toggle > summary::-webkit-details-marker, .pr-case-sources > summary::-webkit-details-marker,
+.rl-rejects details > summary::-webkit-details-marker { display: none; }
+.table-toggle > summary::before, .pr-case-sources > summary::before, .rl-rejects details > summary::before {
+  content: '+';
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border: 1px solid currentColor;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.table-toggle > summary:hover, .pr-case-sources > summary:hover, .rl-rejects details > summary:hover { color: var(--ink); }
+.table-toggle[open] > summary::before, .pr-case-sources[open] > summary::before,
+.rl-rejects details[open] > summary::before { content: '\2212'; background: var(--ink); border-color: var(--ink); color: var(--paper); }
+@keyframes unfold {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+.table-toggle[open] > :not(summary), .pr-case-sources[open] > :not(summary),
+.rl-rejects details[open] > :not(summary) { animation: unfold var(--t-mid) var(--ease) both; }
 .table-scroll { overflow-x: auto; margin-top: 18px; }
 table.counts {
   border-collapse: collapse;
@@ -524,7 +575,7 @@ table.counts td.zero { color: var(--rule); }
   color: var(--ink);
 }
 .search input::placeholder { color: var(--ink-faint); }
-.search input:focus { border-color: var(--ink); outline: none; }
+.search input:focus { border-color: var(--ink); }
 .search .clear {
   position: absolute;
   right: 5px;
@@ -586,6 +637,24 @@ table.counts td.zero { color: var(--rule); }
   margin-top: 3px;
 }
 .fact-big { font-family: var(--poster); font-size: 40px; line-height: 0.9; display: block; }
+
+/* Figures set as display: every big number on the site sits on tabular
+   figures, so a count that changes (a filter, a slider, a run) never jostles
+   its neighbours. The mono data face is tabular by construction. */
+.fact-big, .at-facts .big, .dis-facts .big, .pr-facts .big, .pr-bar-num, .pr-headline-big,
+.pr-panel-score b, .cr-score-grid .big, .cr-toll-number, .split-seg span {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Ledes and theses: no one-word last lines, and opening quotes or dashes
+   hang into the margin where the browser can (Safari) so the left edge of
+   the text block stays optically straight. */
+.lede, .hero-thesis, .at-lede, .dis-lede, .rl-lede, .md-lede, .cat-lede, .pr-lede, .cr-lede {
+  text-wrap: pretty;
+  hanging-punctuation: first allow-end;
+}
+/* Masthead straplines: balanced, so a phone never strands one word. */
+h1 .l2 { text-wrap: balance; }
 
 /* Contact sheet. Rules live on the cards rather than showing through grid gaps,
    so a partial last row leaves paper instead of a coloured block. */
@@ -789,22 +858,48 @@ table.counts td.zero { color: var(--rule); }
 .colophon dd { margin: 3px 0 0; color: #ded4be; font-variant-numeric: tabular-nums; }
 
 /* ══ Entrance sequence ═══════════════════════════════════════════════════
-   A title-card fade: kicker, then title, then thesis. Nothing moves after. */
+   A title card cut, not a fade-up: each block lands in 350ms on the house
+   curve, 90ms behind the last, over 8px — the whole masthead is set within
+   ~0.65s. The kicker's trailing rule is drawn across as the title lands,
+   like a compositor ruling off the head. Nothing moves after. */
 
 @keyframes rise {
-  from { opacity: 0; transform: translateY(14px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: none; }
 }
-.rise { animation: rise 0.72s cubic-bezier(0.16, 0.84, 0.3, 1) both; }
-.rise-1 { animation-delay: 0.04s; }
-.rise-2 { animation-delay: 0.2s; }
-.rise-3 { animation-delay: 0.42s; }
-.rise-4 { animation-delay: 0.6s; }
+@keyframes rule-draw {
+  from { transform: scaleX(0); }
+  to { transform: none; }
+}
+.rise { animation: rise var(--t-slow) var(--ease) both; }
+.rise-1 { animation-delay: 30ms; }
+.rise-2 { animation-delay: 120ms; }
+.rise-3 { animation-delay: 210ms; }
+.rise-4 { animation-delay: 300ms; }
+.rise-1::after { transform-origin: left center; animation: rule-draw var(--t-slow) var(--ease) 200ms both; }
 
+/* The opening beat of the essay: the four-group bar is printed in from the
+   left, one plate after another, once the thesis is down. */
+@keyframes print-in {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.split-seg { animation: print-in var(--t-slow) var(--ease) both; animation-delay: 380ms; }
+.split-seg:nth-child(2) { animation-delay: 450ms; }
+.split-seg:nth-child(3) { animation-delay: 520ms; }
+.split-seg:nth-child(4) { animation-delay: 590ms; }
+
+/* Reduced motion: the page is simply set — every block, rule and bar in its
+   final place on first paint, so nothing is withheld and nothing moves. */
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .rise { animation: none; }
+  .rise, .rise-1::after, .split-seg { animation: none; }
   .film, .note, .chip { transition: none; }
+  .table-toggle > summary, .table-toggle > summary::before,
+  .pr-case-sources > summary, .pr-case-sources > summary::before,
+  .rl-rejects details > summary, .rl-rejects details > summary::before { transition: none; }
+  .table-toggle[open] > :not(summary), .pr-case-sources[open] > :not(summary),
+  .rl-rejects details[open] > :not(summary) { animation: none; }
 }
 
 @media (max-width: 640px) {
@@ -821,4 +916,26 @@ table.counts td.zero { color: var(--rule); }
   .sheet { padding: 0; align-items: flex-end; }
   .sheet-card { max-height: 92vh; border-radius: 3px 3px 0 0; padding: 24px 20px; }
   .sheet-top img { width: 86px; }
+}
+
+/* ══ Touch targets ═══════════════════════════════════════════════════════
+   Filters, chips and disclosures reach 40px on a phone without changing the
+   desktop rhythm. */
+@media (max-width: 720px) {
+  .toggle button { min-height: 40px; }
+  .chip { min-height: 40px; }
+  .reset { min-height: 40px; padding: 0 2px 1px; }
+  .decades button { min-height: 40px; }
+  .search .clear { min-width: 40px; min-height: 40px; }
+  .table-toggle summary { padding: 11px 0; } /* keeps the disclosure marker */
+}
+
+/* Page kickers carry a long back-link that cannot share a 354px line with
+   its trailing rule; set them as a flowing line instead of two stranded
+   flex columns. */
+@media (max-width: 720px) {
+  body .at-kicker, body .dis-kicker, body .rl-kicker, body .md-kicker, body .pr-kicker, body .cat-kicker { display: block; line-height: 1.5; }
+  body .at-kicker::after, body .dis-kicker::after, body .rl-kicker::after, body .md-kicker::after,
+  body .pr-kicker::after, body .cat-kicker::after { display: none; }
+  body .at-kicker a, body .dis-kicker a, body .rl-kicker a, body .md-kicker a, body .pr-kicker a, body .cat-kicker a { display: inline-block; }
 }

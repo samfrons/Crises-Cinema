@@ -5,6 +5,7 @@ import { family } from '@/lib/taxonomy';
 import { monthLabel } from '@/lib/months';
 import DispatchesView, { type Dispatches } from './DispatchesView';
 import './dispatches.css';
+import Elsewhere from '@/app/components/Elsewhere';
 
 // The snapshot is fetched from the Arctic Shift archive of Reddit by
 // scripts/build-dispatches.mjs and committed, so the page builds with no
@@ -142,6 +143,7 @@ export default function DispatchesPage() {
             Snapshot built {data.generated} · refresh with <code>npm run build:dispatches</code> ·
             full sausage-making in the <a href="/methodology">methodology</a>
           </p>
+          <Elsewhere current="/dispatches" />
         </div>
       </footer>
     </div>

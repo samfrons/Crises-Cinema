@@ -34,6 +34,10 @@ import { CASE_STUDIES } from './caseStudies';
 
 const MAP_W = 1000;
 const MAP_H = 500;
+// The land ends near 56°S (no Antarctica) and starts near 84°N, so the plate
+// frames only that band; the full-globe coordinates stay as they are.
+const VIEW_Y = 10;
+const VIEW_H = 404;
 
 type HazardFilter = 'all' | HazardKey;
 
@@ -274,7 +278,7 @@ export default function PreparednessMap() {
             <div className="pr-scroll">
               <div className="pr-inner">
                 <svg
-                  viewBox={`0 0 ${MAP_W} ${MAP_H}`}
+                  viewBox={`0 ${VIEW_Y} ${MAP_W} ${VIEW_H}`}
                   tabIndex={0}
                   role="img"
                   aria-label={

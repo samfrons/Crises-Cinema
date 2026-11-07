@@ -43,7 +43,7 @@
   gap: 12px;
 }
 .rl-kicker::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
-.rl-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; }
+.rl-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; padding: 12px 0; margin: -12px 0; }
 .rl-kicker a:hover { color: var(--ember); }
 
 .rl-mast-title {
@@ -503,4 +503,13 @@ table.rl-ledger td.src-cell {
 
 @media (prefers-reduced-motion: reduce) {
   .rl-gauge { transition: none; }
+}
+
+@media (max-width: 720px) {
+  .rl-btn { min-height: 40px; }
+  .rl-rejects summary { padding: 11px 0; }
+  .rl-back { padding: 11px 0 9px; }
+}
+@media (max-width: 720px) {
+  .rl-srclink { display: inline-block; padding: 11px 0 10px; }
 }

@@ -62,6 +62,7 @@ function build(): string {
   L(`- [The First Reels](${abs('/reel')}): ten public-domain disaster films, 1900–1930, with their licensing paperwork.`);
   L(`- [films.json](${abs('/data/films.json')}): the machine-readable catalogue the explorer fetches.`);
   L(`- [Preparedness](${abs('/preparedness')}): the non-fiction companion — who is actually ready, on real risk indices (INFORM, ND-GAIN, WHO SPAR, Sendai Target G, OCHA FTS), with case files and sources at /data/preparedness/.`);
+  L(`- [The Control Room](${abs('/control-room')}): real disasters replayed on their real clocks — you make the calls, then meet what officials did and what the inquiry found. Every fact cited; where the record is silent, it says so.`);
   L();
 
   L('## The finding');

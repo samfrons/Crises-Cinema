@@ -20,7 +20,7 @@
   gap: 12px;
 }
 .md-kicker::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
-.md-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; }
+.md-kicker a { color: var(--ink-soft); text-decoration: none; letter-spacing: 0.16em; padding: 12px 0; margin: -12px 0; }
 .md-kicker a:hover { color: var(--ember); }
 
 .md-mast-title {
@@ -243,4 +243,8 @@
   .md-masthead { padding: 44px 0 36px; }
   .md-kicker { font-size: 10px; letter-spacing: 0.16em; gap: 9px; }
   .md-flat { columns: 1; }
+}
+
+@media (max-width: 720px) {
+  .md-back { padding: 11px 0 9px; }
 }

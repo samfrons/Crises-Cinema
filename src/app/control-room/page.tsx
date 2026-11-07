@@ -39,16 +39,16 @@ export default function ControlRoomPage() {
 
       <header className="cr-masthead">
         <div className="wrap">
-          <p className="cr-kicker">
+          <p className="cr-kicker rise rise-1">
             <a href="/">Disasters by the Decade</a>
             <span aria-hidden>·</span>
             <span>An interactive companion</span>
           </p>
-          <h1 className="cr-title">
+          <h1 className="cr-title rise rise-2">
             <span className="l1">The Control Room</span>
             <span className="l2">You are the emergency chief. The clock is real.</span>
           </h1>
-          <p className="cr-lede">
+          <p className="cr-lede rise rise-3">
             Disaster films cut to the general who makes the call in time. The record reads differently.
             Each scenario below replays a real day on its real clock: you see only what officials could
             see at each moment, you choose, and the clock advances along what actually happened — this
