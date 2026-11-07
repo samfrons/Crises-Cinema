@@ -110,8 +110,18 @@ export function DamGlyph({ size = 20, className }: P) {
   );
 }
 
+export function FireGlyph({ size = 20, className }: P) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M12 21c-3.6 0-6-2.4-6-5.6 0-3.4 2.6-5.2 3.4-8.4 1.8 1.4 2.4 3.2 2.2 4.8 1.2-.8 2-2.6 1.8-4.6C16 9 18 11.8 18 15.4 18 18.6 15.6 21 12 21z" />
+      <path d="M12 21c-1.5 0-2.6-1-2.6-2.5 0-1.6 1.4-2.4 1.8-3.8 1.6 1 2.8 2.2 2.8 3.8 0 1.5-.9 2.5-2 2.5z" />
+    </svg>
+  );
+}
+
 export function HazardGlyph({ hazard, size, className }: P & { hazard: string }) {
   const h = hazard.toLowerCase();
+  if (/fire|wildland/.test(h)) return <FireGlyph size={size} className={className} />;
   if (h.includes('dam') || h.includes('levee')) return <DamGlyph size={size} className={className} />;
   if (h.includes('cyclone') || h.includes('hurricane') || h.includes('typhoon') || h.includes('surge')) {
     return <CycloneGlyph size={size} className={className} />;

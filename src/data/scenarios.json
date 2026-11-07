@@ -1,6 +1,1253 @@
 {
-  "generated": "2026-09-01T06:15:22.700Z",
+  "generated": "2026-11-07T18:45:37.151Z",
   "playable": [
+    {
+      "id": "lahaina-2023",
+      "status": "playable",
+      "title": "The Day the Fire Came Back",
+      "date": "2023-08-08",
+      "location": "Lahaina and Upcountry, Maui, Hawaiʻi, USA",
+      "hazard": "wildfire",
+      "clock": {
+        "timezone": "Pacific/Honolulu",
+        "start": "06:30",
+        "end": "22:00"
+      },
+      "record_caveat": "The record here is strong on times and thin on reasons. The minute-by-minute facts come from the FSRI timeline dataset published for the Hawaiʻi Attorney General (dispatch audio, police and fire logs, MEMA and HI-EMA logs, NWS products, Hawaiian Electric statements, county social-media posts, and the administrator's own text messages), and from FSRI's Phase Two analysis of 13 September 2024. The Phase One report PDF could not be read as text, so Phase One facts are cited to its dataset rows by time and source. The county after-action report by the Western Fire Chiefs Association and MPD's own report could not be retrieved, and are not cited. Some entries in the dataset carry wrong or later timestamps; those were left out. The player is cast as the MEMA Administrator, who the record places in Honolulu for the Pacific Partnership 2023 meeting that day; the EOC was run in Maui by his staff, and some information shown here (dispatch traffic, 911 calls) is in the county's records but is not shown to have reached him. FSRI's staff interviews say siren activation was not discussed on 8 August, while the Administrator said on 16 August he had decided against it; the documents available here do not reconcile the two. Where this scenario cannot say what a different decision would have caused, it says so: the record is silent on every path not taken. How much Hurricane Dora itself contributed to the wind has been questioned in later analyses; this scenario reports only what the forecasts said. The origin and cause of the fire are under separate investigation and are not addressed.",
+      "briefing_media": {
+        "file": "maui-landsat-true-colour-2023-08-07.jpg",
+        "type": "image",
+        "caption": "Landsat natural-colour view of Maui, 7 August 2023, the day before the fires. The leeward slopes read brown; cloud sits on the West Maui mountains.",
+        "credit": "NASA (Landsat data, U.S. Geological Survey)",
+        "license": "Public domain (NASA / U.S. Geological Survey work)",
+        "licenseUrl": "https://commons.wikimedia.org/wiki/Template:PD-USGov-NASA",
+        "sourcePage": "https://science.nasa.gov/image-detail/amf-56bad9ab-a90c-43b0-96bf-43b52f5c9688/",
+        "width": 1280,
+        "height": 957,
+        "bytes": 329164,
+        "licenseVerifiedOn": "Commons file page https://commons.wikimedia.org/wiki/File:MauiFire_2023Aug07_True432_(Landsat).jpg (template PD-USGov-NASA, source = the NASA page); the NASA page itself carries no explicit licence line",
+        "takenOn": "2023-08-07",
+        "suggestedTimestep": "pre"
+      },
+      "timesteps": [
+        {
+          "id": "t1",
+          "time": "06:30",
+          "time_label": "06:30",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t1-i1",
+              "kind": "forecast",
+              "text": "NWS Honolulu has had a Red Flag Warning in force for the leeward side of every island since 06:00 on 7 August, and a High Wind Warning with it: east winds 30 to 45 mph, gusts to around 60, humidity 35 to 45 percent. The text says any fire that develops 'will likely spread rapidly'. The Red Flag Warning runs to 06:00 on Wednesday 9 August.",
+              "citation": {
+                "sourceId": "nws-2023",
+                "detail": "Red Flag Warning issued 03:15 HST 7 Aug (valid 06:00 7 Aug to 06:00 9 Aug); reissued 03:17 HST 8 Aug 'REMAINS IN EFFECT UNTIL 6 AM HST WEDNESDAY'; High Wind Warning text of 03:18 HST 8 Aug"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "lahaina-front-street",
+                "upcountry-kula"
+              ]
+            },
+            {
+              "id": "t1-i2",
+              "kind": "forecast",
+              "text": "NWS's text names the cause: the gradient between high pressure north of the islands and Hurricane Dora, passing 'safely south of the islands'. It first flagged the danger on 6 August with a Fire Weather Watch and a High Wind Watch.",
+              "citation": {
+                "sourceId": "nws-2023",
+                "detail": "High Wind Watch 03:33 HST 6 Aug names Hurricane Dora 'passing safely south of the islands'; Fire Weather Watch 03:33 HST 6 Aug"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "lahaina-front-street",
+                "upcountry-kula"
+              ],
+              "media": {
+                "file": "hurricane-dora-viirs-2023-08-07.jpg",
+                "type": "image",
+                "caption": "7 August, about 13:30 HST (Suomi NPP VIIRS): Hurricane Dora southeast of the Hawaiian Islands. The Red Flag Warning for leeward Maui has been in force since 06:00.",
+                "credit": "NASA EOSDIS Global Imagery Browse Services (GIBS), VIIRS Suomi NPP corrected-reflectance true colour; crop of the Hawaii region rendered by the project",
+                "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+                "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+                "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&layers=VIIRS_SNPP_CorrectedReflectance_TrueColor&styles=&srs=EPSG:4326&bbox=-175,5,-145,28&width=1200&height=920&format=image/jpeg&time=2023-08-07",
+                "width": 1200,
+                "height": 920,
+                "bytes": 330211,
+                "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-07)",
+                "takenOn": "2023-08-07",
+                "suggestedTimestep": "pre"
+              }
+            },
+            {
+              "id": "t1-i3",
+              "kind": "message",
+              "text": "Upcountry has been burning since overnight. The Olinda/Kula fire was first reported at 00:22. Your EOC has already sent Wireless Emergency Alerts for it: Kula 200 at 04:09, Hoʻopalua Drive at 05:00, Hanamu Road and Kealaloa Avenue at 05:21. A shelter is open at the Hannibal Tavares Community Center.",
+              "citation": {
+                "sourceId": "mema-records",
+                "detail": "MEMA WEA log, 8 Aug 04:09, 05:00 and 05:21; Phase Two reports the Olinda fire at 00:22"
+              },
+              "zones": [
+                "upcountry-kula"
+              ],
+              "board_state": "impact"
+            },
+            {
+              "id": "t1-i4",
+              "kind": "field_report",
+              "text": "West Maui is losing its grid. By 05:38 about 7,000 customers between Lahaina north to Kapalua are out. MPD reports poles leaning and down on Honoapiʻilani Highway at Keawe Street (05:42) and Hokiokio Place (05:51); the highway between Front Street and Hokiokio is closed at 06:21.",
+              "citation": {
+                "sourceId": "mema-records",
+                "detail": "MEMA activity log 05:38 (7,000 customers); EOC Operations and Staffing Report 06:21 road closure; HECO statements for 05:42 and 05:51 reports from MPD"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "lahaina-front-street"
+              ],
+              "board_state": "none"
+            },
+            {
+              "id": "t1-i5",
+              "kind": "message",
+              "text": "Your EOC went to partial activation at 21:00 on 7 August 'for the wind warning'. Your own texts place you in Honolulu: at 22:11 on 7 August you wrote that you had just checked into a hotel, and the Guard's operations chief later learns you are at the Pacific Partnership 2023 meeting on Oʻahu. Mayor Bissen reaches the Maui EOC around 06:00 to 06:30.",
+              "citation": {
+                "sourceId": "mema-records",
+                "detail": "MEMA log 7 Aug 21:33 'Activated the EOC at 2100 hrs, 8/7/23 for the wind warning'; Andaya texts 7 Aug 22:11 and 8 Aug 09:22-09:27; Phase Two §3.6.4 on the Mayor's arrival"
+              }
+            }
+          ],
+          "options": [
+            {
+              "id": "t1-a1",
+              "label": "Go to full activation and pre-position now",
+              "detail": "Call every agency into the EOC. Ask MFD, MPD, Water Supply and Hawaiian Electric to stage crews in West Maui and Upcountry, put traffic control on Honoapiʻilani Highway and the Bypass, and put state aviation on standby.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [
+                  "lahaina-lahainaluna",
+                  "upcountry-kula"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0.5
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t1-a2",
+              "label": "Text West Maui and Upcountry: extreme fire weather, be ready to leave",
+              "detail": "Send a public alert on the Red Flag and High Wind warnings, with go-kit guidance, to leeward Maui.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lahaina-lahainaluna",
+                  "lahaina-front-street",
+                  "upcountry-kula"
+                ],
+                "protective": true,
+                "false_alarm_weight": 1
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t1-a3",
+              "label": "Stay at partial activation and monitor",
+              "detail": "The Red Flag Warning has been in force for a day and a half. Kula is being handled. Hold the EOC where it is and watch the wind.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is the path the day took: the EOC stayed at partial activation until full activation at 16:30. FSRI later found that 'actionable' extreme-weather forecasts reached fire chiefs and emergency managers beforehand, but that adjusting staffing for them 'was not standard'. In FSRI's resident interviews, 62 of 71 said they received no county text about the high winds and fire danger.",
+                "citation": {
+                  "sourceId": "fsri-p2",
+                  "detail": "Findings 5, 36 and 49 (Appendix 6.1); Section 3.6.4 (EOC full activation 16:30); Section 3.5.1.1 (62 of 71)"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t1-a3",
+          "historical_citation": {
+            "sourceId": "fsri-p2",
+            "detail": "Section 3.6.4 and Finding 49: partial activation from 21:00 on 7 Aug; full activation not until 16:30 on 8 Aug"
+          }
+        },
+        {
+          "id": "t2",
+          "time": "06:37",
+          "time_label": "06:37",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t2-i1",
+              "kind": "field_report",
+              "text": "06:34 to 06:37: callers report a brush fire across from Lahaina Intermediate School, off Lahainaluna Road. A power line has just fallen into the bushes, about 50 feet from the nearest house. Officers report high winds.",
+              "citation": {
+                "sourceId": "fsri-p1",
+                "detail": "MPD event chronology 06:35:19 and 06:37:23; Event Chronology Report 06:34 and 06:37; Phase Two §3.6.4 (Lahaina AM fire reported 06:34)"
+              },
+              "zones": [
+                "lahaina-lahainaluna"
+              ]
+            },
+            {
+              "id": "t2-i2",
+              "kind": "message",
+              "text": "MFD sends Lahaina and Napili units. The county helicopter, Air 2, turns back to base because of the wind. MPD evacuates the Hoʻokahua/Kuʻialua streets; the county posts that evacuations were ordered at 06:40 around Lahaina Intermediate and closes Lahainaluna Road.",
+              "citation": {
+                "sourceId": "fsri-p1",
+                "detail": "HI-EMA log 06:37 ('Air-2 return to base due to winds'); PD dispatch narrative 06:37; County of Maui Facebook post (evacuations ordered 6:40 am, Lahainaluna Road closed)"
+              },
+              "zones": [
+                "lahaina-lahainaluna"
+              ]
+            },
+            {
+              "id": "t2-i3",
+              "kind": "field_report",
+              "text": "Hawaiian Electric later states that at 06:40 it told MPD the downed line was not energized, because the last transmission line into West Maui had already tripped offline. Schools nearby, including Lahainaluna High and Princess Nāhiʻenaʻena Elementary, are closed; HI-EMA lists the reason as the power outage.",
+              "citation": {
+                "sourceId": "fsri-p1",
+                "detail": "HECO statement for the 06:40 MPD report; HI-EMA school-closure log 06:40"
+              },
+              "zones": [
+                "lahaina-lahainaluna"
+              ]
+            },
+            {
+              "id": "t2-i4",
+              "kind": "message",
+              "text": "The Upcountry fire is still your main fight. Shelters are open: Hannibal Tavares Community Center in Pukalani, and, from 06:52, the Lahaina Civic Center with the Red Cross.",
+              "citation": {
+                "sourceId": "mema-records",
+                "detail": "EOC Operations and Staffing Report 06:52; HI-EMA shelter log 06:40"
+              },
+              "zones": [
+                "upcountry-kula",
+                "lahaina-lahainaluna"
+              ]
+            }
+          ],
+          "options": [
+            {
+              "id": "t2-a1",
+              "label": "Send a Wireless Emergency Alert for the streets around Lahaina Intermediate",
+              "detail": "Evacuation order for the Lahainaluna neighbourhood, sent to every phone in range.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lahaina-lahainaluna"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0.5
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t2-a2",
+              "label": "Ask HI-EMA and the Guard for aircraft and ground support on Maui now",
+              "detail": "Wind is grounding county aircraft. Ask the state for helicopters and crews for both Lahaina and Upcountry.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [
+                  "lahaina-lahainaluna",
+                  "upcountry-kula"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0.5
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t2-a3",
+              "label": "Back MFD and MPD, keep the shelter open, no public alert",
+              "detail": "Fire crews are on scene and police are already clearing the streets. Support them from the EOC.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is the path the morning took: MPD cleared the streets, the county posted the evacuation to Facebook and X, and the Lahaina Civic Center opened as a shelter. The MEMA Wireless Emergency Alert log shows alerts for Upcountry fires at 04:09, 05:00 and 05:21, and none for Lahaina until 16:16.",
+                "citation": {
+                  "sourceId": "mema-records",
+                  "detail": "MEMA EAS-WEA log for 8 Aug; County of Maui posts 06:40; EOC report 06:52"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t2-a3",
+          "historical_citation": {
+            "sourceId": "fsri-p1",
+            "detail": "HI-EMA log and county posts for 06:37 to 06:52: no WEA issued for the Lahaina morning fire"
+          }
+        },
+        {
+          "id": "t3",
+          "time": "09:30",
+          "time_label": "09:30",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t3-i1",
+              "kind": "field_report",
+              "text": "At 08:19 the MFD battalion chief on Lahaina says: 'We'll call it 90% contained.' By shortly before 09:00 MFD declares it 100% contained. Your EOC's 08:30 shift-change brief says the same; it was passed to HI-EMA at 09:29.",
+              "citation": {
+                "sourceId": "fsri-p1",
+                "detail": "Dispatch audio FD1 08:19:48 (BC5); HI-EMA log 06:37 entry ('100% contained at 0904'); MEMA EM Director activity log 09:36; HI-EMA log 09:29 ('contained as of Maui EOC 0830 Shift Change Brief')"
+              },
+              "zones": [
+                "lahaina-lahainaluna"
+              ]
+            },
+            {
+              "id": "t3-i2",
+              "kind": "field_report",
+              "text": "Upcountry is not contained. At 08:23 the Kula fire stands at 675 acres with no containment. Helicopters could not launch at 07:48 because of wind; the Guard's aviation officer said so.",
+              "citation": {
+                "sourceId": "hiema-records",
+                "detail": "HI-EMA log 08:23 (675 acres, no containment); HI-EMA Phase 1 timeline entry 07:48 ('helicopters are unable to launch due to wind speeds')"
+              },
+              "zones": [
+                "upcountry-kula"
+              ]
+            },
+            {
+              "id": "t3-i3",
+              "kind": "message",
+              "text": "At 09:22 the Hawaiʻi National Guard's joint operations chief, Col. Udani, texts you to ask for an update. The Guard is working a request for the Big Island. You have already spoken to Maj. Gen. Hara, who asked whether Maui needs state assistance.",
+              "citation": {
+                "sourceId": "hiema-records",
+                "detail": "Maj. Gen. Hara timeline notes 09:09 and 09:22; Andaya text 09:30 to HING/J3"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "upcountry-kula"
+              ]
+            },
+            {
+              "id": "t3-i4",
+              "kind": "forecast",
+              "text": "Nothing has changed in the sky. The Red Flag Warning and High Wind Warning still run to 06:00 on Wednesday. East winds are 30 to 45 mph with gusts to about 60. Power is out across West Maui and Upcountry, and a pole is down on Honoapiʻilani Highway between Front Street and Hokiokio Place.",
+              "citation": {
+                "sourceId": "nws-2023",
+                "detail": "NWS Red Flag Warning and High Wind Warning, 8 Aug 03:17-03:18 HST; HI-EMA situation notes 08:19 (road and power)"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "lahaina-front-street"
+              ]
+            }
+          ],
+          "options": [
+            {
+              "id": "t3-a1",
+              "label": "Countermand 'contained': hold the units and say 'contained, not out'",
+              "detail": "Keep MFD on the Lahaina burn scar. Tell HI-EMA a rekindle is likely in red-flag winds. Ask the county information office to word the update as 'contained but not out; stay ready'.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lahaina-lahainaluna"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0.5
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t3-a2",
+              "label": "Accept the Guard's offer: ask for state aviation and ground support on Maui now",
+              "detail": "Col. Udani is asking. Say yes, for Kula first and Lahaina on standby.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [
+                  "lahaina-lahainaluna",
+                  "upcountry-kula"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0.5
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t3-a3",
+              "label": "Report the fire contained and tell the state Maui can manage for now",
+              "detail": "MFD has a handle on Lahaina, and the mayor and chief say they have what they need.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is the path the day took. At 09:30 you texted the Guard: Maui Fire 'has a handle on Lahaina'; Kula 'is a different story'; the mayor and chief said they could fight it with their own assets 'for now'. At 09:55 the county posted that MFD 'declared the Lahaina brush fire 100% contained shortly before 9am' and asked West Maui to conserve water because power outages were hampering pumping.",
+                "citation": {
+                  "sourceId": "hiema-records",
+                  "detail": "Maj. Gen. Hara timeline notes, text from Andaya to HING/J3 at 09:30; County of Maui Facebook, Lahaina Fire Update No. 2, 09:55"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t3-a3",
+          "historical_citation": {
+            "sourceId": "hiema-records",
+            "detail": "Text from Herman Andaya to HING/J3, 8 Aug 09:30, as recorded in the Maj. Gen. Hara timeline notes"
+          }
+        },
+        {
+          "id": "t4",
+          "time": "14:55",
+          "time_label": "14:55",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t4-i1",
+              "kind": "field_report",
+              "text": "Honoapiʻilani Highway has been closed in Lahaina between Papalaua Street and Lahainaluna Road since 14:03. At 14:19 a Hawaiian Electric employee cannot pass because of downed poles. At 14:51 an MPD officer reports five power lines down between Kapunakea and Keawe streets; MPD calls for units to block the road.",
+              "citation": {
+                "sourceId": "mema-records",
+                "detail": "County road-closure text 14:03; HECO statement for 14:19; MPD event chronology 14:50:59-14:51:25"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "lahaina-front-street"
+              ],
+              "board_state": "none"
+            },
+            {
+              "id": "t4-i2",
+              "kind": "field_report",
+              "text": "14:55: numerous callers say the fire is flaring up again at the end of the Kuʻialua cul-de-sac, the same area as the morning fire, and 'spreading fast'. At 14:56 dispatch tells MFD engines it is getting multiple calls with flames visible. At 15:00 the first engine on scene reports a burn 20 by 100 feet on the north flank 'near the houses'.",
+              "citation": {
+                "sourceId": "fsri-p1",
+                "detail": "MPD event chronology 14:55:19-14:57:55; Event Chronology Report 14:55; dispatch audio FD1 14:56:07 and 15:00:37"
+              },
+              "zones": [
+                "lahaina-lahainaluna"
+              ]
+            },
+            {
+              "id": "t4-i3",
+              "kind": "forecast",
+              "text": "The wind has not eased. The Red Flag Warning and High Wind Warning are unchanged: east winds 30 to 45 mph, gusts to about 60.",
+              "citation": {
+                "sourceId": "nws-2023",
+                "detail": "NWS Red Flag and High Wind products, 8 Aug 03:17-03:18 HST"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "lahaina-front-street"
+              ]
+            },
+            {
+              "id": "t4-i4",
+              "kind": "message",
+              "text": "The county IT log notes network problems at Lahaina locations, including the senior center and the fire station. A second Upcountry fire, in Kula, has been burning since 11:27; you wrote at 11:29 that aircraft cannot be used on it.",
+              "citation": {
+                "sourceId": "mema-records",
+                "detail": "MEMA EOC web log 12:50 (network issues at Lahaina locations); Phase Two §3.6.4 (Kula fire reported 11:27); Andaya text 11:29"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "upcountry-kula"
+              ]
+            }
+          ],
+          "options": [
+            {
+              "id": "t4-a1",
+              "label": "Send a Wireless Emergency Alert evacuation order for the Lahainaluna and Kelawea neighbourhoods now",
+              "detail": "Callers say the fire is running toward houses at the spot that burned this morning. Alert every phone in the neighbourhood.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lahaina-lahainaluna"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0.5
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t4-a2",
+              "label": "Go to full EOC activation and request state and Guard help for Lahaina",
+              "detail": "Bring every agency in and ask HI-EMA for aircraft and crews for West Maui before the fire grows.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [
+                  "lahaina-lahainaluna",
+                  "upcountry-kula"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0.5
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t4-a3",
+              "label": "Treat it as a tactical flare-up: leave it to MFD and MPD, watch from the EOC",
+              "detail": "Engines are on scene and police are blocking roads. Do not pull the EOC off Kula.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is the path the afternoon took. MPD began evacuating by hand (15:08: 'Evacuate Hoʻokahua Pl'). At 15:29 you texted the mayor's group: 'New fire in Lahaina near the Intermediate School.' The record logs no Wireless Emergency Alert for Lahaina until 16:10; county posts on Facebook and X continue.",
+                "citation": {
+                  "sourceId": "fsri-p1",
+                  "detail": "MPD event chronology 15:08:18; Andaya text 15:29 to mayor's group; MEMA log 16:10"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t4-a3",
+          "historical_citation": {
+            "sourceId": "fsri-p1",
+            "detail": "MPD event chronology and Andaya texts 14:55-15:30; MEMA log shows the first Lahaina evacuation alert sent at 16:10"
+          }
+        },
+        {
+          "id": "t5",
+          "time": "16:10",
+          "time_label": "16:10",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t5-i1",
+              "kind": "field_report",
+              "text": "The fire jumped Lahainaluna Road and the Lahaina Bypass at about 15:21. The first homes on Lahainaluna Road began to ignite at 15:30. At 15:25 Command asks for police help evacuating south of Kelawea Mauka Park: 'extreme fire conditions.' At 15:32 Command says: 'I have no resources to spare.'",
+              "citation": {
+                "sourceId": "fsri-p2",
+                "detail": "Section 3.8.10: 'ignited at 14:55, jumping the Lahaina Bypass at approximately 15:21. The first homes along Lahainaluna Road began to ignite at 15:30'; dispatch audio FD2 15:24:42, 15:25:36 and 15:32:33"
+              },
+              "zones": [
+                "lahaina-lahainaluna"
+              ],
+              "board_state": "impact"
+            },
+            {
+              "id": "t5-i2",
+              "kind": "message",
+              "text": "Your own texts: at 15:28 you tell the state's Col. Barros it is 'starting to heat up again. We now have to evacuate Olinda and a portion of Lahaina.' At 15:50 a county official texts you 'Pretty chaotic right now for mfd and mpd', and at 15:54 names two priorities: evacuate Kulalani in Kula, and work out West Side traffic access and exit.",
+              "citation": {
+                "sourceId": "mema-records",
+                "detail": "Andaya texts 15:28, 15:30, 15:50 and 15:54"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "upcountry-kula"
+              ]
+            },
+            {
+              "id": "t5-i3",
+              "kind": "message",
+              "text": "The state emergency proclamation was signed at 15:24. Your logistics chief asks for help sending a Wireless Emergency Alert for Kulalani at 15:50; it goes out at 16:04. At 16:10 you text your acting EOC director: 'Are we doing a WEA alert for the evacuations?' The Maui EOC is still at partial activation.",
+              "citation": {
+                "sourceId": "mema-records",
+                "detail": "Andaya texts 15:24-15:25 and 16:10; MEMA log 15:50 and 16:04; Maui HI-EMA Phase 1 timeline"
+              },
+              "zones": [
+                "upcountry-kula",
+                "lahaina-lahainaluna"
+              ]
+            },
+            {
+              "id": "t5-i4",
+              "kind": "field_report",
+              "text": "Hawaiian Electric tells dispatch at 16:11 that all power off Lahainaluna above and below the Bypass is already dead. Honoapiʻilani Highway has been shut by downed poles since 14:03. The Maui outdoor warning sirens have never been used for a wildfire.",
+              "citation": {
+                "sourceId": "fsri-p1",
+                "detail": "HECO dispatch 16:11; county road-closure text 14:03; Phase Two §3.5.1.2 (sirens never used for WUI fire before 8 Aug)"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "lahaina-front-street"
+              ],
+              "board_state": "none"
+            },
+            {
+              "id": "t5-i5",
+              "kind": "gauge",
+              "text": "Satellite fire detections (VIIRS 375 m) for the 8 August UTC day, the night and early-afternoon passes: only the Upcountry fire shows. The passes predate the 14:55 flare-up; West Maui shows none.",
+              "citation": {
+                "sourceId": "nasa-gibs",
+                "detail": "GIBS WMS, layers VIIRS_SNPP_CorrectedReflectance_TrueColor + VIIRS_SNPP_Thermal_Anomalies_375m_All, time=2023-08-08, bbox -157.4,20.5,-156.0,21.2"
+              },
+              "zones": [
+                "upcountry-kula"
+              ],
+              "media": {
+                "file": "maui-viirs-active-fire-2023-08-08.jpg",
+                "type": "image",
+                "caption": "VIIRS 375 m active-fire detections over Maui for 8 August (UTC day: the night and early-afternoon passes, before the 14:55 Lahaina flare-up). The only detections are the Upcountry fire on the slope of Haleakala; West Maui shows none.",
+                "credit": "NASA EOSDIS GIBS: VIIRS Suomi NPP corrected-reflectance true colour with VIIRS 375 m thermal anomalies (active fire); crop of Maui rendered by the project",
+                "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+                "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+                "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&layers=VIIRS_SNPP_CorrectedReflectance_TrueColor,VIIRS_SNPP_Thermal_Anomalies_375m_All&styles=,&srs=EPSG:4326&bbox=-157.4,20.5,-156.0,21.2&width=1200&height=600&format=image/jpeg&time=2023-08-08",
+                "width": 1200,
+                "height": 600,
+                "bytes": 45560,
+                "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-07). Overpass times are the satellite's typical ones (about 01:30 and 13:30 local), not read from the product metadata.",
+                "takenOn": "2023-08-08",
+                "suggestedTimestep": "contained"
+              }
+            }
+          ],
+          "options": [
+            {
+              "id": "t5-a1",
+              "label": "Sound the West Maui sirens and send the Wireless Emergency Alert",
+              "detail": "Activate the outdoor warning sirens along Honoapiʻilani Highway and send the evacuation WEA. Sirens mean tsunami to most people here; say 'fire' on the phone.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lahaina-lahainaluna",
+                  "lahaina-front-street"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0.5
+              },
+              "consequence": {
+                "known": true,
+                "text": "The record does not say what would have followed. FSRI's later assessment: 'The effectiveness of warning sirens remains an open question.' It judged it 'unlikely' residents would have known what the signal meant, but that sirens 'may have provided an additional cue'. It found sirens MA407 and MA412 listed operable but 'very likely inoperable throughout August 8, 2023' because the sirens depend on cell signal.",
+                "citation": {
+                  "sourceId": "fsri-p2",
+                  "detail": "Section 3.5.1.2, Outdoor Warning Siren System (siren MA407 near Papalaua Street; MA412 north of the Civic Center)"
+                }
+              }
+            },
+            {
+              "id": "t5-a2",
+              "label": "Order a wider evacuation by zone, with a traffic plan",
+              "detail": "Evacuate everything between the Bypass and Highway 30 on the Lahainaluna side, send the WEA for every zone, and put MPD traffic control on Front Street and Highway 30 to push people north.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lahaina-lahainaluna",
+                  "lahaina-front-street"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0.5
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t5-a3",
+              "label": "Send the WEA for Kelawea Mauka, go to full activation, log the military requests",
+              "detail": "Do what the EOC is already doing: one named subdivision, full EOC, request Pōhakuloa and Guard support through the state.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lahaina-lahainaluna"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is what happened. The WEA for Kelawea Mauka subdivision (shelter: Lahaina Civic Center) is logged at 16:16 as sent at 16:10. The EOC goes to Level 1 full activation at 16:30. Requests for active-duty Pōhakuloa support (16:29) and Guard support (16:37) are logged. Sirens were not discussed that day, according to MEMA and HI-EMA staff.",
+                "citation": {
+                  "sourceId": "mema-records",
+                  "detail": "MEMA EAS-WEA log 16:10-16:16; MEMA log 16:29-16:40; Phase Two §3.5.1.2 (siren activation 'not discussed during August 8, 2023')"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t5-a3",
+          "historical_citation": {
+            "sourceId": "mema-records",
+            "detail": "MEMA EAS-WEA log: Kelawea Mauka evacuation WEA, 16:16; EOC Level 1 full activation, 16:30"
+          }
+        },
+        {
+          "id": "t6",
+          "time": "18:05",
+          "time_label": "18:05",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t6-i1",
+              "kind": "field_report",
+              "text": "16:36: officers report the neighbourhood between Highway 30, Waineʻe Street and Dickenson Street 'completely engulfed'. At 16:41 the exits west via Komo Mai Street and Lahainaluna Road are cut off. By 16:46 police and residents are breaking locked gates to escape through a county water lot to the Bypass.",
+              "citation": {
+                "sourceId": "fsri-p2",
+                "detail": "PD dispatch narrative 16:36 (via Phase One dataset); Phase Two figures 4.3.3.1.7 (egress at 16:41) and 3.8.2.7 (BWC 16:46)"
+              },
+              "zones": [
+                "lahaina-lahainaluna"
+              ],
+              "board_state": "impact"
+            },
+            {
+              "id": "t6-i2",
+              "kind": "field_report",
+              "text": "17:02: a fire engine reports 'Front Street is impassable with traffic.' Police are opening South Front Street onto Honoapiʻilani Highway to bleed it off. At 17:44 police tell units to stop sending traffic down Front Street: it is 'on fire all the way down' to Market Street.",
+              "citation": {
+                "sourceId": "fsri-p1",
+                "detail": "Dispatch audio FD2 17:02:00; PD dispatch audio D4 16:47:03, 17:02:24 and 17:44:24"
+              },
+              "zones": [
+                "lahaina-front-street"
+              ],
+              "board_state": "impact"
+            },
+            {
+              "id": "t6-i3",
+              "kind": "field_report",
+              "text": "17:34: the Front Street Apartments are catching fire; 17:39: 'fully engulfed', with Kahoma Village homes also burning. At 17:58 a 911 caller says people are in the ocean in Lahaina: 'about 100 people right now.' At 18:01 the log reads: 'There is no beach.' At 18:07 the Coast Guard is sending a helicopter.",
+              "citation": {
+                "sourceId": "fsri-p1",
+                "detail": "PD dispatch audio D4 17:34:44 and 17:39:48; Maui Fire Dispatch (unredacted) 17:58:38; Event Chronology Report 18:01; MPD event chronology 18:07:45"
+              },
+              "zones": [
+                "lahaina-front-street"
+              ],
+              "board_state": "impact"
+            },
+            {
+              "id": "t6-i4",
+              "kind": "message",
+              "text": "At 17:43 a 911 operator tells a caller: 'All phone service has been cut in the area.' The county posts at 17:50 that 'Multiple structures have burned and multiple evacuations are in place' and that the Maui EOC is fully activated. The only Wireless Emergency Alert for Lahaina so far is Kelawea Mauka at 16:16.",
+              "citation": {
+                "sourceId": "fsri-p1",
+                "detail": "Maui Fire Dispatch (unredacted) 17:43:57; County of Maui Facebook, combined update No. 1, 17:50; MEMA EAS-WEA log"
+              },
+              "zones": [
+                "lahaina-front-street",
+                "lahaina-lahainaluna"
+              ]
+            }
+          ],
+          "options": [
+            {
+              "id": "t6-a1",
+              "label": "Ask the Coast Guard, the Guard and active-duty aircraft for rescue now, and tell the state Lahaina is burning",
+              "detail": "Put a formal request for maritime and air rescue through the state, and call the state warning point with what the county's own radio shows.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [
+                  "lahaina-front-street"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t6-a2",
+              "label": "Send the WEA and sirens: all of Lahaina, evacuate north on Highway 30",
+              "detail": "Alert Front Street, Kahoma, Wahikuli and the waterfront together. Say 'fire' and 'north toward Kapalua'.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lahaina-front-street",
+                  "lahaina-lahainaluna"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t6-a3",
+              "label": "Keep to the EOC process; the Coast Guard answers through dispatch",
+              "detail": "Coordinate in the EOC, support Kula, and issue the next alert when a zone is confirmed.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is the path the evening took. The Coast Guard answered the ocean calls through dispatch. The next Lahaina-area WEA, for Wahikuli subdivision ('Evacuate North out of town toward Kapalua'), is logged at 20:46. At 18:25 the Guard's commander approves a plan to support Maui's first formal request, which was for the Kula fire.",
+                "citation": {
+                  "sourceId": "mema-records",
+                  "detail": "MEMA EAS-WEA log 20:46; HI-EMA Maj. Gen. Hara timeline notes 18:25; Maui HI-EMA Phase 1 timeline 17:45"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t6-a3",
+          "historical_citation": {
+            "sourceId": "mema-records",
+            "detail": "MEMA EAS-WEA log: next Lahaina-area WEA (Wahikuli) at 20:46; first formal RFA to the Guard at 17:45 concerned the Kula fire"
+          }
+        },
+        {
+          "id": "t7",
+          "time": "19:19",
+          "time_label": "19:19",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t7-i1",
+              "kind": "message",
+              "text": "The 19:00 state situation report, built from what Maui sent, says Maui's EOC is partially activated and the fires in Kula and Lahaina are 'contained', with 'significant' losses in Kula and '2 structures' lost in Lahaina.",
+              "citation": {
+                "sourceId": "hiema-records",
+                "detail": "HI-EMA situation report #3 as described in the Lt. Governor's Office technical discussion (19:00)"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "lahaina-front-street"
+              ]
+            },
+            {
+              "id": "t7-i2",
+              "kind": "message",
+              "text": "19:19: the State Disaster Management Advisor, Luke Meyers, asks you for the status of Lahaina. He relays social-media reports of apartments and structures burning.",
+              "citation": {
+                "sourceId": "mema-records",
+                "detail": "MEMA EOC Operations and Staffing Report, 19:19-19:52"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "lahaina-front-street"
+              ]
+            },
+            {
+              "id": "t7-i3",
+              "kind": "field_report",
+              "text": "Police radio, 19:00: 'from Shaw and Front to Mala and Front is all engulfed in flames.' 19:06: Front Street Apartments 'fully involved'. Wind and fire are still driving. Hokiokio Place is cleared and cars are leaving Lahaina.",
+              "citation": {
+                "sourceId": "fsri-p1",
+                "detail": "PD dispatch audio D4 19:00:11; dispatch audio FD2 19:06:24; County of Maui Facebook 17:20 and X post (Hokiokio cleared 17:05)"
+              },
+              "zones": [
+                "lahaina-front-street"
+              ],
+              "board_state": "impact"
+            },
+            {
+              "id": "t7-i5",
+              "kind": "field_report",
+              "text": "Water is failing on the fire ground. At 16:10 a ladder company reported 'good water supply and good water pressure'. At 18:27 an engine officer tells Command: 'Hydrants are starting to get low on water, FYI.' At 18:57 one crew asks another about pressure: 'We pretty much got nothing over here.' The county had asked West Maui at 09:55 to conserve water because outages were hampering pumping.",
+              "citation": {
+                "sourceId": "fsri-p1",
+                "detail": "Dispatch audio FD2 16:10:25, 18:27:43 and 18:57:07; County of Maui Facebook, Lahaina Fire Update No. 2, 09:55"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "lahaina-front-street"
+              ]
+            },
+            {
+              "id": "t7-i4",
+              "kind": "forecast",
+              "text": "NWS extended the Red Flag Warning at 15:39 to 18:00 on Wednesday 9 August. A Wind Advisory continues.",
+              "citation": {
+                "sourceId": "nws-2023",
+                "detail": "NWS Red Flag Warning extended at 15:39 HST 8 Aug to 6 PM HST 9 Aug; Wind Advisory 15:39"
+              },
+              "zones": [
+                "lahaina-lahainaluna",
+                "lahaina-front-street"
+              ],
+              "media": {
+                "file": "hurricane-dora-viirs-2023-08-08.jpg",
+                "type": "image",
+                "caption": "8 August, about 13:30 HST (Suomi NPP VIIRS): Hurricane Dora is now south of the islands. The Lahaina afternoon fire ignites at 14:55.",
+                "credit": "NASA EOSDIS Global Imagery Browse Services (GIBS), VIIRS Suomi NPP corrected-reflectance true colour; crop of the Hawaii region rendered by the project",
+                "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+                "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+                "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&layers=VIIRS_SNPP_CorrectedReflectance_TrueColor&styles=&srs=EPSG:4326&bbox=-175,5,-145,28&width=1200&height=920&format=image/jpeg&time=2023-08-08",
+                "width": 1200,
+                "height": 920,
+                "bytes": 296127,
+                "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-07)",
+                "takenOn": "2023-08-08",
+                "suggestedTimestep": "pre"
+              }
+            }
+          ],
+          "options": [
+            {
+              "id": "t7-a1",
+              "label": "Tell the state what the county's own record shows: Lahaina is burning",
+              "detail": "Report Front Street and the waterfront burning, people in the ocean, phone service cut, and ask for the full state and federal response tonight.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [
+                  "lahaina-lahainaluna",
+                  "lahaina-front-street"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t7-a2",
+              "label": "Send the evacuation WEA for Wahikuli, Kahoma and Front Street now",
+              "detail": "Evacuate north toward Kapalua, out of the zones the fire has not yet reached.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lahaina-front-street",
+                  "lahaina-lahainaluna"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t7-a3",
+              "label": "Report the status as it stands in the EOC log",
+              "detail": "Flare-up, Kelawea Mauka evacuated, Bypass closed, one business lost.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is what happened. You told Meyers that Lahaina 'flared up again', that a mauka subdivision (recorded as 'Kilauea Mauka') had been evacuated and the Bypass closed, and that you believed one business had been lost. About 22:00, Lt. Gov. Luke's staff found accounts of 'Lahaina on fire' on social media, and Luke and Maj. Gen. Hara confirmed they were not getting accurate information from Maui. The Wahikuli WEA went out at 20:46.",
+                "citation": {
+                  "sourceId": "mema-records",
+                  "detail": "MEMA EOC Operations and Staffing Report 19:19-19:52; Lt. Governor's Office technical discussion 22:00; MEMA EAS-WEA log 20:46"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t7-a3",
+          "historical_citation": {
+            "sourceId": "mema-records",
+            "detail": "MEMA EOC Operations and Staffing Report, 19:19-19:52 exchange with Luke Meyers"
+          }
+        }
+      ],
+      "historical_path": [
+        {
+          "timestep_id": "t1",
+          "action": "The EOC stayed at partial activation despite a Red Flag Warning in force since 06:00 on 7 August. Full activation came at 16:30.",
+          "citation": {
+            "sourceId": "fsri-p2",
+            "detail": "Finding 49 and Section 3.6.4"
+          }
+        },
+        {
+          "timestep_id": "t2",
+          "action": "MFD and MPD fought and evacuated the Lahainaluna fire; the county posted the evacuation on social media and opened the Civic Center. No Wireless Emergency Alert went out for Lahaina that morning.",
+          "citation": {
+            "sourceId": "mema-records",
+            "detail": "MEMA EAS-WEA log and county posts, 06:37-06:52"
+          }
+        },
+        {
+          "timestep_id": "t3",
+          "action": "MFD declared the Lahaina fire 100% contained shortly before 09:00. You told the Guard Maui could manage 'for now'; the county posted 'contained' at 09:55.",
+          "citation": {
+            "sourceId": "hiema-records",
+            "detail": "Andaya text to HING/J3 09:30; county post 09:55"
+          }
+        },
+        {
+          "timestep_id": "t4",
+          "action": "The 14:55 flare-up was handled as an MFD and MPD tactical problem. The EOC logged no Wireless Emergency Alert for Lahaina until 16:10.",
+          "citation": {
+            "sourceId": "fsri-p1",
+            "detail": "Dispatch record 14:55-15:30; MEMA log 16:10"
+          }
+        },
+        {
+          "timestep_id": "t5",
+          "action": "A WEA for Kelawea Mauka reached phones at 16:16; the EOC went to full activation at 16:30. The outdoor sirens were not sounded; staff say activation was not discussed that day.",
+          "citation": {
+            "sourceId": "mema-records",
+            "detail": "MEMA EAS-WEA log; Phase Two §3.5.1.2"
+          }
+        },
+        {
+          "timestep_id": "t6",
+          "action": "While Front Street burned and people entered the ocean, the Coast Guard answered through dispatch and the next Lahaina WEA (Wahikuli) came at 20:46.",
+          "citation": {
+            "sourceId": "mema-records",
+            "detail": "MEMA EAS-WEA log 20:46; dispatch record 17:34-18:07"
+          }
+        },
+        {
+          "timestep_id": "t7",
+          "action": "At 19:00 the state's report said Lahaina was contained with two structures lost. At 19:19 you told the state's advisor Lahaina had flared up and one business was lost. Around 22:00 the Lt. Governor's staff learned of the fire from social media.",
+          "citation": {
+            "sourceId": "hiema-records",
+            "detail": "HI-EMA SITREP #3; MEMA EOC report 19:19-19:52; Lt. Governor's Office technical discussion 22:00"
+          }
+        }
+      ],
+      "inquiry_findings": [
+        {
+          "kind": "verbatim",
+          "quote": "Actionable extreme weather forecasts were provided to fire chiefs and emergency managers prior to the August 2023 fires. However, adjusting staffing for extreme weather events and their resultant risk of extreme fire behavior was not standard.",
+          "citation": {
+            "sourceId": "fsri-p2",
+            "detail": "Finding 5, Appendix 6.1 (Section 3.2 Weather)"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "Given the known conditions forecasted for the County of Maui on August 8, 2023, agency representatives self-reported to the EOC throughout the day, but full activation of the EOC did not occur until 16:30.",
+          "citation": {
+            "sourceId": "fsri-p2",
+            "detail": "Finding 49, Appendix 6.1 (Section 3.6.4)"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "Only one (1) siren from the All-Hazard Outdoor Warning Siren System was operable within the burn perimeter of the Lahaina area on August 8, 2023.",
+          "translation": "Finding 37. The report's body text names two sirens listed as operable, MA407 and MA412, and says both were 'very likely inoperable' on 8 August because the area had intermittent cell service. It also says the County of Maui 'provided no evidence of discussing siren activation' on the day, and calls the effect of sirens 'an open question'.",
+          "citation": {
+            "sourceId": "fsri-p2",
+            "detail": "Finding 37 (Appendix 6.1) and Section 3.5.1.2"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "The effectiveness of warning sirens remains an open question.",
+          "translation": "FSRI judged it unlikely that residents would have known what a siren signal meant that day, and also that activation 'may have provided an additional cue to alert residents of an emergency and to seek further information'.",
+          "citation": {
+            "sourceId": "fsri-p2",
+            "detail": "Section 3.5.1.2, Outdoor Warning Siren System"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "We were afraid that people would have gone mauka.",
+          "translation": "Not an inquiry finding. The MEMA Administrator, 16 August 2023, explaining why sirens were not sounded; 'mauka' means toward the mountain. AP also quotes him: 'If that was the case, then they would have gone into the fire.' He resigned on 17 August, citing health reasons.",
+          "citation": {
+            "sourceId": "ap-andaya-2023",
+            "detail": "AP, 'Maui's emergency services chief resigns after facing criticism for not activating sirens during fire', 17 Aug 2023"
+          }
+        }
+      ],
+      "debrief_media": [
+        {
+          "file": "maui-landsat-infrared-2023-08-08-2225.jpg",
+          "type": "image",
+          "caption": "Landsat 8, 22:25 HST, 8 August: shortwave-infrared view of Maui. Active fire shows yellow. Much of Lahaina is burning; a second large fire burns northeast of Kihei.",
+          "credit": "NASA Earth Observatory image by Lauren Dauphin, using Landsat data from the U.S. Geological Survey",
+          "license": "Public domain (NASA / U.S. Geological Survey work)",
+          "licenseUrl": "https://commons.wikimedia.org/wiki/Template:PD-USGov-NASA",
+          "sourcePage": "https://earthobservatory.nasa.gov/images/151688/devastation-in-maui",
+          "width": 720,
+          "height": 480,
+          "bytes": 353385,
+          "licenseVerifiedOn": "Commons file page https://commons.wikimedia.org/wiki/File:Mauiswir_oli_2023221.jpg (template PD-USGov-NASA, source = the NASA page); the NASA page carries no explicit licence line",
+          "takenOn": "2023-08-08",
+          "suggestedTimestep": "town"
+        },
+        {
+          "file": "maui-viirs-active-fire-2023-08-09.jpg",
+          "type": "image",
+          "caption": "VIIRS 375 m active-fire detections over Maui for 9 August (UTC day: passes near 01:30 and 13:30 HST). Detections line the Lahaina coast; more clusters burn on inland central Maui. Daytime imagery behind them is from 9 August.",
+          "credit": "NASA EOSDIS GIBS: VIIRS Suomi NPP corrected-reflectance true colour with VIIRS 375 m thermal anomalies (active fire); crop of Maui rendered by the project",
+          "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+          "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+          "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&layers=VIIRS_SNPP_CorrectedReflectance_TrueColor,VIIRS_SNPP_Thermal_Anomalies_375m_All&styles=,&srs=EPSG:4326&bbox=-157.4,20.5,-156.0,21.2&width=1200&height=600&format=image/jpeg&time=2023-08-09",
+          "width": 1200,
+          "height": 600,
+          "bytes": 60950,
+          "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-07). Overpass times are the satellite's typical ones, not read from the product metadata.",
+          "takenOn": "2023-08-09",
+          "suggestedTimestep": "aftermath"
+        },
+        {
+          "file": "upcountry-chinook-bucket-drop-2023-08-09.jpg",
+          "type": "image",
+          "caption": "9 August, Upcountry Maui: a Hawaii Army National Guard CH-47 drops a water bucket on a grass fire. Two Chinook crews flew 58 drops in five hours.",
+          "credit": "Master Sgt. Andrew Jackson, Hawaii National Guard (U.S. National Guard)",
+          "license": "Public domain (U.S. military work; page labelled PUBLIC DOMAIN)",
+          "licenseUrl": "https://www.dvidshub.net/about/copyright",
+          "sourcePage": "https://www.dvidshub.net/image/7963078",
+          "width": 1000,
+          "height": 667,
+          "bytes": 120279,
+          "takenOn": "2023-08-09",
+          "suggestedTimestep": "response"
+        },
+        {
+          "file": "upcountry-chinook-smoke-2023-08-09.mp4",
+          "type": "video",
+          "caption": "9 August, Upcountry Maui: smoke over burned grassland, seen from a Hawaii Army National Guard CH-47 on a water-bucket mission. 14-second excerpt (26 s to 40 s of the DVIDS b-roll), re-encoded to 960x540, audio removed.",
+          "credit": "Master Sgt. Andrew Jackson, Hawaii National Guard (U.S. National Guard); excerpted and re-encoded by the project",
+          "license": "Public domain (U.S. military work; page labelled PUBLIC DOMAIN)",
+          "licenseUrl": "https://www.dvidshub.net/about/copyright",
+          "sourcePage": "https://www.dvidshub.net/video/893262/hawaii-army-national-guard-provides-water-bucket-support-wildfires-maui",
+          "width": 960,
+          "height": 540,
+          "poster": "upcountry-chinook-smoke-2023-08-09-poster.jpg",
+          "bytes": 520564,
+          "durationSeconds": 14,
+          "takenOn": "2023-08-09",
+          "suggestedTimestep": "response"
+        },
+        {
+          "file": "coast-guard-c130-barbers-point-2023-08-09.jpg",
+          "type": "image",
+          "caption": "9 August: a Coast Guard C-130 from Air Station Barbers Point on the ramp, returning from Maui after flying the Lahaina fire response.",
+          "credit": "U.S. Coast Guard (photographer not named on the DVIDS page)",
+          "license": "Public domain (U.S. military work; page labelled PUBLIC DOMAIN)",
+          "licenseUrl": "https://www.dvidshub.net/about/copyright",
+          "sourcePage": "https://www.dvidshub.net/image/7970851",
+          "width": 999,
+          "height": 725,
+          "bytes": 198896,
+          "takenOn": "2023-08-09",
+          "suggestedTimestep": "response"
+        },
+        {
+          "file": "guard-search-lahaina-2023-08-09.jpg",
+          "type": "image",
+          "caption": "A Hawaii National Guard search-and-rescue soldier walks a burned street in Lahaina. About 50 Guardsmen were mobilised on 9 August for search and recovery.",
+          "credit": "Master Sgt. Andrew Jackson, Hawaii National Guard (U.S. National Guard)",
+          "license": "Public domain (U.S. military work; page labelled PUBLIC DOMAIN)",
+          "licenseUrl": "https://www.dvidshub.net/about/copyright",
+          "sourcePage": "https://www.dvidshub.net/image/7965757",
+          "width": 1000,
+          "height": 667,
+          "bytes": 284669,
+          "takenOn": "2023-08-09 (DVIDS 'date taken'; the caption text says 10 August)",
+          "suggestedTimestep": "aftermath"
+        },
+        {
+          "file": "lahaina-from-bypass-2023-08-10.jpg",
+          "type": "image",
+          "caption": "10 August, near the Lahaina Bypass: smoke still rises from the burned town while Guard search-and-recovery teams sweep the area.",
+          "credit": "Master Sgt. Andrew Jackson, Hawaii National Guard (U.S. National Guard)",
+          "license": "Public domain (U.S. military work; page labelled PUBLIC DOMAIN)",
+          "licenseUrl": "https://www.dvidshub.net/about/copyright",
+          "sourcePage": "https://www.dvidshub.net/image/7965717",
+          "width": 1000,
+          "height": 667,
+          "bytes": 211256,
+          "takenOn": "2023-08-10",
+          "suggestedTimestep": "aftermath"
+        }
+      ],
+      "outcome": {
+        "deaths": {
+          "min": 102,
+          "max": 102,
+          "contested": true,
+          "note": "102 deaths confirmed in Lahaina; FSRI Phase Two (September 2024) also lists two people still reported missing by MPD. The count moved: 115 was the official count until it was revised down to 97 on 15 September 2023 after DNA and other forensic work, then rose as victims were identified or died of their injuries: FSRI Phase One (April 2024) states 101, and MPD confirmed 102 on 24 June 2024."
+        },
+        "citation": {
+          "sourceId": "fsri-p2",
+          "detail": "Section 3.8.10: 'A total of 102 fatalities have been confirmed in Lahaina, with two (2) additional individuals still reported missing by the MPD'"
+        }
+      },
+      "scoring": {
+        "impact": {
+          "time": "15:30",
+          "label": "the afternoon fire has jumped the Lahaina Bypass (about 15:21) and the first homes on Lahainaluna Road ignite",
+          "citation": {
+            "sourceId": "fsri-p2",
+            "detail": "Section 3.8.10: 'the Lahaina PM fire ignited at 14:55, jumping the Lahaina Bypass at approximately 15:21. The first homes along Lahainaluna Road began to ignite at 15:30'"
+          }
+        },
+        "at_risk_zones": [
+          {
+            "id": "lahaina-lahainaluna",
+            "label": "Lahaina: Lahainaluna and Kelawea neighbourhoods, east of Highway 30"
+          },
+          {
+            "id": "lahaina-front-street",
+            "label": "Lahaina: Front Street, Kahoma Village and the waterfront"
+          },
+          {
+            "id": "upcountry-kula",
+            "label": "Upcountry: Kula and Olinda"
+          }
+        ],
+        "historical_first_public_alert": "16:16"
+      },
+      "sources": [
+        {
+          "id": "fsri-p1",
+          "label": "Kerber, S. and Alkonis, D. (Fire Safety Research Institute, UL Research Institutes), for the Hawaiʻi Department of the Attorney General. Lahaina Fire Comprehensive Timeline Report (Phase One), 17 April 2024, and its Comprehensive Timeline Dataset (minute-by-minute spreadsheet of dispatch, MPD, MFD, MEMA, HI-EMA, NWS, Hawaiian Electric and county social-media records).",
+          "url": "https://doi.org/10.54206/102376/VQKQ5427",
+          "note": "Entries are cited by time and source column of the dataset. The report PDF itself could not be text-extracted during research."
+        },
+        {
+          "id": "fsri-p2",
+          "label": "Fire Safety Research Institute (UL Research Institutes), for the Hawaiʻi Department of the Attorney General. Lahaina Fire Incident Analysis Report (Phase Two), 13 September 2024 (revised 2 October 2024 and 11 July 2025).",
+          "url": "https://doi.org/10.60752/102376.26858962",
+          "note": "Findings cited by number (Appendix 6.1) and by section."
+        },
+        {
+          "id": "nws-2023",
+          "label": "National Weather Service Honolulu: Fire Weather Watch, Red Flag Warning, High Wind Watch and High Wind Warning products for 6 to 9 August 2023, as reproduced in the FSRI Phase One dataset.",
+          "url": null,
+          "note": "Reproduced from the dataset's NWS columns; a direct NWS archive link has not been added."
+        },
+        {
+          "id": "mema-records",
+          "label": "Maui Emergency Management Agency records for 7 to 8 August 2023: activity log, EAS-WEA log, EM Director activity log, EOC Operations and Staffing Report, EOC web logs, and the MEMA Administrator's text messages; as reproduced in the FSRI Phase One dataset.",
+          "url": null,
+          "note": "Primary county records, cited through the FSRI dataset."
+        },
+        {
+          "id": "hiema-records",
+          "label": "Hawaiʻi Emergency Management Agency (HI-EMA) State Warning Point logs, situation reports, and Maj. Gen. Hara's timeline notes for 6 to 8 August 2023, and the Lt. Governor's Office technical discussion; as reproduced in the FSRI Phase One dataset.",
+          "url": null,
+          "note": "Cited through the FSRI dataset."
+        },
+        {
+          "id": "ap-andaya-2023",
+          "label": "Calvan, B. C., Kelleher, J. S. and Weber, C. (Associated Press). Maui's emergency services chief resigns after facing criticism for not activating sirens during fire. 17 August 2023.",
+          "url": "https://www.ksl.com/article/50711705/mauis-emergency-services-chief-resigns-after-facing-criticism-for-not-activating-sirens-during-fire",
+          "note": "News report, used only for the Administrator's public statements of 16 August and his resignation of 17 August, where no primary transcript was obtained."
+        },
+        {
+          "id": "mpd-toll-2024",
+          "label": "Maui Police Department announcement of 24 June 2024 confirming a 102nd victim of the Lahaina fire, as reported by Maui Now, and MPD's 15 September 2023 revision of the toll from 115 to 97 as reported by Civil Beat.",
+          "url": "https://mauinow.com/2024/06/24/maui-police-confirm-another-fatality-from-lahaina-wildfire-bringing-total-to-102/",
+          "note": "News reports of MPD announcements. Civil Beat (15 Sept 2023): https://www.civilbeat.org/2023/09/maui-fire-death-toll-lowered-from-115-to-97/"
+        },
+        {
+          "id": "nasa-gibs",
+          "label": "NASA EOSDIS Global Imagery Browse Services (GIBS): VIIRS Suomi NPP corrected-reflectance true colour with the VIIRS 375 m thermal-anomalies (active fire) layer, Maui, UTC days of 8 and 9 August 2023; crops rendered by the project from the GIBS WMS.",
+          "url": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+          "note": "URL is NASA's data-use guidance (CC0 for NASA-led missions). The exact WMS request for each crop is given on its figure. Overpass times are the satellite's typical ones, not read from the product metadata."
+        }
+      ]
+    },
     {
       "id": "valencia-dana-2024",
       "status": "playable",

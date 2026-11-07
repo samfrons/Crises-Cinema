@@ -29,9 +29,12 @@ UI labels them as such in the debrief.
   "title": "…",
   "date": "2024-10-29",
   "location": "…",
-  "hazard": "flash flood | dam failure | tropical cyclone | …",
+  "hazard": "flash flood | dam failure | tropical cyclone | wildfire | …",
+                                       // also picks the board's vocabulary (below)
   "clock": { "timezone": "CET", "start": "07:36", "end": "20:11" },
   "record_caveat": "…",                // honest note on the state of the record
+  "briefing_media": { …media },        // optional, one figure; only what existed
+                                       //   before the clock starts
 
   "timesteps": [{
     "id": "t1",
@@ -42,7 +45,11 @@ UI labels them as such in the debrief.
       "id": "t1-i1",
       "kind": "forecast | gauge | message | media | field_report",
       "text": "…",
-      "citation": { "sourceId": "aemet-2024", "detail": "…" }
+      "citation": { "sourceId": "aemet-2024", "detail": "…" },
+      "zones": ["poyo-horta-sud"],     // optional: at-risk zones this item lights
+      "board_state": "impact",         // optional: none | watch | signal | impact
+                                       //   (omitted → the hazard's default for kind)
+      "media": { …media }              // optional figure printed under the slip
     }],
     "options": [{                      // 2–4; option WORDING is game design,
       "id": "t1-a1",                   // consequence CONTENT is not
@@ -77,6 +84,9 @@ UI labels them as such in the debrief.
     "citation": { … }
   }],
 
+  "debrief_media": [{ …media }],       // optional: figures from AFTER the last
+                                       //   decision — shown only in the debrief
+
   "outcome": {
     "deaths": { "min": 227, "max": 229, "contested": true, "note": "…" },
     "citation": { … }
@@ -96,6 +106,61 @@ UI labels them as such in the debrief.
   }]
 }
 ```
+
+## Media attachments
+
+A figure is an image or a short video, printed in the log as a plate with its
+caption, credit and licence. It is held to the same standard as a citation:
+
+```jsonc
+{
+  "file": "maui-viirs-active-fire-2023-08-08.jpg", // bare kebab-case name under
+                                       //   public/control-room/<scenario-id>/
+  "type": "image" | "video",
+  "caption": "…",                      // stands on its own: date + what it shows;
+                                       //   it is also the image's alt text
+  "credit": "NASA EOSDIS GIBS …",
+  "license": "CC0 1.0 (…)",            // a real licence, never "TBD"/"unknown"
+  "licenseUrl": "https://…",           // optional; the licence link (else sourcePage)
+  "sourcePage": "https://…",           // where the file came from
+  "width": 1200, "height": 600,        // pixels — the page reserves the space
+  "poster": "clip-poster.jpg"          // video only, optional, same folder
+  // extra research fields (bytes, takenOn, licenseVerifiedOn, durationSeconds,
+  // suggestedTimestep…) may ride along; the UI ignores them
+}
+```
+
+For a playable scenario the build **fails** if a required field is missing, the
+licence is a placeholder, a URL is not http(s), the file (or poster) does not
+exist under `public/control-room/<scenario-id>/`, or the extension does not match
+the type. Files are served byte-for-byte as vetted — do not recompress them, and
+do not route them through an image optimiser.
+
+**Time discipline.** The player must never see tomorrow's imagery today. When
+`takenOn` starts with a date, a figure in the play log (`briefing_media` or an
+info item's `media`) taken after the scenario's `date` fails the build; it
+belongs in `debrief_media`. Within the day, place a figure no earlier than the
+decision point by which it existed (a satellite pass at 13:30 is not on the
+desk at 09:30) — the build cannot check clock times, so the reviewer must.
+
+## The ops board and hazard vocabulary
+
+Each zoned info item lights its zones on a hand-drawn schematic board
+(`src/app/control-room/OpsMap.tsx`, one drawing per scenario id; a scenario
+without one simply shows no board). Zone state escalates only:
+`quiet → watch → signal → impact`. What those states are *called*, and which
+item kind lights which state by default, comes from the scenario's `hazard`
+(`src/app/control-room/hazards.ts`):
+
+| family | watch | signal | impact | kind defaults |
+|---|---|---|---|---|
+| water (flood, dam, cyclone…) | red warning | gauge alert | flooding | forecast → watch, gauge → signal, field_report → impact |
+| fire (`hazard` contains "fire") | red flag | fire reported | burning | forecast → watch, gauge (sensor) → signal, field_report → signal |
+
+An item's `board_state` overrides the default: set `"impact"` only where the
+cited text itself says the zone is burning / flooding, and `"none"` where a
+zoned item is not a report of the hazard (a downed pole is not a fire). This is
+the interpretive layer, like `zones`; it never changes what an item says.
 
 ## Player telemetry (prototype: localStorage; later: backend)
 

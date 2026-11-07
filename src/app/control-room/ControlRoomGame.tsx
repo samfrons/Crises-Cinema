@@ -1,11 +1,12 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import type { Citation, Option, Scenario, ScenarioBundle, Timestep } from './types';
+import type { Citation, MediaAttachment, Option, Scenario, ScenarioBundle, Timestep } from './types';
 import { startSession, logChoice, completeSession, type ChoiceEvent } from './telemetry';
 import { scoreRun, historicalLeadTime, formatLead, type Choice } from './scoring';
 import DayStrip from './DayStrip';
-import OpsMap, { STATE_LABEL, type ZoneState } from './OpsMap';
+import OpsMap from './OpsMap';
+import { itemState, STATE_RANK, vocabFor, type ZoneState } from './hazards';
 import AlertTimingChart from './AlertTimingChart';
 import { KindGlyph, HazardGlyph } from './glyphs';
 
@@ -23,17 +24,20 @@ import { KindGlyph, HazardGlyph } from './glyphs';
 
 /**
  * What the wall map shows: zone states lit only by cited information already
- * revealed (forecast → watch, gauge → signal, field report → flooding) and
- * the zones the player's own choices have warned.
+ * revealed and the zones the player's own choices have warned. Which state an
+ * item lights is the hazard's default for its kind (flood: forecast → watch,
+ * gauge → signal, field report → flooding; fire: forecast → red flag, sensor
+ * and field report → fire reported) unless the item names its own
+ * board_state — "burning" only where the cited text says so, "none" where a
+ * zoned report is not about the hazard at all (a pole down is not a fire).
+ * The board only ever escalates; it never invents a state.
  */
-const KIND_STATE: Partial<Record<string, ZoneState>> = { forecast: 'watch', gauge: 'signal', field_report: 'flooding' };
-const STATE_RANK: Record<ZoneState, number> = { quiet: 0, watch: 1, signal: 2, flooding: 3 };
-
 function deriveBoard(scenario: Scenario, uptoIndex: number, choices: Choice[]) {
+  const vocab = vocabFor(scenario);
   const zoneStates: Record<string, ZoneState> = {};
   for (const t of scenario.timesteps.slice(0, uptoIndex + 1)) {
     for (const info of t.info_available) {
-      const state = KIND_STATE[info.kind];
+      const state = itemState(info, vocab);
       if (!state) continue;
       for (const z of info.zones ?? []) {
         if (STATE_RANK[state] > STATE_RANK[zoneStates[z] ?? 'quiet']) zoneStates[z] = state;
@@ -52,13 +56,21 @@ function warnedBy(scenario: Scenario, option: Option): string[] {
   return [];
 }
 
-const KIND_LABEL: Record<string, string> = {
-  forecast: 'Forecast',
-  gauge: 'Gauge',
-  message: 'Message',
-  media: 'Media',
-  field_report: 'From the field',
-};
+/** The clock's zone as players read it: an IANA region ("Pacific/Honolulu")
+ *  becomes its short name on the scenario's date ("HST"); a name that is
+ *  already short ("CET") is shown as given. */
+function tzLabel(s: Pick<Scenario, 'clock' | 'date'>) {
+  const tz = s.clock.timezone;
+  if (!tz.includes('/')) return tz;
+  try {
+    const part = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'short' })
+      .formatToParts(new Date(`${s.date}T12:00:00Z`))
+      .find((p) => p.type === 'timeZoneName')?.value;
+    return part && !/^GMT/.test(part) ? part : tz;
+  } catch {
+    return tz;
+  }
+}
 
 const stamp = (t: Timestep) => `${t.approx ? '≈' : ''}${t.time}`;
 const stepId = (t: Timestep) => `cr-step-${t.id}`;
@@ -237,9 +249,9 @@ function Console({ scenario, started, cursor, choices, done, board, showMapButto
     <div className="cr-console">
       <div className="cr-console-row wrap">
         <a className="cr-console-clock" href={`#${target}`}
-          aria-label={`${time} ${scenario.clock.timezone}, ${status}. Jump to the desk.`}>
+          aria-label={`${time} ${tzLabel(scenario)}, ${status}. Jump to the desk.`}>
           <span className="cr-console-time">{time}</span>
-          <span className="cr-console-status">{scenario.clock.timezone} · {status}</span>
+          <span className="cr-console-status"><span className="cr-console-tz">{tzLabel(scenario)} · </span>{status}</span>
         </a>
         <span className="cr-console-title" aria-hidden>{scenario.title}</span>
         <span className="cr-pips" aria-hidden>
@@ -294,6 +306,7 @@ function BoardSheet({ open, onClose, children }: { open: boolean; onClose: () =>
 
 /** The board's state in words — what the map shows, never by colour alone. */
 function BoardList({ scenario, board }: { scenario: Scenario; board: ReturnType<typeof deriveBoard> }) {
+  const { states } = vocabFor(scenario);
   return (
     <ul className="cr-boardlist">
       {scenario.scoring.at_risk_zones.map((z) => {
@@ -302,7 +315,7 @@ function BoardList({ scenario, board }: { scenario: Scenario; board: ReturnType<
         return (
           <li key={z.id} className={`is-${s}`}>
             <span className="cr-boardlist-zone">{z.label}</span>
-            <span className="cr-boardlist-state">{STATE_LABEL[s]}{warned ? ' · warned by you' : ''}</span>
+            <span className="cr-boardlist-state">{states[s]}{warned ? ' · warned by you' : ''}</span>
           </li>
         );
       })}
@@ -355,7 +368,7 @@ function SelectScreen({ bundle, onPick }: { bundle: ScenarioBundle; onPick: (s: 
             <span className="cr-card-date">{s.date} · {s.hazard}</span>
             <span className="cr-card-title">{s.title}</span>
             <span className="cr-card-loc">{s.location}</span>
-            <span className="cr-card-meta">{s.timesteps.length} decisions · {s.clock.start}–{s.clock.end} {s.clock.timezone}</span>
+            <span className="cr-card-meta">{s.timesteps.length} decisions · {s.clock.start}–{s.clock.end} {tzLabel(s)}</span>
             <span className="cr-card-cta">Take the desk →</span>
           </button>
         ))}
@@ -380,26 +393,28 @@ function SelectScreen({ bundle, onPick }: { bundle: ScenarioBundle; onPick: (s: 
 function Briefing({ scenario, started, inlineMap, onStart }: {
   scenario: Scenario; started: boolean; inlineMap: boolean; onStart: () => void;
 }) {
+  const vocab = vocabFor(scenario);
   return (
     <article id="cr-briefing" className="cr-entry cr-entry-brief" aria-labelledby="cr-brief-title">
       <p className="cr-stamp">
         <span className="cr-stamp-time">{scenario.clock.start}</span>
-        <span className="cr-stamp-meta">{scenario.clock.timezone} · {scenario.date} · Briefing</span>
+        <span className="cr-stamp-meta">{tzLabel(scenario)} · {scenario.date} · Briefing</span>
       </p>
       <h2 id="cr-brief-title" className="cr-brief-title" tabIndex={-1}>{scenario.title}</h2>
-      <p className="cr-brief">{scenario.location}. You hold the civil-protection desk. You will see only what
-        officials could see at each moment — forecasts, gauge readings, messages — and choose what to do.
+      <p className="cr-brief">{scenario.location}. You hold the {vocab.desk}. You will see only what
+        officials could see at each moment — {vocab.feeds} — and choose what to do.
         The clock then advances along the real timeline: <strong>history does not branch here</strong>. Each
         call you make stays in this log; at the end, it is set beside what officials actually did and what the
         inquiry found. Where you leave the historical path, the record is silent about what would have
         followed — and the log will say so rather than invent it.</p>
-      <p className="cr-brief-count">{scenario.timesteps.length} decision points, from {scenario.clock.start} {scenario.clock.timezone}.
+      <p className="cr-brief-count">{scenario.timesteps.length} decision points, from {scenario.clock.start} {tzLabel(scenario)}.
         The console above keeps the clock and your progress.</p>
+      {scenario.briefing_media && <Figure scenario={scenario} m={scenario.briefing_media} />}
       {inlineMap && !started && (
         <OpsMap scenario={scenario} zoneStates={{}} warnedZones={[]} />
       )}
       {started ? (
-        <p className="cr-brief-taken">Desk taken at {scenario.clock.start} {scenario.clock.timezone}.</p>
+        <p className="cr-brief-taken">Desk taken at {scenario.clock.start} {tzLabel(scenario)}.</p>
       ) : (
         <div className="cr-dock">
           <button type="button" className="cr-btn-primary" onClick={onStart}>
@@ -418,6 +433,7 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, onChoose, on
   isCurrent: boolean; isLast: boolean; onChoose: (o: Option) => void; onAdvance: () => void;
 }) {
   const sourceIndex = useSourceIndex(scenario);
+  const vocab = vocabFor(scenario);
   const id = stepId(t);
   // What this hour's traffic changed on the board — derived only from the
   // cited items shown here, compared with the board before them.
@@ -434,7 +450,7 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, onChoose, on
       <h3 id={`${id}-h`} className="cr-stamp" tabIndex={-1}>
         <span className="cr-stamp-time">{stamp(t)}</span>
         <span className="cr-stamp-meta">
-          {scenario.clock.timezone}
+          {tzLabel(scenario)}
           {t.time_label !== t.time && t.time_label !== stamp(t) ? ` · ${t.time_label}` : ''}
           {' · '}Decision {index + 1} of {scenario.timesteps.length}
         </span>
@@ -443,8 +459,9 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, onChoose, on
       <ul className="cr-dispatches" aria-label={`Incoming at ${stamp(t)}`}>
         {t.info_available.map((info, i) => (
           <li key={info.id} className={`cr-slip cr-slip-${info.kind}`} style={{ '--i': i } as React.CSSProperties}>
-            <p className="cr-slip-kind"><KindGlyph kind={info.kind} className="cr-kind-glyph" /> {KIND_LABEL[info.kind]}</p>
+            <p className="cr-slip-kind"><KindGlyph kind={info.kind} className="cr-kind-glyph" /> {vocab.kindLabel[info.kind]}</p>
             <p className="cr-slip-text">{info.text} <Cite c={info.citation} idx={sourceIndex} /></p>
+            {info.media && <Figure scenario={scenario} m={info.media} />}
           </li>
         ))}
       </ul>
@@ -455,7 +472,7 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, onChoose, on
           {changes.map((c, i) => (
             <Fragment key={c.label}>
               {i > 0 && <span aria-hidden> · </span>}
-              <span>{c.label} → <strong>{STATE_LABEL[c.state]}</strong></span>
+              <span>{c.label} → <strong>{vocab.states[c.state]}</strong></span>
             </Fragment>
           ))}
         </p>
@@ -539,6 +556,7 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
   const score = useMemo(() => scoreRun(scenario, choices), [scenario, choices]);
   const histLead = historicalLeadTime(scenario);
   const compact = !useMedia('(min-width: 640px)');
+  const vocab = vocabFor(scenario);
   const d = scenario.outcome.deaths;
 
   return (
@@ -546,7 +564,7 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
       <div className="cr-endband">
         <div className="wrap">
           <p className="cr-endband-stamp">
-            <span>{scenario.clock.end} {scenario.clock.timezone}</span>
+            <span>{scenario.clock.end} {tzLabel(scenario)}</span>
             <span>End of record</span>
           </p>
           <h2 id="cr-debrief-title" className="cr-endband-title" tabIndex={-1}>
@@ -595,6 +613,17 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
           </ol>
         </div>
 
+        {scenario.debrief_media && scenario.debrief_media.length > 0 && (
+          <div className="cr-dsec">
+            <h3 className="cr-dsec-title">After the clock stopped</h3>
+            <p className="cr-dsec-note">Imagery from after the last decision point. None of it was on the desk:
+              the log showed only what existed at each hour.</p>
+            <div className="cr-figures">
+              {scenario.debrief_media.map((m) => <Figure key={m.file} scenario={scenario} m={m} />)}
+            </div>
+          </div>
+        )}
+
         <div className="cr-dsec">
           <h3 className="cr-dsec-title">Your run, measured</h3>
           <AlertTimingChart scenario={scenario} choices={choices} compact={compact} />
@@ -605,7 +634,7 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
               <dd className="sub">officials: {formatLead(histLead)} (first alert {scenario.scoring.historical_first_public_alert})</dd>
             </div>
             <div>
-              <dt>Coverage of at-risk basins</dt>
+              <dt>Coverage of at-risk {vocab.zoneNoun}</dt>
               <dd className="big">{Math.round(score.coverage * 100)}%</dd>
               <dd className="cr-meter"><span style={{ width: `${Math.round(score.coverage * 100)}%` }} /></dd>
               <dd className="sub">{scenario.scoring.at_risk_zones.map((z) => z.label).join(' · ')}</dd>
@@ -659,6 +688,41 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
         </div>
       </div>
     </section>
+  );
+}
+
+/* ── Figures ───────────────────────────────────────────────────────────────
+   A cited image or clip, printed into the log like a pasted-in plate: ruled
+   frame, the caption beneath it, then credit and licence in small mono with
+   the licence linked. Width and height are always set and the frame keeps
+   the aspect ratio, so nothing shifts as a lazy image arrives. The image is
+   informative, so its caption is its alt text. Video never autoplays and
+   loads nothing until asked. Files are served exactly as vetted (no image
+   optimiser re-encoding them). */
+
+function Figure({ scenario, m }: { scenario: Scenario; m: MediaAttachment }) {
+  const base = `/control-room/${scenario.id}/`;
+  const ratio = { aspectRatio: `${m.width} / ${m.height}` };
+  return (
+    <figure className={`cr-figure cr-figure-${m.type}`}>
+      <div className="cr-figure-frame">
+        {m.type === 'image' ? (
+          // eslint-disable-next-line @next/next/no-img-element -- served byte-for-byte as licence-vetted, not re-encoded
+          <img src={base + m.file} alt={m.caption} width={m.width} height={m.height} style={ratio}
+            loading="lazy" decoding="async" />
+        ) : (
+          <video src={base + m.file} poster={m.poster ? base + m.poster : undefined} width={m.width} height={m.height} style={ratio}
+            controls preload="none" playsInline aria-label={m.caption} />
+        )}
+      </div>
+      <figcaption>
+        <span className="cr-figure-caption">{m.caption}</span>
+        <span className="cr-figure-credit">
+          {m.credit} · <a href={m.licenseUrl ?? m.sourcePage}>{m.license}</a>
+          {m.licenseUrl ? <> · <a href={m.sourcePage}>source</a></> : null}
+        </span>
+      </figcaption>
+    </figure>
   );
 }
 

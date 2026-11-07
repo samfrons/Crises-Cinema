@@ -186,7 +186,8 @@
   text-decoration: none;
   font-family: var(--data);
   line-height: 1.1;
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
 }
 .cr-console-time {
   font-size: 22px;
@@ -199,7 +200,13 @@
   text-transform: uppercase;
   color: rgba(241, 232, 213, 0.78);
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+/* Narrow phones: the zone name is on every stamp in the log, so the strip
+   drops it rather than truncate "Decision n of N". */
+@media (max-width: 429px) { .cr-console-tz { display: none; } }
 .cr-console-clock:hover .cr-console-time { text-decoration: underline; text-decoration-color: var(--ember); text-underline-offset: 4px; }
 .cr-console :focus-visible { outline: 3px solid var(--paper); outline-offset: 2px; }
 
@@ -618,8 +625,8 @@
 }
 .cr-boardlist-zone { color: var(--ink-soft); }
 .cr-boardlist-state { text-transform: uppercase; letter-spacing: 0.12em; font-weight: 700; }
-.cr-boardlist .is-flooding { border-left: 4px solid var(--ember); }
-.cr-boardlist .is-flooding .cr-boardlist-state { color: var(--ember); }
+.cr-boardlist .is-impact { border-left: 4px solid var(--ember); }
+.cr-boardlist .is-impact .cr-boardlist-state { color: var(--ember); }
 .cr-boardlist .is-signal { border-left: 4px solid var(--ink); }
 .cr-boardlist .is-watch { border-left: 4px dashed var(--ink); }
 
@@ -683,6 +690,12 @@
 .cr-map-river { fill: none; stroke: rgba(25, 20, 16, 0.6); stroke-width: 2; }
 .cr-map-dam { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
 .cr-map-town { fill: var(--ink); }
+/* West Maui: roads, the inset frame, the slope. */
+.cr-map-road { fill: none; stroke: rgba(25, 20, 16, 0.7); stroke-width: 2; }
+.cr-map-highway { stroke-width: 3.2; stroke: rgba(25, 20, 16, 0.85); }
+.cr-map-shelter { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
+.cr-map-inset { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 2 4; }
+.cr-map-contour path, .cr-map-ridge path { fill: none; stroke: rgba(25, 20, 16, 0.35); stroke-width: 1.4; }
 
 .cr-map-plate { font-family: var(--data); font-size: 17px; letter-spacing: 0.12em; fill: var(--ink); }
 .cr-map-label { font-family: var(--data); font-size: 17px; letter-spacing: 0.08em; fill: var(--ink); }
@@ -712,16 +725,16 @@
 .cr-zone.is-signal .cr-zone-state { fill: var(--ink); font-weight: 700; }
 .cr-zone.is-signal .cr-map-river { stroke: var(--ink); stroke-width: 3; }
 
-.cr-zone.is-flooding .cr-zone-shape { stroke: var(--ember); stroke-width: 3; }
-.cr-zone.is-flooding .cr-zone-state { fill: var(--ember); font-weight: 700; }
-.cr-zone.is-flooding .cr-map-river { stroke: var(--ember); stroke-width: 3.4; }
+.cr-zone.is-impact .cr-zone-shape { stroke: var(--ember); stroke-width: 3; }
+.cr-zone.is-impact .cr-zone-state { fill: var(--ember); font-weight: 700; }
+.cr-zone.is-impact .cr-map-river { stroke: var(--ember); stroke-width: 3.4; }
 
 .cr-zone.is-warned .cr-zone-shape { stroke-dasharray: none; stroke-width: 4; }
 .cr-zone .cr-zone-warned { fill: var(--ink); font-weight: 700; }
 
 /* The pulse of an active board — stilled for reduced motion. */
 @keyframes cr-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-.cr-zone.is-signal .cr-zone-shape, .cr-zone.is-flooding .cr-zone-shape { animation: cr-pulse 2.4s ease-in-out infinite; }
+.cr-zone.is-signal .cr-zone-shape, .cr-zone.is-impact .cr-zone-shape { animation: cr-pulse 2.4s ease-in-out infinite; }
 
 .cr-map-legend {
   display: flex;
@@ -738,11 +751,65 @@
 .cr-leg::before { content: ''; width: 14px; height: 9px; border: 1px solid rgba(25, 20, 16, 0.35); }
 .cr-leg.is-watch::before { border: 1.5px dashed var(--ink); }
 .cr-leg.is-signal::before { border: 2px solid var(--ink); }
-.cr-leg.is-flooding::before {
+.cr-leg.is-impact::before {
   border: 2px solid var(--ember);
   background: repeating-linear-gradient(90deg, rgba(184, 50, 26, 0.5) 0 2px, transparent 2px 4px);
 }
+.cr-map-fire .cr-leg.is-impact::before {
+  background: repeating-linear-gradient(135deg, rgba(184, 50, 26, 0.55) 0 1.5px, transparent 1.5px 4px),
+    repeating-linear-gradient(45deg, rgba(184, 50, 26, 0.55) 0 1.5px, transparent 1.5px 4px);
+}
 .cr-leg.is-warned::before { border: 3px solid var(--ink); }
+
+/* ── Figures: cited imagery printed into the log ────────────────────────── */
+/* A pasted-in plate on the slip: ruled frame on cream, mono caption under
+   it, credit and licence in small mono. The frame reserves the media's own
+   aspect ratio, so nothing shifts when a lazy image lands. */
+
+.cr-figure { margin: 12px 0 2px; }
+.cr-figure-frame {
+  box-sizing: border-box;
+  width: 100%;
+  background: var(--cr-sheet);
+  border: 1px solid var(--ink);
+  padding: 5px;
+  box-shadow: 3px 3px 0 rgba(25, 20, 16, 0.18);
+}
+.cr-figure-frame img, .cr-figure-frame video {
+  display: block;
+  width: 100%;
+  height: auto; /* with width/height attributes and aspect-ratio: space reserved */
+  background: rgba(25, 20, 16, 0.08);
+  object-fit: contain;
+}
+.cr-figure figcaption { display: grid; gap: 4px; margin-top: 8px; }
+.cr-figure-caption {
+  font-family: var(--data);
+  font-size: 12.5px;
+  line-height: 1.55;
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+.cr-figure-credit {
+  font-family: var(--data);
+  font-size: 10.5px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  overflow-wrap: anywhere;
+}
+.cr-desk .cr-figure .cr-figure-credit a { color: inherit; text-decoration-color: rgba(25, 20, 16, 0.4); text-underline-offset: 2px; }
+.cr-desk .cr-figure .cr-figure-credit a:hover { color: var(--ember); }
+/* On a slip, the plate runs the slip's full width. */
+.cr-slip .cr-figure { margin-left: -9px; margin-right: -9px; }
+@media (max-width: 599px) { .cr-slip .cr-figure { margin-left: -13px; margin-right: -13px; } }
+.cr-slip .cr-figure figcaption { padding: 0 9px; }
+@media (max-width: 599px) { .cr-slip .cr-figure figcaption { padding: 0 13px; } }
+.cr-entry-brief .cr-figure { margin: 18px 0 6px; max-width: 700px; }
+
+.cr-dsec-note { font-size: 15px; line-height: 1.55; color: var(--ink-soft); margin: -6px 0 18px; max-width: 62ch; font-style: italic; }
+.cr-figures { display: grid; gap: 26px; }
+@media (min-width: 860px) { .cr-figures { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px 28px; } }
 
 /* ── Sources under the log, during play ─────────────────────────────────── */
 

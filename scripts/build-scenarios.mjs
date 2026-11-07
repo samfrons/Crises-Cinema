@@ -6,18 +6,26 @@
  * scenario with any unsourced fact fails the build — that is the point of the
  * script, not an inconvenience to be routed around.
  */
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const srcDir = join(root, 'data', 'scenarios');
 const outFile = join(root, 'src', 'data', 'scenarios.json');
+// Media a scenario attaches is served from public/control-room/<scenario-id>/.
+const mediaRoot = join(root, 'public', 'control-room');
 
 const HHMM = /^([01]\d|2[0-3]):[0-5]\d$/;
 const KINDS = new Set(['forecast', 'gauge', 'message', 'media', 'field_report']);
 const SCOPES = new Set(['none', 'targeted', 'province']);
 const PLACEHOLDER = /source needed/i;
+const BOARD_STATES = new Set(['none', 'watch', 'signal', 'impact']);
+const MEDIA_TYPES = { image: /\.(jpe?g|png|webp|avif|gif)$/i, video: /\.(mp4|webm)$/i };
+// A licence line that is really a to-do note does not clear anything for publication.
+const LICENSE_PLACEHOLDER = /source needed|license needed|licence needed|\btbd\b|\btodo\b|unknown|unclear|placeholder|\?\?|^\s*-?\s*$/i;
+const URL_RE = /^https?:\/\/\S+$/;
+const SAFE_FILE = /^[a-z0-9][a-z0-9.-]*$/;
 
 /** Collects human-readable errors for one scenario file. */
 class Check {
@@ -40,6 +48,53 @@ function checkCitation(chk, cite, path, sourceIds, playable) {
   if (playable && typeof cite.sourceId === 'string') {
     chk.require(sourceIds.has(cite.sourceId), path, `citation sourceId "${cite.sourceId}" not in sources[]`);
     chk.require(!PLACEHOLDER.test(cite.sourceId) && !PLACEHOLDER.test(cite.detail ?? ''), path, 'placeholder "SOURCE NEEDED" in a playable scenario');
+  }
+}
+
+/**
+ * A media attachment (image or short video) on an info item, the briefing or the
+ * debrief. Same spirit as the citation gate: every field the UI prints as
+ * provenance must be present and real, the licence must be an actual licence,
+ * and the file must exist on disk — a missing figure fails the build rather
+ * than shipping a broken frame. `notAfter` (YYYY-MM-DD) refuses imagery taken
+ * after the scenario's day from appearing in the play log.
+ */
+function checkMedia(chk, m, path, scenarioId, notAfter) {
+  if (!chk.require(m && typeof m === 'object' && !Array.isArray(m), path, 'media must be an object')) return;
+  const nonEmpty = (k) => chk.require(typeof m[k] === 'string' && m[k].trim().length > 0, `${path}.${k}`, 'required string missing');
+  ['file', 'caption', 'credit', 'license', 'sourcePage'].forEach(nonEmpty);
+  chk.require(m.type === 'image' || m.type === 'video', `${path}.type`, 'must be "image" or "video"');
+  for (const k of ['width', 'height']) {
+    chk.require(Number.isInteger(m[k]) && m[k] > 0, `${path}.${k}`, 'must be a positive integer (pixels) so the frame reserves its space');
+  }
+  if (typeof m.license === 'string') {
+    chk.require(!LICENSE_PLACEHOLDER.test(m.license), `${path}.license`, `"${m.license}" is a placeholder, not a licence`);
+  }
+  if (typeof m.sourcePage === 'string') chk.require(URL_RE.test(m.sourcePage), `${path}.sourcePage`, 'must be an http(s) URL');
+  if (m.licenseUrl !== undefined) chk.require(typeof m.licenseUrl === 'string' && URL_RE.test(m.licenseUrl), `${path}.licenseUrl`, 'must be an http(s) URL when present');
+  if (typeof m.caption === 'string') chk.require(!PLACEHOLDER.test(m.caption), `${path}.caption`, 'placeholder caption');
+
+  const onDisk = (name, field) => {
+    if (!chk.require(typeof name === 'string' && SAFE_FILE.test(name), `${path}.${field}`,
+      'a bare kebab-case file name (no folders, no "..")')) return;
+    const full = join(mediaRoot, scenarioId, name);
+    chk.require(existsSync(full) && statSync(full).isFile() && statSync(full).size > 0, `${path}.${field}`,
+      `file not found at public/control-room/${scenarioId}/${name}`);
+  };
+  onDisk(m.file, 'file');
+  if (MEDIA_TYPES[m.type] && typeof m.file === 'string') {
+    chk.require(MEDIA_TYPES[m.type].test(m.file), `${path}.file`, `extension does not match type "${m.type}"`);
+  }
+  if (m.poster !== undefined) {
+    onDisk(m.poster, 'poster');
+    if (typeof m.poster === 'string') chk.require(MEDIA_TYPES.image.test(m.poster), `${path}.poster`, 'poster must be an image');
+  }
+
+  // takenOn is free text that starts with a date when the research knows one.
+  const taken = typeof m.takenOn === 'string' ? m.takenOn.match(/^\d{4}-\d{2}-\d{2}/)?.[0] : undefined;
+  if (notAfter && taken) {
+    chk.require(taken <= notAfter, `${path}.takenOn`,
+      `taken ${taken}, after the scenario day (${notAfter}) — later imagery belongs in debrief_media, not the play log`);
   }
 }
 
@@ -77,6 +132,13 @@ function validate(file, s) {
     'clock', 'needs {timezone, start HH:MM, end HH:MM}');
   chk.require(typeof s.record_caveat === 'string' && s.record_caveat.length > 0, 'record_caveat', 'required — say honestly what the record is');
 
+  if (s.briefing_media !== undefined) checkMedia(chk, s.briefing_media, 'briefing_media', s.id, s.date);
+  if (s.debrief_media !== undefined) {
+    if (chk.require(Array.isArray(s.debrief_media), 'debrief_media', 'must be an array of media attachments')) {
+      s.debrief_media.forEach((m, i) => checkMedia(chk, m, `debrief_media[${i}]`, s.id, null));
+    }
+  }
+
   chk.require(Array.isArray(s.timesteps) && s.timesteps.length >= 2, 'timesteps', 'a playable scenario needs at least 2 timesteps');
   const stepIds = new Set();
   let prev = null;
@@ -97,6 +159,11 @@ function validate(file, s) {
       chk.require(typeof info.text === 'string' && info.text.length > 0, q, 'needs text');
       chk.require(!PLACEHOLDER.test(info.text ?? ''), q, 'placeholder text in a playable scenario');
       checkCitation(chk, info.citation, `${q}.citation`, sourceIds, playable);
+      if (info.board_state !== undefined) {
+        chk.require(BOARD_STATES.has(info.board_state), `${q}.board_state`, `must be one of ${[...BOARD_STATES].join('|')}`);
+        chk.require(Array.isArray(info.zones) && info.zones.length > 0, `${q}.board_state`, 'only meaningful on an item with zones');
+      }
+      if (info.media !== undefined) checkMedia(chk, info.media, `${q}.media`, s.id, s.date);
       if (info.zones !== undefined) {
         const known = new Set((s.scoring?.at_risk_zones ?? []).map((z) => z.id));
         chk.require(Array.isArray(info.zones) && info.zones.every((z) => known.has(z)),
@@ -203,4 +270,8 @@ if (allErrors.length) {
 
 const bundle = { generated: new Date().toISOString(), playable, stubs };
 writeFileSync(outFile, `${JSON.stringify(bundle, null, 2)}\n`);
-console.log(`scenarios: ${playable.length} playable, ${stubs.length} stub(s) → src/data/scenarios.json`);
+const figures = playable.reduce((n, sc) => n
+  + (sc.briefing_media ? 1 : 0)
+  + (sc.debrief_media?.length ?? 0)
+  + sc.timesteps.reduce((k, t) => k + t.info_available.filter((i) => i.media).length, 0), 0);
+console.log(`scenarios: ${playable.length} playable, ${stubs.length} stub(s), ${figures} media attachment(s) checked → src/data/scenarios.json`);
