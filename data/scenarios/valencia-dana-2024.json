@@ -11,6 +11,20 @@
     "end": "20:11"
   },
   "record_caveat": "The record here is a judicial instruction still in progress, not a closed inquiry. Times and gauge figures come from official AEMET warnings, CHJ notifications entered in the Catarroja court file, and press reconstructions of that file; quotes from the investigating judge come from interlocutory orders as reproduced in press coverage, and are provisional. Where this scenario cannot say what a different decision would have caused, it says so: the record is silent on every path not taken. Deep links to primary documents are still to be added by the author.",
+  "warning_chain": {
+    "labels": {
+      "forecast": "AEMET · CHJ",
+      "desk": "112 desk",
+      "phone": "ES-Alert",
+      "siren": "Sirens",
+      "broadcast": "Radio · TV",
+      "social": "Posts"
+    },
+    "zones": {
+      "poyo-horta-sud": "Horta Sud",
+      "magro-utiel": "Magro"
+    }
+  },
   "timesteps": [
     {
       "id": "t1",
@@ -28,6 +42,13 @@
           },
           "zones": [
             "poyo-horta-sud"
+          ],
+          "icon": "rain",
+          "chain": [
+            {
+              "link": "forecast",
+              "state": "used"
+            }
           ]
         },
         {
@@ -116,6 +137,14 @@
           },
           "zones": [
             "poyo-horta-sud"
+          ],
+          "icon": "river-gauge",
+          "chain": [
+            {
+              "link": "forecast",
+              "state": "used",
+              "at": "12:20"
+            }
           ]
         },
         {
@@ -128,7 +157,9 @@
           },
           "zones": [
             "magro-utiel"
-          ]
+          ],
+          "icon": "flood",
+          "origin": true
         },
         {
           "id": "t2-i3",
@@ -140,7 +171,8 @@
           },
           "zones": [
             "magro-utiel"
-          ]
+          ],
+          "icon": "rain"
         }
       ],
       "options": [
@@ -217,7 +249,8 @@
           "citation": {
             "sourceId": "press-recon",
             "detail": "The early-afternoon video message of 29 Oct, later deleted; widely reproduced in press reconstructions"
-          }
+          },
+          "icon": "press"
         },
         {
           "id": "t3-i2",
@@ -229,7 +262,8 @@
           },
           "zones": [
             "magro-utiel"
-          ]
+          ],
+          "icon": "rain"
         }
       ],
       "options": [
@@ -303,7 +337,8 @@
           "citation": {
             "sourceId": "court-catarroja",
             "detail": "CECOPI convened at 17:00 on 29 Oct, per the court record and press reconstructions"
-          }
+          },
+          "icon": "committee"
         },
         {
           "id": "t4-i2",
@@ -315,7 +350,8 @@
           },
           "zones": [
             "magro-utiel"
-          ]
+          ],
+          "icon": "dam"
         },
         {
           "id": "t4-i3",
@@ -327,7 +363,8 @@
           },
           "zones": [
             "poyo-horta-sud"
-          ]
+          ],
+          "icon": "river-gauge"
         }
       ],
       "options": [
@@ -420,6 +457,14 @@
           },
           "zones": [
             "poyo-horta-sud"
+          ],
+          "icon": "river-gauge",
+          "chain": [
+            {
+              "link": "forecast",
+              "state": "used",
+              "at": "18:43"
+            }
           ]
         },
         {
@@ -432,7 +477,8 @@
           },
           "zones": [
             "magro-utiel"
-          ]
+          ],
+          "icon": "dam"
         }
       ],
       "options": [
@@ -511,7 +557,8 @@
           },
           "zones": [
             "poyo-horta-sud"
-          ]
+          ],
+          "icon": "flood"
         },
         {
           "id": "t6-i2",
@@ -520,7 +567,14 @@
           "citation": {
             "sourceId": "court-catarroja",
             "detail": "Drafting of the ES-Alert message before 20:11, per the court record"
-          }
+          },
+          "icon": "committee",
+          "chain": [
+            {
+              "link": "phone",
+              "state": "pending"
+            }
+          ]
         }
       ],
       "options": [

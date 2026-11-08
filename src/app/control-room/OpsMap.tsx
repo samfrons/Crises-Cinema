@@ -11,7 +11,7 @@
  */
 import { useId } from 'react';
 import type { Scenario } from './types';
-import { vocabFor, type HazardVocab, type ZoneState } from './hazards';
+import { vocabFor, COMPASS_TOWARD, COMPASS_WORD, type HazardVocab, type ZoneState } from './hazards';
 
 export type { ZoneState } from './hazards';
 
@@ -21,7 +21,16 @@ type Props = {
   warnedZones: string[];
   /** A line printed under the legend, e.g. why the board is still blank. */
   note?: string;
+  /** Zone → the stamp of the cited item that first places the hazard there
+   *  ("06:34", or "BY 12:20" when the text gives no clock time). */
+  origins?: Record<string, string>;
+  /** A wind direction a cited forecast states, and the decision it was last stated at. */
+  wind?: { from: string; by: string } | null;
+  /** What this hour's traffic changed: zones, origin marks, the wind mark. */
+  fresh?: { zones: string[]; origins: string[]; wind: boolean };
 };
+
+const NO_FRESH = { zones: [] as string[], origins: [] as string[], wind: false };
 
 /** What every hand-drawn board gets: state lookups and per-instance ids. */
 type Board = {
@@ -33,6 +42,16 @@ type Board = {
   /** Upper-case state word for the plate. */
   word: (z: string) => string;
   sea: string;
+  /** A zone's outline (and, the hour its state changes, the new state's
+   *  fill printed across it — see .cr-zone-sweep). */
+  shape: (z: string, d: string) => JSX.Element;
+};
+
+/** Per board: where a zone's origin mark is stamped (clear of its labels —
+ *  the mark names the zone, not a street corner), and the wind mark's place. */
+const MARKS: Record<string, { origin: Record<string, [number, number]>; wind?: [number, number] }> = {
+  'valencia-dana-2024': { origin: { 'magro-utiel': [196, 104], 'poyo-horta-sud': [440, 318] } },
+  'lahaina-2023': { origin: { 'lahaina-lahainaluna': [298, 300], 'upcountry-kula': [614, 246] }, wind: [700, 26] },
 };
 
 const BOARDS: Record<string, (b: Board) => JSX.Element> = {
@@ -40,7 +59,7 @@ const BOARDS: Record<string, (b: Board) => JSX.Element> = {
   'lahaina-2023': LahainaBoard,
 };
 
-export default function OpsMap({ scenario, zoneStates, warnedZones, note }: Props) {
+export default function OpsMap({ scenario, zoneStates, warnedZones, note, origins = {}, wind = null, fresh = NO_FRESH }: Props) {
   // Pattern ids are per instance, so a board in the side panel and one in
   // the briefing or the phone sheet never resolve to each other's patterns.
   const uid = useId().replace(/:/g, '');
@@ -54,11 +73,27 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note }: Prop
   const board: Board = {
     st,
     warned,
-    zoneClass: (z) => `cr-zone is-${st(z)}${warned(z) ? ' is-warned' : ''}`,
+    zoneClass: (z) => `cr-zone is-${st(z)}${warned(z) ? ' is-warned' : ''}${fresh.zones.includes(z) ? ' is-fresh' : ''}`,
     fill: (z) => (st(z) === 'impact' ? `url(#${impact})` : undefined),
     word: (z) => vocab.states[st(z)].toUpperCase(),
     sea,
+    shape: (z, d) => {
+      const s = st(z);
+      const sweep = fresh.zones.includes(z) && (s === 'signal' || s === 'impact');
+      return (
+        <>
+          <path className="cr-zone-shape" style={{ fill: s === 'impact' && !sweep ? `url(#${impact})` : undefined }} d={d} />
+          {sweep && (
+            <path key={s} className={`cr-zone-sweep is-${s}`} d={d}
+              style={{ fill: s === 'impact' ? `url(#${impact})` : undefined }} />
+          )}
+        </>
+      );
+    },
   };
+  const marks = MARKS[scenario.id];
+  const originList = Object.entries(origins).filter(([z]) => marks?.origin[z]);
+  const showWind = !!(wind && marks?.wind && COMPASS_TOWARD[wind.from] !== undefined);
 
   return (
     <figure className={`cr-map cr-map-${vocab.family}`}>
@@ -70,6 +105,16 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note }: Prop
           <ImpactPattern id={impact} vocab={vocab} />
         </defs>
         <Draw {...board} />
+        {originList.map(([z, label]) => {
+          const [ox, oy] = marks!.origin[z];
+          return (
+            <g key={z} className={`cr-map-origin${fresh.origins.includes(z) ? ' is-fresh' : ''}`} transform={`translate(${ox}, ${oy})`}>
+              <path className="cr-map-origin-star" d="M0 -8V8M-8 0H8M-5.6 -5.6L5.6 5.6M-5.6 5.6L5.6 -5.6" />
+              <text x="12" y="5">{label}</text>
+            </g>
+          );
+        })}
+        {showWind && <WindMark at={marks!.wind!} from={wind!.from} by={wind!.by} fresh={fresh.wind} />}
       </svg>
       {/* The key: the four states as the progression they are (a zone only
           ever moves rightward along it, and may skip a step when the cited
@@ -96,6 +141,14 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note }: Prop
           </svg>
           warned by you
         </span>
+        {originList.length > 0 && (
+          <span className="cr-leg cr-leg-mark">
+            <svg className="cr-leg-swatch" viewBox="-9 -9 18 18" aria-hidden>
+              <path className="cr-map-origin-star" d="M0 -7V7M-7 0H7M-5 -5L5 5M-5 5L5 -5" />
+            </svg>
+            where the record first places {vocab.originNoun}
+          </span>
+        )}
         {note && <span className="cr-map-note">{note}</span>}
       </figcaption>
     </figure>
@@ -123,6 +176,27 @@ function ImpactPattern({ id, vocab }: { id: string; vocab: HazardVocab }) {
   );
 }
 
+/** The wind as a cited forecast states it, set in the plate's title band
+ *  (clear of every road and zone): an arrow blowing the stated way, three
+ *  streaks behind it, and the direction in words with the hour it was last
+ *  stated on the desk. Drawn only when an item carries `wind`, which the
+ *  build allows only where the text says "<direction> winds". */
+function WindMark({ at, from, by, fresh }: { at: [number, number]; from: string; by: string; fresh: boolean }) {
+  const [x, y] = at;
+  const toward = COMPASS_TOWARD[from];
+  return (
+    <g className={`cr-map-wind${fresh ? ' is-fresh' : ''}`}>
+      {/* the arrow is drawn pointing north, then turned to where the wind blows */}
+      <g transform={`translate(${x - 218}, ${y + 6}) rotate(${toward})`}>
+        <path className="cr-map-wind-arrow" d="M0 14V-14M-6 -7L0 -14L6 -7" pathLength={1} />
+        <path className="cr-map-wind-streak" d="M-9 4v10M9 4v10" pathLength={1} />
+      </g>
+      <text className="cr-map-wind-label" x={x} y={y + 2} textAnchor="end">{`${COMPASS_WORD[from].toUpperCase()} WINDS`}</text>
+      <text className="cr-map-scale" x={x} y={y + 18} textAnchor="end">{`NWS · AS OF ${by}`}</text>
+    </g>
+  );
+}
+
 /** The plate's title block: a paper band ruled off the top of the board, so
  *  no coastline, road or river ever runs through the title. */
 function PlateHead({ title }: { title: string }) {
@@ -147,7 +221,7 @@ function North({ x, y }: { x: number; y: number }) {
 
 /* ── Valencia, 29 October 2024 ──────────────────────────────────────────── */
 
-function ValenciaBoard({ zoneClass, fill, word, warned, sea }: Board) {
+function ValenciaBoard({ zoneClass, shape, word, warned, sea }: Board) {
   return (
     <>
       {/* The sea and the coast */}
@@ -165,7 +239,7 @@ function ValenciaBoard({ zoneClass, fill, word, warned, sea }: Board) {
 
       {/* ZONE — Magro basin: Utiel, Requena, the Forata dam */}
       <g className={zoneClass('magro-utiel')}>
-        <path className="cr-zone-shape" style={{ fill: fill('magro-utiel') }} d="M40 96l150-34 96 44 40 74-48 68-128-2-94-68z" />
+        {shape('magro-utiel', 'M40 96l150-34 96 44 40 74-48 68-128-2-94-68z')}
         {/* the Magro, down through Forata and on south towards the Júcar */}
         <path className="cr-map-river" d="M56 132c40-6 74-22 108-14s52 34 74 44 44 24 56 46 6 50 4 90-4 70 0 102" />
         <rect x="272" y="188" width="18" height="7" className="cr-map-dam" transform="rotate(28 281 191)" />
@@ -182,7 +256,7 @@ function ValenciaBoard({ zoneClass, fill, word, warned, sea }: Board) {
       {/* ZONE — Rambla del Poyo and the Horta Sud towns. The zone runs east
           to the lagoon so the towns can be named clear of the ravine. */}
       <g className={zoneClass('poyo-horta-sud')}>
-        <path className="cr-zone-shape" style={{ fill: fill('poyo-horta-sud') }} d="M336 236L460 200L612 214L618 276L568 296L476 356L346 326z" />
+        {shape('poyo-horta-sud', 'M336 236L460 200L612 214L618 276L568 296L476 356L346 326z')}
         {/* the ravine, west hills to the Albufera */}
         <path className="cr-map-river cr-map-rambla" d="M340 250c30-16 58-24 88-22s58 16 86 26 52 26 66 40" />
         <circle cx="500" cy="248" r="4" className="cr-map-town" />
@@ -210,7 +284,7 @@ function ValenciaBoard({ zoneClass, fill, word, warned, sea }: Board) {
    both. Inset: Upcountry on the slope of Haleakalā, across the isthmus and
    not to the same scale. */
 
-function LahainaBoard({ zoneClass, fill, word, warned, sea }: Board) {
+function LahainaBoard({ zoneClass, shape, word, warned, sea }: Board) {
   return (
     <>
       {/* The ocean and the West Maui shore */}
@@ -226,8 +300,7 @@ function LahainaBoard({ zoneClass, fill, word, warned, sea }: Board) {
 
       {/* ZONE — Front Street, Kahoma and the waterfront: shore to the highway */}
       <g className={zoneClass('lahaina-front-street')}>
-        <path className="cr-zone-shape" style={{ fill: fill('lahaina-front-street') }}
-          d="M114 104L244 100L246 344L108 348c6-30 0-58 4-86s-6-56 2-92-8-40 0-66z" />
+        {shape('lahaina-front-street', 'M114 104L244 100L246 344L108 348c6-30 0-58 4-86s-6-56 2-92-8-40 0-66z')}
         <text className="cr-zone-label" x="128" y="130">FRONT STREET</text>
         <text className="cr-zone-label" x="128" y="146">WATERFRONT</text>
         <text className="cr-zone-state" x="128" y="163">{word('lahaina-front-street')}</text>
@@ -236,8 +309,7 @@ function LahainaBoard({ zoneClass, fill, word, warned, sea }: Board) {
 
       {/* ZONE — Lahainaluna and Kelawea: the slope between Highway 30 and the Bypass */}
       <g className={zoneClass('lahaina-lahainaluna')}>
-        <path className="cr-zone-shape" style={{ fill: fill('lahaina-lahainaluna') }}
-          d="M256 166L380 174L396 298L258 322z" />
+        {shape('lahaina-lahainaluna', 'M256 166L380 174L396 298L258 322z')}
         <text className="cr-zone-label" x="266" y="192">LAHAINALUNA</text>
         <text className="cr-zone-label" x="266" y="208">KELAWEA</text>
         <text className="cr-zone-state" x="266" y="225">{word('lahaina-lahainaluna')}</text>
@@ -274,8 +346,7 @@ function LahainaBoard({ zoneClass, fill, word, warned, sea }: Board) {
 
       {/* ZONE — Kula and Olinda */}
       <g className={zoneClass('upcountry-kula')}>
-        <path className="cr-zone-shape" style={{ fill: fill('upcountry-kula') }}
-          d="M520 176L612 156L690 166L688 280L604 300L522 276z" />
+        {shape('upcountry-kula', 'M520 176L612 156L690 166L688 280L604 300L522 276z')}
         <circle cx="664" cy="184" r="4" className="cr-map-town" />
         <text className="cr-map-minor" x="654" y="190" textAnchor="end">OLINDA</text>
         <circle cx="548" cy="263" r="4" className="cr-map-town" />

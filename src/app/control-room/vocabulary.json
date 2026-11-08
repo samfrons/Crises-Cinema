@@ -1,0 +1,39 @@
+{
+  "_comment": "Presentational vocabulary for the Control Room, shared by the UI (glyphs.tsx, WarningChain.tsx, OpsMap.tsx) and the validator (scripts/build-scenarios.mjs). Adding a word here without drawing it in glyphs.tsx renders nothing; using a word in a scenario that is not here fails the build. Documented in data/scenarios/README.md.",
+  "icons": [
+    "siren",
+    "wea",
+    "downed-line",
+    "roadblock",
+    "shelter",
+    "aircraft",
+    "boat",
+    "dam",
+    "river-gauge",
+    "rain",
+    "flood",
+    "wind",
+    "fire",
+    "contained",
+    "hydrant",
+    "committee",
+    "press",
+    "social",
+    "satellite"
+  ],
+  "chain": {
+    "links": ["forecast", "siren", "phone", "broadcast", "social"],
+    "states": ["used", "cut", "unused", "pending"],
+    "label_keys": ["forecast", "desk", "siren", "phone", "broadcast", "social"]
+  },
+  "compass": {
+    "N": "north",
+    "NE": "north-?east",
+    "E": "east",
+    "SE": "south-?east",
+    "S": "south",
+    "SW": "south-?west",
+    "W": "west",
+    "NW": "north-?west"
+  }
+}

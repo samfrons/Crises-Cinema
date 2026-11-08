@@ -26,6 +26,13 @@ const MEDIA_TYPES = { image: /\.(jpe?g|png|webp|avif|gif)$/i, video: /\.(mp4|web
 const LICENSE_PLACEHOLDER = /source needed|license needed|licence needed|\btbd\b|\btodo\b|unknown|unclear|placeholder|\?\?|^\s*-?\s*$/i;
 const URL_RE = /^https?:\/\/\S+$/;
 const SAFE_FILE = /^[a-z0-9][a-z0-9.-]*$/;
+// The presentational vocabulary (slip pictograms, the warning chain, wind
+// compass) is shared with the UI, so a word the UI cannot draw cannot ship.
+const VOCAB = JSON.parse(readFileSync(join(root, 'src', 'app', 'control-room', 'vocabulary.json'), 'utf8'));
+const ICONS = new Set(VOCAB.icons);
+const CHAIN_LINKS = new Set(VOCAB.chain.links);
+const CHAIN_STATES = new Set(VOCAB.chain.states);
+const CHAIN_LABEL_KEYS = new Set(VOCAB.chain.label_keys);
 
 /** Collects human-readable errors for one scenario file. */
 class Check {
@@ -98,6 +105,80 @@ function checkMedia(chk, m, path, scenarioId, notAfter) {
   }
 }
 
+/** A time the presentation prints must be one the cited text already says. */
+const saysTime = (text, at) => typeof text === 'string' && text.includes(at);
+
+/**
+ * Presentational fields on an info item. None of them may add information:
+ * each one restates something the item's own cited text already says, and
+ * where the field carries a time or a direction, the build checks that the
+ * text says it in so many words.
+ *   icon   — one word from the slip pictogram vocabulary.
+ *   chain  — the warning-chain links this item shows used / cut / unused /
+ *            pending; `at` must appear verbatim in the text; `zones` must be a
+ *            subset of the item's own zones.
+ *   origin — true, or an HH:MM in the text: the record first places the
+ *            hazard in this item's (single) zone. One per zone.
+ *   wind   — { from: compass point }: the text must say "<direction> wind(s)".
+ */
+function checkPresentation(chk, info, q, origins) {
+  if (info.icon !== undefined) {
+    chk.require(ICONS.has(info.icon), `${q}.icon`, `"${info.icon}" is not in the pictogram vocabulary (${[...ICONS].join('|')})`);
+  }
+  if (info.chain !== undefined) {
+    if (chk.require(Array.isArray(info.chain) && info.chain.length > 0, `${q}.chain`, 'must be a non-empty array of { link, state }')) {
+      for (const [k, c] of info.chain.entries()) {
+        const r = `${q}.chain[${k}]`;
+        if (!chk.require(c && typeof c === 'object', r, 'must be an object')) continue;
+        chk.require(CHAIN_LINKS.has(c.link), `${r}.link`, `must be one of ${[...CHAIN_LINKS].join('|')}`);
+        chk.require(CHAIN_STATES.has(c.state), `${r}.state`, `must be one of ${[...CHAIN_STATES].join('|')}`);
+        if (c.link === 'forecast') chk.require(c.state === 'used', `${r}.state`, 'the forecast link is only ever "used" (the warning reached the desk)');
+        if (c.at !== undefined) {
+          chk.require(HHMM.test(c.at ?? '') && saysTime(info.text, c.at), `${r}.at`,
+            `"${c.at}" must be an HH:MM that the item's own text states`);
+        }
+        if (c.zones !== undefined) {
+          const own = new Set(info.zones ?? []);
+          chk.require(Array.isArray(c.zones) && c.zones.length > 0 && c.zones.every((z) => own.has(z)), `${r}.zones`,
+            "must be a non-empty subset of the item's own zones");
+        }
+      }
+    }
+  }
+  if (info.origin !== undefined) {
+    const ok = info.origin === true || (typeof info.origin === 'string' && HHMM.test(info.origin) && saysTime(info.text, info.origin));
+    chk.require(ok, `${q}.origin`, 'must be true or an HH:MM that the item\'s own text states');
+    if (chk.require(Array.isArray(info.zones) && info.zones.length === 1, `${q}.origin`, 'an origin mark needs exactly one zone')) {
+      chk.require(!origins.has(info.zones[0]), `${q}.origin`, `zone "${info.zones[0]}" already has an origin mark`);
+      origins.add(info.zones[0]);
+    }
+    chk.require(info.board_state !== 'none', `${q}.origin`, 'an item that lights nothing cannot place the hazard');
+  }
+  if (info.wind !== undefined) {
+    const word = VOCAB.compass[info.wind?.from];
+    if (chk.require(!!word, `${q}.wind.from`, `must be one of ${Object.keys(VOCAB.compass).join('|')}`)) {
+      chk.require(new RegExp(`\\b${word}(erly)?\\s+winds?\\b`, 'i').test(info.text ?? ''), `${q}.wind`,
+        `the item's text does not say "${info.wind.from}" winds — the board may only restate a stated direction`);
+    }
+  }
+}
+
+/** Scenario-level labels for the warning-chain diagram: short names only. */
+function checkChainLabels(chk, wc, s) {
+  if (!chk.require(wc && typeof wc === 'object' && !Array.isArray(wc), 'warning_chain', 'must be an object')) return;
+  for (const [k, v] of Object.entries(wc.labels ?? {})) {
+    chk.require(CHAIN_LABEL_KEYS.has(k), `warning_chain.labels.${k}`, `key must be one of ${[...CHAIN_LABEL_KEYS].join('|')}`);
+    // forecast / desk boxes are wide; a channel box holds about 11 characters.
+    const max = k === 'forecast' || k === 'desk' ? 18 : 11;
+    chk.require(typeof v === 'string' && v.trim().length > 0 && v.length <= max, `warning_chain.labels.${k}`, `a label of 1–${max} characters`);
+  }
+  const known = new Set((s.scoring?.at_risk_zones ?? []).map((z) => z.id));
+  for (const [k, v] of Object.entries(wc.zones ?? {})) {
+    chk.require(known.has(k), `warning_chain.zones.${k}`, 'must be a scoring.at_risk_zones id');
+    chk.require(typeof v === 'string' && v.trim().length > 0 && v.length <= 14, `warning_chain.zones.${k}`, 'a short label of 1–14 characters');
+  }
+}
+
 function validate(file, s) {
   const chk = new Check(file);
   for (const field of ['id', 'status', 'title', 'date', 'location', 'hazard']) {
@@ -139,8 +220,11 @@ function validate(file, s) {
     }
   }
 
+  if (s.warning_chain !== undefined) checkChainLabels(chk, s.warning_chain, s);
+
   chk.require(Array.isArray(s.timesteps) && s.timesteps.length >= 2, 'timesteps', 'a playable scenario needs at least 2 timesteps');
   const stepIds = new Set();
+  const origins = new Set(); // zones that already carry an origin mark
   let prev = null;
   for (const [i, t] of (s.timesteps ?? []).entries()) {
     const p = `timesteps[${i}]`;
@@ -164,6 +248,7 @@ function validate(file, s) {
         chk.require(Array.isArray(info.zones) && info.zones.length > 0, `${q}.board_state`, 'only meaningful on an item with zones');
       }
       if (info.media !== undefined) checkMedia(chk, info.media, `${q}.media`, s.id, s.date);
+      checkPresentation(chk, info, q, origins);
       if (info.zones !== undefined) {
         const known = new Set((s.scoring?.at_risk_zones ?? []).map((z) => z.id));
         chk.require(Array.isArray(info.zones) && info.zones.every((z) => known.has(z)),

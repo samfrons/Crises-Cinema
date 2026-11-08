@@ -6,9 +6,10 @@ import { startSession, logChoice, completeSession, type ChoiceEvent } from './te
 import { scoreRun, historicalLeadTime, formatLead, type Choice } from './scoring';
 import DayStrip from './DayStrip';
 import OpsMap from './OpsMap';
-import { itemState, STATE_RANK, vocabFor, type ZoneState } from './hazards';
+import { itemState, STATE_RANK, vocabFor, COMPASS_WORD, type ZoneState } from './hazards';
 import AlertTimingChart from './AlertTimingChart';
-import { KindGlyph, HazardGlyph } from './glyphs';
+import { KindGlyph, HazardGlyph, Pictogram, hasPictogram } from './glyphs';
+import WarningChain, { chainChanges, chainNews, deriveChain } from './WarningChain';
 
 /* ══════════════════════════════════════════════════════════════════════════
    One continuous desk. Once a day is chosen, everything happens in a single
@@ -35,8 +36,17 @@ import { KindGlyph, HazardGlyph } from './glyphs';
 function deriveBoard(scenario: Scenario, uptoIndex: number, choices: Choice[]) {
   const vocab = vocabFor(scenario);
   const zoneStates: Record<string, ZoneState> = {};
+  // The board's marks restate cited items too: where the record first places
+  // the hazard (`origin`, one per zone) and a wind direction a forecast states
+  // (`wind`, held from the first item that states it, as of the latest).
+  const origins: Record<string, string> = {};
+  let wind: { from: string; by: string } | null = null;
   for (const t of scenario.timesteps.slice(0, uptoIndex + 1)) {
     for (const info of t.info_available) {
+      if (info.origin && info.zones?.length === 1 && !origins[info.zones[0]]) {
+        origins[info.zones[0]] = info.origin === true ? `BY ${stamp(t)}` : info.origin;
+      }
+      if (info.wind) wind = { from: info.wind.from, by: stamp(t) };
       const state = itemState(info, vocab);
       if (!state) continue;
       for (const z of info.zones ?? []) {
@@ -46,7 +56,28 @@ function deriveBoard(scenario: Scenario, uptoIndex: number, choices: Choice[]) {
   }
   const warnedZones = new Set<string>();
   for (const c of choices) warnedBy(scenario, c.option).forEach((z) => warnedZones.add(z));
-  return { zoneStates, warnedZones: Array.from(warnedZones) };
+  return { zoneStates, warnedZones: Array.from(warnedZones), origins, wind };
+}
+
+/** What decision `index`'s traffic changed on the board, so the plate can
+ *  print just those changes in (and, for reduced motion, strike them twice). */
+function boardFresh(scenario: Scenario, index: number) {
+  if (index < 0) return { zones: [], origins: [], wind: false };
+  const a = deriveBoard(scenario, index - 1, []);
+  const b = deriveBoard(scenario, index, []);
+  return {
+    zones: Object.keys(b.zoneStates).filter((z) => b.zoneStates[z] !== a.zoneStates[z]),
+    origins: Object.keys(b.origins).filter((z) => !a.origins[z]),
+    wind: !!b.wind && !a.wind,
+  };
+}
+
+/** The pictograms a decision point's slips carry, most frequent first, for
+ *  the debrief rows (a scanning aid; the rows say what happened in words). */
+function stepIcons(t: Timestep, max = 3) {
+  const n = new Map<string, number>();
+  for (const i of t.info_available) if (hasPictogram(i.icon)) n.set(i.icon, (n.get(i.icon) ?? 0) + 1);
+  return Array.from(n.entries()).sort((a, b) => b[1] - a[1]).slice(0, max).map(([k]) => k);
 }
 
 function warnedBy(scenario: Scenario, option: Option): string[] {
@@ -184,11 +215,16 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
   };
 
   const board = deriveBoard(scenario, started ? cursor : -1, choices);
+  const shownIndex = started ? cursor : -1;
+  const fresh = done ? { zones: [], origins: [], wind: false } : boardFresh(scenario, shownIndex);
+  const chain = deriveChain(scenario, shownIndex);
+  const chainFresh = done || !started ? new Set<string>() : chainChanges(scenario, shownIndex);
+  const live = { board, fresh, chain, chainFresh };
 
   return (
     <div className="cr-run">
       <Console scenario={scenario} started={started} cursor={cursor} choices={choices} done={done}
-        board={board} showMapButton={!wide} />
+        live={live} showMapButton={!wide} />
 
       <div className="cr-play wrap">
         <div className="cr-log" role="log" aria-label="Dispatch log" aria-live="polite">
@@ -203,13 +239,14 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
               choice={choices[i]}
               isCurrent={i === cursor && !done}
               isLast={i === lastIndex}
+              inlineChain={!wide}
               onChoose={choose}
               onAdvance={advance}
             />
           ))}
         </div>
 
-        {wide && <SidePanel scenario={scenario} board={board} choices={choices} started={started} />}
+        {wide && <SidePanel scenario={scenario} live={live} choices={choices} started={started} />}
       </div>
 
       {done ? (
@@ -229,10 +266,27 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
    count in words, one pip per decision point, and the day as a rail along
    its bottom edge. On phones it also carries the MAP button. */
 
-function Console({ scenario, started, cursor, choices, done, board, showMapButton }: {
+type Live = {
+  board: ReturnType<typeof deriveBoard>;
+  fresh: ReturnType<typeof boardFresh>;
+  chain: ReturnType<typeof deriveChain>;
+  chainFresh: Set<string>;
+};
+
+/** The board as the live desk shows it, with this hour's changes marked. */
+function LiveBoard({ scenario, live, note }: { scenario: Scenario; live: Live; note?: string }) {
+  const { board, fresh } = live;
+  return (
+    <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones}
+      origins={board.origins} wind={board.wind} fresh={fresh} note={note} />
+  );
+}
+
+function Console({ scenario, started, cursor, choices, done, live, showMapButton }: {
   scenario: Scenario; started: boolean; cursor: number; choices: Choice[]; done: boolean;
-  board: ReturnType<typeof deriveBoard>; showMapButton: boolean;
+  live: Live; showMapButton: boolean;
 }) {
+  const { board } = live;
   const steps = scenario.timesteps;
   const t = steps[cursor];
   const time = done ? scenario.clock.end : started ? stamp(t) : scenario.clock.start;
@@ -273,8 +327,10 @@ function Console({ scenario, started, cursor, choices, done, board, showMapButto
       <DayStrip scenario={scenario} currentIndex={started ? cursor : -1} choices={choices} ended={done} />
       {showMapButton && (
         <BoardSheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
-          <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones} />
+          <LiveBoard scenario={scenario} live={live} />
           <BoardList scenario={scenario} board={board} />
+          <p className="cr-side-head">Warning chain</p>
+          <WarningChain scenario={scenario} snapshot={live.chain} fresh={live.chainFresh} />
         </BoardSheet>
       )}
     </div>
@@ -306,19 +362,34 @@ function BoardSheet({ open, onClose, children }: { open: boolean; onClose: () =>
 
 /** The board's state in words — what the map shows, never by colour alone. */
 function BoardList({ scenario, board }: { scenario: Scenario; board: ReturnType<typeof deriveBoard> }) {
-  const { states } = vocabFor(scenario);
+  const { states, originNoun } = vocabFor(scenario);
   return (
     <ul className="cr-boardlist">
       {scenario.scoring.at_risk_zones.map((z) => {
         const s = board.zoneStates[z.id] ?? 'quiet';
         const warned = board.warnedZones.includes(z.id);
+        const origin = board.origins[z.id];
         return (
           <li key={z.id} className={`is-${s}`}>
             <span className="cr-boardlist-zone">{z.label}</span>
-            <span className="cr-boardlist-state">{states[s]}{warned ? ' · warned by you' : ''}</span>
+            <span className="cr-boardlist-state">
+              {states[s]}{warned ? ' · warned by you' : ''}
+            </span>
+            {origin && (
+              <span className="cr-boardlist-origin">
+                <span aria-hidden>✳ </span>The record first places {originNoun} here{' '}
+                {origin.startsWith('BY') ? origin.toLowerCase() : `at ${origin}`}
+              </span>
+            )}
           </li>
         );
       })}
+      {board.wind && (
+        <li className="cr-boardlist-wind">
+          <span className="cr-boardlist-zone">Wind</span>
+          <span className="cr-boardlist-state">{COMPASS_WORD[board.wind.from]} winds, per the forecast as of {board.wind.by}</span>
+        </li>
+      )}
     </ul>
   );
 }
@@ -332,15 +403,16 @@ const boardNote = (scenario: Scenario) =>
 
 /* ── Wide screens: the board and your run, alongside the log ────────────── */
 
-function SidePanel({ scenario, board, choices, started }: {
-  scenario: Scenario; board: ReturnType<typeof deriveBoard>; choices: Choice[]; started: boolean;
+function SidePanel({ scenario, live, choices, started }: {
+  scenario: Scenario; live: Live; choices: Choice[]; started: boolean;
 }) {
   return (
-    <aside className="cr-side" aria-label="Situation board and your run">
+    <aside className="cr-side" aria-label="Situation board, warning chain and your run">
       <p className="cr-side-head">Situation board</p>
-      <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones}
-        note={started ? undefined : boardNote(scenario)} />
-      <BoardList scenario={scenario} board={board} />
+      <LiveBoard scenario={scenario} live={live} note={started ? undefined : boardNote(scenario)} />
+      <BoardList scenario={scenario} board={live.board} />
+      <p className="cr-side-head">Warning chain</p>
+      <WarningChain scenario={scenario} snapshot={live.chain} fresh={live.chainFresh} />
       <p className="cr-side-head">Your run so far</p>
       {started && choices.length ? (
         <ol className="cr-trace">
@@ -440,9 +512,9 @@ function Briefing({ scenario, started, inlineMap, onStart }: {
 
 /* ── Log entries 1…n: one decision point each ────────────────────────────── */
 
-function StepEntry({ scenario, t, index, choice, isCurrent, isLast, onChoose, onAdvance }: {
+function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain, onChoose, onAdvance }: {
   scenario: Scenario; t: Timestep; index: number; choice?: Choice;
-  isCurrent: boolean; isLast: boolean; onChoose: (o: Option) => void; onAdvance: () => void;
+  isCurrent: boolean; isLast: boolean; inlineChain: boolean; onChoose: (o: Option) => void; onAdvance: () => void;
 }) {
   const sourceIndex = useSourceIndex(scenario);
   const vocab = vocabFor(scenario);
@@ -456,6 +528,12 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, onChoose, on
       .filter((z) => (after[z.id] ?? 'quiet') !== (before[z.id] ?? 'quiet'))
       .map((z) => ({ label: z.label, state: after[z.id] as ZoneState }));
   }, [scenario, index]);
+  // What this hour's traffic says about the warning chain, in words; on
+  // phones the chain as it stands at this hour is printed under it.
+  const news = useMemo(() => chainNews(scenario, index), [scenario, index]);
+  const chainAt = useMemo(() => (news.length && inlineChain
+    ? { snap: deriveChain(scenario, index), fresh: chainChanges(scenario, index) } : null), [scenario, index, news, inlineChain]);
+  const slips = t.info_available.length;
 
   return (
     <article id={id} className={`cr-entry${isCurrent ? ' is-current' : ''}`} aria-labelledby={`${id}-h`}>
@@ -471,7 +549,10 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, onChoose, on
       <ul className="cr-dispatches" aria-label={`Incoming at ${stamp(t)}`}>
         {t.info_available.map((info, i) => (
           <li key={info.id} className={`cr-slip cr-slip-${info.kind}`} style={{ '--i': i } as React.CSSProperties}>
-            <p className="cr-slip-kind"><KindGlyph kind={info.kind} className="cr-kind-glyph" /> {vocab.kindLabel[info.kind]}</p>
+            <p className="cr-slip-kind">
+              <KindGlyph kind={info.kind} className="cr-kind-glyph" /> {vocab.kindLabel[info.kind]}
+              {hasPictogram(info.icon) && <Pictogram name={info.icon} size={22} className="cr-slip-pict" />}
+            </p>
             <p className="cr-slip-text">{info.text} <Cite c={info.citation} idx={sourceIndex} /></p>
             {info.media && <Figure scenario={scenario} m={info.media} />}
           </li>
@@ -491,11 +572,27 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, onChoose, on
         </p>
       )}
 
+      {news.length > 0 && (
+        <div className="cr-chainline" style={{ '--i': slips + 1 } as React.CSSProperties}>
+          <p className="cr-boardline">
+            <span className="cr-boardline-tag">Chain</span>
+            <span className="cr-boardline-body">
+              {news.map((n) => (
+                <span key={n.key} className="cr-boardline-item">
+                  {n.what} <span aria-hidden>→</span><span className="cr-sr"> now </span> <strong>{n.word}{n.at ? ` ${n.at}` : ''}</strong>
+                </span>
+              ))}
+            </span>
+          </p>
+          {chainAt && <WarningChain scenario={scenario} snapshot={chainAt.snap} fresh={chainAt.fresh} compact />}
+        </div>
+      )}
+
       {choice ? (
         <CallRecord scenario={scenario} t={t} choice={choice} sourceIndex={sourceIndex} />
       ) : (
         <div className="cr-call" role="group" aria-labelledby={`${id}-call`}
-          style={{ '--i': t.info_available.length + 1 } as React.CSSProperties}>
+          style={{ '--i': slips + 2 } as React.CSSProperties}>
           <p id={`${id}-call`} className="cr-call-head">Your call · {stamp(t)}</p>
           <div className="cr-options">
             {t.options.map((o) => (
@@ -608,7 +705,12 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
               const diverged = !!c?.event.divergedFromHistory;
               return (
                 <li key={t.id} className={diverged ? 'is-diverged' : ''}>
-                  <span className="cr-vs-time">{stamp(t)}</span>
+                  <span className="cr-vs-time">
+                    <span className="cr-vs-stamp">{stamp(t)}</span>
+                    <span className="cr-vs-icons" aria-hidden>
+                      {stepIcons(t).map((name) => <Pictogram key={name} name={name} size={18} />)}
+                    </span>
+                  </span>
                   <div className="cr-vs-you">
                     <span className="cr-vs-who">You</span>
                     <span>

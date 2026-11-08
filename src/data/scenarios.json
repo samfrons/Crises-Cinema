@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-07T18:45:37.151Z",
+  "generated": "2026-11-08T02:13:18.230Z",
   "playable": [
     {
       "id": "lahaina-2023",
@@ -14,6 +14,21 @@
         "end": "22:00"
       },
       "record_caveat": "The record here is strong on times and thin on reasons. The minute-by-minute facts come from the FSRI timeline dataset published for the Hawaiʻi Attorney General (dispatch audio, police and fire logs, MEMA and HI-EMA logs, NWS products, Hawaiian Electric statements, county social-media posts, and the administrator's own text messages), and from FSRI's Phase Two analysis of 13 September 2024. The Phase One report PDF could not be read as text, so Phase One facts are cited to its dataset rows by time and source. The county after-action report by the Western Fire Chiefs Association and MPD's own report could not be retrieved, and are not cited. Some entries in the dataset carry wrong or later timestamps; those were left out. The player is cast as the MEMA Administrator, who the record places in Honolulu for the Pacific Partnership 2023 meeting that day; the EOC was run in Maui by his staff, and some information shown here (dispatch traffic, 911 calls) is in the county's records but is not shown to have reached him. FSRI's staff interviews say siren activation was not discussed on 8 August, while the Administrator said on 16 August he had decided against it; the documents available here do not reconcile the two. Where this scenario cannot say what a different decision would have caused, it says so: the record is silent on every path not taken. How much Hurricane Dora itself contributed to the wind has been questioned in later analyses; this scenario reports only what the forecasts said. The origin and cause of the fire are under separate investigation and are not addressed.",
+      "warning_chain": {
+        "labels": {
+          "forecast": "NWS Honolulu",
+          "desk": "Maui EOC",
+          "phone": "WEA",
+          "siren": "Sirens",
+          "broadcast": "Radio · TV",
+          "social": "Posts"
+        },
+        "zones": {
+          "lahaina-lahainaluna": "Lahainaluna",
+          "lahaina-front-street": "Front St",
+          "upcountry-kula": "Kula · Olinda"
+        }
+      },
       "briefing_media": {
         "file": "maui-landsat-true-colour-2023-08-07.jpg",
         "type": "image",
@@ -48,7 +63,17 @@
                 "lahaina-lahainaluna",
                 "lahaina-front-street",
                 "upcountry-kula"
-              ]
+              ],
+              "icon": "wind",
+              "chain": [
+                {
+                  "link": "forecast",
+                  "state": "used"
+                }
+              ],
+              "wind": {
+                "from": "E"
+              }
             },
             {
               "id": "t1-i2",
@@ -77,7 +102,8 @@
                 "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-07)",
                 "takenOn": "2023-08-07",
                 "suggestedTimestep": "pre"
-              }
+              },
+              "icon": "wind"
             },
             {
               "id": "t1-i3",
@@ -90,7 +116,19 @@
               "zones": [
                 "upcountry-kula"
               ],
-              "board_state": "impact"
+              "board_state": "impact",
+              "icon": "wea",
+              "origin": "00:22",
+              "chain": [
+                {
+                  "link": "phone",
+                  "state": "used",
+                  "at": "04:09",
+                  "zones": [
+                    "upcountry-kula"
+                  ]
+                }
+              ]
             },
             {
               "id": "t1-i4",
@@ -104,7 +142,8 @@
                 "lahaina-lahainaluna",
                 "lahaina-front-street"
               ],
-              "board_state": "none"
+              "board_state": "none",
+              "icon": "downed-line"
             },
             {
               "id": "t1-i5",
@@ -113,7 +152,8 @@
               "citation": {
                 "sourceId": "mema-records",
                 "detail": "MEMA log 7 Aug 21:33 'Activated the EOC at 2100 hrs, 8/7/23 for the wind warning'; Andaya texts 7 Aug 22:11 and 8 Aug 09:22-09:27; Phase Two §3.6.4 on the Mayor's arrival"
-              }
+              },
+              "icon": "committee"
             }
           ],
           "options": [
@@ -194,7 +234,9 @@
               },
               "zones": [
                 "lahaina-lahainaluna"
-              ]
+              ],
+              "icon": "fire",
+              "origin": "06:34"
             },
             {
               "id": "t2-i2",
@@ -206,6 +248,16 @@
               },
               "zones": [
                 "lahaina-lahainaluna"
+              ],
+              "icon": "roadblock",
+              "chain": [
+                {
+                  "link": "social",
+                  "state": "used",
+                  "zones": [
+                    "lahaina-lahainaluna"
+                  ]
+                }
               ]
             },
             {
@@ -218,7 +270,8 @@
               },
               "zones": [
                 "lahaina-lahainaluna"
-              ]
+              ],
+              "icon": "downed-line"
             },
             {
               "id": "t2-i4",
@@ -231,7 +284,8 @@
               "zones": [
                 "upcountry-kula",
                 "lahaina-lahainaluna"
-              ]
+              ],
+              "icon": "shelter"
             }
           ],
           "options": [
@@ -310,7 +364,8 @@
               },
               "zones": [
                 "lahaina-lahainaluna"
-              ]
+              ],
+              "icon": "contained"
             },
             {
               "id": "t3-i2",
@@ -322,7 +377,8 @@
               },
               "zones": [
                 "upcountry-kula"
-              ]
+              ],
+              "icon": "fire"
             },
             {
               "id": "t3-i3",
@@ -348,7 +404,11 @@
               "zones": [
                 "lahaina-lahainaluna",
                 "lahaina-front-street"
-              ]
+              ],
+              "icon": "wind",
+              "wind": {
+                "from": "E"
+              }
             }
           ],
           "options": [
@@ -429,7 +489,8 @@
                 "lahaina-lahainaluna",
                 "lahaina-front-street"
               ],
-              "board_state": "none"
+              "board_state": "none",
+              "icon": "roadblock"
             },
             {
               "id": "t4-i2",
@@ -441,7 +502,8 @@
               },
               "zones": [
                 "lahaina-lahainaluna"
-              ]
+              ],
+              "icon": "fire"
             },
             {
               "id": "t4-i3",
@@ -454,7 +516,11 @@
               "zones": [
                 "lahaina-lahainaluna",
                 "lahaina-front-street"
-              ]
+              ],
+              "icon": "wind",
+              "wind": {
+                "from": "E"
+              }
             },
             {
               "id": "t4-i4",
@@ -547,7 +613,8 @@
               "zones": [
                 "lahaina-lahainaluna"
               ],
-              "board_state": "impact"
+              "board_state": "impact",
+              "icon": "fire"
             },
             {
               "id": "t5-i2",
@@ -573,6 +640,17 @@
               "zones": [
                 "upcountry-kula",
                 "lahaina-lahainaluna"
+              ],
+              "icon": "wea",
+              "chain": [
+                {
+                  "link": "phone",
+                  "state": "used",
+                  "at": "16:04",
+                  "zones": [
+                    "upcountry-kula"
+                  ]
+                }
               ]
             },
             {
@@ -587,7 +665,14 @@
                 "lahaina-lahainaluna",
                 "lahaina-front-street"
               ],
-              "board_state": "none"
+              "board_state": "none",
+              "icon": "siren",
+              "chain": [
+                {
+                  "link": "siren",
+                  "state": "unused"
+                }
+              ]
             },
             {
               "id": "t5-i5",
@@ -614,7 +699,8 @@
                 "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-07). Overpass times are the satellite's typical ones (about 01:30 and 13:30 local), not read from the product metadata.",
                 "takenOn": "2023-08-08",
                 "suggestedTimestep": "contained"
-              }
+              },
+              "icon": "satellite"
             }
           ],
           "options": [
@@ -702,7 +788,8 @@
               "zones": [
                 "lahaina-lahainaluna"
               ],
-              "board_state": "impact"
+              "board_state": "impact",
+              "icon": "fire"
             },
             {
               "id": "t6-i2",
@@ -715,7 +802,8 @@
               "zones": [
                 "lahaina-front-street"
               ],
-              "board_state": "impact"
+              "board_state": "impact",
+              "icon": "roadblock"
             },
             {
               "id": "t6-i3",
@@ -728,7 +816,8 @@
               "zones": [
                 "lahaina-front-street"
               ],
-              "board_state": "impact"
+              "board_state": "impact",
+              "icon": "aircraft"
             },
             {
               "id": "t6-i4",
@@ -741,6 +830,31 @@
               "zones": [
                 "lahaina-front-street",
                 "lahaina-lahainaluna"
+              ],
+              "icon": "wea",
+              "chain": [
+                {
+                  "link": "phone",
+                  "state": "used",
+                  "at": "16:16",
+                  "zones": [
+                    "lahaina-lahainaluna"
+                  ]
+                },
+                {
+                  "link": "phone",
+                  "state": "cut",
+                  "at": "17:43",
+                  "zones": [
+                    "lahaina-front-street",
+                    "lahaina-lahainaluna"
+                  ]
+                },
+                {
+                  "link": "social",
+                  "state": "used",
+                  "at": "17:50"
+                }
               ]
             }
           ],
@@ -834,7 +948,8 @@
               "zones": [
                 "lahaina-lahainaluna",
                 "lahaina-front-street"
-              ]
+              ],
+              "icon": "social"
             },
             {
               "id": "t7-i3",
@@ -847,7 +962,8 @@
               "zones": [
                 "lahaina-front-street"
               ],
-              "board_state": "impact"
+              "board_state": "impact",
+              "icon": "fire"
             },
             {
               "id": "t7-i5",
@@ -860,7 +976,8 @@
               "zones": [
                 "lahaina-lahainaluna",
                 "lahaina-front-street"
-              ]
+              ],
+              "icon": "hydrant"
             },
             {
               "id": "t7-i4",
@@ -888,7 +1005,15 @@
                 "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-07)",
                 "takenOn": "2023-08-08",
                 "suggestedTimestep": "pre"
-              }
+              },
+              "icon": "wind",
+              "chain": [
+                {
+                  "link": "forecast",
+                  "state": "used",
+                  "at": "15:39"
+                }
+              ]
             }
           ],
           "options": [
@@ -1261,6 +1386,20 @@
         "end": "20:11"
       },
       "record_caveat": "The record here is a judicial instruction still in progress, not a closed inquiry. Times and gauge figures come from official AEMET warnings, CHJ notifications entered in the Catarroja court file, and press reconstructions of that file; quotes from the investigating judge come from interlocutory orders as reproduced in press coverage, and are provisional. Where this scenario cannot say what a different decision would have caused, it says so: the record is silent on every path not taken. Deep links to primary documents are still to be added by the author.",
+      "warning_chain": {
+        "labels": {
+          "forecast": "AEMET · CHJ",
+          "desk": "112 desk",
+          "phone": "ES-Alert",
+          "siren": "Sirens",
+          "broadcast": "Radio · TV",
+          "social": "Posts"
+        },
+        "zones": {
+          "poyo-horta-sud": "Horta Sud",
+          "magro-utiel": "Magro"
+        }
+      },
       "timesteps": [
         {
           "id": "t1",
@@ -1278,6 +1417,13 @@
               },
               "zones": [
                 "poyo-horta-sud"
+              ],
+              "icon": "rain",
+              "chain": [
+                {
+                  "link": "forecast",
+                  "state": "used"
+                }
               ]
             },
             {
@@ -1366,6 +1512,14 @@
               },
               "zones": [
                 "poyo-horta-sud"
+              ],
+              "icon": "river-gauge",
+              "chain": [
+                {
+                  "link": "forecast",
+                  "state": "used",
+                  "at": "12:20"
+                }
               ]
             },
             {
@@ -1378,7 +1532,9 @@
               },
               "zones": [
                 "magro-utiel"
-              ]
+              ],
+              "icon": "flood",
+              "origin": true
             },
             {
               "id": "t2-i3",
@@ -1390,7 +1546,8 @@
               },
               "zones": [
                 "magro-utiel"
-              ]
+              ],
+              "icon": "rain"
             }
           ],
           "options": [
@@ -1467,7 +1624,8 @@
               "citation": {
                 "sourceId": "press-recon",
                 "detail": "The early-afternoon video message of 29 Oct, later deleted; widely reproduced in press reconstructions"
-              }
+              },
+              "icon": "press"
             },
             {
               "id": "t3-i2",
@@ -1479,7 +1637,8 @@
               },
               "zones": [
                 "magro-utiel"
-              ]
+              ],
+              "icon": "rain"
             }
           ],
           "options": [
@@ -1553,7 +1712,8 @@
               "citation": {
                 "sourceId": "court-catarroja",
                 "detail": "CECOPI convened at 17:00 on 29 Oct, per the court record and press reconstructions"
-              }
+              },
+              "icon": "committee"
             },
             {
               "id": "t4-i2",
@@ -1565,7 +1725,8 @@
               },
               "zones": [
                 "magro-utiel"
-              ]
+              ],
+              "icon": "dam"
             },
             {
               "id": "t4-i3",
@@ -1577,7 +1738,8 @@
               },
               "zones": [
                 "poyo-horta-sud"
-              ]
+              ],
+              "icon": "river-gauge"
             }
           ],
           "options": [
@@ -1670,6 +1832,14 @@
               },
               "zones": [
                 "poyo-horta-sud"
+              ],
+              "icon": "river-gauge",
+              "chain": [
+                {
+                  "link": "forecast",
+                  "state": "used",
+                  "at": "18:43"
+                }
               ]
             },
             {
@@ -1682,7 +1852,8 @@
               },
               "zones": [
                 "magro-utiel"
-              ]
+              ],
+              "icon": "dam"
             }
           ],
           "options": [
@@ -1761,7 +1932,8 @@
               },
               "zones": [
                 "poyo-horta-sud"
-              ]
+              ],
+              "icon": "flood"
             },
             {
               "id": "t6-i2",
@@ -1770,7 +1942,14 @@
               "citation": {
                 "sourceId": "court-catarroja",
                 "detail": "Drafting of the ES-Alert message before 20:11, per the court record"
-              }
+              },
+              "icon": "committee",
+              "chain": [
+                {
+                  "link": "phone",
+                  "state": "pending"
+                }
+              ]
             }
           ],
           "options": [

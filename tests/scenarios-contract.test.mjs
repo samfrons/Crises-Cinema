@@ -22,6 +22,9 @@ function run(mutate, { raw = {} } = {}) {
   mkdirSync(join(dir, 'src', 'data'), { recursive: true });
   mkdirSync(join(dir, 'public'));
   cpSync(join(repo, 'scripts', 'build-scenarios.mjs'), join(dir, 'scripts', 'build-scenarios.mjs'));
+  // The presentational vocabulary the validator checks icons / chain / wind against.
+  mkdirSync(join(dir, 'src', 'app', 'control-room'), { recursive: true });
+  cpSync(join(repo, 'src', 'app', 'control-room', 'vocabulary.json'), join(dir, 'src', 'app', 'control-room', 'vocabulary.json'));
   cpSync(join(repo, 'data', 'scenarios'), join(dir, 'data', 'scenarios'), { recursive: true });
   symlinkSync(join(repo, 'public', 'control-room'), join(dir, 'public', 'control-room'));
   const edit = (name, fn) => {
@@ -42,6 +45,8 @@ const rejects = (name, mutate, pattern, opts) => test(`rejects: ${name}`, () => 
   assert.notEqual(r.code, 0, 'build should fail');
   assert.match(r.out, pattern);
 });
+const V = 'valencia-dana-2024.json';
+const item = (s, id) => s.timesteps.flatMap((t) => t.info_available).find((i) => i.id === id);
 const firstMedia = (s) => s.timesteps.flatMap((t) => t.info_available).find((i) => i.media).media;
 
 test('real data passes (and writes only to the temp tree)', () => {
@@ -65,6 +70,33 @@ rejects('contested death toll without a note', (e) => e(L, (s) => { delete s.out
 rejects('id does not match filename', (e) => e(L, (s) => { s.id = 'something-else'; }), /must match filename/);
 rejects('stub that does not say SOURCE NEEDED', (e) => e('derna-2023.json', (s) => { s.research_notes = 'done'; }), /stub must say "SOURCE NEEDED"/);
 rejects('invalid JSON', null, /not valid JSON/, { raw: { 'broken.json': '{ nope' } });
+
+// Presentational fields: they may only restate what the cited item says.
+rejects('slip icon outside the pictogram vocabulary', (e) => e(L, (s) => { item(s, 't2-i1').icon = 'explosion'; }), /not in the pictogram vocabulary/);
+rejects('warning-chain link outside the vocabulary', (e) => e(L, (s) => { item(s, 't5-i4').chain = [{ link: 'pager', state: 'used' }]; }), /chain\[0\]\.link — must be one of/);
+rejects('warning-chain state outside the vocabulary', (e) => e(L, (s) => { item(s, 't5-i4').chain[0].state = 'probably-fine'; }), /chain\[0\]\.state — must be one of/);
+rejects('warning-chain time the item text does not state', (e) => e(L, (s) => { item(s, 't6-i4').chain[1].at = '17:00'; }), /HH:MM that the item's own text states/);
+rejects('warning-chain zones outside the item\'s own zones', (e) => e(L, (s) => { item(s, 't1-i3').chain[0].zones = ['lahaina-front-street']; }), /subset of the item's own zones/);
+rejects('forecast link marked cut', (e) => e(V, (s) => { item(s, 't1-i1').chain[0].state = 'cut'; }), /forecast link is only ever "used"/);
+rejects('origin time the item text does not state', (e) => e(L, (s) => { item(s, 't2-i1').origin = '06:00'; }), /origin — must be true or an HH:MM/);
+rejects('origin on an item with several zones', (e) => e(L, (s) => { item(s, 't4-i3').origin = true; }), /exactly one zone/);
+rejects('two origins in one zone', (e) => e(L, (s) => { item(s, 't3-i1').origin = true; }), /already has an origin mark/);
+rejects('wind direction the item text does not state', (e) => e(L, (s) => { item(s, 't1-i1').wind.from = 'W'; }), /does not say "W" winds/);
+rejects('wind arrow on an item with no direction', (e) => e(L, (s) => { item(s, 't7-i4').wind = { from: 'E' }; }), /does not say "E" winds/);
+rejects('warning-chain label key outside the vocabulary', (e) => e(L, (s) => { s.warning_chain.labels.pigeon = 'Pigeons'; }), /warning_chain\.labels\.pigeon — key must be one of/);
+rejects('warning-chain channel label too long for its box', (e) => e(L, (s) => { s.warning_chain.labels.social = 'County social media'; }), /labels\.social — a label of 1–11 characters/);
+rejects('warning-chain zone label for an unknown zone', (e) => e(L, (s) => { s.warning_chain.zones.atlantis = 'Atlantis'; }), /warning_chain\.zones\.atlantis — must be a scoring\.at_risk_zones id/);
+
+test('every icon, chain link and state used in the real data is in the vocabulary (positive control)', () => {
+  const vocab = JSON.parse(readFileSync(join(repo, 'src', 'app', 'control-room', 'vocabulary.json'), 'utf8'));
+  for (const name of [L, V]) {
+    const s = JSON.parse(readFileSync(join(repo, 'data', 'scenarios', name), 'utf8'));
+    for (const i of s.timesteps.flatMap((t) => t.info_available)) {
+      if (i.icon) assert.ok(vocab.icons.includes(i.icon), `${name} ${i.id} icon ${i.icon}`);
+      for (const c of i.chain ?? []) assert.ok(vocab.chain.links.includes(c.link) && vocab.chain.states.includes(c.state), `${name} ${i.id}`);
+    }
+  }
+});
 
 test('debrief media taken after the day is allowed (positive control)', () => {
   const r = run((e) => e(L, (s) => { s.debrief_media[0].takenOn = '2024-01-01'; }));
