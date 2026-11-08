@@ -943,6 +943,10 @@
   .cr-figure-by { flex-basis: 100%; max-width: 100%; }
   .cr-figure-by + .cr-figure-sep { display: none; }
 }
+/* A © notice is attribution the licence requires: it is never clipped. It
+   takes its own line and wraps, and the licence and source follow beneath. */
+.cr-figure-by.is-notice { flex-basis: 100%; max-width: 100%; white-space: normal; overflow: visible; }
+.cr-figure-by.is-notice + .cr-figure-sep { display: none; }
 .cr-figure-credit > a, .cr-figure-sep, .cr-figure-terms > summary { flex: none; white-space: pre; }
 .cr-figure-terms > summary { cursor: pointer; list-style: none; display: inline; }
 .cr-figure-terms > summary::-webkit-details-marker { display: none; }

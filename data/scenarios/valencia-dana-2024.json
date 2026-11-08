@@ -479,6 +479,30 @@
             "magro-utiel"
           ],
           "icon": "dam"
+        },
+        {
+          "id": "t5-i3",
+          "kind": "gauge",
+          "text": "Satellite true colour (VIIRS, Suomi NPP) for 29 October, from the early-afternoon pass: a broad band of cloud lies across eastern and southern Iberia and the western Mediterranean, with the Valencia region under it.",
+          "citation": {
+            "sourceId": "nasa-gibs",
+            "detail": "GIBS WMS, layer VIIRS_SNPP_CorrectedReflectance_TrueColor, time=2024-10-29, bbox -12,34,8,46"
+          },
+          "media": {
+            "file": "iberia-viirs-snpp-true-colour-2024-10-29.jpg",
+            "type": "image",
+            "caption": "29 October, about 13:30 UTC (14:30 CET; typical overpass time, not read from the product metadata), Suomi NPP VIIRS true colour: a band of cloud lies across eastern and southern Iberia and the western Mediterranean, with the Valencia region under it. A daily composite: some swaths may come from other passes that day.",
+            "credit": "NASA EOSDIS Global Imagery Browse Services (GIBS), VIIRS Suomi NPP corrected-reflectance true colour; crop (12W-8E, 34-46N) rendered by the project",
+            "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+            "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+            "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/jpeg&layers=VIIRS_SNPP_CorrectedReflectance_TrueColor&bbox=-12,34,8,46&width=1200&height=720&time=2024-10-29",
+            "width": 1200,
+            "height": 720,
+            "takenOn": "2024-10-29",
+            "bytes": 205562,
+            "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-08)"
+          },
+          "icon": "satellite"
         }
       ],
       "options": [
@@ -716,6 +740,108 @@
       }
     }
   ],
+  "debrief_media": [
+    {
+      "file": "spain-imerg-precipitation-rate-2024-10-29-1400utc.jpg",
+      "type": "image",
+      "caption": "29 October, 14:00 UTC (15:00 CET): NASA IMERG half-hourly precipitation-rate estimate over Spain, on a shaded-relief base. Colour runs from green (lighter) through yellow to red (heavier), but the image carries no colour scale: read it as relative, not as millimetres. Each block is a cell about 10 km across, a coarse satellite estimate rather than a gauge reading. Computed afterwards from the day's data; it was not on the desk.",
+      "credit": "NASA EOSDIS GIBS, GPM IMERG half-hourly precipitation rate (IMERG_Precipitation_Rate_30min) over Blue Marble shaded relief; crop (6W-6E, 35-44N) rendered by the project",
+      "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+      "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+      "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/png&layers=BlueMarble_ShadedRelief,IMERG_Precipitation_Rate_30min,Coastlines_15m&bbox=-6,35,6,44&width=1200&height=900&time=2024-10-29T14:00:00Z",
+      "width": 1200,
+      "height": 900,
+      "takenOn": "2024-10-29",
+      "bytes": 224125,
+      "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-08)"
+    },
+    {
+      "file": "valencia-landsat8-oli-flood-sediment-2024-10-30.jpg",
+      "type": "image",
+      "caption": "30 October, 10:37 UTC (Landsat 8; acquisition time per the Copernicus EMS map metadata): the day after. Orange-brown water covers the lowlands south of Valencia and the Albufera shore, and a sediment plume spreads across the Gulf of Valencia. The black wedge at left is outside the scene.",
+      "credit": "NASA Earth Observatory image by Lauren Dauphin, using Landsat data from the U.S. Geological Survey; downscaled to 1100 px wide by the project",
+      "license": "Public domain (NASA content generally not subject to copyright in the US; Earth Observation image of the Day)",
+      "licenseUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+      "sourcePage": "https://science.nasa.gov/earth/earth-observatory/valencia-floods-153533/",
+      "width": 1100,
+      "height": 1222,
+      "takenOn": "2024-10-30",
+      "bytes": 308625,
+      "licenseVerifiedOn": "https://www.nasa.gov/nasa-brand-center/images-and-media/ (fetched 2026-11-08): 'NASA content ... generally are not subject to copyright in the United States.' Commons file page for the same image carries a Public domain tag. The EO page itself shows no per-image restriction; Landsat credit USGS."
+    },
+    {
+      "file": "valencia-coast-viirs-noaa20-sediment-plume-2024-10-30.jpg",
+      "type": "image",
+      "caption": "30 October (NOAA-20 VIIRS true colour, daily composite; overpass time not read from the metadata): the Valencian coast the day after. Pale turquoise-to-brown water runs along the shore south of Valencia. Cloud and haze cover much of the sea; at this scale the inland flooding cannot be resolved.",
+      "credit": "NASA EOSDIS GIBS, VIIRS NOAA-20 corrected-reflectance true colour; crop (1.6W-0.4E, 38.9-40.0N) rendered by the project",
+      "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+      "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+      "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/jpeg&layers=VIIRS_NOAA20_CorrectedReflectance_TrueColor&bbox=-1.6,38.9,0.4,40.0&width=1200&height=660&time=2024-10-30",
+      "width": 1200,
+      "height": 660,
+      "takenOn": "2024-10-30",
+      "bytes": 84881,
+      "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-08)"
+    },
+    {
+      "file": "paiporta-turia-bed-cv400-bridge-2024-10-30.jpg",
+      "type": "image",
+      "caption": "30 October, morning (per the photographer's series title, 'Fotografies de Paiporta el matí del 30 d'octubre'): the wide channel of the Turia, seen from the CV-400 bridge into the Horta Sud, holds brown water from bank to bank; people walk across the bridge. The Commons description reads: the river channel a day after the floods.",
+      "credit": "Eloy Sanchis, via Wikimedia Commons ('Fotografies de Paiporta el mati del 30 d'octubre de 2024')",
+      "license": "CC0 1.0",
+      "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Riu_T%C3%BAria_i_CV-400_al_seu_pas_pel_pont_d%27acc%C3%A9s_a_l%27Horta_Sud.jpg",
+      "width": 1280,
+      "height": 960,
+      "takenOn": "2024-10-30",
+      "bytes": 155557,
+      "licenseVerifiedOn": "Commons API extmetadata for the file (LicenseShortName CC0, fetched 2026-11-08); file page not separately fetched (rate-limited). Commons description reads 'Cabdal del riu un dia despres de les inundacions'; uploader claim of authorship is not independently verified."
+    },
+    {
+      "file": "alfafar-street-stacked-cars-2024-10-30.jpg",
+      "type": "image",
+      "caption": "30 October, Alfafar (Horta Sud): cars swept together and piled along a street against the buildings, mud on the road, people walking through.",
+      "credit": "Pabloruizmasia, via Wikimedia Commons",
+      "license": "CC BY-SA 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:DANA_Alfafar_coches.jpg",
+      "width": 1280,
+      "height": 853,
+      "takenOn": "2024-10-30",
+      "bytes": 396594,
+      "licenseVerifiedOn": "Commons API extmetadata (LicenseShortName CC BY-SA 4.0, Credit 'Own work', date 2024-10-30; fetched 2026-11-08); file page not separately fetched."
+    },
+    {
+      "file": "emsr773-aoi01-flood-depth-overview-2024-10-31.jpg",
+      "type": "image",
+      "caption": "Copernicus EMS rapid map EMSR773, area 01 (Valencia province), overview: estimated flood depth and flood trace, situation as of 31 October 2024, 18:02 UTC (Sentinel-1 radar, with Sentinel-2 and Landsat 8 optical). The map gives a flood trace of 37,473.5 ha and a flooded area of 15,633.4 ha.",
+      "credit": "© European Union, Copernicus Emergency Management Service, 2024 (EMSR773), base: © OpenStreetMap contributors; map produced by SERTIT, released by e-GEOS on 2 Nov 2024; page 1 of the A1 PDF rendered to JPEG by the project",
+      "license": "Copernicus EMS free and open use (Regulation (EU) 2021/696: full, free and open access; reproduction, distribution and adaptation permitted with source citation. Not stated as CC BY on the terms pages fetched.)",
+      "licenseUrl": "https://mapping.emergency.copernicus.eu/terms-and-conditions/",
+      "sourcePage": "https://mapping.emergency.copernicus.eu/activations/EMSR773/",
+      "width": 1280,
+      "height": 905,
+      "takenOn": "2024-10-31",
+      "bytes": 330201,
+      "licenseVerifiedOn": "https://mapping.emergency.copernicus.eu/terms-and-conditions/ (fetched 2026-11-08); citation guidelines https://mapping.emergency.copernicus.eu/about/citation-guidelines/",
+      "relatedUrl": "https://rapidmapping.emergency.copernicus.eu/backend/EMSR773/AOI01/DEL_PRODUCT/EMSR773_AOI01_DEL_PRODUCT_v1.zip"
+    },
+    {
+      "file": "emsr773-aoi01-flood-depth-detail-valencia-albufera-2024-10-31.jpg",
+      "type": "image",
+      "caption": "Copernicus EMS EMSR773, detail map 02: estimated flood depth south of Valencia, 31 October 2024 (Sentinel-2B optical background, 10:51 UTC; flood trace from Sentinel-1 at 18:02 UTC). Mapped water covers the Horta Sud lowlands and the Albufera shore; the sediment plume lies offshore.",
+      "credit": "© European Union, Copernicus Emergency Management Service, 2024 (EMSR773), base: © OpenStreetMap contributors; map produced by SERTIT, released by e-GEOS on 2 Nov 2024; page 2 of the A1 PDF rendered to JPEG by the project",
+      "license": "Copernicus EMS free and open use (Regulation (EU) 2021/696: full, free and open access; reproduction, distribution and adaptation permitted with source citation. Not stated as CC BY on the terms pages fetched.)",
+      "licenseUrl": "https://mapping.emergency.copernicus.eu/terms-and-conditions/",
+      "sourcePage": "https://mapping.emergency.copernicus.eu/activations/EMSR773/",
+      "width": 1280,
+      "height": 905,
+      "takenOn": "2024-10-31",
+      "bytes": 349582,
+      "licenseVerifiedOn": "https://mapping.emergency.copernicus.eu/terms-and-conditions/ (fetched 2026-11-08)",
+      "relatedUrl": "https://rapidmapping.emergency.copernicus.eu/backend/EMSR773/AOI01/DEL_PRODUCT/EMSR773_AOI01_DEL_PRODUCT_v1.zip"
+    }
+  ],
   "outcome": {
     "deaths": {
       "min": 227,
@@ -780,6 +906,12 @@
       "label": "Press reconstructions of 29 October 2024 published from October–November 2024 onward (El País, RTVE, eldiario.es and others), cross-checked against the court file as it emerged.",
       "url": null,
       "note": "Specific article URLs to be added by the author before publication."
+    },
+    {
+      "id": "nasa-gibs",
+      "label": "NASA EOSDIS Global Imagery Browse Services (GIBS): VIIRS Suomi NPP corrected-reflectance true colour over Iberia and the western Mediterranean, UTC day of 29 October 2024; crop rendered by the project from the GIBS WMS.",
+      "url": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+      "note": "URL is NASA's data-use guidance (CC0 for NASA-led missions). The exact WMS request is given on the figure. The overpass time is the satellite's typical one, not read from the product metadata; the image is a daily composite."
     }
   ]
 }

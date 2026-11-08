@@ -44,7 +44,8 @@ const VOCAB: Record<HazardFamily, HazardVocab> = {
     family: 'water',
     states: { quiet: 'quiet', watch: 'red warning', signal: 'gauge alert', impact: 'flooding' },
     kindState: { forecast: 'watch', gauge: 'signal', field_report: 'impact' },
-    kindLabel: KIND_LABEL,
+    // River gauges and the one satellite pass share the instrument kind.
+    kindLabel: { ...KIND_LABEL, gauge: 'Gauge · sensor' },
     feeds: 'forecasts, gauge readings, messages',
     zoneNoun: 'basins',
     desk: 'civil-protection desk',

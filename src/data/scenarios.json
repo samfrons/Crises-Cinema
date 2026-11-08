@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-08T02:13:18.230Z",
+  "generated": "2026-11-08T02:25:24.010Z",
   "playable": [
     {
       "id": "lahaina-2023",
@@ -856,6 +856,30 @@
                   "at": "17:50"
                 }
               ]
+            },
+            {
+              "id": "t6-i5",
+              "kind": "gauge",
+              "text": "GOES-18 visible-band scan of Maui from 16:10 HST: a pale plume appears to stream southwest off West Maui across the channel toward Lānaʻi. In a single visible band, cloud and sun glint also read bright, so the scan alone cannot confirm smoke.",
+              "citation": {
+                "sourceId": "noaa-goes18",
+                "detail": "ABI-L2-CMIPF band 2, scan start 2023-08-09T02:10:20Z"
+              },
+              "media": {
+                "file": "maui-goes18-abi-visible-2023-08-09-0210utc.jpg",
+                "type": "image",
+                "caption": "8 August, scan from 16:10 HST per the file metadata (GOES-18 ABI visible band 2, greyscale): a pale plume appears to stream southwest off West Maui across the channel toward Lānaʻi. Cloud and sun glint also read bright in this band, so the frame alone cannot separate smoke from cloud or glint.",
+                "credit": "NOAA / NESDIS GOES-18 ABI-L2-CMIPF band 2 (0.64 µm), scan start 2023-08-09T02:10:20Z; crop of Maui and neighbouring islands rendered by the project (reflectance, gamma 0.5, contrast stretch, 3x Lanczos upscale)",
+                "license": "NOAA Open Data Dissemination (NODD): 'open to the public and can be used as desired'; attribution requested",
+                "licenseUrl": "https://registry.opendata.aws/noaa-goes/",
+                "sourcePage": "https://noaa-goes18.s3.amazonaws.com/ABI-L2-CMIPF/2023/221/02/OR_ABI-L2-CMIPF-M6C02_G18_s20232210210206_e20232210219514_c20232210219571.nc",
+                "width": 1200,
+                "height": 741,
+                "takenOn": "2023-08-08",
+                "bytes": 171501,
+                "licenseVerifiedOn": "https://registry.opendata.aws/noaa-goes/ (fetched 2026-11-08), License section: 'NOAA data disseminated through NODD are open to the public and can be used as desired ... NOAA requests attribution for the use or dissemination of unaltered NOAA data.'"
+              },
+              "icon": "satellite"
             }
           ],
           "options": [
@@ -1183,6 +1207,21 @@
       ],
       "debrief_media": [
         {
+          "file": "kihei-fire-glow-dusk-2023-08-08.jpg",
+          "type": "image",
+          "caption": "8 August, about 19:20 (the time in the file's EXIF as relayed by Wikimedia Commons; time zone not stated): fire glow and smoke on the horizon above Kihei, seen across rooftops. This is the Kihei-side fire, a separate fire from Lahaina's, and not the one on this desk.",
+          "credit": "Kahunapule Michael Johnson (Flickr), via Wikimedia Commons",
+          "license": "CC BY-SA 2.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+          "sourcePage": "https://commons.wikimedia.org/wiki/File:August_8_Fire_above_Kihei.jpg",
+          "width": 1280,
+          "height": 960,
+          "takenOn": "2023-08-08",
+          "bytes": 260713,
+          "licenseVerifiedOn": "Flickr original page (fetched 2026-11-08) shows 'Some rights reserved' with creativecommons.org/licenses/by-sa/2.0/ and 'Taken on August 8, 2023'; Commons API extmetadata also reads CC BY-SA 2.0.",
+          "relatedUrl": "https://www.flickr.com/photos/kahunapulej/53110609698/"
+        },
+        {
           "file": "maui-landsat-infrared-2023-08-08-2225.jpg",
           "type": "image",
           "caption": "Landsat 8, 22:25 HST, 8 August: shortwave-infrared view of Maui. Active fire shows yellow. Much of Lahaina is burning; a second large fire burns northeast of Kihei.",
@@ -1283,6 +1322,38 @@
           "bytes": 211256,
           "takenOn": "2023-08-10",
           "suggestedTimestep": "aftermath"
+        },
+        {
+          "file": "hfd-c17-airlift-kahului-2023-08-10.mp4",
+          "type": "video",
+          "caption": "10 August, Kahului Airport, Maui: a Hawaii Air National Guard C-17 delivers Honolulu Fire Department firefighters, four vehicles and relief cargo from Pearl Harbor-Hickam; loadmasters unload gear. 14-second excerpt (40 s to 54 s) of a DVIDS b-roll, 960x540, audio removed.",
+          "credit": "TSgt John Linzmeier, Hawaii Air National Guard (U.S. Air National Guard); excerpted and re-encoded by the project",
+          "license": "Public domain (U.S. military work; page labelled PUBLIC DOMAIN)",
+          "licenseUrl": "https://www.dvidshub.net/about/copyright",
+          "sourcePage": "https://www.dvidshub.net/video/893485/hawaii-air-national-guard-airlifts-fire-department-resources-maui",
+          "width": 960,
+          "height": 540,
+          "poster": "hfd-c17-airlift-kahului-2023-08-10-poster.jpg",
+          "takenOn": "2023-08-10",
+          "bytes": 2196819,
+          "licenseVerifiedOn": "DVIDS video page (fetched 2026-11-08): 'PUBLIC DOMAIN This work, Hawaii Air National Guard Airlifts Fire Department Resources to Maui, by TSgt John Linzmeier, identified by DVIDS, must comply with the restrictions shown on https://www.dvidshub.net/about/copyright.'",
+          "durationSeconds": 14
+        },
+        {
+          "file": "lahaina-guard-search-recovery-excerpt-2023-08-14.mp4",
+          "type": "video",
+          "caption": "Lahaina, mid-August: Hawaii National Guard search-and-recovery teams in helmets and masks work through burned lots and streets; orange search markings are on a wall. 18-second excerpt (0 s to 18 s) of a DVIDS package, vertical frame, audio removed. DVIDS date taken 14 August 2023; the package says the mobilisation began 9 August.",
+          "credit": "MSgt Amber Monio, Hawaii National Guard (U.S. National Guard); excerpted and re-encoded by the project",
+          "license": "Public domain (U.S. military work; page labelled PUBLIC DOMAIN)",
+          "licenseUrl": "https://www.dvidshub.net/about/copyright",
+          "sourcePage": "https://www.dvidshub.net/video/893750/hawaii-national-guard-aids-search-and-recovery-efforts-after-maui-wildfires",
+          "width": 540,
+          "height": 960,
+          "poster": "lahaina-guard-search-recovery-excerpt-2023-08-14-poster.jpg",
+          "takenOn": "2023-08-14",
+          "bytes": 2117163,
+          "licenseVerifiedOn": "DVIDS video page (fetched 2026-11-08): 'PUBLIC DOMAIN This work, Hawaii National Guard aids in search and recovery efforts after Maui wildfires, by MSgt Amber Monio, identified by DVIDS, must comply with the restrictions shown on https://www.dvidshub.net/about/copyright.'",
+          "durationSeconds": 18
         }
       ],
       "outcome": {
@@ -1370,6 +1441,12 @@
           "label": "NASA EOSDIS Global Imagery Browse Services (GIBS): VIIRS Suomi NPP corrected-reflectance true colour with the VIIRS 375 m thermal-anomalies (active fire) layer, Maui, UTC days of 8 and 9 August 2023; crops rendered by the project from the GIBS WMS.",
           "url": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
           "note": "URL is NASA's data-use guidance (CC0 for NASA-led missions). The exact WMS request for each crop is given on its figure. Overpass times are the satellite's typical ones, not read from the product metadata."
+        },
+        {
+          "id": "noaa-goes18",
+          "label": "NOAA GOES-18 ABI Level-2 Cloud and Moisture Imagery (ABI-L2-CMIPF), full disk, band 2 (0.64 µm visible), scan 2023-08-09 02:10:20 to 02:19:51 UTC (16:10 to 16:19 HST on 8 August), from the NOAA Open Data Dissemination archive; crop of Maui rendered by the project.",
+          "url": "https://noaa-goes18.s3.amazonaws.com/ABI-L2-CMIPF/2023/221/02/OR_ABI-L2-CMIPF-M6C02_G18_s20232210210206_e20232210219514_c20232210219571.nc",
+          "note": "Scan times from the file name and metadata. The crop is contrast-stretched (reflectance, gamma 0.5, 3x upscale): not unaltered NOAA data, and no NOAA endorsement is implied. A single visible band cannot separate thin smoke from cloud or sun glint."
         }
       ]
     },
@@ -1854,6 +1931,30 @@
                 "magro-utiel"
               ],
               "icon": "dam"
+            },
+            {
+              "id": "t5-i3",
+              "kind": "gauge",
+              "text": "Satellite true colour (VIIRS, Suomi NPP) for 29 October, from the early-afternoon pass: a broad band of cloud lies across eastern and southern Iberia and the western Mediterranean, with the Valencia region under it.",
+              "citation": {
+                "sourceId": "nasa-gibs",
+                "detail": "GIBS WMS, layer VIIRS_SNPP_CorrectedReflectance_TrueColor, time=2024-10-29, bbox -12,34,8,46"
+              },
+              "media": {
+                "file": "iberia-viirs-snpp-true-colour-2024-10-29.jpg",
+                "type": "image",
+                "caption": "29 October, about 13:30 UTC (14:30 CET; typical overpass time, not read from the product metadata), Suomi NPP VIIRS true colour: a band of cloud lies across eastern and southern Iberia and the western Mediterranean, with the Valencia region under it. A daily composite: some swaths may come from other passes that day.",
+                "credit": "NASA EOSDIS Global Imagery Browse Services (GIBS), VIIRS Suomi NPP corrected-reflectance true colour; crop (12W-8E, 34-46N) rendered by the project",
+                "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+                "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+                "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/jpeg&layers=VIIRS_SNPP_CorrectedReflectance_TrueColor&bbox=-12,34,8,46&width=1200&height=720&time=2024-10-29",
+                "width": 1200,
+                "height": 720,
+                "takenOn": "2024-10-29",
+                "bytes": 205562,
+                "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-08)"
+              },
+              "icon": "satellite"
             }
           ],
           "options": [
@@ -2091,6 +2192,108 @@
           }
         }
       ],
+      "debrief_media": [
+        {
+          "file": "spain-imerg-precipitation-rate-2024-10-29-1400utc.jpg",
+          "type": "image",
+          "caption": "29 October, 14:00 UTC (15:00 CET): NASA IMERG half-hourly precipitation-rate estimate over Spain, on a shaded-relief base. Colour runs from green (lighter) through yellow to red (heavier), but the image carries no colour scale: read it as relative, not as millimetres. Each block is a cell about 10 km across, a coarse satellite estimate rather than a gauge reading. Computed afterwards from the day's data; it was not on the desk.",
+          "credit": "NASA EOSDIS GIBS, GPM IMERG half-hourly precipitation rate (IMERG_Precipitation_Rate_30min) over Blue Marble shaded relief; crop (6W-6E, 35-44N) rendered by the project",
+          "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+          "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+          "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/png&layers=BlueMarble_ShadedRelief,IMERG_Precipitation_Rate_30min,Coastlines_15m&bbox=-6,35,6,44&width=1200&height=900&time=2024-10-29T14:00:00Z",
+          "width": 1200,
+          "height": 900,
+          "takenOn": "2024-10-29",
+          "bytes": 224125,
+          "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-08)"
+        },
+        {
+          "file": "valencia-landsat8-oli-flood-sediment-2024-10-30.jpg",
+          "type": "image",
+          "caption": "30 October, 10:37 UTC (Landsat 8; acquisition time per the Copernicus EMS map metadata): the day after. Orange-brown water covers the lowlands south of Valencia and the Albufera shore, and a sediment plume spreads across the Gulf of Valencia. The black wedge at left is outside the scene.",
+          "credit": "NASA Earth Observatory image by Lauren Dauphin, using Landsat data from the U.S. Geological Survey; downscaled to 1100 px wide by the project",
+          "license": "Public domain (NASA content generally not subject to copyright in the US; Earth Observation image of the Day)",
+          "licenseUrl": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
+          "sourcePage": "https://science.nasa.gov/earth/earth-observatory/valencia-floods-153533/",
+          "width": 1100,
+          "height": 1222,
+          "takenOn": "2024-10-30",
+          "bytes": 308625,
+          "licenseVerifiedOn": "https://www.nasa.gov/nasa-brand-center/images-and-media/ (fetched 2026-11-08): 'NASA content ... generally are not subject to copyright in the United States.' Commons file page for the same image carries a Public domain tag. The EO page itself shows no per-image restriction; Landsat credit USGS."
+        },
+        {
+          "file": "valencia-coast-viirs-noaa20-sediment-plume-2024-10-30.jpg",
+          "type": "image",
+          "caption": "30 October (NOAA-20 VIIRS true colour, daily composite; overpass time not read from the metadata): the Valencian coast the day after. Pale turquoise-to-brown water runs along the shore south of Valencia. Cloud and haze cover much of the sea; at this scale the inland flooding cannot be resolved.",
+          "credit": "NASA EOSDIS GIBS, VIIRS NOAA-20 corrected-reflectance true colour; crop (1.6W-0.4E, 38.9-40.0N) rendered by the project",
+          "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+          "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+          "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/jpeg&layers=VIIRS_NOAA20_CorrectedReflectance_TrueColor&bbox=-1.6,38.9,0.4,40.0&width=1200&height=660&time=2024-10-30",
+          "width": 1200,
+          "height": 660,
+          "takenOn": "2024-10-30",
+          "bytes": 84881,
+          "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-08)"
+        },
+        {
+          "file": "paiporta-turia-bed-cv400-bridge-2024-10-30.jpg",
+          "type": "image",
+          "caption": "30 October, morning (per the photographer's series title, 'Fotografies de Paiporta el matí del 30 d'octubre'): the wide channel of the Turia, seen from the CV-400 bridge into the Horta Sud, holds brown water from bank to bank; people walk across the bridge. The Commons description reads: the river channel a day after the floods.",
+          "credit": "Eloy Sanchis, via Wikimedia Commons ('Fotografies de Paiporta el mati del 30 d'octubre de 2024')",
+          "license": "CC0 1.0",
+          "licenseUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+          "sourcePage": "https://commons.wikimedia.org/wiki/File:Riu_T%C3%BAria_i_CV-400_al_seu_pas_pel_pont_d%27acc%C3%A9s_a_l%27Horta_Sud.jpg",
+          "width": 1280,
+          "height": 960,
+          "takenOn": "2024-10-30",
+          "bytes": 155557,
+          "licenseVerifiedOn": "Commons API extmetadata for the file (LicenseShortName CC0, fetched 2026-11-08); file page not separately fetched (rate-limited). Commons description reads 'Cabdal del riu un dia despres de les inundacions'; uploader claim of authorship is not independently verified."
+        },
+        {
+          "file": "alfafar-street-stacked-cars-2024-10-30.jpg",
+          "type": "image",
+          "caption": "30 October, Alfafar (Horta Sud): cars swept together and piled along a street against the buildings, mud on the road, people walking through.",
+          "credit": "Pabloruizmasia, via Wikimedia Commons",
+          "license": "CC BY-SA 4.0",
+          "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+          "sourcePage": "https://commons.wikimedia.org/wiki/File:DANA_Alfafar_coches.jpg",
+          "width": 1280,
+          "height": 853,
+          "takenOn": "2024-10-30",
+          "bytes": 396594,
+          "licenseVerifiedOn": "Commons API extmetadata (LicenseShortName CC BY-SA 4.0, Credit 'Own work', date 2024-10-30; fetched 2026-11-08); file page not separately fetched."
+        },
+        {
+          "file": "emsr773-aoi01-flood-depth-overview-2024-10-31.jpg",
+          "type": "image",
+          "caption": "Copernicus EMS rapid map EMSR773, area 01 (Valencia province), overview: estimated flood depth and flood trace, situation as of 31 October 2024, 18:02 UTC (Sentinel-1 radar, with Sentinel-2 and Landsat 8 optical). The map gives a flood trace of 37,473.5 ha and a flooded area of 15,633.4 ha.",
+          "credit": "© European Union, Copernicus Emergency Management Service, 2024 (EMSR773), base: © OpenStreetMap contributors; map produced by SERTIT, released by e-GEOS on 2 Nov 2024; page 1 of the A1 PDF rendered to JPEG by the project",
+          "license": "Copernicus EMS free and open use (Regulation (EU) 2021/696: full, free and open access; reproduction, distribution and adaptation permitted with source citation. Not stated as CC BY on the terms pages fetched.)",
+          "licenseUrl": "https://mapping.emergency.copernicus.eu/terms-and-conditions/",
+          "sourcePage": "https://mapping.emergency.copernicus.eu/activations/EMSR773/",
+          "width": 1280,
+          "height": 905,
+          "takenOn": "2024-10-31",
+          "bytes": 330201,
+          "licenseVerifiedOn": "https://mapping.emergency.copernicus.eu/terms-and-conditions/ (fetched 2026-11-08); citation guidelines https://mapping.emergency.copernicus.eu/about/citation-guidelines/",
+          "relatedUrl": "https://rapidmapping.emergency.copernicus.eu/backend/EMSR773/AOI01/DEL_PRODUCT/EMSR773_AOI01_DEL_PRODUCT_v1.zip"
+        },
+        {
+          "file": "emsr773-aoi01-flood-depth-detail-valencia-albufera-2024-10-31.jpg",
+          "type": "image",
+          "caption": "Copernicus EMS EMSR773, detail map 02: estimated flood depth south of Valencia, 31 October 2024 (Sentinel-2B optical background, 10:51 UTC; flood trace from Sentinel-1 at 18:02 UTC). Mapped water covers the Horta Sud lowlands and the Albufera shore; the sediment plume lies offshore.",
+          "credit": "© European Union, Copernicus Emergency Management Service, 2024 (EMSR773), base: © OpenStreetMap contributors; map produced by SERTIT, released by e-GEOS on 2 Nov 2024; page 2 of the A1 PDF rendered to JPEG by the project",
+          "license": "Copernicus EMS free and open use (Regulation (EU) 2021/696: full, free and open access; reproduction, distribution and adaptation permitted with source citation. Not stated as CC BY on the terms pages fetched.)",
+          "licenseUrl": "https://mapping.emergency.copernicus.eu/terms-and-conditions/",
+          "sourcePage": "https://mapping.emergency.copernicus.eu/activations/EMSR773/",
+          "width": 1280,
+          "height": 905,
+          "takenOn": "2024-10-31",
+          "bytes": 349582,
+          "licenseVerifiedOn": "https://mapping.emergency.copernicus.eu/terms-and-conditions/ (fetched 2026-11-08)",
+          "relatedUrl": "https://rapidmapping.emergency.copernicus.eu/backend/EMSR773/AOI01/DEL_PRODUCT/EMSR773_AOI01_DEL_PRODUCT_v1.zip"
+        }
+      ],
       "outcome": {
         "deaths": {
           "min": 227,
@@ -2155,6 +2358,12 @@
           "label": "Press reconstructions of 29 October 2024 published from October–November 2024 onward (El País, RTVE, eldiario.es and others), cross-checked against the court file as it emerged.",
           "url": null,
           "note": "Specific article URLs to be added by the author before publication."
+        },
+        {
+          "id": "nasa-gibs",
+          "label": "NASA EOSDIS Global Imagery Browse Services (GIBS): VIIRS Suomi NPP corrected-reflectance true colour over Iberia and the western Mediterranean, UTC day of 29 October 2024; crop rendered by the project from the GIBS WMS.",
+          "url": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+          "note": "URL is NASA's data-use guidance (CC0 for NASA-led missions). The exact WMS request is given on the figure. The overpass time is the satellite's typical one, not read from the product metadata; the image is a daily composite."
         }
       ]
     }

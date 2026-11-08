@@ -736,7 +736,8 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
         {scenario.debrief_media && scenario.debrief_media.length > 0 && (
           <div className="cr-dsec">
             <h3 className="cr-dsec-title">After the clock stopped</h3>
-            <p className="cr-dsec-note">Imagery from after the last decision point. None of it was on the desk:
+            <p className="cr-dsec-note">Imagery from after the last decision point, or computed afterwards from the
+              day&apos;s data. None of it was on the desk:
               the log showed only what existed at each hour.{compact ? ' Tap a plate to open it.' : ''}</p>
             {compact ? (
               <ContactSheet scenario={scenario} media={scenario.debrief_media} />
@@ -835,6 +836,9 @@ const shortLicense = (license: string) => license.split(' (')[0].trim();
 /** The credit as one line can carry it: the first clause, then without a
  *  trailing parenthetical, then the first comma-part — only as far as needed. */
 function shortCredit(credit: string) {
+  // A © notice is attribution a licence requires (e.g. Copernicus EMS with
+  // its OpenStreetMap base): keep it whole, up to its first semicolon.
+  if (credit.includes('©')) return credit.split(';')[0].trim();
   let s = credit.split(/;|: /)[0].trim();
   if (s.length > 52) s = s.replace(/\s*\([^)]*\)\s*$/, '');
   if (s.length > 52) s = s.split(', ')[0];
@@ -862,7 +866,7 @@ function Figure({ scenario, m }: { scenario: Scenario; m: MediaAttachment }) {
       <figcaption>
         <span className="cr-figure-caption">{m.caption}</span>
         <span className="cr-figure-credit">
-          <span className="cr-figure-by" title={m.credit}>{credit}</span>
+          <span className={`cr-figure-by${credit.includes('©') ? ' is-notice' : ''}`} title={m.credit}>{credit}</span>
           <span className="cr-figure-sep" aria-hidden> · </span>
           <a href={m.licenseUrl ?? m.sourcePage} title={m.license}>{license}</a>
           {m.licenseUrl ? <><span className="cr-figure-sep" aria-hidden> · </span><a href={m.sourcePage}>Source</a></> : null}
