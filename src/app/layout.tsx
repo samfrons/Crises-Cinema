@@ -50,6 +50,17 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
+      <head>
+        {/* The regular cut sets every poster heading; fetch it with the CSS
+            instead of after it. (10 KB; the Bold cut is not critical.) */}
+        <link
+          rel="preload"
+          href="/fonts/SF%20Hollywood%20Hills.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body>
         <SiteNav />
         {children}

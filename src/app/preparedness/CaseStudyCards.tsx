@@ -12,7 +12,7 @@
  * heading, which is the comparison this whole page is making.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { family, type Film } from '@/lib/taxonomy';
 import { CASE_STUDIES, type CaseStudy } from './caseStudies';
 
@@ -99,18 +99,33 @@ function Card({ cs, films }: { cs: CaseStudy; films: Film[] | null }) {
 
 export default function CaseStudyCards() {
   const [films, setFilms] = useState<Film[] | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
+  // The 111 KB catalogue only feeds the cross-links under the cards, far below
+  // the map: fetch it when the section is within ~800px of the viewport, not
+  // on page load.
   useEffect(() => {
     let liveRef = true;
-    fetch('/data/films.json')
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`films.json ${r.status}`))))
-      .then((d: Film[]) => { if (liveRef) setFilms(d); })
-      .catch(() => { /* the cross-links are a garnish; the cards stand alone */ });
-    return () => { liveRef = false; };
+    const load = () => {
+      fetch('/data/films.json')
+        .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`films.json ${r.status}`))))
+        .then((d: Film[]) => { if (liveRef) setFilms(d); })
+        .catch(() => { /* the cross-links are a garnish; the cards stand alone */ });
+    };
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      load();
+      return () => { liveRef = false; };
+    }
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); load(); }
+    }, { rootMargin: '800px 0px' });
+    io.observe(el);
+    return () => { liveRef = false; io.disconnect(); };
   }, []);
 
   return (
-    <div className="pr-cases" id="cases">
+    <div className="pr-cases" id="cases" ref={rootRef}>
       <p className="eyebrow">Fourteen events, and what the record says</p>
       <h3 className="pr-cases-title">The inquiries, in their own words</h3>
       <p className="pr-note">

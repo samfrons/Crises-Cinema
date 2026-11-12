@@ -15,6 +15,7 @@ export function FilmCard({ film, onOpen }: { film: Film; onOpen: (f: Film) => vo
           width={52}
           height={78}
           loading="lazy"
+          decoding="async"
         />
       ) : (
         <span className="film-poster none" aria-hidden="true">no<br />poster</span>

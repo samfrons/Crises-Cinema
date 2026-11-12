@@ -45,6 +45,10 @@ export default function SiteNav() {
               <li key={it.href}>
                 <Link
                   href={it.href}
+                  // The strip links to every route from every page; the default
+                  // viewport prefetch pulled ~300 KB of RSC payload (Dispatches
+                  // alone is 232 KB) on first load. Fetch on navigation instead.
+                  prefetch={false}
                   className="sn-link"
                   aria-current={current ? 'page' : undefined}
                 >
