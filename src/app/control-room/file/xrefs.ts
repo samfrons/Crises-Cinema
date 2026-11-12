@@ -44,11 +44,6 @@ function day(id: string): Scenario {
   if (!s) throw new Error(`control-room/file: cross-reference to "${id}", which is not a playable day in src/data/scenarios.json`);
   return s;
 }
-function stubDay(id: string) {
-  const s = bundle.stubs.find((x) => x.id === id);
-  if (!s) throw new Error(`control-room/file: cross-reference to "${id}", which is not a stub in src/data/scenarios.json`);
-  return s;
-}
 function step(s: Scenario, id: string): { t: Timestep; n: number } {
   const i = s.timesteps.findIndex((t) => t.id === id);
   if (i < 0) throw new Error(`control-room/file: ${s.id} has no decision "${id}"`);
@@ -87,16 +82,43 @@ function valencia(folder: FolderId, after: number): XRef {
   };
 }
 
-function katrina(after: number): XRef {
-  const s = stubDay('katrina-2005');
+/** "N days before" / "the day before", and the date, for a day whose public
+ *  warnings came before its clock opened — read from the bundle. */
+function early(s: Scenario) {
+  const a = s.alert_predates_clock;
+  if (!a) throw new Error(`control-room/file: ${s.id} carries no alert_predates_clock for its slip to read`);
+  const days = Math.round((Date.parse(`${s.date}T00:00:00Z`) - Date.parse(`${a.date}T00:00:00Z`)) / 86_400_000);
+  return { ...a, span: days === 1 ? 'the day before' : `${days} days before`, long: longDate(a.date) };
+}
+
+function katrina(folder: FolderId, after: number): XRef {
+  const s = day('katrina-2005');
+  const { t, n } = step(s, 't1');
+  const e = early(s);
   return {
     after,
-    kind: 'research',
-    tag: 'In research for the desk',
+    kind: 'desk',
+    tag: 'You can hold this desk',
     title: `${s.title} — ${s.location.split(',')[0]}, ${longDate(s.date)}`,
-    body: 'This day sits on the desk as schema only, locked until every fact in it carries a source. The build enforces it: nothing is played from memory.',
-    href: '/control-room#cr-select-title',
-    cta: 'See it locked on the desk',
+    body: `Decision ${n} of ${s.timesteps.length} comes at ${at(t)} ${tzLabel(s)}, with no mandatory order yet issued. The record logs ${e.clock_alert} at ${s.scoring.historical_first_public_alert}; the City's first public call had come ${e.span} the clock opened, on ${e.long}. Hold the hours between.`,
+    href: deskHref(s.id, folder, t.id),
+    cta: `Take the desk — at ${s.clock.start}`,
+  };
+}
+
+function odisha(folder: FolderId, after: number): XRef {
+  const s = day('odisha-phailin-2013');
+  const first = step(s, 't1');
+  const e = early(s);
+  const d = s.outcome.deaths;
+  return {
+    after,
+    kind: 'desk',
+    tag: 'You can hold this desk · the counter-example',
+    title: `${s.title} — ${s.location.split(',')[0]}, ${longDate(s.date)}`,
+    body: `Not Bangladesh, but the same bay and the same machinery: the desk's success case. Public warning came ${e.span} the desk's clock opens, on ${e.long}. The day opens at ${at(first.t)} ${tzLabel(s)} on decision ${first.n} of ${s.timesteps.length}; the toll the record gives is ${d.min === d.max ? d.min : `${d.min}–${d.max}`}${d.contested ? ', contested' : ''}.`,
+    href: deskHref(s.id, folder, first.t.id),
+    cta: `Take the desk — at ${s.clock.start}`,
   };
 }
 
@@ -111,9 +133,10 @@ export const XREFS: Record<FolderId, XRef[]> = {
       href: '/control-room',
       cta: 'To the desk',
     },
+    odisha('a', 1),
   ],
   b: [
-    katrina(0),
+    katrina('b', 0),
     lahaina('b', 1),
     valencia('b', 2),
     {

@@ -116,6 +116,20 @@ export type GlossaryEntry = {
   citation: Citation;
 };
 
+export type AlertPredatesClock = {
+  /** YYYY-MM-DD, before the scenario day; the UI counts the days from it. */
+  date: string;
+  /** HH:MM on that date, only where the item states it. */
+  time?: string;
+  /** The info item the note is drawn from. */
+  from: string;
+  /** One sentence restating the earlier warning, in the item's numbers. */
+  note: string;
+  /** What the day's first-alert HH:MM actually is ("this day's first listed IMD bulletin"). */
+  clock_alert: string;
+  citation: Citation;
+};
+
 export type Source = { id: string; label: string; url: string | null; note?: string | null };
 
 export type Scenario = {
@@ -152,6 +166,10 @@ export type Scenario = {
     at_risk_zones: { id: string; label: string }[];
     historical_first_public_alert: string;
   };
+  /** The real public warnings came before the one-day clock opened, so the
+   *  day's first-alert HH:MM is not the officials' lead time. Drawn from one
+   *  info item (`from`) that names the earlier date; the build checks it. */
+  alert_predates_clock?: AlertPredatesClock;
   sources: Source[];
 };
 

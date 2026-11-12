@@ -30,7 +30,8 @@ UI labels them as such in the debrief.
   "date": "2024-10-29",
   "location": "…",
   "hazard": "flash flood | dam failure | tropical cyclone | wildfire | …",
-                                       // also picks the board's vocabulary (below)
+                                       // also picks the board's vocabulary (below);
+                                       // must name a family in vocabulary.json
   "clock": { "timezone": "CET", "start": "07:36", "end": "20:11" },
   "record_caveat": "…",                // honest note on the state of the record
   "briefing_media": { …media },        // optional, one figure; only what existed
@@ -152,10 +153,27 @@ without one simply shows no board). Zone state escalates only:
 item kind lights which state by default, comes from the scenario's `hazard`
 (`src/app/control-room/hazards.ts`):
 
-| family | watch | signal | impact | kind defaults |
+| family (`hazard` contains…) | watch | signal | impact | kind defaults |
 |---|---|---|---|---|
-| water (flood, dam, cyclone…) | red warning | gauge alert | flooding | forecast → watch, gauge → signal, field_report → impact |
-| fire (`hazard` contains "fire") | red flag | fire reported | burning | forecast → watch, gauge (sensor) → signal, field_report → signal |
+| fire (fire, bushfire, wildland) | red flag | fire reported | burning | forecast → watch, gauge (sensor) → signal, field_report → signal |
+| storm (cyclone, hurricane, typhoon) | warning in force | winds measured | storm ashore | forecast → watch, gauge (observation) → signal; field_report lights nothing by default |
+| water (flood, dam, levee, rain, river, surge) | red warning | gauge alert | flooding | forecast → watch, gauge → signal, field_report → impact |
+
+The families, their match patterns and their state words live in
+`vocabulary.json` (`hazards`), shared by `hazards.ts` and the validator. The
+first family whose pattern the `hazard` contains wins, in the order above — so
+"hurricane / levee failure" is a storm, "dam failure / flash flood" is water.
+The build **fails** a playable scenario whose `hazard` names no family.
+
+The storm words are the ones both storm records print. *Warning in force*: NHC's
+Hurricane Warning "including the city of New Orleans", IMD's cyclone warning
+bulletins for the Odisha coast. *Winds measured*: an instrument has the storm's
+winds as it closes (Southwest Pass's sustained winds in NHC Advisory 24; the
+Visakhapatnam radar's 60 m/s at 19:40). *Storm ashore* is lit only by an item
+whose `board_state` says `"impact"`, where the cited text says the storm is on
+that zone — a forecast of landfall is not a landfall, and neither storm
+scenario's clock reaches one. A storm scenario never says "gauge alert" or
+"red warning".
 
 An item's `board_state` overrides the default: set `"impact"` only where the
 cited text itself says the zone is burning / flooding, and `"none"` where a
@@ -223,6 +241,41 @@ The chain lights only from items the player has already been shown, the same
 discipline as the board. A link the record has not mentioned stays a faint
 hairline, meaning "not on the record yet", never "broken". Severed is drawn
 only where a cited item says the channel was cut or not used.
+
+## Warnings that came before the clock
+
+A scenario's clock is one day and cannot cross midnight, but some days' real
+public warnings came earlier: Odisha's cyclone watch began four days before
+the clock opens; New Orleans' voluntary evacuation was called the day before.
+Forced onto the clock, `scoring.historical_first_public_alert` would then
+present the day's first bulletin as the officials' lead time — flattering or
+distorting it. The optional `alert_predates_clock` says so instead:
+
+```jsonc
+"alert_predates_clock": {
+  "date": "2013-10-08",                // YYYY-MM-DD, before the scenario `date`
+  "time": "21:30",                     // optional; an HH:MM the item states
+  "from": "t1-i4",                     // the info item the note is drawn from
+  "note": "IMD's Bhubaneswar warning centre issued cyclone watch bulletins from 8 October, …",
+                                       // one sentence, 20–280 chars
+  "clock_alert": "this day's first listed IMD bulletin",
+                                       // what the day's HH:MM figure is (≤ 60 chars)
+  "citation": { "sourceId": "imd-report", "detail": "Section 8.2 …" }
+}
+```
+
+It is held to the takeaway discipline. The build **fails** it without a note, a
+`clock_alert` or a citation; with a citation to a source not in `sources[]` or
+to a different source from its `from` item; with a `from` that is no info item;
+with a date on or after the scenario day, or one the item does not name (its
+day and month, "8 October", or its weekday, "Saturday"); with a `time` the
+item does not state; with a placeholder; or with a note that prints a number
+the item does not print. When present, the debrief's lead-time line reads
+"officials, on this clock only", a slip under the alert-timing chart states
+how many days earlier the public warning came (computed from `date`) with the
+cited note, and the chart's officials' lane gains a mark pointing off the
+plate's left edge ("FROM 8 OCT · 4 DAYS EARLIER"). Used by
+`odisha-phailin-2013` and `katrina-2005`.
 
 ## Lessons and terms (the debrief's takeaways, the briefing's glossary)
 

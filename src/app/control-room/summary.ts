@@ -65,9 +65,20 @@ export type ScenarioCard = RunShape & {
 
 export type CardBundle = { playable: ScenarioCard[]; stubs: ScenarioStub[] };
 
+/* The order the days are dealt on the select screen (the bundle itself is in
+   file-name order). The three last-mile failures first, the two most recent
+   leading; then Odisha last, as the counter-example: the same machinery,
+   working. A day not listed here follows, in bundle order. */
+const CARD_ORDER = ['lahaina-2023', 'valencia-dana-2024', 'katrina-2005', 'odisha-phailin-2013'];
+const cardRank = (id: string) => {
+  const i = CARD_ORDER.indexOf(id);
+  return i < 0 ? CARD_ORDER.length : i;
+};
+
 export function toCards(bundle: ScenarioBundle): CardBundle {
+  const dealt = [...bundle.playable].sort((a, b) => cardRank(a.id) - cardRank(b.id));
   return {
-    playable: bundle.playable.map((s) => ({
+    playable: dealt.map((s) => ({
       id: s.id,
       title: s.title,
       date: s.date,

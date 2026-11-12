@@ -34,6 +34,10 @@ const CHAIN_LINKS = new Set(VOCAB.chain.links);
 const CHAIN_STATES = new Set(VOCAB.chain.states);
 const CHAIN_LABEL_KEYS = new Set(VOCAB.chain.label_keys);
 const READINGS = VOCAB.readings;
+// Hazard families, in match order (the first whose pattern the hazard contains).
+const HAZARD_FAMILIES = Object.entries(VOCAB.hazards ?? {}).filter(([k]) => k !== '_comment');
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /** Collects human-readable errors for one scenario file. */
 class Check {
@@ -320,6 +324,54 @@ function checkGlossary(chk, s, sourceIds) {
   }
 }
 
+/**
+ * When the real first public warnings came before the one-day clock opens,
+ * `historical_first_public_alert` (an HH:MM on this day) would flatter or
+ * distort the officials' lead time. `alert_predates_clock` says so, and is
+ * held to the takeaway discipline: it is drawn from ONE info item whose own
+ * text names the earlier day (its date, "8 October", or its weekday,
+ * "Saturday"); its citation is that item's source; its note prints no number
+ * the item does not print; an optional `time` is one the item states. The UI
+ * computes "N days before this clock" from `date` and prints `clock_alert` —
+ * what the day's HH:MM figure actually is — beside it.
+ */
+function checkAlertPredates(chk, s, sourceIds) {
+  const a = s.alert_predates_clock;
+  const p = 'alert_predates_clock';
+  if (!chk.require(a && typeof a === 'object' && !Array.isArray(a), p, 'must be an object')) return;
+  const dateOk = chk.require(typeof a.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(a.date) && !Number.isNaN(Date.parse(`${a.date}T00:00:00Z`)),
+    `${p}.date`, 'must be a real YYYY-MM-DD');
+  if (dateOk) chk.require(a.date < s.date, `${p}.date`, `must be before the scenario day (${s.date}) — a warning on the clock needs no note`);
+  if (chk.require(typeof a.note === 'string' && a.note.trim().length >= 20 && a.note.length <= 280, `${p}.note`, 'one sentence of 20–280 characters')) {
+    chk.require(!PLACEHOLDER.test(a.note), `${p}.note`, 'placeholder text in a playable scenario');
+  }
+  chk.require(typeof a.clock_alert === 'string' && a.clock_alert.trim().length > 0 && a.clock_alert.length <= 60, `${p}.clock_alert`,
+    `what the day's ${s.scoring?.historical_first_public_alert ?? 'HH:MM'} figure is, in 1–60 characters`);
+  checkCitation(chk, a.citation, `${p}.citation`, sourceIds, true);
+
+  const info = (s.timesteps ?? []).flatMap((t) => t.info_available ?? []).find((i) => i.id === a.from);
+  if (!chk.require(!!info, `${p}.from`, 'must be the id of an info item that states the earlier warning')) return;
+  chk.require(a.citation?.sourceId === info.citation?.sourceId, `${p}.citation`,
+    `must cite the source of the item it is drawn from ("${info.citation?.sourceId}")`);
+  if (dateOk) {
+    const d = new Date(`${a.date}T00:00:00Z`);
+    const day = d.getUTCDate();
+    const month = MONTHS[d.getUTCMonth()];
+    const names = [`${day} ${month}`, `${month} ${day}`, WEEKDAYS[d.getUTCDay()]];
+    chk.require(names.some((n) => new RegExp(`\\b${n}\\b`).test(info.text ?? '')), `${p}.date`,
+      `item ${info.id} does not name ${a.date} ("${names.join('" / "')}") — the date must be one the record states`);
+  }
+  if (a.time !== undefined) {
+    chk.require(HHMM.test(a.time ?? '') && saysTime(info.text, a.time), `${p}.time`, `"${a.time}" must be an HH:MM that item ${info.id} states`);
+  }
+  if (typeof a.note === 'string') {
+    const said = new Set(numbersIn(info.text)); // whole numbers as printed: "6" is not in "06:30"
+    for (const n of numbersIn(a.note)) {
+      chk.require(said.has(n),`${p}.note`, `prints "${n}", which item ${info.id} does not — the note may not add a figure`);
+    }
+  }
+}
+
 function validate(file, s) {
   const chk = new Check(file);
   for (const field of ['id', 'status', 'title', 'date', 'location', 'hazard']) {
@@ -353,6 +405,11 @@ function validate(file, s) {
   chk.require(s.clock && HHMM.test(s.clock.start ?? '') && HHMM.test(s.clock.end ?? '') && typeof s.clock.timezone === 'string',
     'clock', 'needs {timezone, start HH:MM, end HH:MM}');
   chk.require(typeof s.record_caveat === 'string' && s.record_caveat.length > 0, 'record_caveat', 'required — say honestly what the record is');
+  // The hazard picks the board's words (hazards.ts); a word the UI has no family for cannot ship.
+  if (typeof s.hazard === 'string') {
+    chk.require(HAZARD_FAMILIES.some(([, f]) => new RegExp(f.match, 'i').test(s.hazard)), 'hazard',
+      `"${s.hazard}" names no hazard family in vocabulary.json (${HAZARD_FAMILIES.map(([k, f]) => `${k}: ${f.match}`).join('; ')})`);
+  }
 
   if (s.briefing_media !== undefined) checkMedia(chk, s.briefing_media, 'briefing_media', s.id, s.date);
   if (s.debrief_media !== undefined) {
@@ -445,6 +502,7 @@ function validate(file, s) {
 
   if (s.takeaways !== undefined) checkTakeaways(chk, s, sourceIds);
   if (s.glossary !== undefined) checkGlossary(chk, s, sourceIds);
+  if (s.alert_predates_clock !== undefined) checkAlertPredates(chk, s, sourceIds);
 
   const d = s.outcome?.deaths;
   chk.require(d && Number.isFinite(d.min) && Number.isFinite(d.max) && d.min <= d.max && typeof d.contested === 'boolean',

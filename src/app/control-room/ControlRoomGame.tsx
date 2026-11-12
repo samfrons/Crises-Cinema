@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type { Citation, GlossaryEntry, InfoItem, MediaAttachment, Option, Scenario, ScenarioBundle, Timestep } from './types';
 import { startSession, logChoice, completeSession, type ChoiceEvent } from './telemetry';
-import { scoreRun, historicalLeadTime, formatLead, type Choice } from './scoring';
+import { scoreRun, historicalLeadTime, formatLead, alertBeforeClock, type Choice } from './scoring';
 import DayStrip from './DayStrip';
 import OpsMap, { BoardMiniature, hasBoard } from './OpsMap';
 import { itemState, STATE_RANK, vocabFor, COMPASS_WORD, type ZoneState } from './hazards';
@@ -1001,6 +1001,10 @@ function Debrief({ scenario, choices, last, onReplay, onLeave }: {
   const sourceIndex = useSourceIndex(scenario);
   const score = useMemo(() => scoreRun(scenario, choices), [scenario, choices]);
   const histLead = historicalLeadTime(scenario);
+  // Where the real public warnings came before this clock opened, the day's
+  // first-alert HH:MM is not the officials' lead time; say so beside it.
+  const early = alertBeforeClock(scenario);
+  const firstAlert = scenario.scoring.historical_first_public_alert;
   const compact = !useMedia('(min-width: 640px)');
   const vocab = vocabFor(scenario);
   const d = scenario.outcome.deaths;
@@ -1146,11 +1150,28 @@ function Debrief({ scenario, choices, last, onReplay, onLeave }: {
         <div className="cr-dsec">
           <h3 className="cr-dsec-title">Your run, measured</h3>
           <AlertTimingChart scenario={scenario} choices={choices} compact={compact} />
+          {early && (
+            <div className="cr-early" id="cr-early">
+              <p className="cr-early-tag">Warnings before the clock</p>
+              <p className="cr-early-body">
+                <strong>Public warning came {early.span} this clock opened</strong>, on {early.weekday} {early.longDate}
+                {early.time ? `, at ${early.time}` : ''}. {early.note} <Cite c={early.citation} idx={sourceIndex} />
+              </p>
+              <p className="cr-early-body">The {firstAlert} on this clock is {early.clock_alert}. A lead time measured
+                from it is this day&apos;s figure only: it neither credits the officials with the warnings that came
+                before the clock opened nor counts them against you, who could not issue them.</p>
+            </div>
+          )}
           <dl className="cr-score-grid">
             <div>
               <dt>Warning lead time</dt>
               <dd className="big">{formatLead(score.leadTimeMinutes)}</dd>
-              <dd className="sub">officials: {formatLead(histLead)} (first alert {scenario.scoring.historical_first_public_alert})</dd>
+              {early ? (
+                <dd className="sub">officials, on this clock only: {formatLead(histLead)} ({firstAlert} is {early.clock_alert}).
+                  Their public warnings came earlier — <a href="#cr-early">{early.span} this clock</a>.</dd>
+              ) : (
+                <dd className="sub">officials: {formatLead(histLead)} (first alert {firstAlert})</dd>
+              )}
             </div>
             <div>
               <dt>Coverage of at-risk {vocab.zoneNoun}</dt>

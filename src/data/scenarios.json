@@ -1,6 +1,1245 @@
 {
-  "generated": "2026-11-12T23:11:27.631Z",
+  "generated": "2026-11-12T23:42:34.664Z",
   "playable": [
+    {
+      "id": "katrina-2005",
+      "status": "playable",
+      "title": "The Day Before the Water",
+      "date": "2005-08-28",
+      "location": "New Orleans, Louisiana, United States",
+      "hazard": "hurricane / levee failure",
+      "clock": {
+        "timezone": "America/Chicago",
+        "start": "07:00",
+        "end": "21:00"
+      },
+      "record_caveat": "This scenario compresses Katrina to one day, Sunday 28 August 2005 (Central Daylight Time): the day of the first-ever mandatory evacuation order, the Superdome's opening as a refuge of last resort, the National Weather Service's \"devastating damage\" statement and the end of contraflow. The clock stops on Sunday evening. Landfall came at 06:10 on Monday and the levee failures that flooded the city came on Monday morning, after the last decision on the desk, so the debrief shows them and the desk does not. \"Impact\" for scoring is therefore not the flood: it is the first documented onset of the storm on the Louisiana coast (NHC's 4 PM advisory: sustained tropical-storm-force winds, conditions to \"worsen through the night\"), after which NHC said preparations should be completed. \"First public alert\" is the City's first mandatory order; the City had called a voluntary evacuation on Saturday and parishes began evacuating from 09:00 Saturday, so the lead time shown measures the mandatory order only. The record disagrees about when that order came: the Senate committee's timeline says about 09:30, the House committee's report says around 11:00, and the National Weather Service assessment says 11 a.m.; this scenario uses 09:30. The CNN transcript of the joint news conference that the Senate cites is headed \"Aired August 28, 2005 - 10:00 ET\" (09:00 CDT), with the anchors still waiting for the Mayor to speak. The record also disagrees on the end of contraflow (about 17:00 in the Senate timeline, about 18:00 in the House report), and the two reports give different counts of the Superdome's pre-positioned rations, so no ration count is used. The player is cast as the City's top decision-maker, with the Governor's staff and the state emergency operations centre on the line. Some beats, such as the federal requests and contraflow, belonged to the Governor, the State Police and the state transportation department; they are framed as what the city could ask for. Some information shown, such as the 11:00 federal video teleconference and the Governor's Saturday request, is in the record but is not shown to have reached the Mayor, and the record does not say when the Mayor saw each item. Not read: the Louisiana state EOC conference-call audio, the New Orleans emergency plan itself (quoted through the House report), the Mayor's and Governor's own accounts beyond what the committees quote, and IPET volumes beyond Volume I. Where this scenario cannot say what a different decision would have caused, it says so: the record is silent on every path not taken.",
+      "warning_chain": {
+        "labels": {
+          "forecast": "NHC · NWS",
+          "desk": "Mayor's desk",
+          "phone": "Calls · fax",
+          "siren": "Sirens",
+          "broadcast": "Radio · TV",
+          "social": "Posts"
+        },
+        "zones": {
+          "lower-ninth": "Lower Ninth",
+          "new-orleans-east": "N.O. East",
+          "lakeview-gentilly": "Lakeview",
+          "algiers": "Algiers",
+          "cbd-superdome": "Superdome"
+        }
+      },
+      "briefing_media": {
+        "file": "gulf-terra-modis-2005-08-27.jpg",
+        "type": "image",
+        "caption": "Saturday 27 August 2005 (Terra MODIS, daily composite): Hurricane Katrina in the southeastern Gulf of Mexico, lower right, with the north-central Gulf coast and the Mississippi delta across the top. The Hurricane Watch for the Louisiana coast was issued at 10:00 CDT that morning.",
+        "credit": "NASA EOSDIS Global Imagery Browse Services (GIBS), MODIS Terra corrected-reflectance true colour; crop of the north-central Gulf rendered by the project",
+        "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+        "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+        "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&layers=MODIS_Terra_CorrectedReflectance_TrueColor&styles=&srs=EPSG:4326&bbox=-96,23,-80,35&width=1200&height=900&format=image/jpeg&time=2005-08-27",
+        "width": 1200,
+        "height": 900,
+        "bytes": 292887,
+        "takenOn": "2005-08-27",
+        "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-12): \"Unless the content is marked with a use restriction or license, data provided from a NASA-led mission are licensed as Creative Commons Zero (CC0).\"",
+        "suggestedTimestep": "pre",
+        "note": "Daily composite: the overpass time is the satellite's typical one, not read from the product metadata. A narrow black no-data wedge sits at the far left edge."
+      },
+      "timesteps": [
+        {
+          "id": "t1",
+          "time": "07:00",
+          "time_label": "07:00",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t1-i1",
+              "kind": "forecast",
+              "text": "NHC Special Advisory 22, 07:00: Katrina is \"now a potentially catastrophic Category Five hurricane\", maximum sustained winds near 160 mph, about 250 miles south-southeast of the mouth of the Mississippi. A Hurricane Warning is in effect from Morgan City, Louisiana, to the Alabama/Florida border, \"including the city of New Orleans and Lake Pontchartrain\", and \"preparations to protect life and property should be rushed to completion\". Coastal storm surge flooding of 15 to 20 feet above normal tide, locally as high as 25 feet, is expected near and east of where the centre makes landfall.",
+              "citation": {
+                "sourceId": "nhc-adv",
+                "detail": "Special Advisory 22, 7 AM CDT Sun 28 Aug 2005"
+              },
+              "zones": [
+                "lower-ninth",
+                "new-orleans-east",
+                "lakeview-gentilly",
+                "algiers",
+                "cbd-superdome"
+              ],
+              "icon": "wind",
+              "chain": [
+                {
+                  "link": "forecast",
+                  "state": "used"
+                }
+              ]
+            },
+            {
+              "id": "t1-i2",
+              "kind": "message",
+              "text": "Saturday evening: at about 19:00 the National Weather Service advised the City of New Orleans Office of Emergency Preparedness that the New Orleans levees could be overtopped. From 19:25 to 20:00 NHC Director Max Mayfield briefed Governor Blanco, Governor Barbour and Mayor Nagin on Katrina's potential impact. At 22:00 NHC issued its first official storm-surge forecast, 15 to 20 feet above normal tides and locally as high as 25 feet.",
+              "citation": {
+                "sourceId": "senate-2006",
+                "detail": "Chapter 5, Timeline of Key Events, Saturday 27 August: 7 p.m. (NWS to the City OEP), 7:25-8 p.m. (Mayfield briefings), 10 p.m. (first storm-surge forecast)"
+              },
+              "icon": "dam"
+            },
+            {
+              "id": "t1-i3",
+              "kind": "message",
+              "text": "Where the city stands. At about 13:00 on Saturday the Mayor declared a state of emergency at a joint news conference with the Governor and announced a voluntary evacuation; he asked residents of Algiers, the Lower Ninth Ward and low-lying areas to start leaving, and said the Superdome would open at 08:00 Sunday as a special-needs shelter. Contraflow, the highways running outbound only, began at about 16:00 on Saturday.",
+              "citation": {
+                "sourceId": "senate-2006",
+                "detail": "Chapter 5 timeline, Saturday 27 August: ~1 p.m. and 4 p.m.; Chapter 16 (Pre-Storm Evacuations) (Mayor's Saturday press conference)"
+              },
+              "icon": "press",
+              "chain": [
+                {
+                  "link": "broadcast",
+                  "state": "used",
+                  "at": "13:00"
+                }
+              ]
+            },
+            {
+              "id": "t1-i4",
+              "kind": "message",
+              "text": "The mandatory evacuation order is still being drafted. The Mayor told staff at noon on Saturday to begin it. A draft sent round late Saturday night excepts essential personnel of the city, regulated utilities, hospitals and their patients, and operating hotels and their guests; staff have since added the media and nursing-home personnel, and Colonel Terry Ebbert, Director of Homeland Security and Public Safety, has recommended that nursing homes not be excepted. Still open: who is excepted, how the order would be enforced, and what transport the city has.",
+              "citation": {
+                "sourceId": "senate-2006",
+                "detail": "Chapter 16 (Pre-Storm Evacuations), \"Mayor Nagin issued a mandatory-evacuation order ... on Sunday\" and notes 60-64"
+              },
+              "icon": "committee"
+            },
+            {
+              "id": "t1-i5",
+              "kind": "message",
+              "text": "The city's own emergency plan lets the Mayor \"direct and compel, by any necessary and reasonable force, the evacuation of all or part of the population from any stricken or threatened area within the City if he deems this action necessary for the preservation of life\". The same plan acknowledges that \"[a]pproximately 100,000 Citizens of New Orleans do not have means of personal transportation\".",
+              "citation": {
+                "sourceId": "house-2006",
+                "detail": "Chapter \"Evacuation\": quotations of the New Orleans plan under \"The declarations of a 'mandatory' evacuation were delayed ...\" and \"The shelter of last resort ... was inadequate\""
+              },
+              "icon": "shelter"
+            }
+          ],
+          "options": [
+            {
+              "id": "t1-a1",
+              "label": "Issue the mandatory evacuation order now, on the draft as it stands",
+              "detail": "Order Orleans Parish to evacuate this hour with the exceptions as drafted, announce it on every channel, and settle enforcement and transport in the hours that follow.",
+              "effects": {
+                "warning_scope": "province",
+                "zones": [
+                  "lower-ninth",
+                  "new-orleans-east",
+                  "lakeview-gentilly",
+                  "algiers",
+                  "cbd-superdome"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t1-a2",
+              "label": "Hold the order until its exceptions, enforcement and transport questions are settled",
+              "detail": "The draft is nearly there. Finish the exceptions list, the enforcement plan and the transport question first, then announce.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is the path the day took. The Mayor had told staff at noon on Saturday to begin the order; it was announced on Sunday morning, at about 09:30 by the Senate committee's timeline and about 11:00 by the House committee's. The Senate found the city \"took nearly 24 hours\" to resolve legal and logistical questions, and that the Mayor \"wasted time in waiting to order a mandatory evacuation until Sunday morning, while his staff worked out details of the order that should have been settled long before the crisis\".",
+                "citation": {
+                  "sourceId": "senate-2006",
+                  "detail": "Chapter 16 (Pre-Storm Evacuations); Finding 60; Chapter 5 timeline, Sunday 28 August, 9:30 a.m."
+                }
+              }
+            },
+            {
+              "id": "t1-a3",
+              "label": "Stay with the voluntary evacuation and press it harder",
+              "detail": "Keep the Saturday call and add door-knocking by police and fire, church networks, and a second round of TV and radio messages to the low-lying neighbourhoods.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lower-ninth",
+                  "new-orleans-east",
+                  "lakeview-gentilly",
+                  "algiers"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            }
+          ],
+          "historical_option_id": "t1-a2",
+          "historical_citation": {
+            "sourceId": "senate-2006",
+            "detail": "Chapter 16 (Pre-Storm Evacuations) (order ordered drafted at noon Saturday; issued Sunday morning); Finding 60"
+          }
+        },
+        {
+          "id": "t2",
+          "time": "09:30",
+          "time_label": "about 09:30",
+          "approx": true,
+          "info_available": [
+            {
+              "id": "t2-i1",
+              "kind": "message",
+              "text": "About 09:30 the city issues its first-ever mandatory evacuation order, at a joint news conference with the Governor. \"I wish I had better news for you,\" the Mayor says. \"But we are facing a storm that most of us have feared.\" The final order excepts essential personnel of federal, state and city government, regulated utilities and mass transit, hospitals and their patients, the media, the Orleans Parish Criminal Sheriff's Office and its inmates, and operating hotels and their patrons. \"We sent out a fax to all the churches that we could this morning,\" he says, asking them to \"buddy up\" and check on seniors who rely on public transport.",
+              "citation": {
+                "sourceId": "senate-2006",
+                "detail": "Chapter 16 (Pre-Storm Evacuations), text and note 57 (Mayor's statement; final exceptions list); Chapter 5 timeline, 9:30 a.m."
+              },
+              "icon": "press",
+              "chain": [
+                {
+                  "link": "broadcast",
+                  "state": "used",
+                  "at": "09:30"
+                },
+                {
+                  "link": "phone",
+                  "state": "used"
+                }
+              ]
+            },
+            {
+              "id": "t2-i2",
+              "kind": "message",
+              "text": "At the same news conference the Governor says President Bush telephoned her just before and \"asked me to please ensure that there would be a mandatory evacuation of New Orleans\". She says waters could be as high as 15 to 20 feet, which is what the National Hurricane Center \"has shared with us\". The Mayor says: \"The storm surge most likely will topple our levee system.\"",
+              "citation": {
+                "sourceId": "house-2006",
+                "detail": "Chapter \"Evacuation\": Nagin-Blanco news conference, 28 August 2005, as quoted under \"The declarations of a 'mandatory' evacuation were delayed or never made\""
+              },
+              "icon": "dam"
+            },
+            {
+              "id": "t2-i3",
+              "kind": "message",
+              "text": "The Mayor announces that the Superdome will open to the general public at 12:00 as a refuge of last resort, and names 12 pick-up points where Regional Transit Authority buses will collect people for it, among them the E.J. Morris Senior Center, Frantz in the Ninth Ward, Warren Easton and Augustine in Mid-City and O. Perry Walker High School on the West Bank. The city waited until Saturday to announce the Superdome, fearing that saying so earlier might dissuade people from leaving.",
+              "citation": {
+                "sourceId": "senate-2006",
+                "detail": "Chapter 16, note 57 (Superdome at 12 p.m.; 12 RTA pick-up points); Chapter 11 (\"The New Orleans Scenario\"), \"The City Prepares and Opens the Superdome as a Refuge of Last Resort\""
+              },
+              "icon": "shelter"
+            },
+            {
+              "id": "t2-i4",
+              "kind": "message",
+              "text": "The Regional Transit Authority owns 372 buses and employs 650 drivers; it estimates each bus can take 40 people and their luggage out of the city, and about 100 drivers have volunteered for evacuation duty. The RTA has offered its buses and drivers; the director of the city's Office of Emergency Preparedness, Chief Matthews, has turned down the offers, citing a lack of identifiable shelters.",
+              "citation": {
+                "sourceId": "senate-2006",
+                "detail": "Chapter 16, \"The Director of the City of New Orleans Office of Emergency Preparedness Turned Down Offers of Assistance ... From the Regional Transit Authority\""
+              }
+            }
+          ],
+          "options": [
+            {
+              "id": "t2-a1",
+              "label": "Take up the RTA's offer: run its buses out of the city, and ask the state for more drivers",
+              "detail": "Send the RTA buses from the pick-up points to shelters beyond the flood, not just to the Superdome, and ask the Governor's staff for drivers, buses and a destination outside the city.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lower-ninth",
+                  "new-orleans-east",
+                  "lakeview-gentilly",
+                  "algiers"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t2-a2",
+              "label": "Open the Superdome at noon as the refuge of last resort and run RTA buses to it from the 12 pick-up points",
+              "detail": "Have police and fire go through the city asking people to go to the pick-up points; buses take them to the Superdome, where the National Guard screens them in.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lower-ninth",
+                  "new-orleans-east",
+                  "lakeview-gentilly",
+                  "algiers",
+                  "cbd-superdome"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is the path the day took. After the order, city officials sent police and fire through the city \"asking\" people to go to checkpoints where buses would take them, but only as far as the Superdome, opened at noon as a refuge of last resort; bus service began at noon. The House committee wrote that \"the city did not make arrangements for their evacuation\" and instead \"decided to shelter them in New Orleans\".",
+                "citation": {
+                  "sourceId": "house-2006",
+                  "detail": "Chapter \"Evacuation\": \"The shelter of last resort for those who could not or would not evacuate was inadequate\"; Senate Chapter 11 gives the noon start of bus service"
+                }
+              }
+            },
+            {
+              "id": "t2-a3",
+              "label": "Announce the order and leave the rest to contraflow, churches and neighbours",
+              "detail": "No city buses. Rely on the highways, the church buddy system started this morning and residents' own cars to move people.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            }
+          ],
+          "historical_option_id": "t2-a2",
+          "historical_citation": {
+            "sourceId": "house-2006",
+            "detail": "Chapter \"Evacuation\", \"The shelter of last resort for those who could not or would not evacuate was inadequate\""
+          }
+        },
+        {
+          "id": "t3",
+          "time": "11:00",
+          "time_label": "11:00",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t3-i1",
+              "kind": "forecast",
+              "text": "NWS New Orleans/Baton Rouge, 10:11, an urgent message headed \"...DEVASTATING DAMAGE EXPECTED...\": Katrina is \"A MOST POWERFUL HURRICANE WITH UNPRECEDENTED STRENGTH...RIVALING THE INTENSITY OF HURRICANE CAMILLE OF 1969.\" \"MOST OF THE AREA WILL BE UNINHABITABLE FOR WEEKS...PERHAPS LONGER.\" \"WATER SHORTAGES WILL MAKE HUMAN SUFFERING INCREDIBLE BY MODERN STANDARDS.\" For Orleans and neighbouring parishes the inland hurricane wind warning says tropical-storm-force winds will begin around 3 PM, and hurricane-force winds around sunset in Lower Plaquemines, spreading north by 3 AM Monday: \"DO NOT VENTURE OUTSIDE!\"",
+              "citation": {
+                "sourceId": "nws-lix",
+                "detail": "Urgent - Weather Message, 1011 AM CDT Sun Aug 28 2005, opening statement and the zone block LAZ038-040-050-056>070 (including ORLEANS)"
+              },
+              "zones": [
+                "lower-ninth",
+                "new-orleans-east",
+                "lakeview-gentilly",
+                "algiers",
+                "cbd-superdome"
+              ],
+              "icon": "wind",
+              "chain": [
+                {
+                  "link": "forecast",
+                  "state": "used"
+                }
+              ],
+              "media": {
+                "file": "nws-urgent-weather-message-2005-08-28-1011.png",
+                "type": "image",
+                "caption": "Sunday 28 August 2005, 10:11 CDT: the opening of the National Weather Service's \"Urgent - Weather Message\", headed \"Devastating damage expected\", from its New Orleans/Baton Rouge forecast office at Slidell. This is the product as archived on weather.gov, captured to an image by the project; the text is unaltered.",
+                "credit": "NOAA / National Weather Service, Weather Forecast Office New Orleans/Baton Rouge. Archived product page captured and cropped by the project, 12 November 2026",
+                "license": "Public domain (NWS information on weather.gov, per the NWS disclaimer: \"in the public domain, unless specifically noted otherwise\")",
+                "licenseUrl": "https://www.weather.gov/disclaimer",
+                "sourcePage": "https://www.weather.gov/lix/NPW_28_1011",
+                "width": 616,
+                "height": 748,
+                "bytes": 134628,
+                "takenOn": "2005-08-28 (product issued 10:11 CDT; page captured 2026-11-12)",
+                "licenseVerifiedOn": "https://www.weather.gov/disclaimer (fetched 2026-11-12): \"The information on National Weather Service (NWS) Web pages are in the public domain, unless specifically noted otherwise, and may be used without charge for any lawful purpose so long as you do not ... modify its content and then present it as official government material.\"",
+                "suggestedTimestep": "t3",
+                "note": "Cropped to the page title and the first section of the product; the same text is reproduced in the NWS Service Assessment, Fig. 10."
+              }
+            },
+            {
+              "id": "t3-i2",
+              "kind": "forecast",
+              "text": "NHC Advisory 23, 10:00: Katrina is \"even stronger\", maximum sustained winds near 175 mph, pressure 907 mb; hurricane-force winds extend 105 miles from the centre, tropical-storm-force winds 205 miles. The storm surge forecast is raised to 18 to 22 feet above normal tide, locally as high as 28 feet, \"along with large and dangerous battering waves\". The Hurricane Warning stays up for New Orleans and Lake Pontchartrain.",
+              "citation": {
+                "sourceId": "nhc-adv",
+                "detail": "Advisory 23, 10 AM CDT Sun 28 Aug 2005"
+              },
+              "zones": [
+                "lower-ninth",
+                "new-orleans-east",
+                "lakeview-gentilly",
+                "algiers",
+                "cbd-superdome"
+              ],
+              "icon": "wind",
+              "chain": [
+                {
+                  "link": "forecast",
+                  "state": "used"
+                }
+              ]
+            },
+            {
+              "id": "t3-i3",
+              "kind": "message",
+              "text": "At 11:00 the daily federal video teleconference, linking the White House, DHS, FEMA and its regional offices with Louisiana and Mississippi, takes place. NHC's Max Mayfield: \"I don't think any model can tell you with any confidence right now whether the levees will be topped or not, but that's obviously a very, very grave concern.\" FEMA Director Michael Brown: \"Just keep jamming those lines full as much as you can with commodities.\" On this call and Saturday's, state officials report that contraflow is going well.",
+              "citation": {
+                "sourceId": "senate-2006",
+                "detail": "Chapter 5 timeline, Sunday 28 August, 11 a.m. (note 31); Chapter 16, \"Governor Blanco Did Not Request Transportation Resources From the Federal Government\""
+              },
+              "icon": "committee"
+            },
+            {
+              "id": "t3-i4",
+              "kind": "message",
+              "text": "On Saturday the Governor asked the President for $9 million in Stafford Act assistance for emergency protective measures, of which $2.5 million was for evacuation needs; the request did not specify a need for transportation. The President granted the emergency declaration the same day.",
+              "citation": {
+                "sourceId": "senate-2006",
+                "detail": "Chapter 16, \"Governor Blanco Did Not Request Transportation Resources From the Federal Government\""
+              }
+            }
+          ],
+          "options": [
+            {
+              "id": "t3-a1",
+              "label": "Ask FEMA and the Department of Transportation for buses and drivers to take people out of New Orleans before the storm",
+              "detail": "Use the call, and the Governor's line to the White House, to put a specific request for evacuation buses and drivers on the record while the roads are still open.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lower-ninth",
+                  "new-orleans-east",
+                  "lakeview-gentilly",
+                  "algiers"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t3-a2",
+              "label": "Ask for military and Coast Guard boats, helicopters and medical teams to be staged within range for the morning after",
+              "detail": "Request pre-positioned rescue and medical assets, in addition to commodities, so that they can fly or float in the hour the winds drop.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [
+                  "cbd-superdome",
+                  "lower-ninth",
+                  "new-orleans-east"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t3-a3",
+              "label": "Report that contraflow is working and welcome the federal commodities; make no request for transport",
+              "detail": "Contraflow has moved the people who had cars. Thank FEMA for the supplies on their way and move on.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is the path the day took. State officials discussed the success of contraflow on the Saturday and Sunday calls but did not raise additional transportation assets, despite the long-standing knowledge that 100,000 people in New Orleans lacked transportation; neither the Governor nor any other state official made a specific request of the federal government for transportation resources before landfall. The Senate found the Governor \"missed opportunities to ask the federal government to help evacuate New Orleans before landfall\".",
+                "citation": {
+                  "sourceId": "senate-2006",
+                  "detail": "Chapter 16, \"Governor Blanco Did Not Request Transportation Resources From the Federal Government\"; Finding 62"
+                }
+              }
+            }
+          ],
+          "historical_option_id": "t3-a3",
+          "historical_citation": {
+            "sourceId": "senate-2006",
+            "detail": "Chapter 16, \"Governor Blanco Did Not Request Transportation Resources From the Federal Government\"; Findings 62, 65 and 66"
+          }
+        },
+        {
+          "id": "t4",
+          "time": "12:00",
+          "time_label": "12:00",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t4-i1",
+              "kind": "message",
+              "text": "The Superdome opens to the general public at 12:00 as the refuge of last resort, and RTA bus service from the pick-up points begins. The special-needs shelter inside has been open since 08:00; it was set up for about 1,200 people, 600 special-needs patients and their caregivers. In earlier hurricanes the Superdome served as a refuge for those riding out a storm for a few hours before going home. Since Hurricane Ivan in 2004 the city's plan has been to use RTA buses to bring people without transportation to it.",
+              "citation": {
+                "sourceId": "senate-2006",
+                "detail": "Chapter 11 (\"The New Orleans Scenario\"), \"Preparing the Superdome as a Special-Needs Shelter\" and \"Preparing the Superdome as a Refuge of Last Resort\"; Chapter 5 timeline, Sunday 28 August, 8 a.m. and 12 p.m."
+              },
+              "icon": "shelter"
+            },
+            {
+              "id": "t4-i2",
+              "kind": "message",
+              "text": "This morning city officials were drafting a plan to seize private facilities to create additional refuges of last resort. The city's Director of Homeland Security, Terry Ebbert, predicts \"nightmare\" conditions in the Superdome.",
+              "citation": {
+                "sourceId": "house-2006",
+                "detail": "Chapter \"Evacuation\": \"The shelter of last resort for those who could not or would not evacuate was inadequate\""
+              },
+              "icon": "committee"
+            },
+            {
+              "id": "t4-i3",
+              "kind": "message",
+              "text": "As of Sunday no one has made arrangements for portable toilets at the Superdome: on Saturday the city Health Director, Dr. Kevin Stephens, tried to contract with individual vendors but could not reach them. National Guard and FEMA food and water have been pre-positioned there.",
+              "citation": {
+                "sourceId": "senate-2006",
+                "detail": "Chapter 11 (\"The New Orleans Scenario\"), \"The City Prepares and Opens the Superdome as a Refuge of Last Resort\"; House, \"Those in shelters or on high ground suffered horrible conditions\" (pre-positioned food and water)"
+              }
+            }
+          ],
+          "options": [
+            {
+              "id": "t4-a1",
+              "label": "Open the Superdome now, and in the same hour order toilets, water, food, medical staff and police in bulk from the state and FEMA",
+              "detail": "Put the whole supply list to the state EOC and FEMA before the first bus arrives, rather than adding to it as the crowd grows.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [
+                  "cbd-superdome"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t4-a2",
+              "label": "Open the Superdome with what is on site and add supplies as the crowd shows up",
+              "detail": "Doors at noon, National Guard and police screening at the door, the pre-positioned stock in hand; ask for more as numbers become clear.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [
+                  "cbd-superdome"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is the path the day took. By late Sunday evening about 10,000 people had shown up. Officials realised during Sunday that more supplies were needed and rushed out requests, including for 350,000 more meals-ready-to-eat from the city and more food and water from the state; no one had arranged portable toilets; and a FEMA medical team, which the city accepted help from on Sunday, stopped in Baton Rouge when the Texas State Police denied two requests for escorts and did not reach the Superdome before landfall.",
+                "citation": {
+                  "sourceId": "senate-2006",
+                  "detail": "Chapter 11 (\"The New Orleans Scenario\"), \"Sheltering in the Superdome\" and \"The City Prepares and Opens the Superdome as a Refuge of Last Resort\""
+                }
+              }
+            },
+            {
+              "id": "t4-a3",
+              "label": "Open a second refuge of last resort now, using the plan drafted this morning, and split the bus runs",
+              "detail": "Designate a second large building on the plan to commandeer private facilities, so the Superdome is not the only place the buses go.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [
+                  "cbd-superdome",
+                  "algiers"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            }
+          ],
+          "historical_option_id": "t4-a2",
+          "historical_citation": {
+            "sourceId": "senate-2006",
+            "detail": "Chapter 11 (\"The New Orleans Scenario\"), \"Preparing the Superdome as a Refuge of Last Resort\"; House, Chapter \"Evacuation\", \"The shelter of last resort ... was inadequate\" (\"Only at the last minute did the City ask for food and water and medical personnel\")"
+          }
+        },
+        {
+          "id": "t5",
+          "time": "16:00",
+          "time_label": "16:00",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t5-i1",
+              "kind": "gauge",
+              "text": "NHC Advisory 24, 16:00: Katrina is a Category Five hurricane, maximum sustained winds near 165 mph, pressure 902 mb, about 150 miles south of the mouth of the Mississippi. \"Sustained tropical storm force winds are occurring over the southeast Louisiana coast\": Southwest Pass reports sustained winds of 48 mph with gusts to 53. \"Conditions are already beginning to deteriorate ... and will continue to worsen through the night.\" Surge of 18 to 22 feet, locally 28, with large and dangerous battering waves: \"Some levees in the greater New Orleans area could be overtopped.\" \"Preparations to protect life and property should be completed this evening.\"",
+              "citation": {
+                "sourceId": "nhc-adv",
+                "detail": "Advisory 24, 4 PM CDT Sun 28 Aug 2005"
+              },
+              "zones": [
+                "lower-ninth",
+                "new-orleans-east",
+                "lakeview-gentilly",
+                "algiers",
+                "cbd-superdome"
+              ],
+              "icon": "wind",
+              "chain": [
+                {
+                  "link": "forecast",
+                  "state": "used"
+                }
+              ]
+            },
+            {
+              "id": "t5-i2",
+              "kind": "gauge",
+              "text": "GOES-12 visible image, scan 17:45 UTC (12:45 CDT): Katrina's eye is clear in the central Gulf with the Louisiana coast across the top. NHC puts its peak intensity at 150 kt, near this time.",
+              "citation": {
+                "sourceId": "nhc-tcr",
+                "detail": "Fig. 6, GOES-12 visible image at 1745 UTC 28 August 2005; Section a, Synoptic History (peak intensity of 150 kt at 1800 UTC 28 August)"
+              },
+              "icon": "satellite",
+              "media": {
+                "file": "katrina-goes12-visible-2005-08-28-1745utc.jpg",
+                "type": "image",
+                "caption": "Sunday 28 August 2005, 17:45 UTC (12:45 CDT), GOES-12 visible image: Hurricane Katrina over the central Gulf of Mexico near the time of its peak intensity of 150 kt, with the Louisiana coast across the top. Scan time is printed in the strip under the frame.",
+                "credit": "NOAA GOES-12 visible imagery, as Figure 6 of the National Hurricane Center Tropical Cyclone Report: Hurricane Katrina (Knabb, Rhome and Brown; updated 4 January 2023). Image extracted from the report PDF and resampled to 1200 px wide by the project",
+                "license": "Public domain (NOAA/NHC information on government servers, per the NHC disclaimer)",
+                "licenseUrl": "https://www.nhc.noaa.gov/disclaimer.shtml",
+                "sourcePage": "https://www.nhc.noaa.gov/data/tcr/AL122005_Katrina.pdf",
+                "width": 1200,
+                "height": 777,
+                "bytes": 196179,
+                "takenOn": "2005-08-28",
+                "licenseVerifiedOn": "https://www.nhc.noaa.gov/disclaimer.shtml (fetched 2026-11-12): \"The information on government servers are in the public domain, unless specifically annotated otherwise, and may be used freely by the public.\"",
+                "suggestedTimestep": "t5",
+                "note": "The report PDF carries this figure as two stacked raster strips; they were joined without other change and downsized."
+              }
+            },
+            {
+              "id": "t5-i3",
+              "kind": "gauge",
+              "text": "MODIS Terra true-colour composite for 28 August: the eye of Katrina in the central Gulf, and the broad cloud shield reaching the Louisiana and Mississippi coast.",
+              "citation": {
+                "sourceId": "nasa-gibs",
+                "detail": "MODIS_Terra_CorrectedReflectance_TrueColor, UTC day 2005-08-28 (daily composite)"
+              },
+              "icon": "satellite",
+              "media": {
+                "file": "gulf-coast-terra-modis-2005-08-28.jpg",
+                "type": "image",
+                "caption": "Sunday 28 August 2005 (Terra MODIS, daily composite): the eye of Hurricane Katrina in the central Gulf of Mexico, with the Louisiana and Mississippi coast above it. The black wedge at right is a gap between satellite swaths.",
+                "credit": "NASA EOSDIS Global Imagery Browse Services (GIBS), MODIS Terra corrected-reflectance true colour; crop of the north-central Gulf rendered by the project",
+                "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+                "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+                "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&layers=MODIS_Terra_CorrectedReflectance_TrueColor&styles=&srs=EPSG:4326&bbox=-96,23,-80,35&width=1200&height=900&format=image/jpeg&time=2005-08-28",
+                "width": 1200,
+                "height": 900,
+                "bytes": 268533,
+                "takenOn": "2005-08-28",
+                "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-12): \"Unless the content is marked with a use restriction or license, data provided from a NASA-led mission are licensed as Creative Commons Zero (CC0).\"",
+                "suggestedTimestep": "t5",
+                "note": "Daily composite; the overpass time is the satellite's typical one, not read from the product metadata, so it is placed at the last step of the afternoon, not earlier."
+              }
+            },
+            {
+              "id": "t5-i4",
+              "kind": "field_report",
+              "text": "Contraflow, all highway lanes outbound, has run since about 16:00 on Saturday, managed by the state transportation department and the State Police, with the Governor monitoring it personally. Louisiana's plan, coordinated with Mississippi and Texas, had the southernmost parishes leave first so that evacuees would not meet bottlenecks in New Orleans or Baton Rouge. RTA special service runs from 12 sites to the Superdome, and at least 10 paratransit vehicles are carrying special-needs residents to the Baton Rouge area.",
+              "citation": {
+                "sourceId": "house-2006",
+                "detail": "Chapter \"Pre-landfall Preparation and Katrina's Impact\", \"Evacuations in Louisiana\" (contraflow; RTA special service)"
+              },
+              "icon": "roadblock"
+            }
+          ],
+          "options": [
+            {
+              "id": "t5-a1",
+              "label": "Keep contraflow running through the evening, until the outbound lanes are empty or the weather closes the road",
+              "detail": "Ask the State Police to hold the lanes outbound for latecomers, carpoolers and anyone the church network has found a ride for.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [
+                  "lower-ninth",
+                  "new-orleans-east",
+                  "lakeview-gentilly",
+                  "algiers"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t5-a2",
+              "label": "Let the State Police end contraflow this evening, once traffic is light",
+              "detail": "Traffic is thinning; return the lanes to their normal configuration, with the outbound lanes still open to anyone leaving.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is the path the day took. By 6:00 p.m. on Sunday traffic was light, so contraflow was halted; residents could still leave on the outbound lanes once the highways were returned to their normal configuration. The Senate committee's timeline places the end of contraflow at 5 p.m.",
+                "citation": {
+                  "sourceId": "house-2006",
+                  "detail": "Chapter \"Pre-landfall Preparation and Katrina's Impact\", \"Evacuations in Louisiana\": \"By 6:00 p.m. on Sunday, August 28, traffic was light, so contraflow was halted\"; Senate Chapter 5 timeline, 5 p.m."
+                }
+              }
+            },
+            {
+              "id": "t5-a3",
+              "label": "Keep the outbound lanes for the city's buses and vans, carrying people to Baton Rouge and beyond",
+              "detail": "Reserve the contraflow lanes for RTA buses and paratransit vans on runs out of the city, as long as drivers will make them.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lower-ninth",
+                  "new-orleans-east",
+                  "lakeview-gentilly",
+                  "algiers"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            }
+          ],
+          "historical_option_id": "t5-a2",
+          "historical_citation": {
+            "sourceId": "house-2006",
+            "detail": "Chapter \"Pre-landfall Preparation and Katrina's Impact\", \"Evacuations in Louisiana\": contraflow ran from Saturday about 4:00 p.m. and was halted on Sunday when traffic was light"
+          }
+        },
+        {
+          "id": "t6",
+          "time": "19:00",
+          "time_label": "about 19:00",
+          "approx": true,
+          "info_available": [
+            {
+              "id": "t6-i1",
+              "kind": "forecast",
+              "text": "NWS New Orleans/Baton Rouge, 16:13: \"EXTREMELY DANGEROUS HURRICANE KATRINA CONTINUES TO APPROACH THE MISSISSIPPI RIVER DELTA.\" \"DEVASTATING DAMAGE EXPECTED\" is repeated. \"HURRICANE FORCE WINDS WILL ONSET AROUND MIDNIGHT NEAR THE COAST AND BY 3 AM CLOSER TO THE NEW ORLEANS METRO AREA AND PERSIST FOR 9 TO 15 HOURS. MAXIMUM WIND GUSTS AROUND 175 MPH ARE LIKELY IN THE WARNED AREA BY DAYBREAK MONDAY.\" \"DO NOT VENTURE OUTDOORS ONCE TROPICAL STORM FORCE WINDS ONSET.\"",
+              "citation": {
+                "sourceId": "nws-lix",
+                "detail": "Urgent - Weather Message, 413 PM CDT Sun Aug 28 2005, zone block LAZ038-040-050-056>070-MSZ080>082 (including ORLEANS)"
+              },
+              "zones": [
+                "lower-ninth",
+                "new-orleans-east",
+                "lakeview-gentilly",
+                "algiers",
+                "cbd-superdome"
+              ],
+              "icon": "wind",
+              "chain": [
+                {
+                  "link": "forecast",
+                  "state": "used"
+                }
+              ]
+            },
+            {
+              "id": "t6-i2",
+              "kind": "gauge",
+              "text": "NHC Intermediate Advisory 24A, 19:00: about 130 miles south of the mouth of the Mississippi, winds near 160 mph, pressure 904 mb, moving north-northwest at 11 mph. \"Sustained tropical storm force winds are already occurring over the southeast Louisiana coast.\" \"Some levees in the greater New Orleans area could be overtopped.\" \"Winds affecting the upper floors of high-rise buildings will be significantly stronger than those near ground level.\" Preparations \"should be completed this evening\".",
+              "citation": {
+                "sourceId": "nhc-adv",
+                "detail": "Intermediate Advisory 24A, 7 PM CDT Sun 28 Aug 2005"
+              },
+              "zones": [
+                "lower-ninth",
+                "new-orleans-east",
+                "lakeview-gentilly",
+                "algiers",
+                "cbd-superdome"
+              ],
+              "icon": "wind",
+              "chain": [
+                {
+                  "link": "forecast",
+                  "state": "used"
+                }
+              ]
+            },
+            {
+              "id": "t6-i3",
+              "kind": "field_report",
+              "text": "The downpour began at the Superdome around 18:00 and security screening moved inside the building, which made it harder for city police to ensure that no one entered with a weapon. Contraflow has been halted: traffic was light by about 18:00. Under the contraflow plan the roads are closed a few hours before landfall.",
+              "citation": {
+                "sourceId": "senate-2006",
+                "detail": "Chapter 11 (\"The New Orleans Scenario\"), \"The City Prepares and Opens the Superdome as a Refuge of Last Resort\" (security, 6 p.m. downpour); Chapter 16, RTA drivers (roads closed \"a few hours before landfall\", consistent with the contraflow plan)"
+              },
+              "icon": "rain"
+            },
+            {
+              "id": "t6-i4",
+              "kind": "media",
+              "text": "A FEMA photographer's picture from Sunday shows residents lining up with a few belongings to enter the Superdome. FEMA's caption says most residents have evacuated the city and that those left behind do not have transportation.",
+              "citation": {
+                "sourceId": "fema-bahamonde",
+                "detail": "FEMA Photo Library caption, Marty Bahamonde, 28 August 2005"
+              },
+              "icon": "shelter",
+              "media": {
+                "file": "superdome-line-fema-2005-08-28.jpg",
+                "type": "image",
+                "caption": "Sunday 28 August 2005 (time of day not established): residents with a few belongings line up to get into the Superdome, opened as a shelter ahead of Hurricane Katrina. FEMA's caption says most residents have evacuated the city and that those left behind do not have transportation.",
+                "credit": "Marty Bahamonde / FEMA (FEMA Photo Library); downscaled to 900 px wide by the project",
+                "license": "Public domain (work of a U.S. federal government employee, FEMA)",
+                "sourcePage": "https://commons.wikimedia.org/wiki/File:People_lining_up_for_shelter_in_Superdome_in_New_Orleans.jpg",
+                "width": 900,
+                "height": 1200,
+                "bytes": 325381,
+                "takenOn": "2005-08-28",
+                "licenseVerifiedOn": "Wikimedia Commons file page (fetched 2026-11-12): tagged public domain as a work of a FEMA employee \"taken or made as part of that person's official duties\"; the FEMA Photo Library original is obsolete and could not be fetched. File EXIF reads 2005-08-28 and carries the same caption.",
+                "suggestedTimestep": "t6",
+                "note": "EXIF \"DateTime\" 17:19:38 may be a save time, not the exposure time, so the photo is placed at the last step of the day, not earlier."
+              }
+            }
+          ],
+          "options": [
+            {
+              "id": "t6-a1",
+              "label": "Keep the buses running to the Superdome into the night, for as long as drivers will go",
+              "detail": "Hold the pick-up points open and the shuttles moving in the rain, using the volunteer drivers, and accept the weather risk.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "cbd-superdome",
+                  "lower-ninth",
+                  "new-orleans-east"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t6-a2",
+              "label": "Stand the buses down at about 19:00 as conditions worsen",
+              "detail": "End the RTA service now; everyone who is going to the Superdome by bus has had their chance, and the drivers must shelter too.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is the path the day took. All RTA bus service ceased at approximately 7:00 p.m. on Sunday, about 11 hours before Katrina was due to make landfall and as conditions worsened. More than 70,000 people remained in the city to be rescued after the storm.",
+                "citation": {
+                  "sourceId": "house-2006",
+                  "detail": "Chapter \"Pre-landfall Preparation and Katrina's Impact\", \"Evacuations in Louisiana\": \"All service ceased at approximately 7:00 p.m. Sunday night\"; Chapter \"Evacuation\", finding on the incomplete evacuation (\"more than 70,000 people remained in the City to be rescued after the storm\")"
+                }
+              }
+            },
+            {
+              "id": "t6-a3",
+              "label": "Send one last convoy of buses and vans out of the city to Baton Rouge before the roads close, then stand down",
+              "detail": "Use the remaining drivers on a final run out of town while the highway is still open, then bring the fleet to high ground.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "lower-ninth",
+                  "new-orleans-east",
+                  "lakeview-gentilly",
+                  "algiers"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            }
+          ],
+          "historical_option_id": "t6-a2",
+          "historical_citation": {
+            "sourceId": "house-2006",
+            "detail": "Chapter \"Pre-landfall Preparation and Katrina's Impact\", \"Evacuations in Louisiana\": RTA service \"ceased at approximately 7:00 p.m. Sunday night ... as conditions worsened\""
+          }
+        }
+      ],
+      "historical_path": [
+        {
+          "timestep_id": "t1",
+          "action": "The mandatory evacuation order was still being drafted. The Mayor had told staff at noon on Saturday to begin; its exceptions, its enforcement and the transport question were unresolved, and no order was issued at 07:00.",
+          "citation": {
+            "sourceId": "senate-2006",
+            "detail": "Chapter 16 (Pre-Storm Evacuations); Finding 60"
+          }
+        },
+        {
+          "timestep_id": "t2",
+          "action": "At about 09:30 the Mayor announced the first-ever mandatory evacuation order, said the Superdome would open at noon as a refuge of last resort and named 12 RTA pick-up points. Bus service to the Superdome began at noon.",
+          "citation": {
+            "sourceId": "senate-2006",
+            "detail": "Chapter 5 timeline, 9:30 a.m. and 12 p.m.; Chapter 16, note 57; Chapter 11"
+          }
+        },
+        {
+          "timestep_id": "t3",
+          "action": "State officials told the federal video teleconference that contraflow was working. Neither the Governor nor any other state official made a specific request to the federal government for transportation resources before landfall.",
+          "citation": {
+            "sourceId": "senate-2006",
+            "detail": "Chapter 16, \"Governor Blanco Did Not Request Transportation Resources From the Federal Government\""
+          }
+        },
+        {
+          "timestep_id": "t4",
+          "action": "The Superdome opened at noon as a refuge of last resort with the food and water on site. More supplies were requested as the crowd grew; no portable toilets had been arranged.",
+          "citation": {
+            "sourceId": "senate-2006",
+            "detail": "Chapter 11 (\"The New Orleans Scenario\"), \"The City Prepares and Opens the Superdome as a Refuge of Last Resort\""
+          }
+        },
+        {
+          "timestep_id": "t5",
+          "action": "Contraflow was halted on Sunday evening, when traffic was light. The outbound lanes stayed open to anyone leaving once the highways were returned to normal.",
+          "citation": {
+            "sourceId": "house-2006",
+            "detail": "Chapter \"Pre-landfall Preparation and Katrina's Impact\", \"Evacuations in Louisiana\""
+          }
+        },
+        {
+          "timestep_id": "t6",
+          "action": "RTA bus service ceased at approximately 19:00 as conditions worsened, about 11 hours before landfall. More than 70,000 people remained in the city to be rescued after the storm.",
+          "citation": {
+            "sourceId": "house-2006",
+            "detail": "Chapter \"Pre-landfall Preparation and Katrina's Impact\", \"Evacuations in Louisiana\" (RTA service ceased); Chapter \"Evacuation\", finding on the incomplete evacuation"
+          }
+        }
+      ],
+      "inquiry_findings": [
+        {
+          "kind": "verbatim",
+          "quote": "Despite adequate warning 56 hours before landfall, Governor Blanco and Mayor Nagin delayed ordering a mandatory evacuation in New Orleans until 19 hours before landfall.",
+          "citation": {
+            "sourceId": "house-2006",
+            "detail": "Chapter \"Evacuation\": finding heading (Executive Summary and Chapter \"Evacuation\")"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "Mayor Nagin wasted time in waiting to order a mandatory evacuation until Sunday morning, while his staff worked out details of the order that should have been settled long before the crisis.",
+          "citation": {
+            "sourceId": "senate-2006",
+            "detail": "Finding 60 (Evacuations: Pre-Storm)"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "Prior to Katrina, New Orleans officials did not fulfill a commitment in their emergency plan to provide transportation for people without vehicles.",
+          "citation": {
+            "sourceId": "senate-2006",
+            "detail": "Finding 59 (Evacuations: Pre-Storm)"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "Governor Blanco missed opportunities to ask the federal government to help evacuate New Orleans before landfall.",
+          "citation": {
+            "sourceId": "senate-2006",
+            "detail": "Finding 62 (Evacuations: Pre-Storm), first sentence"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "The accuracy and timeliness of National Weather Service and National Hurricane Center forecasts prevented further loss of life",
+          "citation": {
+            "sourceId": "house-2006",
+            "detail": "Chapter \"Pre-landfall Preparation and Katrina's Impact\": finding heading, \"Timeline of Hurricane Katrina and NWS Warnings\""
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "This statement was highly effective in reinforcing the message from emergency management for residents to rush preparations to completion and heed evacuation orders.",
+          "citation": {
+            "sourceId": "nws-sa",
+            "detail": "Finding 1, on the 10:11 a.m. statement of 28 August"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "Before landfall, Louisiana successfully evacuated people with vehicles who wanted to leave.",
+          "citation": {
+            "sourceId": "senate-2006",
+            "detail": "Finding 58 (Evacuations: Pre-Storm)"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "emergency response planning must focus more attention on providing necessary assistance to those unable to self-evacuate.",
+          "citation": {
+            "sourceId": "ipet-2009",
+            "detail": "Volume I, Executive Summary: The Consequences"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "Hurricane Katrina resulted in 50 major breaches",
+          "citation": {
+            "sourceId": "ipet-2009",
+            "detail": "Volume I, Executive Summary: The Performance (all but four of the 50 attributed to overtopping and erosion; the four were foundation design failures)"
+          }
+        }
+      ],
+      "takeaways": [
+        {
+          "text": "An evacuation order is only as fast as the plan behind it: its exceptions, its enforcement and its transport are details that, in the Senate's words, \"should have been settled long before the crisis\".",
+          "from": {
+            "finding": 1
+          },
+          "citation": {
+            "sourceId": "senate-2006",
+            "detail": "Finding 60 (Evacuations: Pre-Storm)"
+          }
+        },
+        {
+          "text": "Telling people to leave is not the same as getting them out: New Orleans' own emergency plan committed to provide transportation for people without vehicles, and the Senate found officials did not fulfill that commitment.",
+          "from": {
+            "finding": 2
+          },
+          "citation": {
+            "sourceId": "senate-2006",
+            "detail": "Finding 59 (Evacuations: Pre-Storm)"
+          }
+        },
+        {
+          "text": "Accurate forecasts were not the missing piece: the National Weather Service and National Hurricane Center warned in time, so what remained to be decided was whether officials would act on the warning.",
+          "from": {
+            "finding": 4
+          },
+          "citation": {
+            "sourceId": "house-2006",
+            "detail": "Chapter \"Pre-landfall Preparation and Katrina's Impact\": finding heading, \"Timeline of Hurricane Katrina and NWS Warnings\""
+          }
+        }
+      ],
+      "glossary": [
+        {
+          "term": "Hurricane Warning",
+          "match": [
+            "Hurricane Warning"
+          ],
+          "kind": "verbatim",
+          "definition": "A hurricane warning means that hurricane conditions are expected within the warning area within the next 24 hours.",
+          "citation": {
+            "sourceId": "nhc-adv",
+            "detail": "Special Advisory 22, 7 AM CDT 28 Aug 2005, second paragraph (the definition NHC printed in the advisory itself)"
+          }
+        },
+        {
+          "term": "storm surge",
+          "match": [
+            "storm surge"
+          ],
+          "kind": "verbatim",
+          "definition": "An abnormal rise in sea level accompanying a hurricane or other intense storm, and whose height is the difference between the observed level of the sea surface and the level that would have occurred in the absence of the cyclone.",
+          "citation": {
+            "sourceId": "nhc-glossary",
+            "detail": "Entry \"Storm Surge\" (first sentence)"
+          }
+        },
+        {
+          "term": "contraflow",
+          "match": [
+            "contraflow",
+            "Contraflow"
+          ],
+          "kind": "verbatim",
+          "definition": "Making all highway lanes outbound to maximize traffic flow and minimize traffic jams.",
+          "citation": {
+            "sourceId": "house-2006",
+            "detail": "Chapter \"Pre-landfall Preparation and Katrina's Impact\", \"Evacuations in Louisiana\", the committee's own gloss of \"contraflow\""
+          }
+        },
+        {
+          "term": "mandatory evacuation",
+          "match": [
+            "mandatory evacuation"
+          ],
+          "kind": "paraphrase",
+          "definition": "Under the New Orleans plan the Mayor may \"direct and compel, by any necessary and reasonable force\", an evacuation. The House committee found no clear, consistent definition among officials, who said no one would be forcibly removed from a home.",
+          "citation": {
+            "sourceId": "house-2006",
+            "detail": "Chapter \"Evacuation\": \"Terms for voluntary and mandatory evacuations lack clear definitions\"; New Orleans plan as quoted there"
+          }
+        },
+        {
+          "term": "refuge of last resort",
+          "match": [
+            "refuge of last resort"
+          ],
+          "kind": "paraphrase",
+          "definition": "As the House committee describes the Superdome's role, a refuge of last resort is \"set up to allow people to survive a storm passing over\"; it was \"not intended to house, feed, and water thousands of people for several days\".",
+          "citation": {
+            "sourceId": "house-2006",
+            "detail": "Chapter \"Evacuation\": \"New Orleans opened the Superdome as a 'refuge of last resort'\""
+          }
+        }
+      ],
+      "debrief_media": [
+        {
+          "file": "new-orleans-17th-street-canal-breach-noaa-2005-08-30.jpg",
+          "type": "image",
+          "caption": "30 August 2005, the day after landfall (NOAA aerial image, date per Wikimedia Commons metadata; the file title says 31 August): the breach in the 17th Street Canal floodwall. West End, east of the canal and at right, is deep in water; part of Metairie to the west, at left, is not flooded.",
+          "credit": "NOAA aerial imagery of Hurricane Katrina damage (original at ngs.woc.noaa.gov/storms/katrina/), via Wikimedia Commons; downscaled to 900 px wide by the project",
+          "license": "Public domain (NOAA work)",
+          "sourcePage": "https://commons.wikimedia.org/wiki/File:NOAA_Katrina_NOLA_17th_Street_breach_Aug_31_2005.jpg",
+          "width": 900,
+          "height": 1100,
+          "bytes": 191209,
+          "takenOn": "2005-08-30",
+          "licenseVerifiedOn": "Wikimedia Commons file page / API metadata (fetched 2026-11-12): licence \"Public domain\", artist NOAA. The NOAA original URL named there was not re-fetched."
+        },
+        {
+          "file": "uscg-helicopter-over-new-orleans-2005-08-30.jpg",
+          "type": "image",
+          "caption": "30 August 2005: Coast Guard Petty Officer 2nd Class Shawn Beaty looks for survivors from an HH-60J Jayhawk helicopter over New Orleans, the day after Hurricane Katrina struck.",
+          "credit": "Petty Officer 2nd Class NyxoLyno Cangemi, U.S. Coast Guard (as published by the U.S. Navy at navy.mil, id 27531); downscaled to 1200 px wide by the project",
+          "license": "Public domain (U.S. Coast Guard work)",
+          "sourcePage": "https://commons.wikimedia.org/wiki/File:New_Orleans_Survivor_Flyover.jpg",
+          "width": 1200,
+          "height": 782,
+          "bytes": 195752,
+          "takenOn": "2005-08-30",
+          "licenseVerifiedOn": "Wikimedia Commons file page / API metadata (fetched 2026-11-12): licence \"Public domain\", artist U.S. Coast Guard. The navy.mil original was not re-fetched."
+        }
+      ],
+      "outcome": {
+        "deaths": {
+          "min": 1392,
+          "max": 1392,
+          "contested": true,
+          "note": "The National Hurricane Center's Tropical Cyclone Report, updated 4 January 2023, gives 1,392 deaths in all: 520 direct (341 in Louisiana, 172 in Mississippi, 6 in Florida, 1 in Georgia), 565 indirect, and 307 of undetermined cause. It rests on state medical logs analysed by Rappaport (2014) and Rappaport and Blanchard (2016), and replaces the \"over 1800\" of the 2005 and 2006 versions of the report. Other counts differ by method and date: IPET (2009) says almost 1,600 deaths in the Gulf region and over 1,000 in the New Orleans area as of February 2006."
+        },
+        "citation": {
+          "sourceId": "nhc-tcr",
+          "detail": "Section \"Casualty and Damage Statistics\": \"Total number of fatalities: 1392 ... Direct deaths: 520 ... Indirect deaths: 565 ... Indeterminate cause: 307\" (update of 4 January 2023)"
+        }
+      },
+      "scoring": {
+        "impact": {
+          "time": "16:00",
+          "label": "sustained tropical-storm-force winds are already blowing on the southeast Louisiana coast and NHC says conditions will \"continue to worsen through the night\"; the flooding itself comes after the clock ends",
+          "citation": {
+            "sourceId": "nhc-adv",
+            "detail": "Advisory 24, 4 PM CDT 28 Aug 2005: \"Sustained tropical storm force winds are occurring over the southeast Louisiana coast\""
+          }
+        },
+        "at_risk_zones": [
+          {
+            "id": "lower-ninth",
+            "label": "Lower Ninth Ward and the Industrial Canal side of the east bank"
+          },
+          {
+            "id": "new-orleans-east",
+            "label": "New Orleans East"
+          },
+          {
+            "id": "lakeview-gentilly",
+            "label": "Lakeview and Gentilly, behind the 17th Street and London Avenue canals"
+          },
+          {
+            "id": "algiers",
+            "label": "Algiers and the West Bank"
+          },
+          {
+            "id": "cbd-superdome",
+            "label": "Central Business District and the Superdome"
+          }
+        ],
+        "historical_first_public_alert": "09:30"
+      },
+      "alert_predates_clock": {
+        "date": "2005-08-27",
+        "time": "13:00",
+        "from": "t1-i3",
+        "note": "At about 13:00 on Saturday the Mayor declared a state of emergency and announced a voluntary evacuation, asking residents of Algiers, the Lower Ninth Ward and low-lying areas to start leaving.",
+        "clock_alert": "the City's first mandatory evacuation order",
+        "citation": {
+          "sourceId": "senate-2006",
+          "detail": "Chapter 5 timeline, Saturday 27 August: ~1 p.m.; Chapter 16 (Pre-Storm Evacuations) (Mayor's Saturday press conference)"
+        }
+      },
+      "sources": [
+        {
+          "id": "nhc-adv",
+          "label": "National Hurricane Center (NWS/NOAA), Hurricane Katrina public advisories of 28 August 2005 (CDT): Special Advisory 22 (7 AM), Advisory 23 (10 AM), Intermediate 23A (1 PM), Advisory 24 (4 PM), Intermediate 24A (7 PM) and Advisory 25 (10 PM), from the NHC archive of the storm.",
+          "url": "https://www.nhc.noaa.gov/archive/2005/KATRINA.shtml",
+          "note": "The advisories are in capitals in the original; case is normalised in the quotations here, words are not changed. Fetched 12 November 2026."
+        },
+        {
+          "id": "nhc-tcr",
+          "label": "Knabb, R. D., Rhome, J. R. and Brown, D. P. (National Hurricane Center). Tropical Cyclone Report: Hurricane Katrina, 23-30 August 2005. Original 20 December 2005; updated 10 August 2006, 14 September 2011 and 4 January 2023.",
+          "url": "https://www.nhc.noaa.gov/data/tcr/AL122005_Katrina.pdf",
+          "note": "The 4 January 2023 update revises the fatality total to 1,392 (the original versions said over 1,800) and gives the watch and warning table (Table 5) and the landfall time (06:10 CDT, 29 August, near Buras, Louisiana)."
+        },
+        {
+          "id": "nws-lix",
+          "label": "National Weather Service, Weather Forecast Office New Orleans/Baton Rouge (Slidell, Louisiana): \"Urgent - Weather Message\" / Inland Hurricane Warning products of Sunday 28 August 2005 at 1:05 AM, 10:11 AM and 4:13 PM CDT, as archived at weather.gov/lix (NPW_28_0105, NPW_28_1011, npw_28_1613).",
+          "url": "https://www.weather.gov/lix/NPW_28_1011",
+          "note": "The product header reads \"National Weather Service New Orleans LA\"; the office is in Slidell. The 10:11 AM text is also reproduced in the NWS Service Assessment (Fig. 10)."
+        },
+        {
+          "id": "nws-sa",
+          "label": "NOAA National Weather Service. Service Assessment: Hurricane Katrina, August 23-31, 2005. Silver Spring, Maryland, June 2006.",
+          "url": "https://www.weather.gov/media/publications/assessments/Katrina.pdf",
+          "note": "Cited for Finding 1 (the 10:11 statement) and for its own account that the Mayor ordered the evacuation at 11 a.m., which differs from the Senate committee."
+        },
+        {
+          "id": "house-2006",
+          "label": "U.S. House of Representatives, Select Bipartisan Committee to Investigate the Preparation for and Response to Hurricane Katrina. A Failure of Initiative (H. Rept. 109-377), 15 February 2006.",
+          "url": "https://www.govinfo.gov/content/pkg/CRPT-109hrpt377/pdf/CRPT-109hrpt377.pdf",
+          "note": "Cited by chapter heading or finding. The text puts the mandatory order at \"around 11:00 a.m.\" and in one passage dates a Saturday event as \"Saturday, August 28\"; where it matters the Senate timeline is used for clock times. Also used for the glossary (the committee's own gloss of contraflow, refuge of last resort and mandatory evacuation)."
+        },
+        {
+          "id": "senate-2006",
+          "label": "U.S. Senate Committee on Homeland Security and Governmental Affairs. Hurricane Katrina: A Nation Still Unprepared (S. Rept. 109-322), special report, 2006.",
+          "url": "https://www.govinfo.gov/content/pkg/CRPT-109srpt322/pdf/CRPT-109srpt322.pdf",
+          "note": "Cited by chapter, Chapter 5 timeline entry (all times Central) or numbered finding (Findings 58-62 are the pre-storm evacuation findings). Its endnotes cite city press releases, the FEMA video teleconference transcript and a CNN transcript of the 28 August news conference, none of which was fetched separately."
+        },
+        {
+          "id": "ipet-2009",
+          "label": "Interagency Performance Evaluation Task Force (U.S. Army Corps of Engineers). Performance Evaluation of the New Orleans and Southeast Louisiana Hurricane Protection System, Final Report, Volume I: Executive Summary and Overview. June 2009.",
+          "url": "https://biotech.law.lsu.edu/katrina/ipet/Volume%20I%20FINAL%2023Jun09%20mh.pdf",
+          "note": "Only Volume I was read. IPET states that its report is its independent opinion and not necessarily the official position of the Corps."
+        },
+        {
+          "id": "nhc-glossary",
+          "label": "National Hurricane Center. Glossary of NHC Terms, entry \"Storm Surge\" (nhc.noaa.gov/aboutgloss.shtml). Consulted 12 November 2026.",
+          "url": "https://www.nhc.noaa.gov/aboutgloss.shtml",
+          "note": "Used only for the glossary. The current page post-dates the day; the definition of storm surge is the same physical quantity NHC used in its 2005 advisories, but the 2005 wording of the glossary was not checked."
+        },
+        {
+          "id": "nasa-gibs",
+          "label": "NASA EOSDIS Global Imagery Browse Services (GIBS): MODIS Terra corrected-reflectance true colour, UTC days of 27 and 28 August 2005 over the north-central Gulf of Mexico; crops rendered by the project from the GIBS WMS.",
+          "url": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+          "note": "URL is NASA's data-use guidance (CC0 for NASA-led missions). The exact WMS request is given on each figure. Overpass times are not read from the product metadata; the images are daily composites."
+        },
+        {
+          "id": "fema-bahamonde",
+          "label": "Bahamonde, M. (FEMA). Photograph, New Orleans, Louisiana, 28 August 2005: residents lining up to enter the Superdome, opened as a shelter in advance of Hurricane Katrina. FEMA Photo Library (obsolete since 2019), as held on Wikimedia Commons.",
+          "url": "https://commons.wikimedia.org/wiki/File:People_lining_up_for_shelter_in_Superdome_in_New_Orleans.jpg",
+          "note": "Used only for the photo and its own caption."
+        }
+      ]
+    },
     {
       "id": "lahaina-2023",
       "status": "playable",
@@ -1589,6 +2828,753 @@
       ]
     },
     {
+      "id": "odisha-phailin-2013",
+      "status": "playable",
+      "title": "The Million-Person Evacuation",
+      "date": "2013-10-12",
+      "location": "Odisha, India",
+      "hazard": "tropical cyclone",
+      "clock": {
+        "timezone": "IST",
+        "start": "06:30",
+        "end": "20:30"
+      },
+      "record_caveat": "This is the success case, and its record is thinner than the US and Spanish inquiries. There is no public inquiry. The sources are IMD's own report on the storm (primary: bulletin times, forecasts, radar, tolls as supplied by the state), the joint Government of Odisha / World Bank / Asian Development Bank damage assessment, a slide presentation by an OSDMA chief general manager (undated), and three press reports. The Odisha government's own order-by-order timeline was not fetchable, so the record does not say at what hour any evacuation order was given, and most of the evacuation (the 36 hours before landfall) began on 11 October, before this clock opens. The clock is a single day because the game cannot cross midnight. Where an item comes from an undated source it is placed by plausibility and says so in its text. The IMD report stamps its warning bulletins in a day-hour-minute form with an unexplained suffix (for example 120630ef); they are read here as IST. The landfall hour varies inside IMD's own report (about 21:30 IST in its satellite section, 22:30 in its summary; radar shows the eye over land by 22:05) and in press (about 21:15). Wind figures are not comparable across agencies: IMD reports 3-minute winds, the US Joint Typhoon Warning Center 1-minute winds. Where this scenario cannot say what a different decision would have caused, it says so: the record is silent on every path not taken. The score is game design, not a claim about lives saved. The scoring field for the first public alert is set to the first listed bulletin of this day, 06:30, only because the clock cannot hold the real first alerts of 8 to 10 October.",
+      "briefing_media": {
+        "file": "phailin-terra-modis-true-colour-2013-10-11.jpg",
+        "type": "image",
+        "caption": "11 October 2013, late morning local time: Phailin over the Bay of Bengal the day before landfall, in a true-colour view from NASA's Terra satellite. IMD's own analysis has the storm at its peak of 115 knots and 940 hPa on this date. A satellite picture, not a wind measurement.",
+        "credit": "NASA EOSDIS GIBS, MODIS Terra corrected reflectance (true colour) with coastlines; crop (80E-96E, 10N-24N) rendered by the project",
+        "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+        "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+        "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/jpeg&layers=MODIS_Terra_CorrectedReflectance_TrueColor,Coastlines_15m&bbox=80,10,96,24&width=1200&height=1050&time=2013-10-11",
+        "width": 1200,
+        "height": 1050,
+        "takenOn": "2013-10-11",
+        "bytes": 219464,
+        "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-12)"
+      },
+      "warning_chain": {
+        "labels": {
+          "forecast": "IMD Bhubaneswar",
+          "desk": "OSDMA · SRC",
+          "phone": "Mobiles",
+          "broadcast": "AIR · TV"
+        },
+        "zones": {
+          "ganjam-coast": "Ganjam",
+          "puri-khurda": "Puri · Khurda",
+          "jagatsinghpur": "Jagatsinghpur"
+        }
+      },
+      "timesteps": [
+        {
+          "id": "t1",
+          "time": "06:30",
+          "time_label": "06:30, Saturday 12 October",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t1-i1",
+              "kind": "forecast",
+              "text": "IMD raised its landfall wind forecast in yesterday's 08:30 bulletin: gale winds of 210-220 kmph along and off the coastal districts of north coastal Andhra Pradesh and south Odisha at landfall. Its forecast of the morning of 9 October had said 175-185 kmph, gusting to 200. Landfall is forecast near Gopalpur, by night of the 12th.",
+              "citation": {
+                "sourceId": "imd-report",
+                "detail": "Section 9, items (iv) and (v), and Table 12 (bulletin of 11.10.13, 0830 IST)"
+              },
+              "zones": [
+                "ganjam-coast"
+              ],
+              "icon": "wind",
+              "chain": [
+                {
+                  "link": "forecast",
+                  "state": "used"
+                }
+              ]
+            },
+            {
+              "id": "t1-i2",
+              "kind": "forecast",
+              "text": "IMD's storm-surge forecast of 17:30 yesterday: a surge of 3.0 to 3.5 m above the astronomical tide, flooding the low-lying areas of Ganjam, Khurda, Puri and Jagatsinghpur districts of Odisha and Srikakulam district of Andhra Pradesh at landfall. The forecast of 17:30 on 10 October had said around 1.5 to 2.0 m.",
+              "citation": {
+                "sourceId": "imd-report",
+                "detail": "Table 13, forecasts of 10.10.13/1730 and 11.10.13/1730"
+              },
+              "zones": [
+                "ganjam-coast",
+                "puri-khurda",
+                "jagatsinghpur"
+              ],
+              "icon": "flood"
+            },
+            {
+              "id": "t1-i3",
+              "kind": "media",
+              "text": "Press reports of the day carry a second number. The US Navy's Joint Typhoon Warning Center forecasts maximum sustained winds of 269 kph with gusts up to 315 kph. A weather presenter says: 'There are some discrepancies in terms of the forecast. The Indian forecasts are slightly different from the Joint Typhoon Warning Center.' Some foreign forecasters are suggesting that India's weather office is underestimating the storm.",
+              "citation": {
+                "sourceId": "aljazeera",
+                "detail": "Al Jazeera, 'Cyclone Phailin hits India's east coast', 12 Oct 2013: the JTWC forecast, the presenter's remark and the report of foreign forecasters' view. Article time of day not stated"
+              },
+              "icon": "press"
+            },
+            {
+              "id": "t1-i4",
+              "kind": "message",
+              "text": "IMD's Bhubaneswar warning centre has issued cyclone watch (from 8 October), alert (from 9 October) and warning (from 10 October) bulletins; the same time stamps appear in its list of press, All India Radio and Doordarshan/TV bulletins. Fishermen warnings have gone out since 21:30 on 8 October. From 06:30 today the port signal is GD-X at Gopalpur and Puri and GD-IX at Paradip and Chandbali.",
+              "citation": {
+                "sourceId": "imd-report",
+                "detail": "Section 8.2 (Cyclone Warning Centre Bhubaneswar): watch, alert, warning, press/AIR/Doordarshan, fishermen and port-warning lists"
+              },
+              "icon": "press",
+              "chain": [
+                {
+                  "link": "broadcast",
+                  "state": "used"
+                }
+              ]
+            }
+          ],
+          "options": [
+            {
+              "id": "t1-a1",
+              "label": "One voice: every public message carries IMD's forecast",
+              "detail": "Radio bulletins, public appeals and district orders all rest on IMD's numbers. The foreign estimate stays out of the messaging.",
+              "effects": {
+                "warning_scope": "province",
+                "zones": [
+                  "ganjam-coast",
+                  "puri-khurda",
+                  "jagatsinghpur"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is what happened: the state's warnings rested on IMD's forecast ('accurate early warning by IMD' heads OSDMA's list of what went right), were repeated on All India Radio every 15 minutes, and the Chief Minister appealed to the public not to panic and to co-operate with the administration.",
+                "citation": {
+                  "sourceId": "osdma-mishra",
+                  "detail": "Slides '10 front preparedness' (item 1) and 'Continuous Govt.-public interface'"
+                }
+              }
+            },
+            {
+              "id": "t1-a2",
+              "label": "Lead public messaging with the foreign Category-5 estimate",
+              "detail": "Tell the coast that the US Navy's Joint Typhoon Warning Center expects stronger winds than IMD, and warn for that.",
+              "effects": {
+                "warning_scope": "province",
+                "zones": [
+                  "ganjam-coast",
+                  "puri-khurda",
+                  "jagatsinghpur"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0.5
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t1-a3",
+              "label": "No new message today: the evacuation order is out, leave it there",
+              "detail": "People have had days of warnings. Add nothing, change nothing.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            }
+          ],
+          "historical_option_id": "t1-a1",
+          "historical_citation": {
+            "sourceId": "osdma-mishra",
+            "detail": "Slides 'Early warning' (single authority) and '10 front preparedness' (accurate early warning by IMD)"
+          }
+        },
+        {
+          "id": "t2",
+          "time": "11:30",
+          "time_label": "11:30",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t2-i1",
+              "kind": "gauge",
+              "text": "IMD's track puts the centre at 18.1N, 85.7E at 11:30 (06:00 UTC), moving northwest at about 15 kmph, with sustained winds of 115 knots (215 kmph) and a central pressure of 940 hPa. The Visakhapatnam radar, watching since 06:30, shows an almost closed eye about 30 km across.",
+              "citation": {
+                "sourceId": "imd-report",
+                "detail": "Table 1 (best track, 12-10-2013 0600 UTC), Table 3 row 8 (DWR Visakhapatnam, 0600z) and Section 2.2"
+              },
+              "zones": [
+                "ganjam-coast"
+              ],
+              "board_state": "watch",
+              "icon": "satellite"
+            },
+            {
+              "id": "t2-i2",
+              "kind": "field_report",
+              "text": "Ganjam's most senior civil servant, Krishan Kumar, has not slept for three nights, setting up hundreds of temporary shelters in schools and temples and persuading villagers to leave flimsy homes. 'The weather was very good, the sun was shining and to convince people was not an easy job.' He has asked to be authorised to decide at his own level, and has told officials across Ganjam to act as they see fit, including keeping village shops open so supplies are not hoarded. (The record gives no hour for his account.)",
+              "citation": {
+                "sourceId": "reuters-dailyft",
+                "detail": "Reuters, 'In the eye of a storm: How Indian bureaucrats got it right', section 'Empowering local officials'"
+              },
+              "icon": "shelter"
+            },
+            {
+              "id": "t2-i3",
+              "kind": "message",
+              "text": "Mobile phones are a tool the state did not have in 1999: Kumar says he is able to reach officials in remote villages by phone to spread word of the coming storm. About 25 million people in Odisha, 60% of the state's population, carry a phone. (The record gives no hour for this.)",
+              "citation": {
+                "sourceId": "reuters-dailyft",
+                "detail": "Reuters, same article: district chief Kumar on mobile phones; 25 million users, 60% of the state's population"
+              },
+              "icon": "wea",
+              "chain": [
+                {
+                  "link": "phone",
+                  "state": "used"
+                }
+              ]
+            }
+          ],
+          "options": [
+            {
+              "id": "t2-a1",
+              "label": "Let district officials use force on people who refuse to leave",
+              "detail": "The order is out and the law allows force. Tell the districts to use it where persuasion has failed.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "ganjam-coast",
+                  "puri-khurda",
+                  "jagatsinghpur"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is what happened: Section 34(C) of the Disaster Management Act 2005 was promulgated, empowering the district administration to use force if required for evacuation.",
+                "citation": {
+                  "sourceId": "osdma-mishra",
+                  "detail": "Slide 'Preparing for combat'"
+                }
+              }
+            },
+            {
+              "id": "t2-a2",
+              "label": "Persuasion only: no force, however long the holdouts take",
+              "detail": "Keep sending officials and volunteers village to village, and ask nothing of those who still refuse.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "ganjam-coast",
+                  "puri-khurda",
+                  "jagatsinghpur"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t2-a3",
+              "label": "Stop pressing the holdouts: they have had days of warnings",
+              "detail": "Whoever is still in a flimsy house has chosen. Put the effort into the shelters instead.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            }
+          ],
+          "historical_option_id": "t2-a1",
+          "historical_citation": {
+            "sourceId": "osdma-mishra",
+            "detail": "Slide 'Preparing for combat': Section 34(C) of the Disaster Management Act 2005 promulgated, empowering the district administration to use force if required for evacuation"
+          }
+        },
+        {
+          "id": "t3",
+          "time": "17:30",
+          "time_label": "17:30",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t3-i1",
+              "kind": "forecast",
+              "text": "IMD's 17:30 storm-surge forecast holds at 3.0 to 3.5 m above the astronomical tide, flooding the low-lying areas of Ganjam, Khurda, Puri and Jagatsinghpur at landfall. Model guidance from INCOIS and IIT Delhi gives a surge of 2 to 3 m; the IIT Bhubaneswar model gives 3.5 m.",
+              "citation": {
+                "sourceId": "imd-report",
+                "detail": "Table 13 (forecast of 12.10.13/1730) and Section 7.6 (storm surge guidance)"
+              },
+              "zones": [
+                "ganjam-coast",
+                "puri-khurda",
+                "jagatsinghpur"
+              ],
+              "icon": "flood",
+              "media": {
+                "file": "phailin-terra-modis-true-colour-2013-10-12.jpg",
+                "type": "image",
+                "caption": "12 October 2013, morning local time: Phailin's eye close to the Odisha and Andhra coast on the day of landfall, in a true-colour view from NASA's Terra satellite (the pass is hours old by the evening). The black wedge is the gap between two satellite swaths, not cloud or smoke. A satellite picture, not a wind or surge measurement.",
+                "credit": "NASA EOSDIS GIBS, MODIS Terra corrected reflectance (true colour) with coastlines; crop (80E-96E, 10N-24N) rendered by the project",
+                "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+                "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+                "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/jpeg&layers=MODIS_Terra_CorrectedReflectance_TrueColor,Coastlines_15m&bbox=80,10,96,24&width=1200&height=1050&time=2013-10-12",
+                "width": 1200,
+                "height": 1050,
+                "takenOn": "2013-10-12",
+                "bytes": 225190,
+                "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-12)",
+                "suggestedTimestep": "t3"
+              }
+            },
+            {
+              "id": "t3-i2",
+              "kind": "message",
+              "text": "The state's public line, as OSDMA later described it: warnings on All India Radio every 15 minutes, in the commonly used language; an appeal from the Chief Minister not to panic and to co-operate with the administration; and the Special Relief Commissioner, through the media, asking the public to co-operate with the government on evacuation. (The record gives no hour for this.)",
+              "citation": {
+                "sourceId": "osdma-mishra",
+                "detail": "Slide 'Continuous Govt.-public interface'"
+              },
+              "icon": "press",
+              "chain": [
+                {
+                  "link": "broadcast",
+                  "state": "used"
+                }
+              ]
+            },
+            {
+              "id": "t3-i3",
+              "kind": "message",
+              "text": "The shelters are ready: OSDMA has run mock drills at all the cyclone shelters and checked or replaced their equipment; the cyclone and flood shelter management committees are activated to help move the vulnerable; all 14 cyclone-prone districts hold satellite phones in case the phone lines fail; free kitchens have been open since 11 October. Government employees' Dussehra holidays are cancelled.",
+              "citation": {
+                "sourceId": "rdna",
+                "detail": "Section 1.3 'State Government Response', paragraph 12"
+              },
+              "icon": "shelter"
+            }
+          ],
+          "options": [
+            {
+              "id": "t3-a1",
+              "label": "Hold the order as issued and keep the shelters filling",
+              "detail": "Everyone in low-lying areas, and in flimsy houses within 10 km of the coast, goes to a shelter or a safe building, as already ordered.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "ganjam-coast",
+                  "puri-khurda",
+                  "jagatsinghpur"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is what happened: the order stood. All people living in low-lying areas and in kutcha or tin-roof houses within 0-10 km of the coastline were ordered to nearby cyclone shelters or other identified safe buildings, and over 1 million people were evacuated within 36 hours preceding landfall.",
+                "citation": {
+                  "sourceId": "rdna",
+                  "detail": "Section 1.3, paragraph 13"
+                }
+              }
+            },
+            {
+              "id": "t3-a2",
+              "label": "Widen the order: move people from beyond the 10 km line too",
+              "detail": "The surge forecast has risen. Bring in people from further inland before dark.",
+              "effects": {
+                "warning_scope": "province",
+                "zones": [
+                  "ganjam-coast",
+                  "puri-khurda",
+                  "jagatsinghpur"
+                ],
+                "protective": true,
+                "false_alarm_weight": 1
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t3-a3",
+              "label": "Declare the evacuation complete: stop moving people",
+              "detail": "Those who have not come by now will not come. Close admission to the shelters and prepare to shelter in place.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            }
+          ],
+          "historical_option_id": "t3-a1",
+          "historical_citation": {
+            "sourceId": "rdna",
+            "detail": "Section 1.3, paragraph 13 (the 0-10 km order and the evacuation in the 36 hours before landfall)"
+          }
+        },
+        {
+          "id": "t4",
+          "time": "20:30",
+          "time_label": "20:30",
+          "approx": false,
+          "info_available": [
+            {
+              "id": "t4-i1",
+              "kind": "gauge",
+              "text": "IMD's 20:30 cyclone warning is out. The Visakhapatnam radar measured winds of 60 m/s at 4 km height at 19:40 (14:10 UTC) with an eye 18 km across. IMD's track puts the centre at 19.1N, 85.2E at 20:30 (15:00 UTC), still at 115 knots and 940 hPa, heading for a landfall near Gopalpur.",
+              "citation": {
+                "sourceId": "imd-report",
+                "detail": "Table 3 row 16 and Section 4.2 (DWR Visakhapatnam); Table 1 (12-10-2013 1500 UTC); Section 8.2 (warning at 122030)"
+              },
+              "zones": [
+                "ganjam-coast"
+              ],
+              "icon": "satellite"
+            },
+            {
+              "id": "t4-i2",
+              "kind": "field_report",
+              "text": "In Ganjam, with a couple of hours to go before landfall, some 350,000 people living up to 10 km from the shoreline are in shelters for the night.",
+              "citation": {
+                "sourceId": "reuters-dailyft",
+                "detail": "Reuters, same article: 'With a couple of hours to go before the storm made landfall, some 350,000 people living up to 10 km (6 miles) from the shoreline were safely sheltered for the night'"
+              },
+              "icon": "shelter"
+            },
+            {
+              "id": "t4-i3",
+              "kind": "message",
+              "text": "Teams and stock are in position. Odisha's rapid-action force, the state fire service and the national disaster-response force are deployed with equipment at strategic locations; tracks are assigned to teams for clearing the relief lines; seven days of food, fuel and relief materials are prepositioned; satellite phones are with the vulnerable districts as the last line of communication. (The record gives no hour for this.)",
+              "citation": {
+                "sourceId": "osdma-mishra",
+                "detail": "Slide 'Preparing for combat'"
+              },
+              "icon": "committee"
+            }
+          ],
+          "options": [
+            {
+              "id": "t4-a1",
+              "label": "Keep the teams prepositioned and clear the roads once the cyclone abates",
+              "detail": "Control rooms stay open; response teams, equipment and relief stock stay where they are placed.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "ganjam-coast"
+                ],
+                "protective": true,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": true,
+                "text": "This is what happened: major roads were cleared within 24 hours, and about 5.7 MT of dry food was airdropped by IAF helicopters to inaccessible areas.",
+                "citation": {
+                  "sourceId": "rdna",
+                  "detail": "Section 1.3, paragraph 14"
+                }
+              }
+            },
+            {
+              "id": "t4-a2",
+              "label": "Send crews onto the coast roads now, ahead of the wind",
+              "detail": "Put teams out to reach anyone still moving toward the shelters before the eye arrives.",
+              "effects": {
+                "warning_scope": "targeted",
+                "zones": [
+                  "ganjam-coast"
+                ],
+                "protective": true,
+                "false_alarm_weight": 1
+              },
+              "consequence": {
+                "known": false
+              }
+            },
+            {
+              "id": "t4-a3",
+              "label": "Stand the control rooms down for the night and resume at first light",
+              "detail": "Nothing more can be done until the wind drops. Rest the staff.",
+              "effects": {
+                "warning_scope": "none",
+                "zones": [],
+                "protective": false,
+                "false_alarm_weight": 0
+              },
+              "consequence": {
+                "known": false
+              }
+            }
+          ],
+          "historical_option_id": "t4-a1",
+          "historical_citation": {
+            "sourceId": "osdma-mishra",
+            "detail": "Slides 'Preparing for combat' (prepositioning, relief-line clearance plans) and 'Milestones' (restoration of road communication within 12-24 hours of abatement)"
+          }
+        }
+      ],
+      "historical_path": [
+        {
+          "timestep_id": "t1",
+          "action": "The state kept to IMD's forecast as the single early warning, repeated on All India Radio every 15 minutes, with the Chief Minister's appeal not to panic. The record does not say whether the Joint Typhoon Warning Center's higher numbers were discussed.",
+          "citation": {
+            "sourceId": "osdma-mishra",
+            "detail": "Slides 'Early warning', '10 front preparedness' and 'Continuous Govt.-public interface'"
+          }
+        },
+        {
+          "timestep_id": "t2",
+          "action": "Section 34(C) of the Disaster Management Act 2005 was promulgated, empowering the district administration to use force if required for evacuation.",
+          "citation": {
+            "sourceId": "osdma-mishra",
+            "detail": "Slide 'Preparing for combat'"
+          }
+        },
+        {
+          "timestep_id": "t3",
+          "action": "The 0-10 km order stood: all people in low-lying areas and in kutcha or tin-roof houses within 0-10 km of the coastline to nearby cyclone shelters or other safe buildings. Over 1 million people were evacuated within 36 hours before landfall.",
+          "citation": {
+            "sourceId": "rdna",
+            "detail": "Section 1.3, paragraph 13"
+          }
+        },
+        {
+          "timestep_id": "t4",
+          "action": "Response teams stayed prepositioned with their equipment; major roads were cleared within 24 hours of the cyclone and IAF helicopters airdropped dry food to cut-off areas.",
+          "citation": {
+            "sourceId": "rdna",
+            "detail": "Section 1.3, paragraph 14"
+          }
+        }
+      ],
+      "inquiry_findings": [
+        {
+          "kind": "verbatim",
+          "quote": "Preparedness of the Government of Odisha (GoO) and the coastal communities and their resolve to ensure zero casualties resulted in prompt action to the warning of the cyclone.",
+          "citation": {
+            "sourceId": "rdna",
+            "detail": "Executive Summary, paragraph 2 (joint Government of Odisha, World Bank and ADB assessment; there was no public inquiry)"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "To ensure zero casualties, the GoO ordered all people living in low lying areas and kutcha houses or tin roof houses within 0-10 km of the coastline to be evacuated to nearby cyclone shelters or other identified safe buildings.",
+          "citation": {
+            "sourceId": "rdna",
+            "detail": "Section 1.3, paragraph 13"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "Single authority for EW or people may act on incorrect or misleading information",
+          "translation": "OSDMA's own slide on early warning (EW): one authority should issue the warning, or people may act on wrong information.",
+          "citation": {
+            "sourceId": "osdma-mishra",
+            "detail": "Slide 'Early warning'"
+          }
+        },
+        {
+          "kind": "verbatim",
+          "quote": "After the 1999 super cyclone, the state government has taken measures like the installation of modern communication systems, construction of cyclone shelters, and other improved infrastructure",
+          "citation": {
+            "sourceId": "rdna",
+            "detail": "Section 1.1, paragraph 4"
+          }
+        },
+        {
+          "kind": "paraphrase",
+          "quote": "Compliance with the evacuation order was high but uneven. In some areas as many as 95% of residents left; in others as few as 33% did. Unemployment, theft and no provision for evacuating livestock to safety explained the failures to leave significantly.",
+          "citation": {
+            "sourceId": "das-2019",
+            "detail": "Abstract, Climatic Change 152:291-305 (peer-reviewed study of evacuation responses to Phailin in Odisha's coastal districts)"
+          }
+        },
+        {
+          "kind": "paraphrase",
+          "quote": "The forecasters' own numbers differ by agency and by averaging period. In the archive's reanalysis the US Joint Typhoon Warning Center has Phailin at 140 knots (1-minute winds, Category 5 on the Saffir-Simpson scale) at its peak on 11 and 12 October; IMD has 115 knots (3-minute winds). The archive says it makes no adjustment for differing averaging periods, so the two figures cannot be read straight across.",
+          "citation": {
+            "sourceId": "ibtracs",
+            "detail": "IBTrACS v04r01, storm 2013281N12098: USA_WIND and WMO_WIND columns, 11-12 Oct 2013; column documentation on averaging periods"
+          }
+        }
+      ],
+      "takeaways": [
+        {
+          "text": "When forecasters disagree, the desk can still speak with one voice: OSDMA's own lesson is that a single authority for early warning stops people acting on incorrect or misleading information.",
+          "from": {
+            "finding": 2
+          },
+          "citation": {
+            "sourceId": "osdma-mishra",
+            "detail": "Slide 'Early warning'"
+          }
+        },
+        {
+          "text": "An order that names who must move and how far from the sea can be carried out village by village: here, low-lying areas and flimsy houses within 0-10 km of the coast.",
+          "from": {
+            "finding": 1
+          },
+          "citation": {
+            "sourceId": "rdna",
+            "detail": "Section 1.3, paragraph 13"
+          }
+        },
+        {
+          "text": "Shelters and communications built after the 1999 super cyclone were already in place when Phailin came; the evacuation was a matter of using them, not building them.",
+          "from": {
+            "finding": 3
+          },
+          "citation": {
+            "sourceId": "rdna",
+            "detail": "Section 1.1, paragraph 4"
+          }
+        }
+      ],
+      "debrief_media": [
+        {
+          "file": "phailin-aqua-modis-true-colour-2013-10-13.jpg",
+          "type": "image",
+          "caption": "13 October 2013, afternoon pass: Phailin's cloud mass over eastern India the day after landfall, in a true-colour view from NASA's Aqua satellite. Pale, sediment-coloured water lies along the Odisha coast. A satellite picture; it carries no measurement of wind, rain or flooding. Taken after the last decision; it was not on the desk.",
+          "credit": "NASA EOSDIS GIBS, MODIS Aqua corrected reflectance (true colour) with coastlines; crop (78E-94E, 14N-28N) rendered by the project",
+          "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+          "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+          "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/jpeg&layers=MODIS_Aqua_CorrectedReflectance_TrueColor,Coastlines_15m&bbox=78,14,94,28&width=1200&height=1050&time=2013-10-13",
+          "width": 1200,
+          "height": 1050,
+          "takenOn": "2013-10-13",
+          "bytes": 323501,
+          "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-12)"
+        },
+        {
+          "file": "phailin-terra-modis-true-colour-2013-10-14.jpg",
+          "type": "image",
+          "caption": "14 October 2013, morning pass: the skies clearing over the Odisha coast two days after landfall, in a true-colour view from NASA's Terra satellite. Brown, sediment-laden water lies along the coast; the black wedge at right is the gap between two satellite swaths. A satellite picture; it carries no measurement of flooding or damage. Taken after the last decision; it was not on the desk.",
+          "credit": "NASA EOSDIS GIBS, MODIS Terra corrected reflectance (true colour) with coastlines; crop (80E-92E, 16N-26N) rendered by the project",
+          "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+          "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+          "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/jpeg&layers=MODIS_Terra_CorrectedReflectance_TrueColor,Coastlines_15m&bbox=80,16,92,26&width=1200&height=1000&time=2013-10-14",
+          "width": 1200,
+          "height": 1000,
+          "takenOn": "2013-10-14",
+          "bytes": 244944,
+          "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-12)"
+        }
+      ],
+      "outcome": {
+        "deaths": {
+          "min": 21,
+          "max": 44,
+          "contested": true,
+          "note": "Counts differ by what they include. 21 were killed by the cyclone itself (IMD's report, as supplied by the state; OSDMA). The floods that followed add 17 in IMD's report and 23 in OSDMA's table, and the joint damage assessment gives 44 dead in all. IMD lists one further death in coastal Andhra Pradesh. Press counts were 25 on 14 October (AP) and 21 on 16 October (Reuters). For comparison, the 1999 super cyclone is given as 'about 10,000' dead in the damage assessment, as 8,900 in OSDMA's comparison table, and as 8,243 in a government report quoted by Al Jazeera; this scenario does not resolve those to one figure. Evacuation is graded the same way: the state's own tally is 983,642 for the cyclone (and 171,083 more for the floods that followed), the damage assessment says 'over 1 million' within 36 hours, and the 1.2 million sometimes quoted rests on secondary summaries only."
+        },
+        "citation": {
+          "sourceId": "rdna",
+          "detail": "Executive Summary, paragraph 1 ('left 44 people dead'). The other figures in the note come from the IMD report (section 6.1), the OSDMA slides 'Phailin and floods' and 'Super cyclone 1999 vs Phailin 2013', and the press reports named"
+        }
+      },
+      "scoring": {
+        "impact": {
+          "time": "21:30",
+          "label": "the eye crosses the Odisha coast near Gopalpur (IMD's report gives about 21:30 in one section and 22:30 in its summary; radar shows the eye over land by 22:05)",
+          "citation": {
+            "sourceId": "imd-report",
+            "detail": "Introduction and Section 4.1 (landfall near Gopalpur, 1600 and 1700 UTC in different sections); Table 3 rows 19-20 (eye over land at 1635 UTC)"
+          },
+          "window_minutes": 60
+        },
+        "at_risk_zones": [
+          {
+            "id": "ganjam-coast",
+            "label": "Ganjam: the coast around Gopalpur, the landfall district"
+          },
+          {
+            "id": "puri-khurda",
+            "label": "Puri and Khurda: the coast and the Chilika lagoon"
+          },
+          {
+            "id": "jagatsinghpur",
+            "label": "Jagatsinghpur coast, named in IMD's storm-surge forecast"
+          }
+        ],
+        "historical_first_public_alert": "06:30"
+      },
+      "alert_predates_clock": {
+        "date": "2013-10-08",
+        "from": "t1-i4",
+        "note": "IMD's Bhubaneswar warning centre issued cyclone watch bulletins from 8 October, alert bulletins from 9 October and warning bulletins from 10 October, and fishermen warnings from 21:30 on 8 October.",
+        "clock_alert": "this day's first listed IMD bulletin",
+        "citation": {
+          "sourceId": "imd-report",
+          "detail": "Section 8.2 (Cyclone Warning Centre Bhubaneswar): watch, alert, warning and fishermen-warning lists"
+        }
+      },
+      "sources": [
+        {
+          "id": "imd-report",
+          "label": "India Meteorological Department (Cyclone Warning Division, New Delhi), Ministry of Earth Sciences / Earth System Science Organisation, 'Very Severe Cyclonic Storm, PHAILIN over the Bay of Bengal (08-14 October 2013): A Report', October 2013.",
+          "url": "https://rsmcnewdelhi.imd.gov.in/uploads/report/26/26_38a1d4_phailin.pdf",
+          "note": "Primary meteorological record: best track, radar log, bulletin and warning times, forecast verification, Odisha casualty and evacuation tallies as supplied by the state. Cited for text and figures only, not reproduced. Warning-time stamps read as IST (suffix 'ef' unexplained in the report). The report's observed surge (2-2.5 m) differs from the damage assessment's (3.5 m)."
+        },
+        {
+          "id": "rdna",
+          "label": "Government of Odisha, The World Bank and the Asian Development Bank, 'India: Cyclone Phailin in Odisha, October 2013: Rapid Damage and Needs Assessment Report', assessment of 26 November to 3 December 2013 (World Bank report no. 83886).",
+          "url": "https://documents1.worldbank.org/curated/en/168471468257979992/pdf/838860WP0P14880Box0382116B00PUBLIC0.pdf",
+          "note": "Joint government and multilateral assessment, not an inquiry. Gives 44 dead, over 1 million evacuated within 36 hours, the 0-10 km order, and the 1999 comparison. Does not date the evacuation order."
+        },
+        {
+          "id": "osdma-mishra",
+          "label": "Dr Kamal Lochan Mishra, Chief General Manager, Odisha State Disaster Management Authority, 'Cyclones and Disaster Preparedness', slide presentation hosted by the Centre for Science and Environment (undated).",
+          "url": "https://cdn.cseindia.org/userfiles/kamal%20mishra.pdf",
+          "note": "OSDMA's own post-event account. Slides give the 'Section 34(C)' provision, the All India Radio cadence, prepositioning, and a 1999-versus-Phailin table (8,900 versus 21 casualties; 983,642 evacuated). Undated; used where nothing dated is available, and items drawn from it say the record gives no hour."
+        },
+        {
+          "id": "reuters-dailyft",
+          "label": "Reuters (Bhubaneshwar), 'In the eye of a storm: How Indian bureaucrats got it right', as published by the Daily FT (Colombo), 16 October 2013.",
+          "url": "https://www.ft.lk/Other-Sectors/in-the-eye-of-a-storm-how-indian-bureaucrats-got-it-right/57-201796",
+          "note": "Press report of 16 October built on interviews with the Ganjam district chief and the state's disaster-management head; their accounts are retrospective and carry no clock times."
+        },
+        {
+          "id": "aljazeera",
+          "label": "Al Jazeera and news agencies, 'Cyclone Phailin hits India's east coast', 12 October 2013.",
+          "url": "https://www.aljazeera.com/news/2013/10/12/cyclone-phailin-hits-indias-east-coast",
+          "note": "Press report written as the storm made landfall; the only fetched contemporaneous source for the Joint Typhoon Warning Center's forecast winds and for the reported disagreement with Indian forecasts. Article hour not stated."
+        },
+        {
+          "id": "ibtracs",
+          "label": "NOAA National Centers for Environmental Information, International Best Track Archive for Climate Stewardship (IBTrACS) v04r01, North Indian Ocean subset, storm 2013281N12098 (PHAILIN); Knapp et al. 2010, Bulletin of the American Meteorological Society 91:363-376; IBTrACS v04 column documentation.",
+          "url": "https://www.ncei.noaa.gov/products/international-best-track-archive",
+          "note": "Post-event reanalysis, not what was on the desk. Used only for the debrief comparison of the JTWC (1-minute) and IMD (3-minute) peak winds and the archive's statement that it does not adjust for averaging periods."
+        },
+        {
+          "id": "das-2019",
+          "label": "Saudamini Das, 'Evaluating climate change adaptation through evacuation decisions: a case study of cyclone management in India', Climatic Change 152 (2019), 291-305, doi:10.1007/s10584-018-2292-1.",
+          "url": "https://link.springer.com/article/10.1007/s10584-018-2292-1",
+          "note": "Peer-reviewed study. Only the abstract (free to read) was fetched; the figures used are those in the abstract."
+        }
+      ]
+    },
+    {
       "id": "valencia-dana-2024",
       "status": "playable",
       "title": "The Day of the DANA",
@@ -2618,22 +4604,6 @@
       "date": "2013-11-08",
       "location": "Tacloban and Eastern Visayas, Philippines",
       "hazard": "tropical cyclone / storm surge"
-    },
-    {
-      "id": "katrina-2005",
-      "status": "stub",
-      "title": "The Levees",
-      "date": "2005-08-29",
-      "location": "New Orleans, Louisiana, United States",
-      "hazard": "hurricane / levee failure"
-    },
-    {
-      "id": "odisha-phailin-2013",
-      "status": "stub",
-      "title": "The Million-Person Evacuation",
-      "date": "2013-10-12",
-      "location": "Odisha, India",
-      "hazard": "tropical cyclone"
     }
   ]
 }

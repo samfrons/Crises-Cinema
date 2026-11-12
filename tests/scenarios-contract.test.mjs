@@ -120,9 +120,28 @@ rejects('reading series mixing timed and untimed readings', (e) => e(L, (s) => {
 rejects('reading "by" without a time', (e) => e(L, (s) => { delete item(s, 't3-i1').readings[1].at; item(s, 't3-i1').readings[0].by = true; delete item(s, 't3-i1').readings[0].at; }), /by — only `true`, and only with an `at`/);
 rejects('instrument label that runs long', (e) => e(V, (s) => { s.instruments.poyo = 'x'.repeat(41); }), /instruments\.poyo — a label of 1–40/);
 
+// The hazard picks the board's words; a hazard with no family has none.
+const K = 'katrina-2005.json';
+const P = 'odisha-phailin-2013.json';
+rejects('playable hazard that names no hazard family', (e) => e(P, (s) => { s.hazard = 'volcanic eruption'; }), /hazard — "volcanic eruption" names no hazard family/);
+
+// Alert before the clock: the earlier warning is drawn from one cited slip and may not outrun it.
+rejects('alert_predates_clock without a note', (e) => e(P, (s) => { delete s.alert_predates_clock.note; }), /alert_predates_clock\.note — one sentence/);
+rejects('alert_predates_clock without a citation', (e) => e(P, (s) => { delete s.alert_predates_clock.citation; }), /alert_predates_clock\.citation — missing citation/);
+rejects('alert_predates_clock citing a source not in sources[]', (e) => e(P, (s) => { s.alert_predates_clock.citation.sourceId = 'memory'; }), /alert_predates_clock\.citation — citation sourceId "memory" not in sources/);
+rejects('alert_predates_clock citing a different source from its slip', (e) => e(P, (s) => { s.alert_predates_clock.citation.sourceId = 'rdna'; }), /must cite the source of the item it is drawn from \("imd-report"\)/);
+rejects('alert_predates_clock drawn from no slip', (e) => e(P, (s) => { s.alert_predates_clock.from = 't9-i9'; }), /alert_predates_clock\.from — must be the id of an info item/);
+rejects('alert_predates_clock dated on or after the scenario day', (e) => e(P, (s) => { s.alert_predates_clock.date = '2013-10-12'; }), /must be before the scenario day/);
+rejects('alert_predates_clock date its slip does not name', (e) => e(P, (s) => { s.alert_predates_clock.date = '2013-10-06'; }), /does not name 2013-10-06/);
+rejects('alert_predates_clock weekday its slip does not name', (e) => e(K, (s) => { s.alert_predates_clock.date = '2005-08-26'; }), /does not name 2005-08-26 \("26 August" \/ "August 26" \/ "Friday"\)/);
+rejects('alert_predates_clock time its slip does not state', (e) => e(K, (s) => { s.alert_predates_clock.time = '10:00'; }), /alert_predates_clock\.time — "10:00" must be an HH:MM/);
+rejects('alert_predates_clock note that adds a figure', (e) => e(P, (s) => { s.alert_predates_clock.note += ' Some 6 days of warnings in all.'; }), /prints "6", which item t1-i4 does not/);
+rejects('alert_predates_clock without a clock_alert', (e) => e(P, (s) => { delete s.alert_predates_clock.clock_alert; }), /alert_predates_clock\.clock_alert — what the day's 06:30 figure is/);
+rejects('alert_predates_clock with SOURCE NEEDED', (e) => e(K, (s) => { s.alert_predates_clock.note = 'SOURCE NEEDED: when did the first call go out?'; }), /alert_predates_clock\.note — placeholder/);
+
 test('every icon, chain link and state used in the real data is in the vocabulary (positive control)', () => {
   const vocab = JSON.parse(readFileSync(join(repo, 'src', 'app', 'control-room', 'vocabulary.json'), 'utf8'));
-  for (const name of [L, V]) {
+  for (const name of [L, V, K, P]) {
     const s = JSON.parse(readFileSync(join(repo, 'data', 'scenarios', name), 'utf8'));
     for (const i of s.timesteps.flatMap((t) => t.info_available)) {
       if (i.icon) assert.ok(vocab.icons.includes(i.icon), `${name} ${i.id} icon ${i.icon}`);

@@ -39,6 +39,21 @@
     "contained": { "label": "contained", "says": "\\bcontained\\b" },
     "flaring": { "label": "flaring up", "says": "\\bflaring up\\b" }
   },
+  "hazards": {
+    "_comment": "Hazard families (hazards.ts). A scenario's `hazard` picks the FIRST family whose `match` pattern it contains (case-insensitive), so order matters: fire, then storm, then water. `states` are the board's words for watch / signal / impact. The build refuses a playable scenario whose hazard names no family. Documented in data/scenarios/README.md.",
+    "fire": {
+      "match": "fire|bushfire|wildland",
+      "states": { "watch": "red flag", "signal": "fire reported", "impact": "burning" }
+    },
+    "storm": {
+      "match": "cyclone|hurricane|typhoon",
+      "states": { "watch": "warning in force", "signal": "winds measured", "impact": "storm ashore" }
+    },
+    "water": {
+      "match": "flood|dam|levee|rain|river|surge",
+      "states": { "watch": "red warning", "signal": "gauge alert", "impact": "flooding" }
+    }
+  },
   "compass": {
     "N": "north",
     "NE": "north-?east",

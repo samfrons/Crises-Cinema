@@ -34,9 +34,13 @@ export function deskHref(scenario: string, folder: FolderId, step?: string) {
 }
 
 /** Which folder demonstrates a playable day — where the debrief's bridge
- *  sends a player who has just held it. Both playable days are clocked in
- *  folder Two ("The last mile"); a day not listed falls back to the cover. */
+ *  sends a player who has just held it. The three last-mile failures are
+ *  clocked in folder Two ("Where the graveyard is"); Odisha, the success
+ *  case, sits in folder One beside the warning dividend. A day not listed
+ *  falls back to the cover. */
 export const DAY_FOLDER: Record<string, FolderId> = {
   'lahaina-2023': 'b',
   'valencia-dana-2024': 'b',
+  'katrina-2005': 'b',
+  'odisha-phailin-2013': 'a',
 };

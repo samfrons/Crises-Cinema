@@ -367,9 +367,12 @@ export function SilentGlyph({ size = 34, className }: P) {
 export function HazardGlyph({ hazard, size, className }: P & { hazard: string }) {
   const h = hazard.toLowerCase();
   if (/fire|wildland/.test(h)) return <FireGlyph size={size} className={className} />;
-  if (h.includes('dam') || h.includes('levee')) return <DamGlyph size={size} className={className} />;
-  if (h.includes('cyclone') || h.includes('hurricane') || h.includes('typhoon') || h.includes('surge')) {
+  // Storm before dam, as in the board's hazard families: "hurricane / levee
+  // failure" is a storm day (the levees fail after its clock ends).
+  if (h.includes('cyclone') || h.includes('hurricane') || h.includes('typhoon')) {
     return <CycloneGlyph size={size} className={className} />;
   }
+  if (h.includes('dam') || h.includes('levee')) return <DamGlyph size={size} className={className} />;
+  if (h.includes('surge')) return <CycloneGlyph size={size} className={className} />;
   return <FloodGlyph size={size} className={className} />;
 }

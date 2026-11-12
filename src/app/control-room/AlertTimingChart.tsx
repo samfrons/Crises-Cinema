@@ -16,7 +16,7 @@
  */
 import { useState } from 'react';
 import type { Scenario } from './types';
-import type { Choice } from './scoring';
+import { alertBeforeClock, type Choice } from './scoring';
 
 const minutes = (hhmm: string) => {
   const [h, m] = hhmm.split(':').map(Number);
@@ -49,6 +49,14 @@ export default function AlertTimingChart({ scenario, choices, compact = false }:
   const yourFirst = choices.find((c) => c.option.effects.warning_scope !== 'none');
   const theirAlertTime = scenario.scoring.historical_first_public_alert;
   const theirAlert = minutes(theirAlertTime);
+  // Warnings that came before this clock opened: the day's HH:MM is then this
+  // day's figure only. The lane says so with a mark pointing off the plate's
+  // left edge (earlier than the axis can hold), and the flag is renamed.
+  const early = alertBeforeClock(scenario);
+  const theyX = x(theirAlert);
+  const theyFlip = theyX < W * 0.4; // an early flag reads rightward, clear of the lane name
+  const theyLabelX = theyFlip ? Math.max(theyX + 6, PAD.left + 44) : theyX - 6;
+  const theyLabel = early ? `ON THIS CLOCK ${theirAlertTime}` : `THEY ALERT ${theirAlertTime}`;
 
   const hours: number[] = [];
   for (let m = t0; m <= t1; m += 60) hours.push(m);
@@ -69,7 +77,7 @@ export default function AlertTimingChart({ scenario, choices, compact = false }:
       </div>
       <div className="cr-timing-plot">
         <svg viewBox={`0 0 ${W} ${H}`} role="img" onPointerLeave={hide}
-          aria-label={`Timeline comparing your first warning${yourFirst ? ` at ${yourFirst.timestep.time}` : ' (you never alerted)'} with the official alert at ${theirAlertTime} and the impact at ${scenario.scoring.impact.time}`}>
+          aria-label={`Timeline comparing your first warning${yourFirst ? ` at ${yourFirst.timestep.time}` : ' (you never alerted)'} with the official alert at ${theirAlertTime}${early ? ` (${early.clock_alert}; public warning came ${early.span} this clock, on ${early.longDate})` : ''} and the impact at ${scenario.scoring.impact.time}`}>
           {/* impact window — the status band everything is measured against */}
           <rect className="cr-timing-impact" x={x(impactStart)} y={PAD.top} width={x(impactStart + window) - x(impactStart)} height={H - PAD.top - PAD.bottom} />
           <text className="cr-timing-impact-label" x={impactMid} y={PAD.top - 8} textAnchor="middle">
@@ -127,16 +135,29 @@ export default function AlertTimingChart({ scenario, choices, compact = false }:
           <text className="cr-timing-lane" x={PAD.left} y={LANE_THEY + 22}>THEY</text>
           <line className="cr-timing-lanerail is-they" x1={PAD.left} y1={LANE_THEY} x2={W - PAD.right} y2={LANE_THEY} />
           <g className="cr-timing-flag is-they">
-            <line x1={x(theirAlert)} y1={LANE_THEY + 9} x2={x(theirAlert)} y2={LANE_THEY + 26} />
-            <text x={x(theirAlert) - 6} y={LANE_THEY + 23} textAnchor="end">{`THEY ALERT ${theirAlertTime}`}</text>
+            {/* the tick would cross the lane name when the alert opens the axis */}
+            {theyX > PAD.left + 40 && <line x1={theyX} y1={LANE_THEY + 9} x2={theyX} y2={LANE_THEY + 26} />}
+            <text x={theyLabelX} y={LANE_THEY + 23} textAnchor={theyFlip ? 'start' : 'end'}>{theyLabel}</text>
           </g>
+          {early && (
+            <g className="cr-timing-mark cr-timing-early" onPointerEnter={() => show({
+              x: PAD.left, y: LANE_THEY, time: `${early.short}${early.time ? ` ${early.time}` : ''}`, who: 'They',
+              text: `Public warning ${early.span} this clock`, note: 'Before the clock',
+            })}>
+              <path className="cr-timing-early-arrow" d={`M${PAD.left + 34} ${LANE_THEY}H${PAD.left - 14}M${PAD.left - 8} ${LANE_THEY - 5}L${PAD.left - 14} ${LANE_THEY}L${PAD.left - 8} ${LANE_THEY + 5}`} />
+              <text className="cr-timing-early-label" x={PAD.left - 14} y={LANE_THEY - 10}>
+                {`FROM ${early.short} · ${early.days === 1 ? '1 DAY' : `${early.days} DAYS`} EARLIER`}
+              </text>
+              <rect className="cr-timing-hit" x={PAD.left - 16} y={LANE_THEY - 22} width={52} height={30} />
+            </g>
+          )}
           <g className="cr-timing-mark" onPointerEnter={() => show({
-            x: x(theirAlert), y: LANE_THEY, time: theirAlertTime, who: 'They',
-            text: 'First public alert on the record', note: 'Warning',
+            x: theyX, y: LANE_THEY, time: theirAlertTime, who: 'They',
+            text: early ? `On this clock: ${early.clock_alert}` : 'First public alert on the record', note: 'Warning',
           })}>
-            <circle className="cr-timing-ring" cx={x(theirAlert)} cy={LANE_THEY} r={8} />
-            <circle className="cr-timing-dot is-alert is-they" cx={x(theirAlert)} cy={LANE_THEY} r={6} />
-            <circle className="cr-timing-hit" cx={x(theirAlert)} cy={LANE_THEY} r={13} />
+            <circle className="cr-timing-ring" cx={theyX} cy={LANE_THEY} r={8} />
+            <circle className="cr-timing-dot is-alert is-they" cx={theyX} cy={LANE_THEY} r={6} />
+            <circle className="cr-timing-hit" cx={theyX} cy={LANE_THEY} r={13} />
           </g>
         </svg>
         {tip && (
@@ -150,6 +171,7 @@ export default function AlertTimingChart({ scenario, choices, compact = false }:
       </div>
       <figcaption className="cr-timing-caption">
         The shaded band is the documented impact window — {scenario.scoring.impact.label}.
+        {early && <> The arrow off the officials&apos; lane points to warnings issued before this clock opened ({early.longDate}); {theirAlertTime} is {early.clock_alert}.</>}{' '}
         Each decision is listed in full under <em>Your day beside theirs</em>.
       </figcaption>
     </figure>

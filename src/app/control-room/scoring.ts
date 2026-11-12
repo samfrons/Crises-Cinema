@@ -48,6 +48,23 @@ export function historicalLeadTime(scenario: Scenario): number {
   return minutes(scenario.scoring.impact.time) - minutes(scenario.scoring.historical_first_public_alert);
 }
 
+/**
+ * When the officials' public warnings came before this clock opened: how many
+ * calendar days before the scenario day, and that date in words. The day's
+ * HH:MM first alert is then this day's figure only, and the debrief says so
+ * rather than letting it stand as the officials' lead time.
+ */
+export function alertBeforeClock(scenario: Scenario) {
+  const a = scenario.alert_predates_clock;
+  if (!a) return null;
+  const day = (iso: string) => Date.parse(`${iso}T00:00:00Z`);
+  const days = Math.round((day(scenario.date) - day(a.date)) / 86_400_000);
+  const longDate = new Date(day(a.date)).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const weekday = new Date(day(a.date)).toLocaleDateString('en-GB', { weekday: 'long', timeZone: 'UTC' });
+  const short = new Date(day(a.date)).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' }).toUpperCase();
+  return { ...a, days, longDate, weekday, short, span: days === 1 ? 'the day before' : `${days} days before` };
+}
+
 export function formatLead(mins: number | null): string {
   if (mins === null) return 'no warning sent';
   if (mins === 0) return 'at the moment of impact';

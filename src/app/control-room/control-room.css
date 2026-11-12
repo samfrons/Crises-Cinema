@@ -791,6 +791,15 @@
 .cr-map-highway { stroke-width: 3.2; stroke: rgba(25, 20, 16, 0.85); }
 .cr-map-shelter { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
 .cr-map-inset { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 2 4; }
+/* New Orleans: the river drawn as two banks with water between; the canals;
+   the contraflow chevrons (a direction of travel, ink, never ember). */
+.cr-map-riverbank { fill: none; stroke: rgba(25, 20, 16, 0.6); stroke-width: 22; }
+.cr-map-riverbed { fill: none; stroke: var(--paper); stroke-width: 18.5; }
+.cr-map-riverhatch { fill: none; stroke-width: 18.5; }
+.cr-map-canal { fill: none; stroke: rgba(25, 20, 16, 0.6); stroke-width: 3; }
+.cr-map-flow path { fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+/* Odisha: the state line, dashed like the Lahaina inset frame. */
+.cr-map-boundary { fill: none; stroke: rgba(25, 20, 16, 0.5); stroke-width: 1.4; stroke-dasharray: 6 4 1.5 4; }
 .cr-map-contour path, .cr-map-ridge path { fill: none; stroke: rgba(25, 20, 16, 0.35); stroke-width: 1.4; }
 
 /* The title block: a paper band ruled off the top of the plate. */
@@ -1240,6 +1249,24 @@
 .cr-score-grid dd { margin: 0; }
 .cr-score-grid .big { font-family: var(--poster); font-size: 34px; line-height: 1; text-transform: uppercase; }
 .cr-score-grid .sub { font-family: var(--data); font-size: 11.5px; line-height: 1.5; color: var(--ink-soft); margin-top: 6px; }
+.cr-score-grid .sub a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--ember); }
+/* Warnings issued before the clock opened: a hard-ruled typewriter slip under
+   the chart, so the day's HH:MM is never read as the officials' lead time. */
+.cr-early {
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding: 12px 0 14px;
+  margin: 0 0 var(--s3);
+  max-width: 66ch;
+  scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 14px);
+}
+.cr-early-tag { font-family: var(--data); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 6px; }
+.cr-early-body { font-size: 14.5px; line-height: 1.6; margin: 0; }
+.cr-early-body + .cr-early-body { margin-top: 8px; color: var(--ink-soft); }
+.cr-timing-early-arrow { fill: none; stroke: var(--ink-soft); stroke-width: 1.4; stroke-dasharray: 4 3; }
+.cr-timing-early-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.1em; fill: var(--ink-soft); }
+.cr-timing.is-compact .cr-timing-early-label { font-size: 11.5px; letter-spacing: 0.04em; }
+.cr-timing-mark.cr-timing-early:hover .cr-timing-early-arrow { stroke: var(--ember); }
 .cr-score-caveat { font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); max-width: 66ch; margin: 0; }
 
 .cr-meter {
