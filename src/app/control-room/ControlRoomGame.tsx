@@ -13,6 +13,7 @@ import WarningChain, { chainChanges, chainNews, deriveChain } from './WarningCha
 import { loadLastRun, markCoached, sameCalls, saveRun, wasCoached, type LastRun } from './memory';
 import prepMeta from '../../data/preparedness-meta.json';
 import { inWords, tzLabel, WPM, type CardBundle, type ScenarioCard } from './summary';
+import { DAY_FOLDER, FILE_PATH, folderHref, folderWord, isFolder, type FolderId } from './file/folders';
 
 /* ══════════════════════════════════════════════════════════════════════════
    One continuous desk. Once a day is chosen, everything happens in a single
@@ -103,7 +104,27 @@ type Run = {
   /** The player's previous completed run of this day, read when the desk was
    *  taken (so the debrief can set this run beside it); null on a first run. */
   last: LastRun | null;
+  /** Set when the desk officer's file sent the player here: which folder,
+   *  and the decision it points at (if any). Interface only; the day still
+   *  runs from its opening. */
+  filed: Filed | null;
 };
+
+type Filed = { folder: FolderId; at: string | null };
+
+/** What the select screen says about the desk officer's file (computed on
+ *  the server from src/data/essay.json; the essay itself never ships here). */
+export type FileCard = { folders: number; sources: number; minutes: number; draft: boolean };
+
+/** A link from the file: /control-room#day=<id>&at=<step>&file=<folder>. */
+function readFiledHash(): { day: string; filed: Filed | null } | null {
+  if (typeof window === 'undefined' || !window.location.hash.startsWith('#day=')) return null;
+  const p = new URLSearchParams(window.location.hash.slice(1));
+  const day = p.get('day');
+  if (!day) return null;
+  const folder = p.get('file');
+  return { day, filed: isFolder(folder) ? { folder, at: p.get('at') } : null };
+}
 
 /* ── The taught first hour ────────────────────────────────────────────────
    The first time a visitor takes a desk this session, the interface names
@@ -173,7 +194,7 @@ const loadBundle = () => {
   return bundlePromise;
 };
 
-export default function ControlRoomGame({ cards }: { cards: CardBundle }) {
+export default function ControlRoomGame({ cards, file }: { cards: CardBundle; file?: FileCard }) {
   const [run, setRun] = useState<Run | null>(null);
   const [coachIndex, setCoachIndex] = useState<number | null>(null);
   const wide = useMedia('(min-width: 1024px)');
@@ -194,23 +215,44 @@ export default function ControlRoomGame({ cards }: { cards: CardBundle }) {
     }
   });
 
-  const newRun = (scenario: Scenario): Run =>
-    ({ scenario, sessionId: null, cursor: 0, choices: [], presentedAt: 0, done: false, last: loadLastRun(scenario) });
+  const newRun = (scenario: Scenario, filed: Filed | null = null): Run =>
+    ({ scenario, sessionId: null, cursor: 0, choices: [], presentedAt: 0, done: false, last: loadLastRun(scenario), filed });
 
   const [loading, setLoading] = useState<string | null>(null);
-  const pick = (id: string) => {
+  const pick = (id: string, filed: Filed | null = null) => {
     setLoading(id);
     loadBundle().then((b) => {
       const scenario = b.playable.find((x) => x.id === id);
       setLoading(null);
       if (!scenario) return;
+      // A decision the day does not hold is dropped, not guessed at.
+      const at = filed?.at && scenario.timesteps.some((t) => t.id === filed.at) ? filed.at : null;
       pending.current = { focus: 'cr-brief-title', scroll: 'desk' };
-      setRun(newRun(scenario));
+      setRun(newRun(scenario, filed ? { ...filed, at } : null));
     }, () => setLoading(null));
   };
 
+  // Arriving from the desk officer's file (#day=…), open that day's briefing.
+  // Read after mount, so the server render (the select screen) and the first
+  // client render agree; a later hash change from a link does the same.
+  const pickRef = useRef(pick);
+  pickRef.current = pick;
+  useEffect(() => {
+    const sync = () => {
+      const h = readFiledHash();
+      if (!h || !cards.playable.some((c) => c.id === h.day)) return;
+      // Read once: a reload, or "Choose another day", returns to the select
+      // screen rather than reopening this briefing.
+      window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#desk`);
+      pickRef.current(h.day, h.filed);
+    };
+    sync();
+    window.addEventListener('hashchange', sync);
+    return () => window.removeEventListener('hashchange', sync);
+  }, [cards]);
+
   if (!run) {
-    return <SelectScreen cards={cards} onPick={pick} loading={loading} />;
+    return <SelectScreen cards={cards} file={file} onPick={(id) => pick(id)} loading={loading} />;
   }
 
   const { scenario, sessionId, cursor, choices, done } = run;
@@ -304,7 +346,7 @@ export default function ControlRoomGame({ cards }: { cards: CardBundle }) {
 
       <div className="cr-play wrap">
         <div className="cr-log" role="log" aria-label="Dispatch log" aria-live="polite">
-          <Briefing scenario={scenario} started={started} inlineMap={!wide} onStart={start} last={run.last} />
+          <Briefing scenario={scenario} started={started} inlineMap={!wide} onStart={start} last={run.last} filed={run.filed} />
 
           {started && steps.slice(0, cursor + 1).map((t, i) => (
             <StepEntry
@@ -317,6 +359,7 @@ export default function ControlRoomGame({ cards }: { cards: CardBundle }) {
               isLast={i === lastIndex}
               inlineChain={!wide}
               coach={i === 0 ? coach : null}
+              filed={run.filed?.at === t.id ? run.filed.folder : null}
               onChoose={choose}
               onAdvance={advance}
             />
@@ -520,7 +563,9 @@ function SidePanel({ scenario, live, choices, started, coach }: {
 
 /* ── Select ──────────────────────────────────────────────────────────────── */
 
-function SelectScreen({ cards, onPick, loading }: { cards: CardBundle; onPick: (id: string) => void; loading: string | null }) {
+function SelectScreen({ cards, file, onPick, loading }: {
+  cards: CardBundle; file?: FileCard; onPick: (id: string) => void; loading: string | null;
+}) {
   // What this browser remembers of each day: unknown until mounted (so the
   // server render and the first client render agree), then a run or null.
   const [memory, setMemory] = useState<Record<string, LastRun | null> | null>(null);
@@ -550,6 +595,20 @@ function SelectScreen({ cards, onPick, loading }: { cards: CardBundle; onPick: (
             </span>
           </button>
         ))}
+        {file && (
+          <a className="cr-card cr-card-file" href={FILE_PATH}>
+            <span className="cr-card-head">
+              <span className="cr-card-filetab" aria-hidden>File</span>
+              <span className="cr-card-date">The argument · {inWords(file.folders).toLowerCase()} folders{file.draft ? ' · draft' : ''}</span>
+            </span>
+            <span className="cr-card-title">The Desk Officer&apos;s File</span>
+            <span className="cr-card-loc">Read the desk officer&apos;s file: the argument behind these days, in{' '}
+              {inWords(file.folders).toLowerCase()} folders. The Last Mile essay, filed for reading at the desk, with a slip wherever a claim is one you
+              can hold here.</span>
+            <span className="cr-card-meta">{file.sources} sources · about {file.minutes} min to read</span>
+            <span className="cr-card-cta">Open the file <span className="cr-card-arrow" aria-hidden>→</span></span>
+          </a>
+        )}
         {cards.stubs.map((s) => (
           <div key={s.id} className="cr-card cr-card-stub" aria-disabled>
             <span className="cr-card-head">
@@ -585,9 +644,10 @@ function CardMemory({ scenario, last }: { scenario: ScenarioCard; last: LastRun 
 
 /* ── Log entry 0: the briefing ───────────────────────────────────────────── */
 
-function Briefing({ scenario, started, inlineMap, onStart, last }: {
-  scenario: Scenario; started: boolean; inlineMap: boolean; onStart: () => void; last: LastRun | null;
+function Briefing({ scenario, started, inlineMap, onStart, last, filed }: {
+  scenario: Scenario; started: boolean; inlineMap: boolean; onStart: () => void; last: LastRun | null; filed: Filed | null;
 }) {
+  const filedStep = filed?.at ? scenario.timesteps.findIndex((t) => t.id === filed.at) : -1;
   const vocab = vocabFor(scenario);
   const sourceIndex = useSourceIndex(scenario);
   const lastSame = last ? sameCalls(scenario, last.picks) : null;
@@ -606,6 +666,18 @@ function Briefing({ scenario, started, inlineMap, onStart, last }: {
         followed — and the log will say so rather than invent it.</p>
       <p className="cr-brief-count">{scenario.timesteps.length} decision points, from {scenario.clock.start} {tzLabel(scenario)}.
         The console above keeps the clock and your progress.</p>
+      {filed && (
+        <p className="cr-filed">
+          <span className="cr-filed-tag">From the file · folder {folderWord(filed.folder)}</span>
+          <span className="cr-filed-body">
+            {filedStep >= 0
+              ? <>The desk officer&apos;s file sent you here for decision {filedStep + 1} of {scenario.timesteps.length}, at {stamp(scenario.timesteps[filedStep])}. </>
+              : <>The desk officer&apos;s file sent you to this desk. </>}
+            The day still starts at its opening: the clock will bring you to that call, and the log will mark it.{' '}
+            <a href={folderHref(filed.folder)}>Back to folder {folderWord(filed.folder)}</a>
+          </span>
+        </p>
+      )}
       {lastSame && (
         <p className="cr-brief-count cr-brief-again">You have held this desk before: your last run took the officials&apos;
           call at {lastSame.same} of {lastSame.of} decisions. The debrief will set this run beside it.</p>
@@ -648,9 +720,9 @@ function Briefing({ scenario, started, inlineMap, onStart, last }: {
 
 /* ── Log entries 1…n: one decision point each ────────────────────────────── */
 
-function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain, coach, onChoose, onAdvance }: {
+function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain, coach, filed, onChoose, onAdvance }: {
   scenario: Scenario; t: Timestep; index: number; choice?: Choice;
-  isCurrent: boolean; isLast: boolean; inlineChain: boolean; coach: Coach;
+  isCurrent: boolean; isLast: boolean; inlineChain: boolean; coach: Coach; filed: FolderId | null;
   onChoose: (o: Option) => void; onAdvance: () => void;
 }) {
   const sourceIndex = useSourceIndex(scenario);
@@ -685,6 +757,15 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain,
           {' · '}Decision {index + 1} of {scenario.timesteps.length}
         </span>
       </h3>
+      {filed && (
+        <p className="cr-filed cr-filed-step">
+          <span className="cr-filed-tag">The file points here</span>
+          <span className="cr-filed-body">
+            This is the call folder {folderWord(filed)} sent you to.{' '}
+            <a href={folderHref(filed)}>Read the folder</a>
+          </span>
+        </p>
+      )}
 
       <ul className="cr-dispatches" aria-label={`Incoming at ${stamp(t)}`}>
         {t.info_available.map((info, i) => (
@@ -1114,6 +1195,15 @@ function Debrief({ scenario, choices, last, onReplay, onLeave }: {
         <nav className="cr-bridge" aria-labelledby="cr-bridge-h">
           <p id="cr-bridge-h" className="cr-bridge-line">One day, one desk. The rest of the site widens the frame.</p>
           <ul>
+            <li className="cr-bridge-file">
+              <a href={DAY_FOLDER[scenario.id] ? folderHref(DAY_FOLDER[scenario.id]) : FILE_PATH}>
+                <span className="cr-bridge-title">The argument behind this day, in six folders</span>
+                <span className="cr-bridge-sub">
+                  The desk officer&apos;s file — the Last Mile essay, filed for reading at the desk
+                  {DAY_FOLDER[scenario.id] ? `. This day is clocked in folder ${folderWord(DAY_FOLDER[scenario.id])}.` : '.'}
+                </span>
+              </a>
+            </li>
             <li>
               <a href="/preparedness">
                 <span className="cr-bridge-title">{COUNTRY_COUNT

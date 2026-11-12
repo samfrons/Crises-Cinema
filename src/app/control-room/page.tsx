@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import scenariosData from '../../data/scenarios.json';
+import essayJson from '../../data/essay.json';
 import { abs } from '@/lib/site';
 import type { ScenarioBundle } from './types';
-import { toCards } from './summary';
-import ControlRoomGame from './ControlRoomGame';
+import { toCards, WPM } from './summary';
+import ControlRoomGame, { type FileCard } from './ControlRoomGame';
 import Elsewhere from '@/app/components/Elsewhere';
 import './control-room.css';
 
@@ -14,6 +15,18 @@ import './control-room.css';
 // Only card summaries cross to the client here; the game loads the full
 // scenarios on demand once a day is picked.
 const cards = toCards(scenariosData as unknown as ScenarioBundle);
+
+// The desk officer's file (/control-room/file) is the Last Mile essay filed
+// for reading at the desk. Only its count line crosses to the client.
+type EssayShape = { status: string; sources: unknown[]; sections: { paragraphs: { text: string }[] }[] };
+const essay = (essayJson as unknown as Record<string, EssayShape>)['last-mile'];
+const essayWords = essay.sections.reduce((n, s) => n + s.paragraphs.reduce((m, p) => m + p.text.split(/\s+/).filter(Boolean).length, 0), 0);
+const file: FileCard = {
+  folders: essay.sections.length,
+  sources: essay.sources.length,
+  minutes: Math.max(1, Math.round(essayWords / WPM)),
+  draft: essay.status === 'draft',
+};
 
 const title = 'The Control Room — Disasters by the Decade';
 const description =
@@ -63,7 +76,7 @@ export default function ControlRoomPage() {
       </header>
 
       <main id="desk" className="cr-desk">
-        <ControlRoomGame cards={cards} />
+        <ControlRoomGame cards={cards} file={file} />
       </main>
 
       <footer className="cr-colophon">

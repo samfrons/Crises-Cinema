@@ -1809,3 +1809,81 @@
   .is-coached { outline-style: solid; filter: drop-shadow(3px 3px 0 rgba(184, 50, 26, 0.45)); }
   .cr-bridge a:hover, .cr-bridge a:active, .cr-coach-next:active { transform: none !important; }
 }
+
+
+/* ══ The desk officer's file, seen from the desk ═══════════════════════════
+   The file itself is /control-room/file (file/file.css). Here: its entry on
+   the select screen, the briefing and log lines for a player the file sent,
+   and its place in the debrief's bridge. Interface only; ink on paper, ember
+   for the hand. */
+
+/* Select: the file sits under the playable days as a manila folder, the full
+   width of the grid, its tab standing proud of the top edge. */
+.cr-card-file {
+  grid-column: 1 / -1;
+  position: relative;
+  margin-top: 18px;
+  text-decoration: none;
+  background: var(--paper-lit);
+  background-image: repeating-linear-gradient(0deg, color-mix(in srgb, var(--ink) 3.5%, transparent) 0 1px, transparent 1px 28px);
+}
+.cr-card-filetab {
+  position: absolute;
+  left: 18px;
+  bottom: 100%;
+  transform: translateY(1.5px);
+  padding: 4px 12px 3px;
+  background: var(--ink);
+  color: var(--paper-lit);
+  border: 1.5px solid var(--ink);
+  border-bottom: 0;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+@media (hover: hover) { .cr-card-file:hover .cr-card-filetab { background: var(--ember); border-color: var(--ember); } }
+.cr-card-file:focus-visible .cr-card-filetab { background: var(--ember); border-color: var(--ember); }
+.cr-card-file .cr-card-loc { color: var(--ink); max-width: 62ch; }
+
+/* Briefing and log: the line that says the file sent you, and where. */
+.cr-filed {
+  display: grid;
+  gap: 2px;
+  margin: var(--s3) 0 var(--s4);
+  max-width: 62ch;
+  padding: 10px 14px 4px;
+  background: var(--paper-lit);
+  border: 1px solid var(--rule);
+  border-left: 6px double var(--ink);
+}
+.cr-filed-step { margin: 0 0 var(--s3); animation: cr-arrive var(--t-slow) var(--ease) 120ms both; }
+.cr-filed-tag {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.cr-filed-body { font-size: 15px; line-height: 1.55; }
+.cr-filed-body a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ember);
+}
+
+/* Debrief bridge: the file leads, across the full width. */
+.cr-bridge li.cr-bridge-file { grid-column: 1 / -1; }
+.cr-bridge-file a { background: var(--paper-lit); border-width: 1.5px 1.5px 1.5px 6px; border-style: solid solid solid double; }
+
+/* Reduced motion: the log line arrives set, struck twice out of register. */
+@media (prefers-reduced-motion: reduce) {
+  .cr-filed-step { animation: none; box-shadow: 3px 3px 0 color-mix(in srgb, var(--ink) 30%, transparent); }
+  .cr-card-filetab { transition: none; }
+}

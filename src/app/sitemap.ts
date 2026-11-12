@@ -22,6 +22,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: abs('/dispatches'), lastModified, changeFrequency: 'monthly', priority: 0.7 },
     { url: abs('/preparedness'), lastModified, changeFrequency: 'monthly', priority: 0.7 },
     { url: abs('/control-room'), lastModified, changeFrequency: 'monthly', priority: 0.7 },
+    { url: abs('/control-room/file'), lastModified, changeFrequency: 'monthly', priority: 0.6 },
     ...DECADES.map(({ slug }) => ({
       url: abs(`/catalogue/${slug}`),
       lastModified,
