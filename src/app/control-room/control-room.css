@@ -1556,3 +1556,256 @@
   .cr-chain-edge.is-fresh,
   .cr-chain-node.is-fresh { filter: drop-shadow(2px 2px 0 rgba(25, 20, 16, 0.5)); }
 }
+
+
+/* ══ The engagement layer: the taught first hour, the terms, the second run ══
+   Interface teaching and the player's own memory, never record content. Ink
+   on paper like everything else; ember only where a hand is invited (the
+   note's button, the coached part's ring), never to encode anything. */
+
+/* Card: the memory line holds two lines of height whether or not this
+   browser has a run to report, so the grid never moves when it is read. */
+.cr-card-memory {
+  display: block;
+  min-height: calc(2 * 1.45em);
+  font-family: var(--data);
+  font-size: 12px;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  margin: -4px 0 6px;
+}
+.cr-card-memory.is-held { color: var(--ink); }
+@media (max-width: 699px) { .cr-card-memory { min-height: calc(3 * 1.45em); } }
+.cr-card-memory.is-held::before { content: '▪ '; }
+
+/* A desk note: a typed slip pinned beside the part it names, ink stock with
+   a notch pointing at it. It lands like a slip (the house arrival). */
+.cr-coach {
+  position: relative;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 16px 12px;
+  margin: 14px 0 6px;
+  max-width: 46ch;
+  box-shadow: 3px 3px 0 var(--ember);
+  animation: cr-arrive var(--t-slow) var(--ease) 420ms both;
+  scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 24px);
+  scroll-margin-bottom: 120px;
+}
+.cr-coach::before {
+  content: '';
+  position: absolute;
+  left: 22px;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+}
+.cr-coach.is-up::before { top: -16px; border-bottom-color: var(--ink); }
+.cr-coach.is-down::before { bottom: -16px; border-top-color: var(--ink); }
+.cr-coach.is-down { margin: 6px 0 16px; }
+.cr-coach-head {
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.78);
+  margin: 0 0 4px;
+}
+.cr-coach-text { margin: 0; font-size: 15.5px; line-height: 1.5; }
+.cr-coach-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin-top: 10px; }
+.cr-coach-next, .cr-coach-skip {
+  min-height: 40px;
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease-press);
+}
+.cr-coach-next {
+  padding: 8px 16px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1.5px solid var(--paper);
+}
+.cr-coach-skip {
+  padding: 8px 2px;
+  background: none;
+  border: 0;
+  color: var(--paper);
+  text-decoration: underline;
+  text-decoration-color: rgba(241, 232, 213, 0.5);
+  text-underline-offset: 3px;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-size: 13px;
+}
+@media (hover: hover) {
+  .cr-coach-next:hover { background: var(--ember); border-color: var(--ember); color: #fff; }
+  .cr-coach-skip:hover { text-decoration-color: var(--paper); }
+}
+.cr-coach-next:active { transform: translate(1px, 1px); }
+.cr-desk .cr-coach :focus-visible, .cr-console .cr-coach :focus-visible { outline: 3px solid var(--ember); outline-offset: 2px; }
+
+/* The clock's note hangs from the console strip, over the log. */
+.cr-coach-dock { position: absolute; top: 100%; left: 0; right: 0; pointer-events: none; }
+.cr-coach-dock .cr-coach { pointer-events: auto; margin-top: 12px; box-shadow: 3px 3px 0 var(--ember), 0 10px 30px rgba(25, 20, 16, 0.25); }
+.cr-coach-dock .cr-coach.is-up::before { border-bottom-color: var(--ink); }
+
+/* The part being named: an ember ring that pulses once on arrival (one
+   in-out over the slow step), then holds as a quiet dashed rule. */
+@keyframes cr-coach-ring {
+  from { box-shadow: 0 0 0 0 rgba(184, 50, 26, 0.55); }
+  to { box-shadow: 0 0 0 10px rgba(184, 50, 26, 0); }
+}
+.is-coached { outline: 2px dashed var(--ember); outline-offset: 4px; }
+.cr-slip.is-coached, .cr-coach-target.is-coached, .cr-options.is-coached {
+  animation: cr-arrive var(--t-slow) var(--ease) both, cr-coach-ring var(--t-slow) var(--ease) 2 alternate 480ms;
+}
+.cr-slip.is-coached { animation-delay: calc(var(--i, 0) * 90ms + 120ms), 480ms; }
+.cr-coach-target.is-coached, .cr-options.is-coached { animation: cr-coach-ring var(--t-slow) var(--ease) 2 alternate 480ms; }
+.cr-console-clock.is-coached { outline-color: var(--paper); outline-offset: -2px; padding: 0 6px; }
+
+/* Between calls: how far through the record the player is. */
+.cr-advance-note {
+  font-family: var(--data);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin: 10px 0 0;
+  text-align: center;
+}
+@media (min-width: 760px) { .cr-advance-note { text-align: left; } }
+.cr-advance-note strong { color: var(--ink); font-weight: 700; }
+.cr-advance-note.is-penultimate { color: var(--ink); }
+.cr-advance-note.is-penultimate::before { content: '◆ '; color: var(--ink); }
+
+/* Terms of the desk: the briefing's fold-out list. */
+.cr-brief-again { margin-top: 8px; color: var(--ink); }
+.cr-terms { margin: 16px 0 4px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); max-width: 62ch; }
+.cr-terms summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.cr-terms summary::-webkit-details-marker { display: none; }
+.cr-terms summary::before { content: '+'; width: 1em; font-size: 16px; color: var(--ember); transition: transform var(--t-fast) var(--ease); }
+.cr-terms[open] summary::before { content: '–'; }
+.cr-terms-count { color: var(--ink-soft); letter-spacing: 0.06em; text-transform: none; margin-left: auto; }
+.cr-terms dl { margin: 4px 0 12px; display: grid; gap: 12px; }
+.cr-terms dt { font-family: var(--data); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+.cr-terms dd { margin: 2px 0 0; font-size: 15px; line-height: 1.55; }
+.cr-terms-note { font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); font-style: italic; margin: 0 0 12px; }
+.cr-def-quote { quotes: '“' '”'; }
+
+/* A term in a slip: dotted underline, a 40px-tall hit area that does not
+   move the line, the definition printed under the slip as a footnote. */
+.cr-term {
+  position: relative;
+  display: inline;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: help;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--ink-soft);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  transition: color var(--t-fast) var(--ease), text-decoration-color var(--t-fast) var(--ease);
+}
+.cr-term::after { content: ''; position: absolute; left: -2px; right: -2px; top: 50%; height: 40px; transform: translateY(-50%); }
+@media (hover: hover) { .cr-term:hover { color: var(--ember); text-decoration-color: var(--ember); } }
+.cr-term.is-open { text-decoration-style: solid; text-decoration-color: var(--ember); }
+.cr-term-note {
+  margin: 10px 0 0;
+  padding: 8px 0 0 12px;
+  border-top: 1px dashed var(--rule);
+  border-left: 3px solid var(--ink-soft);
+  font-size: 14.5px;
+  line-height: 1.55;
+  animation: cr-arrive var(--t-mid) var(--ease) both;
+}
+.cr-term-note[hidden] { display: none; }
+.cr-term-tag { font-family: var(--data); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); }
+
+/* Debrief: this run, the last one, the record. */
+.cr-vs-legend { margin: 0 0 var(--s3); }
+.cr-vs-key { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0 0 10px; font-family: var(--data); font-size: 11.5px; color: var(--ink-soft); }
+.cr-vs-key > span { display: inline-flex; align-items: center; gap: 8px; }
+.cr-vs-key .cr-vs-who { width: 50px; display: inline-block; }
+.cr-vs-key .cr-vs-who.is-you { background: var(--ink); color: var(--paper); }
+.cr-vs-key .cr-vs-who.is-last, .cr-vs-last .cr-vs-who { border-style: dashed; }
+.cr-vs-compare { margin: 0; font-size: 15.5px; line-height: 1.6; max-width: 68ch; }
+.cr-vs-compare strong { font-family: var(--data); font-size: 14px; }
+.cr-vs-compare-note { color: var(--ink-soft); font-style: italic; }
+.cr-vs-mine { display: grid; gap: 8px; }
+.cr-vs-last { display: grid; grid-template-columns: 52px 1fr; gap: 10px; align-items: baseline; font-family: var(--data); font-size: 12.5px; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.45; color: var(--ink-soft); }
+.cr-vs-last .cr-vs-meta { text-transform: none; }
+@media (min-width: 760px) {
+  .cr-vs-last { grid-template-columns: 50px minmax(0, 1fr); gap: 12px; align-items: first baseline; }
+}
+
+/* What the record teaches: three lessons, numbered like reel cans. */
+.cr-lessons { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s4); max-width: 70ch; }
+.cr-lessons li { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 14px; border-top: 2px solid var(--ink); padding-top: 12px; }
+.cr-lesson-num { grid-row: span 2; font-family: var(--data); font-size: 22px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.cr-lesson-text { margin: 0; font-size: clamp(17px, 2.2vw, 20px); line-height: 1.45; text-wrap: pretty; }
+.cr-lesson-from { margin: 8px 0 0; font-family: var(--data); font-size: 11.5px; letter-spacing: 0.04em; color: var(--ink-soft); }
+.cr-lesson-from a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--ember); text-underline-offset: 2px; }
+/* The inquiry's entries carry a number, so a lesson can point at one. */
+.cr-findings { counter-reset: cr-finding; }
+.cr-findings li { counter-increment: cr-finding; }
+.cr-findings li::before {
+  content: 'No. ' counter(cr-finding);
+  display: block;
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+.cr-findings li:target { background: rgba(184, 50, 26, 0.06); outline: 1px solid var(--ember); outline-offset: 4px; }
+.cr-findings li, .cr-vs li { scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 14px); }
+
+/* After the replay buttons: the bridge out to the site's thesis. */
+.cr-replay-note { font-family: var(--data); font-size: 11.5px; color: var(--ink-soft); margin: 12px 0 0; }
+.cr-bridge { margin-top: 56px; border-top: 3px solid var(--ink); padding-top: 18px; }
+.cr-bridge-line { font-family: var(--data); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 14px; }
+.cr-bridge ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+@media (min-width: 700px) { .cr-bridge ul { grid-template-columns: 1fr 1fr; } }
+.cr-bridge a {
+  display: grid;
+  gap: 6px;
+  min-height: 44px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--paper);
+  transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-mid) var(--ease), transform var(--t-mid) var(--ease);
+}
+.cr-bridge-title { font-family: var(--poster); font-size: clamp(22px, 4vw, 28px); line-height: 1; text-transform: uppercase; }
+.cr-bridge-title::after { content: ' →'; color: var(--ember); }
+.cr-bridge-sub { font-size: 14.5px; color: var(--ink-soft); line-height: 1.45; }
+@media (hover: hover) { .cr-bridge a:hover { border-color: var(--ember); box-shadow: 4px 4px 0 var(--ember); transform: translate(-2px, -2px); } }
+.cr-bridge a:active { transform: translate(1px, 1px); box-shadow: none; transition-duration: var(--t-fast); transition-timing-function: var(--ease-press); }
+
+/* Reduced motion: the notes arrive set, the named part carries its ring
+   still and struck twice out of register (the house "this is new" mark),
+   and nothing lifts on hover. */
+@media (prefers-reduced-motion: reduce) {
+  .cr-coach, .cr-term-note, .cr-slip.is-coached, .cr-coach-target.is-coached, .cr-options.is-coached { animation: none !important; }
+  .is-coached { outline-style: solid; filter: drop-shadow(3px 3px 0 rgba(184, 50, 26, 0.45)); }
+  .cr-bridge a:hover, .cr-bridge a:active, .cr-coach-next:active { transform: none !important; }
+}

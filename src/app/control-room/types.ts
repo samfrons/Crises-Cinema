@@ -94,6 +94,22 @@ export type Timestep = {
   historical_citation?: Citation;
 };
 
+export type Takeaway = {
+  text: string;
+  from: { finding: number } | { step: string };
+  citation: Citation;
+};
+
+export type GlossaryEntry = {
+  term: string;
+  /** Spellings that mark the term in the slips (whole word, case-sensitive). */
+  match: string[];
+  kind: 'verbatim' | 'paraphrase';
+  definition: string;
+  translation?: string;
+  citation: Citation;
+};
+
 export type Source = { id: string; label: string; url: string | null; note?: string | null };
 
 export type Scenario = {
@@ -112,6 +128,11 @@ export type Scenario = {
   timesteps: Timestep[];
   historical_path: { timestep_id: string; action: string; citation: Citation }[];
   inquiry_findings: { kind: 'verbatim' | 'paraphrase'; quote: string; translation?: string; citation: Citation }[];
+  /** "What the record teaches": a lesson in the project's words, tied to one
+   *  cited line (an inquiry finding by index, or a historical-path step). */
+  takeaways?: Takeaway[];
+  /** "Terms of the desk": official definitions of words the slips use. */
+  glossary?: GlossaryEntry[];
   /** Figures from after the last decision — shown only once the log closes. */
   debrief_media?: MediaAttachment[];
   outcome: {

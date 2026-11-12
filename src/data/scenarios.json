@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-08T02:25:24.010Z",
+  "generated": "2026-11-12T22:38:29.781Z",
   "playable": [
     {
       "id": "lahaina-2023",
@@ -1205,6 +1205,89 @@
           }
         }
       ],
+      "takeaways": [
+        {
+          "text": "A forecast is not a plan: the extreme-weather warning reached fire chiefs and emergency managers ahead of the day, but turning it into extra staff was not standard practice.",
+          "from": {
+            "finding": 0
+          },
+          "citation": {
+            "sourceId": "fsri-p2",
+            "detail": "Finding 5, Appendix 6.1 (Section 3.2 Weather)"
+          }
+        },
+        {
+          "text": "Activation is a decision, not a drift: with the conditions forecast, agencies reported to the EOC on their own through the day, and full activation came only at 16:30.",
+          "from": {
+            "finding": 1
+          },
+          "citation": {
+            "sourceId": "fsri-p2",
+            "detail": "Finding 49, Appendix 6.1 (Section 3.6.4)"
+          }
+        },
+        {
+          "text": "Silence is a decision too: the County 'provided no evidence of discussing siren activation' that day — an open question about what sirens would have done is no reason never to ask it.",
+          "from": {
+            "finding": 2
+          },
+          "citation": {
+            "sourceId": "fsri-p2",
+            "detail": "Finding 37 (Appendix 6.1) and Section 3.5.1.2"
+          }
+        }
+      ],
+      "glossary": [
+        {
+          "term": "Red Flag Warning",
+          "match": [
+            "Red Flag Warning"
+          ],
+          "kind": "verbatim",
+          "definition": "A term used by fire-weather forecasters to call attention to limited weather conditions of particular importance that may result in extreme burning conditions.",
+          "citation": {
+            "sourceId": "nws-glossary",
+            "detail": "Entry 'Red Flag Warning' (first sentence): https://forecast.weather.gov/glossary.php?word=red+flag+warning"
+          }
+        },
+        {
+          "term": "High Wind Warning",
+          "match": [
+            "High Wind Warning"
+          ],
+          "kind": "verbatim",
+          "definition": "This product is issued when sustained, strong winds with even stronger gusts are expected or occurring.",
+          "citation": {
+            "sourceId": "nws-glossary",
+            "detail": "Entry 'High Wind Warning' (first sentence): https://forecast.weather.gov/glossary.php?word=high+wind+warning"
+          }
+        },
+        {
+          "term": "Wind Advisory",
+          "match": [
+            "Wind Advisory"
+          ],
+          "kind": "verbatim",
+          "definition": "This product is issued for strong winds that are not expected to reach warning criteria.",
+          "citation": {
+            "sourceId": "nws-glossary",
+            "detail": "Entry 'Wind Advisory' (first sentence): https://forecast.weather.gov/glossary.php?word=wind+advisory"
+          }
+        },
+        {
+          "term": "Wireless Emergency Alert (WEA)",
+          "match": [
+            "Wireless Emergency Alert",
+            "WEA"
+          ],
+          "kind": "verbatim",
+          "definition": "The Wireless Emergency Alerts (WEA) system refers to the voluntary emergency alerting system established by this part, whereby Commercial Mobile Service Providers may elect to transmit Alert Messages to the public.",
+          "citation": {
+            "sourceId": "ecfr-47-10",
+            "detail": "47 CFR § 10.10(c)"
+          }
+        }
+      ],
       "debrief_media": [
         {
           "file": "kihei-fire-glow-dusk-2023-08-08.jpg",
@@ -1447,6 +1530,18 @@
           "label": "NOAA GOES-18 ABI Level-2 Cloud and Moisture Imagery (ABI-L2-CMIPF), full disk, band 2 (0.64 µm visible), scan 2023-08-09 02:10:20 to 02:19:51 UTC (16:10 to 16:19 HST on 8 August), from the NOAA Open Data Dissemination archive; crop of Maui rendered by the project.",
           "url": "https://noaa-goes18.s3.amazonaws.com/ABI-L2-CMIPF/2023/221/02/OR_ABI-L2-CMIPF-M6C02_G18_s20232210210206_e20232210219514_c20232210219571.nc",
           "note": "Scan times from the file name and metadata. The crop is contrast-stretched (reflectance, gamma 0.5, 3x upscale): not unaltered NOAA data, and no NOAA endorsement is implied. A single visible band cannot separate thin smoke from cloud or sun glint."
+        },
+        {
+          "id": "nws-glossary",
+          "label": "National Weather Service (NOAA). NWS Glossary: the entries 'Red Flag Warning', 'High Wind Warning' and 'Wind Advisory'. Online glossary at forecast.weather.gov, consulted 12 November 2026.",
+          "url": "https://forecast.weather.gov/glossary.php",
+          "note": "Used only for the definitions under 'Terms of the desk'. This is the glossary's current wording, not a product issued on 8 August 2023; the products themselves are cited to the NWS columns of the FSRI dataset."
+        },
+        {
+          "id": "ecfr-47-10",
+          "label": "Code of Federal Regulations, Title 47 (Telecommunication), Part 10 — Wireless Emergency Alerts, § 10.10 Definitions, paragraph (c) 'Wireless Emergency Alerts'. Federal Communications Commission rules, Electronic Code of Federal Regulations (eCFR), current text consulted 12 November 2026.",
+          "url": "https://www.ecfr.gov/current/title-47/chapter-I/subchapter-A/part-10/subpart-A/section-10.10",
+          "note": "Used only for the definition under 'Terms of the desk'. The FCC's consumer guide to WEA could not be fetched; the rule text is the FCC's own definition."
         }
       ]
     },
@@ -2192,6 +2287,54 @@
           }
         }
       ],
+      "takeaways": [
+        {
+          "text": "A red warning is not a decision: the coordinating committee met at 17:00, more than nine hours after the red warning was issued.",
+          "from": {
+            "step": "t4"
+          },
+          "citation": {
+            "sourceId": "court-catarroja",
+            "detail": "Historical path at 17:00, as cited in the debrief"
+          }
+        },
+        {
+          "text": "Data that is tracked is not data that is acted on: the 12:20 hydrological alert on the Poyo was received and followed, and no population-wide warning came from it.",
+          "from": {
+            "step": "t2"
+          },
+          "citation": {
+            "sourceId": "chj-record",
+            "detail": "Historical path at 12:20, as cited in the debrief"
+          }
+        },
+        {
+          "text": "A warning is measured against the water, not the clock on the wall: most of the deaths came between about 19:00 and 20:00, before the 20:11 alert reached a single phone.",
+          "from": {
+            "finding": 1
+          },
+          "citation": {
+            "sourceId": "court-catarroja",
+            "detail": "Findings on the timing of deaths in the interlocutory orders"
+          }
+        }
+      ],
+      "glossary": [
+        {
+          "term": "Red warning (AEMET)",
+          "match": [
+            "RED",
+            "red warning"
+          ],
+          "kind": "verbatim",
+          "definition": "El peligro es extraordinario. Los bienes y la población vulnerables o en zonas expuestas podrían sufrir impactos muy graves o catastróficos.",
+          "translation": "The danger is extraordinary. Vulnerable people and property, or those in exposed areas, could suffer very serious or catastrophic impacts.",
+          "citation": {
+            "sourceId": "aemet-meteoalerta",
+            "detail": "Section 4.2.2.3 'Nivel rojo', p. 8"
+          }
+        }
+      ],
       "debrief_media": [
         {
           "file": "spain-imerg-precipitation-rate-2024-10-29-1400utc.jpg",
@@ -2364,6 +2507,12 @@
           "label": "NASA EOSDIS Global Imagery Browse Services (GIBS): VIIRS Suomi NPP corrected-reflectance true colour over Iberia and the western Mediterranean, UTC day of 29 October 2024; crop rendered by the project from the GIBS WMS.",
           "url": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
           "note": "URL is NASA's data-use guidance (CC0 for NASA-led missions). The exact WMS request is given on the figure. The overpass time is the satellite's typical one, not read from the product metadata; the image is a daily composite."
+        },
+        {
+          "id": "aemet-meteoalerta",
+          "label": "AEMET (Agencia Estatal de Meteorología). Plan Nacional de Predicción y Vigilancia de Fenómenos Meteorológicos Adversos — Meteoalerta. Version 9, 10 January 2025, section 4.2.2.3 'Nivel rojo' (p. 8). Consulted 12 November 2026.",
+          "url": "https://www.aemet.es/documentos/es/eltiempo/prediccion/avisos/plan_meteoalerta/plan_meteoalerta.pdf",
+          "note": "Used only for the definition under 'Terms of the desk'. Version 9 post-dates the day; its change log records that it altered only the warning-review periods (p. 9), so the level definitions stand as in version 8 of 26 May 2022, in force on 29 October 2024. English translation by the project."
         }
       ]
     }

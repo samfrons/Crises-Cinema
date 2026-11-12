@@ -740,6 +740,54 @@
       }
     }
   ],
+  "takeaways": [
+    {
+      "text": "A red warning is not a decision: the coordinating committee met at 17:00, more than nine hours after the red warning was issued.",
+      "from": {
+        "step": "t4"
+      },
+      "citation": {
+        "sourceId": "court-catarroja",
+        "detail": "Historical path at 17:00, as cited in the debrief"
+      }
+    },
+    {
+      "text": "Data that is tracked is not data that is acted on: the 12:20 hydrological alert on the Poyo was received and followed, and no population-wide warning came from it.",
+      "from": {
+        "step": "t2"
+      },
+      "citation": {
+        "sourceId": "chj-record",
+        "detail": "Historical path at 12:20, as cited in the debrief"
+      }
+    },
+    {
+      "text": "A warning is measured against the water, not the clock on the wall: most of the deaths came between about 19:00 and 20:00, before the 20:11 alert reached a single phone.",
+      "from": {
+        "finding": 1
+      },
+      "citation": {
+        "sourceId": "court-catarroja",
+        "detail": "Findings on the timing of deaths in the interlocutory orders"
+      }
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Red warning (AEMET)",
+      "match": [
+        "RED",
+        "red warning"
+      ],
+      "kind": "verbatim",
+      "definition": "El peligro es extraordinario. Los bienes y la población vulnerables o en zonas expuestas podrían sufrir impactos muy graves o catastróficos.",
+      "translation": "The danger is extraordinary. Vulnerable people and property, or those in exposed areas, could suffer very serious or catastrophic impacts.",
+      "citation": {
+        "sourceId": "aemet-meteoalerta",
+        "detail": "Section 4.2.2.3 'Nivel rojo', p. 8"
+      }
+    }
+  ],
   "debrief_media": [
     {
       "file": "spain-imerg-precipitation-rate-2024-10-29-1400utc.jpg",
@@ -912,6 +960,12 @@
       "label": "NASA EOSDIS Global Imagery Browse Services (GIBS): VIIRS Suomi NPP corrected-reflectance true colour over Iberia and the western Mediterranean, UTC day of 29 October 2024; crop rendered by the project from the GIBS WMS.",
       "url": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
       "note": "URL is NASA's data-use guidance (CC0 for NASA-led missions). The exact WMS request is given on the figure. The overpass time is the satellite's typical one, not read from the product metadata; the image is a daily composite."
+    },
+    {
+      "id": "aemet-meteoalerta",
+      "label": "AEMET (Agencia Estatal de Meteorología). Plan Nacional de Predicción y Vigilancia de Fenómenos Meteorológicos Adversos — Meteoalerta. Version 9, 10 January 2025, section 4.2.2.3 'Nivel rojo' (p. 8). Consulted 12 November 2026.",
+      "url": "https://www.aemet.es/documentos/es/eltiempo/prediccion/avisos/plan_meteoalerta/plan_meteoalerta.pdf",
+      "note": "Used only for the definition under 'Terms of the desk'. Version 9 post-dates the day; its change log records that it altered only the warning-review periods (p. 9), so the level definitions stand as in version 8 of 26 May 2022, in force on 29 October 2024. English translation by the project."
     }
   ]
 }

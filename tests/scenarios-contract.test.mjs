@@ -87,6 +87,23 @@ rejects('warning-chain label key outside the vocabulary', (e) => e(L, (s) => { s
 rejects('warning-chain channel label too long for its box', (e) => e(L, (s) => { s.warning_chain.labels.social = 'County social media'; }), /labels\.social — a label of 1–11 characters/);
 rejects('warning-chain zone label for an unknown zone', (e) => e(L, (s) => { s.warning_chain.zones.atlantis = 'Atlantis'; }), /warning_chain\.zones\.atlantis — must be a scoring\.at_risk_zones id/);
 
+// "What the record teaches": each lesson is tied to one cited line and may not outrun it.
+rejects('takeaway without a citation', (e) => e(L, (s) => { delete s.takeaways[0].citation; }), /takeaways\[0\]\.citation — missing citation/);
+rejects('takeaway citing a source not in sources[]', (e) => e(L, (s) => { s.takeaways[0].citation.sourceId = 'my-memory'; }), /not in sources\[\]/);
+rejects('takeaway that names no cited line', (e) => e(L, (s) => { delete s.takeaways[0].from; }), /takeaways\[0\]\.from — must name exactly one cited line/);
+rejects('takeaway drawn from a finding that does not exist', (e) => e(L, (s) => { s.takeaways[0].from = { finding: 99 }; }), /from\.finding — must be an index into inquiry_findings/);
+rejects('takeaway drawn from a step with no historical path', (e) => e(V, (s) => { s.takeaways[0].from = { step: 't99' }; }), /from\.step — must be a timestep id/);
+rejects('takeaway citing a different source from its line', (e) => e(L, (s) => { s.takeaways[0].citation.sourceId = 'fsri-p1'; }), /must cite the source of the line it is drawn from/);
+rejects('takeaway that adds a figure its line does not print', (e) => e(L, (s) => { s.takeaways[1].text = s.takeaways[1].text.replace('16:30', '15:00'); }), /prints "15:00".*may not add a figure/);
+rejects('takeaway with SOURCE NEEDED', (e) => e(V, (s) => { s.takeaways[0].text = 'SOURCE NEEDED — lesson to be written later'; }), /takeaways\[0\]\.text — placeholder/);
+
+// "Terms of the desk": official definitions, cited, for words the slips actually use.
+rejects('glossary definition without a citation', (e) => e(L, (s) => { delete s.glossary[0].citation; }), /glossary\[0\]\.citation — missing citation/);
+rejects('glossary definition citing a source not in sources[]', (e) => e(V, (s) => { s.glossary[0].citation.sourceId = 'wikipedia'; }), /glossary\[0\]\.citation — citation sourceId "wikipedia" not in sources/);
+rejects('glossary term that never appears on the desk', (e) => e(L, (s) => { s.glossary[0].match = ['Tsunami Warning']; }), /glossary\[0\]\.match — none of these spellings appears/);
+rejects('glossary definition with no kind', (e) => e(L, (s) => { delete s.glossary[0].kind; }), /glossary\[0\]\.kind — must be "verbatim" or "paraphrase"/);
+rejects('glossary definition that runs long', (e) => e(L, (s) => { s.glossary[0].definition = 'x'.repeat(400); }), /glossary\[0\]\.definition — a definition of 1–320/);
+
 test('every icon, chain link and state used in the real data is in the vocabulary (positive control)', () => {
   const vocab = JSON.parse(readFileSync(join(repo, 'src', 'app', 'control-room', 'vocabulary.json'), 'utf8'));
   for (const name of [L, V]) {

@@ -179,6 +179,90 @@ function checkChainLabels(chk, wc, s) {
   }
 }
 
+/** Every number a sentence prints ("16:30", "1,686", "9"), as written. */
+const numbersIn = (text) => (typeof text === 'string' ? text.match(/\d+(?:[.,:]\d+)*/g) ?? [] : []);
+
+/**
+ * "What the record teaches": a lesson in the project's words, one sentence,
+ * tied to ONE cited line of the scenario — an inquiry finding (`from.finding`,
+ * its index) or a historical-path entry (`from.step`, its timestep id). The
+ * lesson's citation must be that line's own source, and the lesson may not
+ * print a number its line does not already print: a reading of the record
+ * can sharpen it, never add to it.
+ */
+function checkTakeaways(chk, s, sourceIds) {
+  if (!chk.require(Array.isArray(s.takeaways) && s.takeaways.length >= 1 && s.takeaways.length <= 4,
+    'takeaways', 'must be an array of 1–4 lessons')) return;
+  for (const [i, t] of s.takeaways.entries()) {
+    const p = `takeaways[${i}]`;
+    if (!chk.require(t && typeof t === 'object', p, 'must be an object')) continue;
+    const ok = chk.require(typeof t.text === 'string' && t.text.trim().length >= 20 && t.text.length <= 280,
+      `${p}.text`, 'one sentence of 20–280 characters');
+    if (ok) chk.require(!PLACEHOLDER.test(t.text), `${p}.text`, 'placeholder text in a playable scenario');
+    checkCitation(chk, t.citation, `${p}.citation`, sourceIds, true);
+
+    // Which cited line the lesson is drawn from.
+    const from = t.from ?? {};
+    const hasF = from.finding !== undefined;
+    const hasS = from.step !== undefined;
+    if (!chk.require(hasF !== hasS, `${p}.from`, 'must name exactly one cited line: { finding: <index> } or { step: <timestep id> }')) continue;
+    let line = null; // { sourceId, text }
+    if (hasF) {
+      const f = Number.isInteger(from.finding) ? s.inquiry_findings?.[from.finding] : undefined;
+      if (chk.require(!!f, `${p}.from.finding`, `must be an index into inquiry_findings (0–${(s.inquiry_findings?.length ?? 1) - 1})`)) {
+        line = { sourceId: f.citation?.sourceId, text: `${f.quote ?? ''} ${f.translation ?? ''}` };
+      }
+    } else {
+      const h = (s.historical_path ?? []).find((x) => x.timestep_id === from.step);
+      if (chk.require(!!h, `${p}.from.step`, 'must be a timestep id that has a historical_path entry')) {
+        line = { sourceId: h.citation?.sourceId, text: h.action ?? '' };
+      }
+    }
+    if (!line) continue;
+    chk.require(t.citation?.sourceId === line.sourceId, `${p}.citation`,
+      `must cite the source of the line it is drawn from ("${line.sourceId}")`);
+    for (const n of numbersIn(t.text)) {
+      chk.require(line.text.includes(n), `${p}.text`,
+        `prints "${n}", which the line it is drawn from does not — a lesson may not add a figure`);
+    }
+  }
+}
+
+/**
+ * "Terms of the desk": a civilian's gloss on a word the slips use. Each entry
+ * is an official definition, quoted (`verbatim`) or tightly paraphrased
+ * (`paraphrase`), with a citation like any other fact. `match` lists the
+ * spellings that mark the term in the slips (whole words, case-sensitive);
+ * at least one must actually appear on the desk, or the gloss explains
+ * nothing the player will meet.
+ */
+function checkGlossary(chk, s, sourceIds) {
+  if (!chk.require(Array.isArray(s.glossary) && s.glossary.length >= 1, 'glossary', 'must be a non-empty array')) return;
+  const desk = (s.timesteps ?? []).flatMap((t) => (t.info_available ?? []).map((i) => i.text ?? ''));
+  const esc = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const terms = new Set();
+  for (const [i, g] of s.glossary.entries()) {
+    const p = `glossary[${i}]`;
+    if (!chk.require(g && typeof g === 'object', p, 'must be an object')) continue;
+    if (chk.require(typeof g.term === 'string' && g.term.trim().length > 0 && g.term.length <= 48, `${p}.term`, 'a term of 1–48 characters')) {
+      chk.require(!terms.has(g.term), `${p}.term`, `duplicate term "${g.term}"`);
+      terms.add(g.term);
+    }
+    chk.require(g.kind === 'verbatim' || g.kind === 'paraphrase', `${p}.kind`, 'must be "verbatim" or "paraphrase"');
+    if (chk.require(typeof g.definition === 'string' && g.definition.trim().length > 0 && g.definition.length <= 320,
+      `${p}.definition`, 'a definition of 1–320 characters')) {
+      chk.require(!PLACEHOLDER.test(g.definition), `${p}.definition`, 'placeholder definition in a playable scenario');
+    }
+    if (g.translation !== undefined) chk.require(typeof g.translation === 'string' && g.translation.length > 0, `${p}.translation`, 'must be a string when present');
+    checkCitation(chk, g.citation, `${p}.citation`, sourceIds, true);
+    if (chk.require(Array.isArray(g.match) && g.match.length > 0 && g.match.every((m) => typeof m === 'string' && m.length >= 2),
+      `${p}.match`, 'must be a non-empty array of spellings (2+ characters)')) {
+      const onDesk = g.match.some((m) => desk.some((text) => new RegExp(`\\b${esc(m)}\\b`).test(text)));
+      chk.require(onDesk, `${p}.match`, 'none of these spellings appears in any slip — a gloss must explain a word the player meets');
+    }
+  }
+}
+
 function validate(file, s) {
   const chk = new Check(file);
   for (const field of ['id', 'status', 'title', 'date', 'location', 'hazard']) {
@@ -298,6 +382,9 @@ function validate(file, s) {
     chk.require(typeof f.quote === 'string' && f.quote.length > 0, `${p}.quote`, 'required');
     checkCitation(chk, f.citation, `${p}.citation`, sourceIds, playable);
   }
+
+  if (s.takeaways !== undefined) checkTakeaways(chk, s, sourceIds);
+  if (s.glossary !== undefined) checkGlossary(chk, s, sourceIds);
 
   const d = s.outcome?.deaths;
   chk.require(d && Number.isFinite(d.min) && Number.isFinite(d.max) && d.min <= d.max && typeof d.contested === 'boolean',

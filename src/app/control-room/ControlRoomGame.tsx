@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import type { Citation, MediaAttachment, Option, Scenario, ScenarioBundle, Timestep } from './types';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import type { Citation, GlossaryEntry, InfoItem, MediaAttachment, Option, Scenario, ScenarioBundle, Timestep } from './types';
 import { startSession, logChoice, completeSession, type ChoiceEvent } from './telemetry';
 import { scoreRun, historicalLeadTime, formatLead, type Choice } from './scoring';
 import DayStrip from './DayStrip';
@@ -10,6 +10,9 @@ import { itemState, STATE_RANK, vocabFor, COMPASS_WORD, type ZoneState } from '.
 import AlertTimingChart from './AlertTimingChart';
 import { KindGlyph, HazardGlyph, Pictogram, hasPictogram } from './glyphs';
 import WarningChain, { chainChanges, chainNews, deriveChain } from './WarningChain';
+import { loadLastRun, markCoached, sameCalls, saveRun, wasCoached, type LastRun } from './memory';
+import prepMeta from '../../data/preparedness-meta.json';
+import { inWords, tzLabel, WPM, type CardBundle, type ScenarioCard } from './summary';
 
 /* ══════════════════════════════════════════════════════════════════════════
    One continuous desk. Once a day is chosen, everything happens in a single
@@ -87,22 +90,6 @@ function warnedBy(scenario: Scenario, option: Option): string[] {
   return [];
 }
 
-/** The clock's zone as players read it: an IANA region ("Pacific/Honolulu")
- *  becomes its short name on the scenario's date ("HST"); a name that is
- *  already short ("CET") is shown as given. */
-function tzLabel(s: Pick<Scenario, 'clock' | 'date'>) {
-  const tz = s.clock.timezone;
-  if (!tz.includes('/')) return tz;
-  try {
-    const part = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'short' })
-      .formatToParts(new Date(`${s.date}T12:00:00Z`))
-      .find((p) => p.type === 'timeZoneName')?.value;
-    return part && !/^GMT/.test(part) ? part : tz;
-  } catch {
-    return tz;
-  }
-}
-
 const stamp = (t: Timestep) => `${t.approx ? '≈' : ''}${t.time}`;
 const stepId = (t: Timestep) => `cr-step-${t.id}`;
 
@@ -113,7 +100,52 @@ type Run = {
   choices: Choice[];
   presentedAt: number;
   done: boolean;
+  /** The player's previous completed run of this day, read when the desk was
+   *  taken (so the debrief can set this run beside it); null on a first run. */
+  last: LastRun | null;
 };
+
+/* ── The taught first hour ────────────────────────────────────────────────
+   The first time a visitor takes a desk this session, the interface names
+   its own parts, one desk note at a time, each pinned beside the thing it
+   names: the first slip, the warning chain, the clock, the call. Four notes,
+   one press to dismiss them all, never shown again this session. This is
+   interface teaching, not record content: it states how to read the desk,
+   never a fact about the day. */
+
+type CoachAt = 'slip' | 'chain' | 'clock' | 'call';
+const COACH: { at: CoachAt; text: string }[] = [
+  { at: 'slip', text: 'Dispatch traffic arrives here, one slip at a time, as officials received it. The bracketed number is the citation: every line on this desk is the record.' },
+  { at: 'chain', text: 'Every warning must cross this chain to reach a person: forecast office, your desk, then sirens, phones, broadcast, posts. A link lights only when the record says it carried one.' },
+  { at: 'clock', text: 'The clock is real; it will not wait. After each call it jumps to the next moment the record holds, and whatever happened in between happened without you.' },
+  { at: 'call', text: 'Your call. No option is drawn as the right one. Afterwards the log says what officials did, and says so plainly where the record is silent.' },
+];
+
+type Coach = { at: CoachAt; index: number; onNext: () => void; onSkip: () => void } | null;
+const coached = (coach: Coach, at: CoachAt) => (coach?.at === at ? ' is-coached' : '');
+
+/** One desk note, set beside the part of the desk it names. `alt` replaces
+ *  the line where that part is somewhere else on this screen (the chain,
+ *  on a phone hour that does not print it, lives behind MAP). */
+function CoachMark({ coach, at, point = 'up', alt }: { coach: Coach; at: CoachAt; point?: 'up' | 'down'; alt?: string }) {
+  if (!coach || coach.at !== at) return null;
+  const last = coach.index === COACH.length - 1;
+  return (
+    <aside id="cr-coach" className={`cr-coach cr-coach-${at} is-${point}`} aria-labelledby="cr-coach-h"
+      onKeyDown={(e) => { if (e.key === 'Escape') coach.onSkip(); }}>
+      <p id="cr-coach-h" className="cr-coach-head">Desk note {coach.index + 1} of {COACH.length}</p>
+      <p className="cr-coach-text">{alt ?? COACH[coach.index].text}</p>
+      <div className="cr-coach-actions">
+        <button type="button" id="cr-coach-next" className="cr-coach-next" onClick={coach.onNext}>
+          {last ? 'Take the call' : 'Next note'} <span aria-hidden>→</span>
+        </button>
+        {!last && (
+          <button type="button" className="cr-coach-skip" onClick={coach.onSkip}>I&apos;ve held a desk before</button>
+        )}
+      </div>
+    </aside>
+  );
+}
 
 /** After a render: where focus lands and what scrolls into view. */
 type Pending = { focus?: string; scroll?: string; block?: ScrollLogicalPosition };
@@ -133,8 +165,17 @@ function useMedia(query: string) {
 const reducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) {
+/** The full scenarios load only once a day is picked: the select screen
+ *  ships card summaries (summary.ts), and this chunk follows on demand. */
+let bundlePromise: Promise<ScenarioBundle> | null = null;
+const loadBundle = () => {
+  bundlePromise ??= import('../../data/scenarios.json').then((m) => (m.default ?? m) as unknown as ScenarioBundle);
+  return bundlePromise;
+};
+
+export default function ControlRoomGame({ cards }: { cards: CardBundle }) {
   const [run, setRun] = useState<Run | null>(null);
+  const [coachIndex, setCoachIndex] = useState<number | null>(null);
   const wide = useMedia('(min-width: 1024px)');
 
   const pending = useRef<Pending | null>(null);
@@ -153,13 +194,23 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
     }
   });
 
-  const pick = (scenario: Scenario) => {
-    pending.current = { focus: 'cr-brief-title', scroll: 'desk' };
-    setRun({ scenario, sessionId: null, cursor: 0, choices: [], presentedAt: 0, done: false });
+  const newRun = (scenario: Scenario): Run =>
+    ({ scenario, sessionId: null, cursor: 0, choices: [], presentedAt: 0, done: false, last: loadLastRun(scenario) });
+
+  const [loading, setLoading] = useState<string | null>(null);
+  const pick = (id: string) => {
+    setLoading(id);
+    loadBundle().then((b) => {
+      const scenario = b.playable.find((x) => x.id === id);
+      setLoading(null);
+      if (!scenario) return;
+      pending.current = { focus: 'cr-brief-title', scroll: 'desk' };
+      setRun(newRun(scenario));
+    }, () => setLoading(null));
   };
 
   if (!run) {
-    return <SelectScreen bundle={bundle} onPick={pick} />;
+    return <SelectScreen cards={cards} onPick={pick} loading={loading} />;
   }
 
   const { scenario, sessionId, cursor, choices, done } = run;
@@ -171,8 +222,31 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
 
   const start = () => {
     const session = startSession(scenario.id);
-    pending.current = { focus: `${stepId(steps[0])}-h`, scroll: stepId(steps[0]) };
+    if (!wasCoached()) {
+      // First desk this session: the interface introduces itself. Marked as
+      // seen at once, so leaving half-way never brings the notes back.
+      markCoached();
+      setCoachIndex(0);
+      pending.current = { focus: 'cr-coach-next', scroll: stepId(steps[0]) };
+    } else {
+      pending.current = { focus: `${stepId(steps[0])}-h`, scroll: stepId(steps[0]) };
+    }
     setRun({ ...run, sessionId: session.sessionId, cursor: 0, presentedAt: Date.now() });
+  };
+
+  const endCoach = () => {
+    setCoachIndex(null);
+    pending.current = { focus: `${stepId(steps[0])}-h`, scroll: `${stepId(steps[0])}-call`, block: 'center' };
+  };
+  const coach: Coach = coachIndex === null || !started || done ? null : {
+    at: COACH[coachIndex].at,
+    index: coachIndex,
+    onNext: () => {
+      if (coachIndex >= COACH.length - 1) { endCoach(); return; }
+      setCoachIndex(coachIndex + 1);
+      pending.current = { focus: 'cr-coach-next', scroll: 'cr-coach', block: 'nearest' };
+    },
+    onSkip: endCoach,
   };
 
   const choose = (option: Option) => {
@@ -188,6 +262,7 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
       divergedFromHistory: current.historical_option_id !== null && option.id !== current.historical_option_id,
     };
     logChoice(sessionId, event);
+    setCoachIndex(null);
     pending.current = { focus: 'cr-advance-btn', scroll: `${stepId(current)}-record`, block: 'nearest' };
     setRun({ ...run, choices: [...choices, { timestep: current, option, event }] });
   };
@@ -196,6 +271,7 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
     if (!sessionId || !decided) return;
     if (cursor >= lastIndex) {
       completeSession(sessionId, scoreRun(scenario, choices));
+      saveRun(scenario, Object.fromEntries(choices.map((c) => [c.timestep.id, c.option.id])));
       pending.current = { focus: 'cr-debrief-title', scroll: 'cr-debrief' };
       setRun({ ...run, done: true });
     } else {
@@ -207,7 +283,7 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
 
   const replay = () => {
     pending.current = { focus: 'cr-brief-title', scroll: 'desk' };
-    setRun({ scenario, sessionId: null, cursor: 0, choices: [], presentedAt: 0, done: false });
+    setRun(newRun(scenario));
   };
   const leave = () => {
     pending.current = { scroll: 'desk' };
@@ -224,11 +300,11 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
   return (
     <div className="cr-run">
       <Console scenario={scenario} started={started} cursor={cursor} choices={choices} done={done}
-        live={live} showMapButton={!wide} />
+        live={live} showMapButton={!wide} coach={coach} />
 
       <div className="cr-play wrap">
         <div className="cr-log" role="log" aria-label="Dispatch log" aria-live="polite">
-          <Briefing scenario={scenario} started={started} inlineMap={!wide} onStart={start} />
+          <Briefing scenario={scenario} started={started} inlineMap={!wide} onStart={start} last={run.last} />
 
           {started && steps.slice(0, cursor + 1).map((t, i) => (
             <StepEntry
@@ -240,17 +316,18 @@ export default function ControlRoomGame({ bundle }: { bundle: ScenarioBundle }) 
               isCurrent={i === cursor && !done}
               isLast={i === lastIndex}
               inlineChain={!wide}
+              coach={i === 0 ? coach : null}
               onChoose={choose}
               onAdvance={advance}
             />
           ))}
         </div>
 
-        {wide && <SidePanel scenario={scenario} live={live} choices={choices} started={started} />}
+        {wide && <SidePanel scenario={scenario} live={live} choices={choices} started={started} coach={coach} />}
       </div>
 
       {done ? (
-        <Debrief scenario={scenario} choices={choices} onReplay={replay} onLeave={leave} />
+        <Debrief scenario={scenario} choices={choices} last={run.last} onReplay={replay} onLeave={leave} />
       ) : (
         <div className="wrap cr-play-sources">
           <Sources scenario={scenario} title="Sources for this day" />
@@ -282,9 +359,9 @@ function LiveBoard({ scenario, live, note }: { scenario: Scenario; live: Live; n
   );
 }
 
-function Console({ scenario, started, cursor, choices, done, live, showMapButton }: {
+function Console({ scenario, started, cursor, choices, done, live, showMapButton, coach }: {
   scenario: Scenario; started: boolean; cursor: number; choices: Choice[]; done: boolean;
-  live: Live; showMapButton: boolean;
+  live: Live; showMapButton: boolean; coach: Coach;
 }) {
   const { board } = live;
   const steps = scenario.timesteps;
@@ -302,7 +379,7 @@ function Console({ scenario, started, cursor, choices, done, live, showMapButton
   return (
     <div className="cr-console">
       <div className="cr-console-row wrap">
-        <a className="cr-console-clock" href={`#${target}`}
+        <a className={`cr-console-clock${coached(coach, 'clock')}`} href={`#${target}`}
           aria-label={`${time} ${tzLabel(scenario)}, ${status}. Jump to the desk.`}>
           <span className="cr-console-time">{time}</span>
           <span className="cr-console-status"><span className="cr-console-tz">{tzLabel(scenario)} · </span>{status}</span>
@@ -325,6 +402,9 @@ function Console({ scenario, started, cursor, choices, done, live, showMapButton
         )}
       </div>
       <DayStrip scenario={scenario} currentIndex={started ? cursor : -1} choices={choices} ended={done} />
+      {coach?.at === 'clock' && (
+        <div className="cr-coach-dock wrap"><CoachMark coach={coach} at="clock" /></div>
+      )}
       {showMapButton && (
         <BoardSheet open={sheetOpen} onClose={() => setSheetOpen(false)}>
           <LiveBoard scenario={scenario} live={live} />
@@ -403,8 +483,8 @@ const boardNote = (scenario: Scenario) =>
 
 /* ── Wide screens: the board and your run, alongside the log ────────────── */
 
-function SidePanel({ scenario, live, choices, started }: {
-  scenario: Scenario; live: Live; choices: Choice[]; started: boolean;
+function SidePanel({ scenario, live, choices, started, coach }: {
+  scenario: Scenario; live: Live; choices: Choice[]; started: boolean; coach: Coach;
 }) {
   return (
     <aside className="cr-side" aria-label="Situation board, warning chain and your run">
@@ -412,7 +492,10 @@ function SidePanel({ scenario, live, choices, started }: {
       <LiveBoard scenario={scenario} live={live} note={started ? undefined : boardNote(scenario)} />
       <BoardList scenario={scenario} board={live.board} />
       <p className="cr-side-head">Warning chain</p>
-      <WarningChain scenario={scenario} snapshot={live.chain} fresh={live.chainFresh} />
+      <CoachMark coach={coach} at="chain" point="down" />
+      <div className={`cr-coach-target${coached(coach, 'chain')}`}>
+        <WarningChain scenario={scenario} snapshot={live.chain} fresh={live.chainFresh} />
+      </div>
       <p className="cr-side-head">Your run so far</p>
       {started && choices.length ? (
         <ol className="cr-trace">
@@ -437,24 +520,37 @@ function SidePanel({ scenario, live, choices, started }: {
 
 /* ── Select ──────────────────────────────────────────────────────────────── */
 
-function SelectScreen({ bundle, onPick }: { bundle: ScenarioBundle; onPick: (s: Scenario) => void }) {
+function SelectScreen({ cards, onPick, loading }: { cards: CardBundle; onPick: (id: string) => void; loading: string | null }) {
+  // What this browser remembers of each day: unknown until mounted (so the
+  // server render and the first client render agree), then a run or null.
+  const [memory, setMemory] = useState<Record<string, LastRun | null> | null>(null);
+  useEffect(() => {
+    setMemory(Object.fromEntries(cards.playable.map((s) => [s.id, loadLastRun(s)])));
+  }, [cards]);
   return (
     <section className="cr-select wrap" aria-labelledby="cr-select-title">
       <h2 id="cr-select-title" className="cr-section-eyebrow">Choose a day to hold the desk</h2>
       <div className="cr-select-grid">
-        {bundle.playable.map((s) => (
-          <button type="button" key={s.id} className="cr-card" onClick={() => onPick(s)}>
+        {cards.playable.map((s) => (
+          <button type="button" key={s.id} className="cr-card" onClick={() => onPick(s.id)}
+            aria-busy={loading === s.id} disabled={loading !== null && loading !== s.id}>
             <span className="cr-card-head">
               <HazardGlyph hazard={s.hazard} size={22} className="cr-card-glyph" />
               <span className="cr-card-date">{s.date} · {s.hazard}</span>
             </span>
             <span className="cr-card-title">{s.title}</span>
             <span className="cr-card-loc">{s.location}</span>
-            <span className="cr-card-meta">{s.timesteps.length} decisions · {s.clock.start}–{s.clock.end} {tzLabel(s)}</span>
-            <span className="cr-card-cta">Take the desk <span className="cr-card-arrow" aria-hidden>→</span></span>
+            <span className="cr-card-meta">
+              {inWords(s.timesteps.length)} decisions · about {s.minutes} min · {s.clock.start}–{s.clock.end} {s.tz}
+            </span>
+            <CardMemory scenario={s} last={memory ? memory[s.id] : undefined} />
+            <span className="cr-card-cta">
+              {loading === s.id ? 'Opening the desk…' : memory?.[s.id] ? 'Take the desk again' : 'Take the desk'}
+              <span className="cr-card-arrow" aria-hidden>→</span>
+            </span>
           </button>
         ))}
-        {bundle.stubs.map((s) => (
+        {cards.stubs.map((s) => (
           <div key={s.id} className="cr-card cr-card-stub" aria-disabled>
             <span className="cr-card-head">
               <HazardGlyph hazard={s.hazard} size={22} className="cr-card-glyph" />
@@ -466,18 +562,35 @@ function SelectScreen({ bundle, onPick }: { bundle: ScenarioBundle; onPick: (s: 
           </div>
         ))}
       </div>
-      <p className="cr-footnote">Greyed scenarios exist only as schema: nothing appears here until every fact in
+      <p className="cr-footnote">Minutes are reading time: the words each day puts in front of you, at {WPM} a
+        minute. Greyed scenarios exist only as schema: nothing appears here until every fact in
         them carries a source, and the build enforces it.</p>
     </section>
   );
 }
 
+/** The card's memory line. Its height is held whether or not there is a
+ *  run to report, so the grid never shifts when this browser's memory is
+ *  read after first paint. */
+function CardMemory({ scenario, last }: { scenario: ScenarioCard; last: LastRun | null | undefined }) {
+  let text = '';
+  if (last) {
+    const { same, of } = sameCalls(scenario, last.picks);
+    text = `You have held this desk before — your last run took the officials' call at ${same} of ${of} decisions.`;
+  } else if (last === null) {
+    text = 'Not yet held on this browser.';
+  }
+  return <span className={`cr-card-memory${last ? ' is-held' : ''}`}>{text}</span>;
+}
+
 /* ── Log entry 0: the briefing ───────────────────────────────────────────── */
 
-function Briefing({ scenario, started, inlineMap, onStart }: {
-  scenario: Scenario; started: boolean; inlineMap: boolean; onStart: () => void;
+function Briefing({ scenario, started, inlineMap, onStart, last }: {
+  scenario: Scenario; started: boolean; inlineMap: boolean; onStart: () => void; last: LastRun | null;
 }) {
   const vocab = vocabFor(scenario);
+  const sourceIndex = useSourceIndex(scenario);
+  const lastSame = last ? sameCalls(scenario, last.picks) : null;
   return (
     <article id="cr-briefing" className="cr-entry cr-entry-brief" aria-labelledby="cr-brief-title">
       <p className="cr-stamp">
@@ -493,6 +606,29 @@ function Briefing({ scenario, started, inlineMap, onStart }: {
         followed — and the log will say so rather than invent it.</p>
       <p className="cr-brief-count">{scenario.timesteps.length} decision points, from {scenario.clock.start} {tzLabel(scenario)}.
         The console above keeps the clock and your progress.</p>
+      {lastSame && (
+        <p className="cr-brief-count cr-brief-again">You have held this desk before: your last run took the officials&apos;
+          call at {lastSame.same} of {lastSame.of} decisions. The debrief will set this run beside it.</p>
+      )}
+      {scenario.glossary && scenario.glossary.length > 0 && (
+        <details className="cr-terms">
+          <summary>
+            <span className="cr-terms-label">Terms of the desk</span>
+            <span className="cr-terms-count">{scenario.glossary.length} official definition{scenario.glossary.length > 1 ? 's' : ''}</span>
+          </summary>
+          <dl>
+            {scenario.glossary.map((g) => (
+              <div key={g.term}>
+                <dt>{g.term}</dt>
+                <dd><Definition g={g} idx={sourceIndex} /></dd>
+              </div>
+            ))}
+          </dl>
+          <p className="cr-terms-note">Each term is also marked with a dotted underline where it first appears in
+            the traffic; press it for the definition. Words without an official definition the project could
+            fetch and check are left unglossed.</p>
+        </details>
+      )}
       {scenario.briefing_media && <Figure scenario={scenario} m={scenario.briefing_media} />}
       {inlineMap && !started && (
         <OpsMap scenario={scenario} zoneStates={{}} warnedZones={[]} note={boardNote(scenario)} />
@@ -512,11 +648,15 @@ function Briefing({ scenario, started, inlineMap, onStart }: {
 
 /* ── Log entries 1…n: one decision point each ────────────────────────────── */
 
-function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain, onChoose, onAdvance }: {
+function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain, coach, onChoose, onAdvance }: {
   scenario: Scenario; t: Timestep; index: number; choice?: Choice;
-  isCurrent: boolean; isLast: boolean; inlineChain: boolean; onChoose: (o: Option) => void; onAdvance: () => void;
+  isCurrent: boolean; isLast: boolean; inlineChain: boolean; coach: Coach;
+  onChoose: (o: Option) => void; onAdvance: () => void;
 }) {
   const sourceIndex = useSourceIndex(scenario);
+  const termMarks = useTermMarks(scenario);
+  const total = scenario.timesteps.length;
+  const remaining = total - (index + 1);
   const vocab = vocabFor(scenario);
   const id = stepId(t);
   // What this hour's traffic changed on the board — derived only from the
@@ -548,16 +688,21 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain,
 
       <ul className="cr-dispatches" aria-label={`Incoming at ${stamp(t)}`}>
         {t.info_available.map((info, i) => (
-          <li key={info.id} className={`cr-slip cr-slip-${info.kind}`} style={{ '--i': i } as React.CSSProperties}>
+          <li key={info.id} className={`cr-slip cr-slip-${info.kind}${i === 0 ? coached(coach, 'slip') : ''}`}
+            style={{ '--i': i } as React.CSSProperties}>
             <p className="cr-slip-kind">
               <KindGlyph kind={info.kind} className="cr-kind-glyph" /> {vocab.kindLabel[info.kind]}
               {hasPictogram(info.icon) && <Pictogram name={info.icon} size={22} className="cr-slip-pict" />}
             </p>
-            <p className="cr-slip-text">{info.text} <Cite c={info.citation} idx={sourceIndex} /></p>
+            <SlipText info={info} marks={termMarks.get(info.id)} idx={sourceIndex} />
+            {i === 0 && <CoachMark coach={coach} at="slip" />}
             {info.media && <Figure scenario={scenario} m={info.media} />}
           </li>
         ))}
       </ul>
+      {inlineChain && !chainAt && (
+        <CoachMark coach={coach} at="chain" alt={`${COACH[1].text} On this screen the chain is on the situation board: press MAP in the bar above.`} />
+      )}
 
       {changes.length > 0 && (
         <p className="cr-boardline" style={{ '--i': t.info_available.length } as React.CSSProperties}>
@@ -584,7 +729,12 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain,
               ))}
             </span>
           </p>
-          {chainAt && <WarningChain scenario={scenario} snapshot={chainAt.snap} fresh={chainAt.fresh} compact />}
+          {chainAt && <CoachMark coach={coach} at="chain" />}
+          {chainAt && (
+            <div className={`cr-coach-target${coached(coach, 'chain')}`}>
+              <WarningChain scenario={scenario} snapshot={chainAt.snap} fresh={chainAt.fresh} compact />
+            </div>
+          )}
         </div>
       )}
 
@@ -594,7 +744,8 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain,
         <div className="cr-call" role="group" aria-labelledby={`${id}-call`}
           style={{ '--i': slips + 2 } as React.CSSProperties}>
           <p id={`${id}-call`} className="cr-call-head">Your call · {stamp(t)}</p>
-          <div className="cr-options">
+          <CoachMark coach={coach} at="call" point="down" />
+          <div className={`cr-options${coached(coach, 'call')}`}>
             {t.options.map((o) => (
               <button type="button" key={o.id} className="cr-option" onClick={() => onChoose(o)}>
                 <span className="cr-option-label">{o.label}</span>
@@ -611,9 +762,94 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain,
             {isLast ? 'Close the log — to the debrief' : 'Advance the clock'}
             <span className="cr-btn-arrow" aria-hidden>↓</span>
           </button>
+          <p className={`cr-advance-note${remaining === 1 ? ' is-penultimate' : ''}`}>
+            Decision {index + 1} of {total} logged
+            {remaining > 1 && <> · {remaining} more on the record</>}
+            {remaining === 1 && <> · <strong>one decision remains before the log closes</strong></>}
+            {remaining === 0 && <> · that was the last call; the log closes on the debrief</>}
+          </p>
         </div>
       )}
     </article>
+  );
+}
+
+/* ── Terms of the desk ─────────────────────────────────────────────────────
+   A glossary term is marked once, where it first appears in the day's
+   traffic (in slip order), as a dotted-underline button: pressing it prints
+   the official definition as a footnote under the slip, cited like every
+   other line. Its title carries the same words for a pointer's hover. */
+
+type TermMark = { g: GlossaryEntry; start: number; end: number };
+const escRe = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+function useTermMarks(scenario: Scenario) {
+  return useMemo(() => {
+    const out = new Map<string, TermMark[]>();
+    for (const g of scenario.glossary ?? []) {
+      const res = g.match.map((m) => new RegExp(`\\b${escRe(m)}\\b`));
+      found: for (const t of scenario.timesteps) {
+        for (const info of t.info_available) {
+          let best: { start: number; end: number } | null = null;
+          for (const re of res) {
+            const m = re.exec(info.text);
+            if (m && (!best || m.index < best.start)) best = { start: m.index, end: m.index + m[0].length };
+          }
+          if (!best) continue;
+          const list = out.get(info.id) ?? [];
+          // Two terms may not overlap in one slip; the earlier-listed term wins.
+          if (!list.some((x) => best!.start < x.end && x.start < best!.end)) list.push({ g, ...best });
+          out.set(info.id, list.sort((a, b) => a.start - b.start));
+          break found;
+        }
+      }
+    }
+    return out;
+  }, [scenario]);
+}
+
+function Definition({ g, idx }: { g: GlossaryEntry; idx: Map<string, number> }) {
+  return (
+    <>
+      {g.kind === 'verbatim' ? <q className="cr-def-quote" lang={g.translation ? 'es' : undefined}>{g.definition}</q> : g.definition}
+      {g.translation ? <span className="cr-translation"> {g.translation} <span className="cr-paraphrase-tag">our translation</span></span> : null}
+      {' '}<Cite c={g.citation} idx={idx} />
+      {g.kind === 'paraphrase' && <span className="cr-paraphrase-tag"> paraphrase</span>}
+    </>
+  );
+}
+
+function SlipText({ info, marks, idx }: { info: InfoItem; marks?: TermMark[]; idx: Map<string, number> }) {
+  const [open, setOpen] = useState<string | null>(null);
+  if (!marks?.length) {
+    return <p className="cr-slip-text">{info.text} <Cite c={info.citation} idx={idx} /></p>;
+  }
+  const parts: React.ReactNode[] = [];
+  let at = 0;
+  for (const m of marks) {
+    parts.push(info.text.slice(at, m.start));
+    const noteId = `${info.id}-term-${m.start}`;
+    const isOpen = open === m.g.term;
+    parts.push(
+      <button key={noteId} type="button" className={`cr-term${isOpen ? ' is-open' : ''}`} aria-expanded={isOpen}
+        aria-controls={noteId} title={m.g.translation ?? m.g.definition}
+        onClick={() => setOpen(isOpen ? null : m.g.term)}>
+        {info.text.slice(m.start, m.end)}
+      </button>,
+    );
+    at = m.end;
+  }
+  parts.push(info.text.slice(at));
+  return (
+    <>
+      <p className="cr-slip-text">{parts.map((x, i) => <Fragment key={i}>{x}</Fragment>)} <Cite c={info.citation} idx={idx} /></p>
+      {marks.map((m) => (
+        <p key={m.start} id={`${info.id}-term-${m.start}`} className="cr-term-note" hidden={open !== m.g.term}>
+          <span className="cr-term-tag">Term of the desk</span>{' '}
+          <b>{m.g.term}</b> <span aria-hidden>—</span> <Definition g={m.g} idx={idx} />
+        </p>
+      ))}
+    </>
   );
 }
 
@@ -663,8 +899,8 @@ function CallRecord({ scenario, t, choice, sourceIndex }: {
 
 /* ── The last entry: the debrief ─────────────────────────────────────────── */
 
-function Debrief({ scenario, choices, onReplay, onLeave }: {
-  scenario: Scenario; choices: Choice[]; onReplay: () => void; onLeave: () => void;
+function Debrief({ scenario, choices, last, onReplay, onLeave }: {
+  scenario: Scenario; choices: Choice[]; last: LastRun | null; onReplay: () => void; onLeave: () => void;
 }) {
   const sourceIndex = useSourceIndex(scenario);
   const score = useMemo(() => scoreRun(scenario, choices), [scenario, choices]);
@@ -672,6 +908,12 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
   const compact = !useMedia('(min-width: 640px)');
   const vocab = vocabFor(scenario);
   const d = scenario.outcome.deaths;
+  const optLabel = (t: Timestep, id?: string) => t.options.find((o) => o.id === id)?.label ?? '—';
+  // This run beside the last one, counted against the record — never ranked.
+  const thisPicks = Object.fromEntries(choices.map((c) => [c.timestep.id, c.option.id]));
+  const nowSame = sameCalls(scenario, thisPicks);
+  const lastSame = last ? sameCalls(scenario, last.picks) : null;
+  const changed = last ? scenario.timesteps.filter((t) => last.picks[t.id] !== thisPicks[t.id]) : [];
 
   return (
     <section id="cr-debrief" className="cr-debrief" aria-labelledby="cr-debrief-title">
@@ -698,30 +940,60 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
       <div className="wrap cr-debrief-body">
         <div className="cr-dsec">
           <h3 className="cr-dsec-title">Your day beside theirs</h3>
+          {last && lastSame && (
+            <div className="cr-vs-legend">
+              <p className="cr-vs-key">
+                <span><span className="cr-vs-who is-you">You</span> this run</span>
+                <span><span className="cr-vs-who is-last">Last</span> your last run on this browser</span>
+                <span><span className="cr-vs-who">They</span> the record</span>
+              </p>
+              <p className="cr-vs-compare">
+                This run took the officials&apos; call at <strong>{nowSame.same} of {nowSame.of}</strong> decisions;
+                your last run, at <strong>{lastSame.same} of {lastSame.of}</strong>.{' '}
+                {changed.length
+                  ? <>You changed your call at {changed.map((t) => stamp(t)).join(', ')}.</>
+                  : <>You made every call as you did last time.</>}
+                {' '}<span className="cr-vs-compare-note">Neither count is a score: the officials&apos; call is what
+                happened, not the right answer. What matters is which line of the record moved you.</span>
+              </p>
+            </div>
+          )}
           <ol className="cr-vs">
             {scenario.timesteps.map((t) => {
               const c = choices.find((x) => x.timestep.id === t.id);
               const h = scenario.historical_path.find((x) => x.timestep_id === t.id);
               const diverged = !!c?.event.divergedFromHistory;
               return (
-                <li key={t.id} className={diverged ? 'is-diverged' : ''}>
+                <li key={t.id} id={`cr-vs-${t.id}`} className={diverged ? 'is-diverged' : ''}>
                   <span className="cr-vs-time">
                     <span className="cr-vs-stamp">{stamp(t)}</span>
                     <span className="cr-vs-icons" aria-hidden>
                       {stepIcons(t).map((name) => <Pictogram key={name} name={name} size={18} />)}
                     </span>
                   </span>
-                  <div className="cr-vs-you">
-                    <span className="cr-vs-who">You</span>
-                    <span>
-                      {c ? c.option.label : '—'}
-                      {c && (
-                        <span className="cr-vs-meta">
-                          {' '}· decided in {Math.round(c.event.hesitationMs / 1000)}s
-                          {diverged ? <strong> · off the historical path</strong> : ' · as on the day'}
+                  <div className="cr-vs-mine">
+                    <div className="cr-vs-you">
+                      <span className="cr-vs-who">You</span>
+                      <span>
+                        {c ? c.option.label : '—'}
+                        {c && (
+                          <span className="cr-vs-meta">
+                            {' '}· decided in {Math.round(c.event.hesitationMs / 1000)}s
+                            {diverged ? <strong> · off the historical path</strong> : ' · as on the day'}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                    {last && (
+                      <div className="cr-vs-last">
+                        <span className="cr-vs-who">Last</span>
+                        <span>
+                          {last.picks[t.id] === c?.option.id
+                            ? <span className="cr-vs-meta">The same call</span>
+                            : <>{optLabel(t, last.picks[t.id])} <span className="cr-vs-meta">· changed this run</span></>}
                         </span>
-                      )}
-                    </span>
+                      </div>
+                    )}
                   </div>
                   <div className="cr-vs-they">
                     <span className="cr-vs-who">They</span>
@@ -732,6 +1004,32 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
             })}
           </ol>
         </div>
+
+        {scenario.takeaways && scenario.takeaways.length > 0 && (
+          <div className="cr-dsec">
+            <h3 className="cr-dsec-title">What the record teaches</h3>
+            <p className="cr-dsec-note">{inWords(scenario.takeaways.length)} lessons in our words, each tied to the cited
+              line it is drawn from. The line is the record; the lesson is our reading of it.</p>
+            <ol className="cr-lessons">
+              {scenario.takeaways.map((k, i) => {
+                const fromStep = 'step' in k.from ? scenario.timesteps.find((t) => 'step' in k.from && t.id === k.from.step) : undefined;
+                const href = 'finding' in k.from ? `#cr-finding-${k.from.finding}` : `#cr-vs-${k.from.step}`;
+                const label = 'finding' in k.from
+                  ? `the inquiry said, no. ${k.from.finding + 1} below`
+                  : `the record at ${fromStep ? stamp(fromStep) : k.from.step}, above`;
+                return (
+                  <li key={i}>
+                    <span className="cr-lesson-num" aria-hidden>{String(i + 1).padStart(2, '0')}</span>
+                    <p className="cr-lesson-text">{k.text}</p>
+                    <p className="cr-lesson-from">
+                      Drawn from <a href={href}>{label}</a> <Cite c={k.citation} idx={sourceIndex} />
+                    </p>
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
+        )}
 
         {scenario.debrief_media && scenario.debrief_media.length > 0 && (
           <div className="cr-dsec">
@@ -790,7 +1088,7 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
           <h3 className="cr-dsec-title">The inquiry said</h3>
           <ol className="cr-findings">
             {scenario.inquiry_findings.map((f, i) => (
-              <li key={i} className={f.kind === 'verbatim' ? 'is-verbatim' : ''}>
+              <li key={i} id={`cr-finding-${i}`} className={f.kind === 'verbatim' ? 'is-verbatim' : ''}>
                 {f.kind === 'verbatim' ? <q className="cr-verbatim">{f.quote}</q> : f.quote}
                 {f.translation ? <span className="cr-translation"> {f.translation}</span> : null}
                 {' '}<Cite c={f.citation} idx={sourceIndex} />
@@ -811,10 +1109,36 @@ function Debrief({ scenario, choices, onReplay, onLeave }: {
           <button type="button" className="cr-btn-primary" onClick={onReplay}>Replay this day</button>
           <button type="button" className="cr-btn-quiet" onClick={onLeave}>Choose another day</button>
         </div>
+        <p className="cr-replay-note">A replay keeps this run, in this browser only, and sets the next one beside it.</p>
+
+        <nav className="cr-bridge" aria-labelledby="cr-bridge-h">
+          <p id="cr-bridge-h" className="cr-bridge-line">One day, one desk. The rest of the site widens the frame.</p>
+          <ul>
+            <li>
+              <a href="/preparedness">
+                <span className="cr-bridge-title">{COUNTRY_COUNT
+                  ? `The same machinery, scored for ${COUNTRY_COUNT} countries`
+                  : 'The same machinery, scored country by country'}</span>
+                <span className="cr-bridge-sub">The Last Mile — preparedness indices, and the inquiries into what failed</span>
+              </a>
+            </li>
+            <li>
+              <a href="/">
+                <span className="cr-bridge-title">The movies get this wrong on purpose</span>
+                <span className="cr-bridge-sub">The essay — disaster films, decade by decade</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
       </div>
     </section>
   );
 }
+
+/** Countries the preparedness page scores (src/data/preparedness-meta.json,
+ *  written by its committed pipeline) — the same figure that page prints. */
+const COUNTRY_COUNT = typeof (prepMeta as { countryCount?: unknown }).countryCount === 'number'
+  ? (prepMeta as { countryCount: number }).countryCount : 0;
 
 /* ── Figures ───────────────────────────────────────────────────────────────
    A cited image or clip, printed into the log like a pasted-in plate: ruled

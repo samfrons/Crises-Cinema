@@ -209,6 +209,49 @@ discipline as the board. A link the record has not mentioned stays a faint
 hairline, meaning "not on the record yet", never "broken". Severed is drawn
 only where a cited item says the channel was cut or not used.
 
+## Lessons and terms (the debrief's takeaways, the briefing's glossary)
+
+Two optional, cited fields carry the game's teaching. Both are held to the same
+citation rule as everything else, and the build gates each one.
+
+```jsonc
+"takeaways": [{                        // 1–4; "What the record teaches"
+  "text": "Activation is a decision, not a drift: … only at 16:30.",
+                                       // ONE sentence, 20–280 chars, our words
+  "from": { "finding": 1 },            // the cited line it is drawn from:
+                                       //   an inquiry_findings index, or
+                                       //   { "step": "t4" } — a historical_path entry
+  "citation": { "sourceId": "fsri-p2", "detail": "Finding 49 …" }
+}],
+"glossary": [{                         // "Terms of the desk"
+  "term": "Red Flag Warning",          // 1–48 chars, unique
+  "match": ["Red Flag Warning"],       // spellings marked in the slips (whole
+                                       //   word, case-sensitive; first use only)
+  "kind": "verbatim" | "paraphrase",   // an official definition, quoted or
+                                       //   tightly paraphrased — never from memory
+  "definition": "A term used by fire-weather forecasters …",   // ≤ 320 chars
+  "translation": "…",                  // optional; the project's translation
+  "citation": { "sourceId": "nws-glossary", "detail": "Entry 'Red Flag Warning' …" }
+}]
+```
+
+The build **fails** a takeaway that has no citation, cites a source not in
+`sources[]`, names no line (or a finding / step that does not exist), cites a
+different source from the line it is drawn from, or **prints a number the line
+does not print** — a lesson may sharpen the record, never add to it. It fails a
+glossary entry with no citation, an unknown source, no `kind`, a definition over
+320 characters, a placeholder, or `match` spellings that appear in no slip (a
+gloss must explain a word the player actually meets).
+
+A takeaway is the project's reading, and the UI says so ("each in our words,
+tied to the cited line it is drawn from"). A definition is added only when the
+official page could be fetched and its wording checked: give the definition's
+own source a full bibliographic label and say in its `note` that it is used only
+for the glossary (and, where the current wording post-dates the day, why it
+still applies). Terms left unglossed for want of a verified source: EOC,
+ES-Alert, EAS (as of November 2026: the FEMA, FCC consumer-guide and Spanish
+Interior Ministry pages refused automated fetches).
+
 ## Player telemetry (prototype: localStorage; later: backend)
 
 `src/app/control-room/telemetry.ts` logs anonymously — no PII, no identifiers
