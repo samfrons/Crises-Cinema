@@ -33,6 +33,7 @@ const ICONS = new Set(VOCAB.icons);
 const CHAIN_LINKS = new Set(VOCAB.chain.links);
 const CHAIN_STATES = new Set(VOCAB.chain.states);
 const CHAIN_LABEL_KEYS = new Set(VOCAB.chain.label_keys);
+const READINGS = VOCAB.readings;
 
 /** Collects human-readable errors for one scenario file. */
 class Check {
@@ -160,6 +161,62 @@ function checkPresentation(chk, info, q, origins) {
       chk.require(new RegExp(`\\b${word}(erly)?\\s+winds?\\b`, 'i').test(info.text ?? ''), `${q}.wind`,
         `the item's text does not say "${info.wind.from}" winds — the board may only restate a stated direction`);
     }
+  }
+}
+
+/**
+ * Instrument readings: a drawn restatement of what an item says an instrument
+ * (a river gauge, a dam, a fire's containment, the hydrants) read. Each
+ * reading names a series the scenario declares in `instruments`, a state from
+ * the shared vocabulary whose phrase the item's own text must contain, and
+ * optionally the HH:MM the text gives it (`by: true` prints "by HH:MM") and a
+ * value whose every number the text already prints. Within a series the
+ * readings run forward in time, and a series is either timed throughout (drawn
+ * on a clock axis) or untimed throughout (drawn in log order) — never a mix,
+ * so the drawing never places a reading at a time the record does not give.
+ */
+function checkReadings(chk, info, q, s, series) {
+  if (info.readings === undefined) return;
+  if (!chk.require(Array.isArray(info.readings) && info.readings.length > 0, `${q}.readings`, 'must be a non-empty array of { series, state }')) return;
+  const declared = s.instruments && typeof s.instruments === 'object' ? s.instruments : {};
+  for (const [k, r] of info.readings.entries()) {
+    const p = `${q}.readings[${k}]`;
+    if (!chk.require(r && typeof r === 'object', p, 'must be an object')) continue;
+    chk.require(typeof r.series === 'string' && Object.hasOwn(declared, r.series), `${p}.series`,
+      `"${r.series}" is not declared in the scenario's instruments`);
+    const st = READINGS[r.state];
+    if (chk.require(!!st && r.state !== '_comment', `${p}.state`, `must be one of ${Object.keys(READINGS).filter((x) => x !== '_comment').join('|')}`)) {
+      chk.require(new RegExp(st.says, 'i').test(info.text ?? ''), `${p}.state`,
+        `the item's text does not say "${st.label}" — a drawn reading may only restate the slip`);
+    }
+    if (r.at !== undefined) {
+      chk.require(HHMM.test(r.at ?? '') && saysTime(info.text, r.at), `${p}.at`, `"${r.at}" must be an HH:MM that the item's own text states`);
+    }
+    if (r.by !== undefined) chk.require(r.by === true && r.at !== undefined, `${p}.by`, 'only `true`, and only with an `at`');
+    if (r.value !== undefined) {
+      const nums = numbersIn(r.value);
+      const said = new Set(numbersIn(info.text));
+      chk.require(typeof r.value === 'string' && r.value.length <= 16 && nums.length > 0 && nums.every((n) => said.has(n)), `${p}.value`,
+        'a value of at most 16 characters whose every number the item\'s text already prints');
+    }
+    if (typeof r.series !== 'string') continue;
+    const prev = series.get(r.series);
+    const timed = r.at !== undefined;
+    if (prev) {
+      chk.require(prev.timed === timed, `${p}.at`, `series "${r.series}" mixes timed and untimed readings`);
+      if (timed && prev.at) chk.require(r.at >= prev.at, `${p}.at`, `series "${r.series}" runs backwards in time (${r.at} after ${prev.at})`);
+    }
+    series.set(r.series, { timed, at: timed ? r.at : prev?.at });
+  }
+}
+
+/** Short series names for the instrument drawings. */
+function checkInstruments(chk, s) {
+  if (s.instruments === undefined) return;
+  if (!chk.require(s.instruments && typeof s.instruments === 'object' && !Array.isArray(s.instruments), 'instruments', 'must be an object of id → label')) return;
+  for (const [k, v] of Object.entries(s.instruments)) {
+    chk.require(/^[a-z0-9-]+$/.test(k), `instruments.${k}`, 'id must be kebab-case');
+    chk.require(typeof v === 'string' && v.trim().length > 0 && v.length <= 40, `instruments.${k}`, 'a label of 1–40 characters');
   }
 }
 
@@ -305,6 +362,8 @@ function validate(file, s) {
   }
 
   if (s.warning_chain !== undefined) checkChainLabels(chk, s.warning_chain, s);
+  checkInstruments(chk, s);
+  const series = new Map(); // instrument series → { timed, at } as the log reaches it
 
   chk.require(Array.isArray(s.timesteps) && s.timesteps.length >= 2, 'timesteps', 'a playable scenario needs at least 2 timesteps');
   const stepIds = new Set();
@@ -333,6 +392,7 @@ function validate(file, s) {
       }
       if (info.media !== undefined) checkMedia(chk, info.media, `${q}.media`, s.id, s.date);
       checkPresentation(chk, info, q, origins);
+      checkReadings(chk, info, q, s, series);
       if (info.zones !== undefined) {
         const known = new Set((s.scoring?.at_risk_zones ?? []).map((z) => z.id));
         chk.require(Array.isArray(info.zones) && info.zones.every((z) => known.has(z)),

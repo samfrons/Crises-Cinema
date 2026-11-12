@@ -1887,3 +1887,142 @@
   .cr-filed-step { animation: none; box-shadow: 3px 3px 0 color-mix(in srgb, var(--ink) 30%, transparent); }
   .cr-card-filetab { transition: none; }
 }
+
+
+/* ══ Visuals throughout ═════════════════════════════════════════════════════
+   Three more drawings, each a restatement: the select screen's plate (the
+   board's ground, nothing lit), an instrument's readings under the slip that
+   carries them, and the silent record's empty ledger page. Ink only; ember
+   stays the hand's colour. */
+
+/* ── The card plate: the board's ground, at card scale ─────────────────── */
+.cr-card-plate {
+  position: relative;
+  display: block;
+  margin: -4px -6px 8px;
+  border: 1px solid var(--rule);
+  background: var(--paper-lit);
+  color: var(--ink);
+  overflow: hidden;
+}
+.cr-mini { display: block; width: 100%; height: auto; aspect-ratio: 720 / 348; }
+.cr-mini.is-pending { aspect-ratio: 720 / 150; }
+.cr-mini text { display: none; }
+.cr-mini .cr-map-coast { stroke-width: 3; }
+.cr-mini .cr-map-river, .cr-mini .cr-map-road { stroke-width: 3; }
+.cr-mini .cr-zone .cr-zone-shape { stroke: color-mix(in srgb, var(--ink) 55%, transparent); stroke-width: 2.4; stroke-dasharray: 9 6; }
+.cr-mini .cr-map-north path { fill: var(--ink); }
+.cr-card-plate-tag {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 3px 8px 2px;
+  background: var(--paper-lit);
+  border-top: 1px solid var(--rule);
+  border-right: 1px solid var(--rule);
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+/* The plate settles under the card's hover lift, a beat behind it. */
+.cr-card-plate .cr-mini { transition: transform var(--t-slow) var(--ease); transform-origin: 50% 60%; }
+@media (hover: hover) { .cr-card:hover .cr-card-plate .cr-mini { transform: scale(1.03); } }
+.cr-card:focus-visible .cr-card-plate .cr-mini { transform: scale(1.03); }
+/* A stub's plate: an empty frame, struck through, as a pressbook marks a
+   still not yet delivered. */
+.cr-card-plate.is-pending { background: transparent; border-style: dashed; border-color: var(--ink-faint); }
+.cr-mini-pending { fill: none; stroke: color-mix(in srgb, var(--ink-soft) 45%, transparent); stroke-width: 2; stroke-dasharray: 10 8; }
+.cr-card-plate.is-pending .cr-card-plate-tag { background: var(--paper); border-color: var(--ink-faint); border-style: dashed; color: var(--ink-faint); }
+
+/* ── Instrument readings, under the slip that carries the latest ───────── */
+.cr-reads {
+  margin: 12px 0 2px;
+  padding: 10px 0 4px;
+  border-top: 1px dashed var(--rule);
+}
+.cr-reads-head {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+.cr-reads-name { color: var(--ink); font-weight: 700; }
+.cr-reads-cols {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr));
+  gap: 8px;
+}
+.cr-reads-cols li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  min-width: 0;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.35;
+}
+.cr-reads-glyph { margin-bottom: 4px; }
+.cr-reads-cols .is-now { color: var(--ink); }
+.cr-reads-cols .is-past { color: var(--ink-faint); }
+.cr-reads-time { font-weight: 700; font-size: 12px; }
+.cr-reads-desk { font-weight: 400; }
+.cr-reads-state { overflow-wrap: anywhere; }
+.cr-reads-value { font-weight: 700; letter-spacing: 0.02em; text-transform: none; }
+.cr-reads-cols .is-now .cr-reads-value { font-size: 13px; }
+/* The clock axis: the leaders run from each column down to where its time
+   falls, so a long silence between two readings is a long stretch of rail. */
+.cr-reads-axis { padding: 0 18px; margin-top: 2px; }
+.cr-reads-leaders { display: block; width: 100%; height: 22px; overflow: visible; }
+.cr-reads-leaders path { fill: none; stroke: var(--ink-faint); stroke-width: 1; }
+.cr-reads-leaders path.is-now { stroke: var(--ink); stroke-width: 1.4; }
+.cr-reads-rail { position: relative; height: 26px; border-top: 1.5px solid var(--ink-soft); }
+.cr-reads-hour { position: absolute; top: -4px; width: 1px; height: 7px; background: var(--ink-faint); }
+.cr-reads-hourlabel {
+  position: absolute;
+  top: 9px;
+  left: 0;
+  transform: translateX(-50%);
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.cr-reads-node {
+  position: absolute;
+  top: -5px;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1.5px solid var(--ink-faint);
+}
+.cr-reads-node.is-now { background: var(--ink); border-color: var(--ink); }
+/* Arrival: the new reading is inked in after its slip lands — the glyph
+   prints, the leader is inked down to the rail, the node is set. (Faded,
+   not drawn: a non-scaling stroke ignores pathLength, so a dash draw would
+   break up on a stretched axis.) */
+.cr-reads .is-now .cr-reads-glyph { animation: cr-arrive var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 90ms + 360ms); }
+.cr-reads-leaders path.is-now { animation: cr-fade var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 90ms + 480ms); }
+.cr-reads-node.is-now { animation: cr-fade var(--t-mid) var(--ease-press) both; animation-delay: calc(var(--i, 0) * 90ms + 700ms); }
+@media (prefers-reduced-motion: reduce) {
+  .cr-reads .is-now .cr-reads-glyph, .cr-reads-leaders path.is-now, .cr-reads-node.is-now { animation: none !important; }
+  /* The house second impression stands in for the ink arriving. */
+  .cr-reads .is-now .cr-reads-glyph, .cr-reads-node.is-now { filter: drop-shadow(2px 2px 0 color-mix(in srgb, var(--ink) 45%, transparent)); }
+}
+
+/* ── The silent record: an empty ledger page ───────────────────────────── */
+.cr-consequence-silent { display: flow-root; }
+.cr-silent-glyph { float: right; margin: 0 0 6px 12px; color: var(--ink-soft); }

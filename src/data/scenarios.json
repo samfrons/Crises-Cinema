@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-12T22:38:29.781Z",
+  "generated": "2026-11-12T23:11:27.631Z",
   "playable": [
     {
       "id": "lahaina-2023",
@@ -28,6 +28,10 @@
           "lahaina-front-street": "Front St",
           "upcountry-kula": "Kula · Olinda"
         }
+      },
+      "instruments": {
+        "lahaina-fire": "Lahaina fire · as reported to the desk",
+        "hydrants": "Hydrant water · as crews reported it"
       },
       "briefing_media": {
         "file": "maui-landsat-true-colour-2023-08-07.jpg",
@@ -365,7 +369,22 @@
               "zones": [
                 "lahaina-lahainaluna"
               ],
-              "icon": "contained"
+              "icon": "contained",
+              "readings": [
+                {
+                  "series": "lahaina-fire",
+                  "at": "08:19",
+                  "state": "contained",
+                  "value": "90%"
+                },
+                {
+                  "series": "lahaina-fire",
+                  "at": "09:00",
+                  "by": true,
+                  "state": "contained",
+                  "value": "100%"
+                }
+              ]
             },
             {
               "id": "t3-i2",
@@ -503,7 +522,14 @@
               "zones": [
                 "lahaina-lahainaluna"
               ],
-              "icon": "fire"
+              "icon": "fire",
+              "readings": [
+                {
+                  "series": "lahaina-fire",
+                  "at": "14:55",
+                  "state": "flaring"
+                }
+              ]
             },
             {
               "id": "t4-i3",
@@ -1001,7 +1027,24 @@
                 "lahaina-lahainaluna",
                 "lahaina-front-street"
               ],
-              "icon": "hydrant"
+              "icon": "hydrant",
+              "readings": [
+                {
+                  "series": "hydrants",
+                  "at": "16:10",
+                  "state": "good"
+                },
+                {
+                  "series": "hydrants",
+                  "at": "18:27",
+                  "state": "low"
+                },
+                {
+                  "series": "hydrants",
+                  "at": "18:57",
+                  "state": "nothing"
+                }
+              ]
             },
             {
               "id": "t7-i4",
@@ -1572,6 +1615,10 @@
           "magro-utiel": "Magro"
         }
       },
+      "instruments": {
+        "poyo": "Rambla del Poyo · flow, as CHJ sent it",
+        "forata": "Forata dam · basin authority warnings"
+      },
       "timesteps": [
         {
           "id": "t1",
@@ -1691,6 +1738,13 @@
                   "link": "forecast",
                   "state": "used",
                   "at": "12:20"
+                }
+              ],
+              "readings": [
+                {
+                  "series": "poyo",
+                  "at": "12:20",
+                  "state": "above-alert"
                 }
               ]
             },
@@ -1898,7 +1952,17 @@
               "zones": [
                 "magro-utiel"
               ],
-              "icon": "dam"
+              "icon": "dam",
+              "readings": [
+                {
+                  "series": "forata",
+                  "state": "filling"
+                },
+                {
+                  "series": "forata",
+                  "state": "may-fail"
+                }
+              ]
             },
             {
               "id": "t4-i3",
@@ -1911,7 +1975,14 @@
               "zones": [
                 "poyo-horta-sud"
               ],
-              "icon": "river-gauge"
+              "icon": "river-gauge",
+              "readings": [
+                {
+                  "series": "poyo",
+                  "at": "16:13",
+                  "state": "falling"
+                }
+              ]
             }
           ],
           "options": [
@@ -2012,6 +2083,14 @@
                   "state": "used",
                   "at": "18:43"
                 }
+              ],
+              "readings": [
+                {
+                  "series": "poyo",
+                  "at": "18:43",
+                  "state": "surged",
+                  "value": "1,686 m³/s"
+                }
               ]
             },
             {
@@ -2025,7 +2104,13 @@
               "zones": [
                 "magro-utiel"
               ],
-              "icon": "dam"
+              "icon": "dam",
+              "readings": [
+                {
+                  "series": "forata",
+                  "state": "may-fail"
+                }
+              ]
             },
             {
               "id": "t5-i3",

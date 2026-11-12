@@ -104,6 +104,22 @@ rejects('glossary term that never appears on the desk', (e) => e(L, (s) => { s.g
 rejects('glossary definition with no kind', (e) => e(L, (s) => { delete s.glossary[0].kind; }), /glossary\[0\]\.kind — must be "verbatim" or "paraphrase"/);
 rejects('glossary definition that runs long', (e) => e(L, (s) => { s.glossary[0].definition = 'x'.repeat(400); }), /glossary\[0\]\.definition — a definition of 1–320/);
 
+// Instrument readings: a drawn reading may only restate its slip.
+rejects('reading on a series the scenario does not declare', (e) => e(V, (s) => { item(s, 't2-i1').readings[0].series = 'turia'; }), /readings\[0\]\.series — "turia" is not declared/);
+rejects('reading state outside the vocabulary', (e) => e(V, (s) => { item(s, 't2-i1').readings[0].state = 'catastrophic'; }), /readings\[0\]\.state — must be one of/);
+rejects('reading state the slip does not say', (e) => e(V, (s) => { item(s, 't2-i1').readings[0].state = 'falling'; }), /does not say "falling"/);
+rejects('reading time the slip does not state', (e) => e(V, (s) => { item(s, 't5-i1').readings[0].at = '18:30'; }), /readings\[0\]\.at — "18:30" must be an HH:MM/);
+rejects('reading value with a number the slip does not print', (e) => e(V, (s) => { item(s, 't5-i1').readings[0].value = '1,700 m³/s'; }), /readings\[0\]\.value — .*every number the item's text already prints/);
+rejects('reading series that runs backwards in time', (e) => e(L, (s) => {
+  // 14:55's slip, re-timed to 08:00 (and saying so), lands after the 09:00 reading
+  const i = item(s, 't4-i2');
+  i.text = i.text.replace('14:55:', '08:00 and 14:55:');
+  i.readings[0].at = '08:00';
+}), /runs backwards in time/);
+rejects('reading series mixing timed and untimed readings', (e) => e(L, (s) => { delete item(s, 't4-i2').readings[0].at; }), /mixes timed and untimed readings/);
+rejects('reading "by" without a time', (e) => e(L, (s) => { delete item(s, 't3-i1').readings[1].at; item(s, 't3-i1').readings[0].by = true; delete item(s, 't3-i1').readings[0].at; }), /by — only `true`, and only with an `at`/);
+rejects('instrument label that runs long', (e) => e(V, (s) => { s.instruments.poyo = 'x'.repeat(41); }), /instruments\.poyo — a label of 1–40/);
+
 test('every icon, chain link and state used in the real data is in the vocabulary (positive control)', () => {
   const vocab = JSON.parse(readFileSync(join(repo, 'src', 'app', 'control-room', 'vocabulary.json'), 'utf8'));
   for (const name of [L, V]) {

@@ -186,7 +186,18 @@ by the UI and the validator.
 "origin": "06:34",        // the record first places the hazard in this item's
                           //   ONE zone: an HH:MM the text states, or true
                           //   ("by this decision point"). One per zone.
-"wind": { "from": "E" }   // compass point; the text must say "east winds"
+"wind": { "from": "E" },  // compass point; the text must say "east winds"
+"readings": [{            // an instrument reading, drawn on the slip
+  "series": "poyo",       //   a key of the scenario's `instruments`
+  "state": "surged",      //   one of vocabulary.json `readings`; the text must
+                          //   say its phrase ("surged", "falling", "may fail"…)
+  "at": "18:43",          //   optional; must appear verbatim in the text
+  "by": true,             //   optional, with `at`: printed "by 18:43"
+  "value": "1,686 m³/s"   //   optional, ≤ 16 chars; every number in it must
+}]                        //   be one the text prints
+
+// at scenario level: the instrument series, by short name (≤ 40 chars)
+"instruments": { "poyo": "Rambla del Poyo · flow, as CHJ sent it" }
 
 // at scenario level: short names for the chain diagram
 "warning_chain": {
@@ -201,7 +212,11 @@ vocabulary; an `at` or `origin` time the text does not state; chain `zones`
 outside the item's zones; a cut/unused/pending forecast link; an origin on an
 item with other than one zone, a second origin in a zone, or an origin on a
 `board_state: "none"` item; a `wind` direction the text does not state as
-"<direction> wind(s)"; an over-long label. Each gate has a fault-injection
+"<direction> wind(s)"; an over-long label; a reading on an undeclared series,
+in a state its text does not say, at a time its text does not state, or with
+a number its text does not print; a series that runs backwards in time or
+mixes timed and untimed readings (a timed series is drawn on a clock axis, an
+untimed one in log order). Each gate has a fault-injection
 case in `tests/scenarios-contract.test.mjs`.
 
 The chain lights only from items the player has already been shown, the same

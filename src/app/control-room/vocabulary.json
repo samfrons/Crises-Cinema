@@ -26,6 +26,19 @@
     "states": ["used", "cut", "unused", "pending"],
     "label_keys": ["forecast", "desk", "siren", "phone", "broadcast", "social"]
   },
+  "readings": {
+    "_comment": "Instrument readings drawn on a slip (glyphs.tsx READING_GLYPHS). `label` is what the drawing prints; `says` is a case-insensitive pattern the item's own text must match, so a drawn state is always one the slip states in words.",
+    "above-alert": { "label": "past alert", "says": "alert threshold" },
+    "falling": { "label": "falling", "says": "\\bfalling\\b" },
+    "surged": { "label": "surged", "says": "\\bsurged\\b" },
+    "filling": { "label": "filling fast", "says": "\\bfilling fast\\b" },
+    "may-fail": { "label": "may fail", "says": "\\bmay (fail|break)\\b" },
+    "good": { "label": "good", "says": "\\bgood water (supply|pressure)\\b" },
+    "low": { "label": "low", "says": "\\bget(ting)? low\\b" },
+    "nothing": { "label": "nothing", "says": "\\bgot nothing\\b" },
+    "contained": { "label": "contained", "says": "\\bcontained\\b" },
+    "flaring": { "label": "flaring up", "says": "\\bflaring up\\b" }
+  },
   "compass": {
     "N": "north",
     "NE": "north-?east",

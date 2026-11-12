@@ -194,6 +194,7 @@ export default function DeskOfficersFile() {
       <main id="file" className="cf-desk" tabIndex={-1}>
         <div className="wrap cf-wrap">
           <section className="cf-cover" aria-labelledby="cf-cover-h">
+            <CoverArt />
             {draft && <p className="cf-draft">Draft — cited, for your edit</p>}
             <h2 id="cf-cover-h" className="cf-cover-h">Cover sheet</h2>
             <dl className="cf-cover-dl">
@@ -275,5 +276,42 @@ export default function DeskOfficersFile() {
         </div>
       </footer>
     </div>
+  );
+}
+
+/** The cover sheet's drawing: the desk at night, in the route's ink line —
+ *  a lamp over a stack of tabbed folders, and a telephone.
+ *  Pure decoration: it encodes nothing (the stack is not a count; the file's
+ *  folder count is printed in the masthead), so it is hidden from assistive
+ *  technology. */
+function CoverArt() {
+  return (
+    <svg className="cf-cover-art" viewBox="0 0 240 190" aria-hidden focusable="false">
+      {/* the pool of light the lamp throws across the desk */}
+      <path className="cf-art-light" d="M120 86L52 176h132L156 86z" />
+      {/* the desk's edge */}
+      <path d="M4 176h232" />
+      {/* a stack of folders, the top one's tabs set a step along */}
+      <g className="cf-art-stack">
+        <path d="M18 176v-10h126v10z" />
+        <path d="M22 166v-10h120v10z" />
+        <path d="M16 156v-10h128v10z" />
+        <path d="M22 146v-10h118v10z" />
+        <path d="M18 136v-12h124v12z" />
+        <path d="M26 124v-7h24v7M56 124v-7h24v7M86 124v-7h24v7" />
+        <path d="M30 130h56M30 133.5h36" strokeDasharray="2 3" />
+      </g>
+      {/* the telephone, on the desk beside the stack */}
+      <path d="M154 176l4-11h28l4 11z" />
+      <path d="M152 163c0-7 10-10 20-10s20 3 20 10l-5 3h-30z" />
+      <circle cx="172" cy="170" r="2.6" />
+      {/* the lamp: weighted base, two arms at their pivots, the shade */}
+      <path d="M200 176c0-5 5-7 15-7s15 2 15 7z" />
+      <path d="M215 169L198 112L150 62" />
+      <circle cx="215" cy="169" r="2.6" />
+      <circle cx="198" cy="112" r="2.6" />
+      <path d="M152 56L116 86h42z" />
+      <circle cx="152" cy="58" r="2.6" />
+    </svg>
   );
 }

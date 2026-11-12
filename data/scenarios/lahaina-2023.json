@@ -26,6 +26,10 @@
       "upcountry-kula": "Kula · Olinda"
     }
   },
+  "instruments": {
+    "lahaina-fire": "Lahaina fire · as reported to the desk",
+    "hydrants": "Hydrant water · as crews reported it"
+  },
   "briefing_media": {
     "file": "maui-landsat-true-colour-2023-08-07.jpg",
     "type": "image",
@@ -362,7 +366,22 @@
           "zones": [
             "lahaina-lahainaluna"
           ],
-          "icon": "contained"
+          "icon": "contained",
+          "readings": [
+            {
+              "series": "lahaina-fire",
+              "at": "08:19",
+              "state": "contained",
+              "value": "90%"
+            },
+            {
+              "series": "lahaina-fire",
+              "at": "09:00",
+              "by": true,
+              "state": "contained",
+              "value": "100%"
+            }
+          ]
         },
         {
           "id": "t3-i2",
@@ -500,7 +519,14 @@
           "zones": [
             "lahaina-lahainaluna"
           ],
-          "icon": "fire"
+          "icon": "fire",
+          "readings": [
+            {
+              "series": "lahaina-fire",
+              "at": "14:55",
+              "state": "flaring"
+            }
+          ]
         },
         {
           "id": "t4-i3",
@@ -998,7 +1024,24 @@
             "lahaina-lahainaluna",
             "lahaina-front-street"
           ],
-          "icon": "hydrant"
+          "icon": "hydrant",
+          "readings": [
+            {
+              "series": "hydrants",
+              "at": "16:10",
+              "state": "good"
+            },
+            {
+              "series": "hydrants",
+              "at": "18:27",
+              "state": "low"
+            },
+            {
+              "series": "hydrants",
+              "at": "18:57",
+              "state": "nothing"
+            }
+          ]
         },
         {
           "id": "t7-i4",

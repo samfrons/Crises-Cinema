@@ -155,6 +155,42 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note, origin
   );
 }
 
+/** True when a day has a hand-drawn board. */
+export const hasBoard = (id: string) => id in BOARDS;
+
+/**
+ * The select screen's plate: the same hand-drawn board, geography only.
+ * Every zone is drawn quiet, nothing is warned, no mark is stamped and no
+ * label is set (the card says where it is), so the miniature tells the
+ * player nothing about how the day went: only the shape of the ground the
+ * desk will watch. The title band is cropped off. Decorative.
+ */
+export function BoardMiniature({ id, className }: { id: string; className?: string }) {
+  const uid = useId().replace(/:/g, '');
+  const Draw = BOARDS[id];
+  if (!Draw) return null;
+  const sea = `cr-mini-sea-${uid}`;
+  const board: Board = {
+    st: () => 'quiet',
+    warned: () => false,
+    zoneClass: () => 'cr-zone is-quiet',
+    fill: () => undefined,
+    word: () => '',
+    sea,
+    shape: (_z, d) => <path className="cr-zone-shape" d={d} />,
+  };
+  return (
+    <svg className={`cr-mini ${className ?? ''}`} viewBox="0 52 720 348" aria-hidden focusable="false">
+      <defs>
+        <pattern id={sea} width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="10" stroke="currentColor" strokeOpacity="0.18" strokeWidth="1.4" />
+        </pattern>
+      </defs>
+      <Draw {...board} />
+    </svg>
+  );
+}
+
 const ARIA: Record<string, string> = {
   'valencia-dana-2024': 'Schematic map of the province of Valencia showing the state of the at-risk basins',
   'lahaina-2023': 'Schematic map of Lahaina on the West Maui coast, with an inset of Upcountry Maui, showing the state of the at-risk zones',

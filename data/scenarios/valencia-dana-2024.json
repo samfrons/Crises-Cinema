@@ -25,6 +25,10 @@
       "magro-utiel": "Magro"
     }
   },
+  "instruments": {
+    "poyo": "Rambla del Poyo · flow, as CHJ sent it",
+    "forata": "Forata dam · basin authority warnings"
+  },
   "timesteps": [
     {
       "id": "t1",
@@ -144,6 +148,13 @@
               "link": "forecast",
               "state": "used",
               "at": "12:20"
+            }
+          ],
+          "readings": [
+            {
+              "series": "poyo",
+              "at": "12:20",
+              "state": "above-alert"
             }
           ]
         },
@@ -351,7 +362,17 @@
           "zones": [
             "magro-utiel"
           ],
-          "icon": "dam"
+          "icon": "dam",
+          "readings": [
+            {
+              "series": "forata",
+              "state": "filling"
+            },
+            {
+              "series": "forata",
+              "state": "may-fail"
+            }
+          ]
         },
         {
           "id": "t4-i3",
@@ -364,7 +385,14 @@
           "zones": [
             "poyo-horta-sud"
           ],
-          "icon": "river-gauge"
+          "icon": "river-gauge",
+          "readings": [
+            {
+              "series": "poyo",
+              "at": "16:13",
+              "state": "falling"
+            }
+          ]
         }
       ],
       "options": [
@@ -465,6 +493,14 @@
               "state": "used",
               "at": "18:43"
             }
+          ],
+          "readings": [
+            {
+              "series": "poyo",
+              "at": "18:43",
+              "state": "surged",
+              "value": "1,686 m³/s"
+            }
           ]
         },
         {
@@ -478,7 +514,13 @@
           "zones": [
             "magro-utiel"
           ],
-          "icon": "dam"
+          "icon": "dam",
+          "readings": [
+            {
+              "series": "forata",
+              "state": "may-fail"
+            }
+          ]
         },
         {
           "id": "t5-i3",

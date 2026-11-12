@@ -60,7 +60,13 @@ export type InfoItem = {
   origin?: true | string;
   /** A wind direction the text states ("east winds"). */
   wind?: { from: string };
+  /** Instrument readings the text states (vocabulary.json `readings`). */
+  readings?: Reading[];
 };
+
+/** One reading of an instrument series, as a slip states it: a state whose
+ *  phrase the text contains, and the time and value only where it says them. */
+export type Reading = { series: string; state: string; at?: string; by?: true; value?: string };
 
 export type WarningScope = 'none' | 'targeted' | 'province';
 
@@ -123,6 +129,8 @@ export type Scenario = {
   record_caveat: string;
   /** Short names for the warning-chain diagram's nodes and zones. */
   warning_chain?: { labels?: Partial<Record<'desk' | ChainLink, string>>; zones?: Record<string, string> };
+  /** Instrument series id → short name, for the readings drawn on slips. */
+  instruments?: Record<string, string>;
   /** One figure on the briefing — only what existed before the clock starts. */
   briefing_media?: MediaAttachment;
   timesteps: Timestep[];

@@ -5,10 +5,11 @@ import type { Citation, GlossaryEntry, InfoItem, MediaAttachment, Option, Scenar
 import { startSession, logChoice, completeSession, type ChoiceEvent } from './telemetry';
 import { scoreRun, historicalLeadTime, formatLead, type Choice } from './scoring';
 import DayStrip from './DayStrip';
-import OpsMap from './OpsMap';
+import OpsMap, { BoardMiniature, hasBoard } from './OpsMap';
 import { itemState, STATE_RANK, vocabFor, COMPASS_WORD, type ZoneState } from './hazards';
 import AlertTimingChart from './AlertTimingChart';
-import { KindGlyph, HazardGlyph, Pictogram, hasPictogram } from './glyphs';
+import { KindGlyph, HazardGlyph, Pictogram, SilentGlyph, hasPictogram } from './glyphs';
+import Readings from './Readings';
 import WarningChain, { chainChanges, chainNews, deriveChain } from './WarningChain';
 import { loadLastRun, markCoached, sameCalls, saveRun, wasCoached, type LastRun } from './memory';
 import prepMeta from '../../data/preparedness-meta.json';
@@ -579,6 +580,12 @@ function SelectScreen({ cards, file, onPick, loading }: {
         {cards.playable.map((s) => (
           <button type="button" key={s.id} className="cr-card" onClick={() => onPick(s.id)}
             aria-busy={loading === s.id} disabled={loading !== null && loading !== s.id}>
+            {hasBoard(s.id) && (
+              <span className="cr-card-plate">
+                <BoardMiniature id={s.id} />
+                <span className="cr-card-plate-tag" aria-hidden>The board · ground only</span>
+              </span>
+            )}
             <span className="cr-card-head">
               <HazardGlyph hazard={s.hazard} size={22} className="cr-card-glyph" />
               <span className="cr-card-date">{s.date} · {s.hazard}</span>
@@ -611,6 +618,12 @@ function SelectScreen({ cards, file, onPick, loading }: {
         )}
         {cards.stubs.map((s) => (
           <div key={s.id} className="cr-card cr-card-stub" aria-disabled>
+            <span className="cr-card-plate is-pending">
+              <svg className="cr-mini is-pending" viewBox="0 0 720 150" aria-hidden focusable="false">
+                <path className="cr-mini-pending" d="M24 18h672v114H24zM24 18l672 114M696 18L24 132" />
+              </svg>
+              <span className="cr-card-plate-tag">Board pending research</span>
+            </span>
             <span className="cr-card-head">
               <HazardGlyph hazard={s.hazard} size={22} className="cr-card-glyph" />
               <span className="cr-card-date">{s.date} · {s.hazard}</span>
@@ -776,6 +789,7 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain,
               {hasPictogram(info.icon) && <Pictogram name={info.icon} size={22} className="cr-slip-pict" />}
             </p>
             <SlipText info={info} marks={termMarks.get(info.id)} idx={sourceIndex} />
+            {info.readings && <Readings scenario={scenario} itemId={info.id} readings={info.readings} />}
             {i === 0 && <CoachMark coach={coach} at="slip" />}
             {info.media && <Figure scenario={scenario} m={info.media} />}
           </li>
@@ -969,6 +983,7 @@ function CallRecord({ scenario, t, choice, sourceIndex }: {
         </div>
       ) : (
         <div className="cr-consequence cr-consequence-silent">
+          <SilentGlyph className="cr-silent-glyph" />
           <p className="cr-consequence-tag">The record is silent</p>
           <p>No one took this path on the day, so no source can say what it would have changed. Your call is
             logged and scored; the clock moves on along the real timeline.</p>

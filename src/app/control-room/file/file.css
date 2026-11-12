@@ -366,3 +366,37 @@
   .cf-desk { background: none; }
   .cf-controls { display: none; }
 }
+
+/* The cover's drawing: the desk at night, in the route's ink line, set in
+   the sheet's empty right-hand margin on wide screens (decorative, hidden on
+   phones where the sheet has no margin to give). It is struck onto the sheet
+   with the masthead: the lamp's pool comes up last. */
+.cf-cover { position: relative; }
+.cf-cover-art { display: none; }
+@media (min-width: 900px) {
+  .cf-cover-art {
+    display: block;
+    position: absolute;
+    top: 26px;
+    right: 30px;
+    width: clamp(180px, 22vw, 260px);
+    height: auto;
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    color: var(--ink);
+    opacity: 0.8;
+    animation: rise var(--t-slow) var(--ease) 320ms both;
+  }
+  .cf-cover-art circle { fill: var(--paper-lit); }
+  .cf-art-light { fill: color-mix(in srgb, var(--ink) 5%, transparent); stroke: none; animation: cf-lamp var(--t-slow) var(--ease) 620ms both; }
+  .cf-art-stack path:not([stroke-dasharray]) { fill: var(--paper-lit); }
+  .cf-cover-dl { max-width: min(65ch, calc(100% - 280px)); }
+}
+@keyframes cf-lamp { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  /* No arrival: the drawing is simply on the sheet, the lamp already lit. */
+  .cf-cover-art, .cf-art-light { animation: none !important; }
+}
