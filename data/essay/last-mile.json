@@ -1,0 +1,159 @@
+{
+  "id": "last-mile",
+  "status": "draft",
+  "updated": "2026-11-12",
+  "sources": [
+    { "id": "wmo-mhews", "label": "WMO / UNDRR, Global Status of Multi-Hazard Early Warning Systems 2025 (press release, 12 November 2025; the full report was not read).", "url": null },
+    { "id": "sources-md", "label": "Crises Cinema, SOURCES.md: Sendai Target G and Loss and Damage Fund layers (not loaded), OCHA FTS double-counting note, ND-GAIN and SPAR limitations.", "url": null },
+    { "id": "haque-2012", "label": "Haque U. et al., “Reduced death rates from cyclones in Bangladesh: what more needs to be done?”, Bulletin of the World Health Organization 90(2):150–156, 2012.", "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3302549/" },
+    { "id": "bern-1993", "label": "Bern C. et al., “Risk factors for mortality in the Bangladesh cyclone of 1991”, Bulletin of the World Health Organization 71(1):73–78, 1993.", "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2393441/" },
+    { "id": "katrina-house", "label": "US House of Representatives, Select Bipartisan Committee, A Failure of Initiative, H. Rpt. 109-377, 2006.", "url": null },
+    { "id": "nhc-katrina", "label": "US National Hurricane Center, Tropical Cyclone Report: Hurricane Katrina (updated edition).", "url": null },
+    { "id": "fsri-lahaina", "label": "Fire Safety Research Institute (UL), Lahaina findings and recommendations, for the Hawaii Department of the Attorney General, 10 September 2024.", "url": "https://ag.hawaii.gov/wp-content/uploads/2024/09/FSRI_Lahaina_Report_Findings_and_Recommendations_09102024.pdf" },
+    { "id": "scenarios-json", "label": "Crises Cinema, Control Room scenario bundle (src/data/scenarios.json): Lahaina 2023 and Valencia DANA 2024 timelines, themselves cited to FSRI, AEMET and the Catarroja court record. Analysis: scripts/essay-analysis.mjs.", "url": null },
+    { "id": "nist-camp", "label": "NIST, A Case Study of the Camp Fire: Fire Progression Timeline, Technical Note 2252, July 2023.", "url": null },
+    { "id": "jma-tohoku", "label": "Japan Meteorological Agency, assessment of the initial tsunami warning for the 2011 Tōhoku earthquake (document title to be confirmed by the site owner).", "url": null },
+    { "id": "pdna-pakistan", "label": "Government of Pakistan with international partners, Pakistan Floods 2022: Post-Disaster Needs Assessment, 2022.", "url": null },
+    { "id": "robine-2008", "label": "Robine J.-M. et al., “Death toll exceeded 70,000 in Europe during the summer of 2003”, Comptes Rendus Biologies 331:171–178, 2008.", "url": null },
+    { "id": "gallo-2024", "label": "Gallo E. et al., “Heat-related mortality in Europe during 2023 and the role of adaptation in protecting health”, Nature Medicine 30:3101–3105, 2024.", "url": null },
+    { "id": "abbey-2020", "label": "Abbey E.J. et al., “The Global Health Security Index is not predictive of coronavirus pandemic responses among Organization for Economic Cooperation and Development countries”, PLoS ONE, 2020.", "url": "https://doi.org/10.1371/journal.pone.0239398" },
+    { "id": "haider-2020", "label": "Haider N. et al., “Global Health Security Index and Joint External Evaluation scores and COVID-19 outcomes”, Epidemiology & Infection 148:e210, 2020.", "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7506172/" },
+    { "id": "bollyky-2022", "label": "COVID-19 National Preparedness Collaborators (Bollyky T.J. et al.), “Pandemic preparedness and COVID-19: an exploratory analysis of infection and fatality rates, and contextual factors associated with preparedness in 177 countries”, The Lancet 399(10334):1489–1512, 2022 (abstract read).", "url": "https://doi.org/10.1016/S0140-6736(22)00172-6" },
+    { "id": "ledesma-2023", "label": "Ledesma J.R. et al., “Global Health Security Index and COVID-19 excess mortality”, BMJ Global Health 8(7):e012203, 2023 (abstract read).", "url": null },
+    { "id": "repo-scores", "label": "Crises Cinema, committed layers emdat.json, inform.json, ndgain.json and spar.json in public/data/preparedness/, analysed by scripts/essay-analysis.mjs (association only; Spearman, deaths per 100,000, 2000–2025). Publishers, licences and as-of dates: SOURCES.md.", "url": null },
+    { "id": "ballester-2023", "label": "Ballester J. et al., “Heat-related mortality in Europe during the summer of 2022”, Nature Medicine 29:1857–1866, 2023.", "url": null },
+    { "id": "naiic-2012", "label": "National Diet of Japan, Fukushima Nuclear Accident Independent Investigation Commission (NAIIC), Official Report, 2012.", "url": null },
+    { "id": "ag-hawaii", "label": "Hawaii Department of the Attorney General, News Release 2024-40, 2024 (Lahaina fire findings).", "url": null },
+    { "id": "repo-hazards", "label": "Crises Cinema, committed layers emdat.json (byHazard, deaths 2000–2025) and idmc.json (byHazard, new displacements 2008–2025), summed over countries holding both, analysed by scripts/essay-analysis.mjs.", "url": null },
+    { "id": "hrw-turkey", "label": "Human Rights Watch, reporting on accountability after the February 2023 Türkiye earthquakes, 27 March 2024 and 6 February 2025.", "url": null },
+    { "id": "repo-funding", "label": "Crises Cinema, committed layer funding.json (OCHA Financial Tracking Service, appeals 2010–2026; 2026 partial), analysed by scripts/essay-analysis.mjs. Licence and double-counting caveat: SOURCES.md.", "url": null },
+    { "id": "ocha-fletcher", "label": "T. Fletcher, UN Under-Secretary-General for Humanitarian Affairs, press remarks, UN Geneva (UNOG) transcript, 3 December 2025.", "url": null },
+    { "id": "verisk-ij", "label": "Insurance Journal, report on Verisk’s estimate of insured losses from the January 2025 Los Angeles wildfires, 22 January 2025 (the Verisk release itself was not read).", "url": null },
+    { "id": "ucla-anderson", "label": "UCLA Anderson Forecast, estimate of total property and capital losses from the January 2025 Los Angeles wildfires, 3 March 2025 (explicitly preliminary).", "url": null },
+    { "id": "unep-2025", "label": "UNEP, Adaptation Gap Report 2025: Running on Empty, 2025.", "url": null }
+  ],
+  "sections": [
+    {
+      "id": "a",
+      "eyebrow": "One · The architecture",
+      "title": "The machine we built for this",
+      "paragraphs": [
+        {
+          "text": "The machine is real, and it is spreading. In 2025 the WMO and UNDRR counted 119 countries reporting a multi-hazard early warning system: 60 per cent of the total, a record, and more than double the number of a decade ago. Their headline claim is that disaster mortality is nearly six times lower where those systems are comprehensive. That is a cross-country association, and richer countries tend to have both the systems and the lower mortality, so the honest verb is “associated with”, not “cuts”. This site cannot test it for itself: the Sendai Target G layer is not loaded, because no open source for it could be reached.",
+          "cites": ["wmo-mhews", "sources-md"]
+        },
+        {
+          "text": "The positive control is Bangladesh. Cyclone deaths there ran to roughly 500,000 in 1970 (the baseline varies by source), 138,958 in 1991 and 4,234 in Sidr in 2007: roughly a hundredfold fall in four decades, bought with megaphones, concrete and volunteers. The peer-reviewed account credits warnings, shelters, evacuation plans, embankments and the Red Crescent’s Cyclone Preparedness Programme, and then admits there is currently no scientific evidence on the precise effect of any one of them. The shelters are the clearest piece of the arithmetic: in 1991, about 22 per cent of people who did not reach a concrete or brick structure died, and everyone who sheltered in one survived.",
+          "cites": ["haque-2012", "bern-1993"]
+        },
+        {
+          "text": "On paper, then, the architecture is extremely good, and in one coastal country it demonstrably worked. That is the difficulty this page is about.",
+          "cites": []
+        }
+      ]
+    },
+    {
+      "id": "b",
+      "eyebrow": "Two · The last mile",
+      "title": "Where the graveyard is",
+      "paragraphs": [
+        {
+          "text": "Hurricane Katrina had been predicted in theory for many years and forecast, in the House committee’s words, “with startling accuracy for five days”. “Despite adequate warning 56 hours before landfall, Governor Blanco and Mayor Nagin delayed ordering a mandatory evacuation in New Orleans until 19 hours before landfall.” The thirty-seven hours between those two figures are our subtraction, not the committee’s. The National Hurricane Center’s updated report puts the toll at nearly 1,400 combined direct and indirect deaths, a revision of the figure of over 1,800 first reported.",
+          "cites": ["katrina-house", "nhc-katrina"]
+        },
+        {
+          "text": "Lahaina’s investigators set the last mile out as numbered findings. Many residents did not receive a text notification from the county about the high winds and fire danger (F36). Only one siren of the outdoor warning system was operable inside the burn perimeter (F37), and the system had never been used to warn of a wildland-urban-interface fire before 8 August 2023 (F38). Some residents stayed because, in the report’s phrase, many “refused because there did not appear to be official notification that danger was imminent” (F39). The fire and police departments “never connected to establish a unified command” (F41). The record carries 102 deaths, a figure our own scenario file flags as contested.",
+          "cites": ["fsri-lahaina", "scenarios-json"]
+        },
+        {
+          "text": "The site’s two playable scenarios put clocks on this, with the caveat that N is 2. At Lahaina the first homes ignite at 15:30 and the first public alert is logged at 16:16, 46 minutes later. In Valencia the flood wave reaches the towns of the Horta Sud at 19:00 and the phones ring at 20:11, 71 minutes later; the same scenario file records the national weather service’s red-level warning at 07:36 that morning, about twelve and a half hours before the phones. The two impact times mark different things (homes igniting, a wave arriving), so this is a description of two nights, not a rate. At Camp Fire the clock was shorter and still lost: the incident commander’s request for warnings named the wrong side of Pentz Road (west instead of east), and 14 minutes passed between the request at 07:32 and the upgrade to evacuation orders at 07:46. Fewer than 40 per cent of Paradise residents had signed up for the phone alerts, and of 14,737 numbers called, 33 per cent answered. NIST’s summary is that the rapid fire spread outpaced the information flow. Eighty-five people died.",
+          "cites": ["scenarios-json", "nist-camp"]
+        },
+        {
+          "text": "The last mile is the commonest graveyard in the record, not the only one. At Tōhoku in 2011 the first tsunami warning went out about three minutes after the quake, so latency was fine; the content was wrong, because the magnitude of 7.9 estimated promptly for the initial warning was an underestimate, and the Japan Meteorological Agency allows that the low heights it implied possibly contributed to delays in evacuation. Pakistan in 2022 was a matter of exposure and drainage: more than 1,700 dead, 33 million affected, US$14.9 billion in damage, and an assessment that does not frame it as a warning failure. And the machine, where it runs, does something, if less than we would like. Europe’s heat-health systems did not end the summer death toll: 47,690 people died of heat in 2023 (95 per cent interval 28,853 to 66,525), against more than 70,000 additional deaths in the summer of 2003. The two series cover different countries and are not directly comparable. But the 2023 study estimates that the burden would have been 80 per cent higher without present-century adaptation, which by our arithmetic (1 − 1/1.8) is about 44 per cent of the counterfactual deaths avoided. That is real progress, and it sits a long way from Bangladesh.",
+          "cites": ["jma-tohoku", "pdna-pakistan", "gallo-2024", "robine-2008"]
+        }
+      ]
+    },
+    {
+      "id": "c",
+      "eyebrow": "Three · Scores against reality",
+      "title": "The index that ranked us first",
+      "paragraphs": [
+        {
+          "text": "The early literature on pandemic-preparedness scores is unkind. One OECD comparison found “countries ranked in the top five of the GHS index, occupy the bottom eight positions of the commutative ranking” of COVID outcomes; it is a small sample, on raw reported deaths. Another found the Global Health Security Index and the Joint External Evaluation correlated with each other (r = 0.82) but not usefully with mortality: in regression neither was significant (P = 0.891 and P = 0.419), and the share of the population aged 65 and over was the strongest predictor. A 177-country analysis in The Lancet tested twelve preparedness indices and found them not meaningfully associated with standardised infection or fatality rates, while trust in government, interpersonal trust and lower corruption were.",
+          "cites": ["abbey-2020", "haider-2020", "bollyky-2022"]
+        },
+        {
+          "text": "The counter-evidence belongs here, at the same weight. Once COVID excess mortality is standardised for under-reporting and age, a higher Global Health Security Index score is associated with lower mortality: an overall coefficient of −0.21 (95 per cent interval −0.35 to −0.08), after adjusting for income. Its authors are affiliated with Brown University, the Nuclear Threat Initiative (which co-produces the index) and the Gates Foundation, and the Lancet analysis was funded in part by the Gates Foundation, which also funds work with the index’s partners. Neither is a reason to dismiss either paper. The fair summary is that scores predicted poorly in early reported data, a modest association appears with better outcome measures, and trust, corruption and age explain more.",
+          "cites": ["ledesma-2023", "bollyky-2022"]
+        },
+        {
+          "text": "The site’s own layers fail the expected sign, weakly. Against recorded disaster deaths per 100,000 (2000–2025), INFORM’s Lack of Coping Capacity gives ρ = −0.196 over 187 countries, where a positive value would be expected; ND-GAIN gives ρ = +0.187 over 185, where a negative one would be; SPAR gives +0.076 over 185, which is negligible. Of the 62 countries in ND-GAIN’s most-prepared third, 32 sit in the top third for deaths. All of these correlations are weak (|ρ| below 0.2). The scores are 2024–25 snapshots set against cumulative 2000–25 deaths, so there is no ordering and no cause. ND-GAIN readiness tracks GDP, so “prepared” partly means “rich”, and SPAR is self-reported and health-only.",
+          "cites": ["repo-scores", "sources-md"]
+        },
+        {
+          "text": "Most of that mismatch is a labelling confound, and it should be read first. The “prepared but deadly” countries record 44.5 per cent of their deaths (SPAR group, 24 countries) and 79.6 per cent (ND-GAIN group, 29 countries) outside the five hazards the data labels, against 24 per cent overall and 8 to 12 per cent for the opposite group. For individual countries the residual is about 97 to 99 per cent: 69,974 of Italy’s 70,950 recorded deaths, 41,590 of Spain’s 42,068, 37,537 of France’s 37,874. Our data does not say what the residual is. Extreme heat is a strong inference, since Europe’s own heat-death estimates are of that order (61,672 in the summer of 2022 alone), but it is an inference and we have not verified it. The defensible reading is not that the scores are useless; it is that they may measure capacity against the hazards they were built for while rich countries die of one nobody scored.",
+          "cites": ["repo-scores", "ballester-2023"]
+        }
+      ]
+    },
+    {
+      "id": "d",
+      "eyebrow": "Four · The verdicts",
+      "title": "There are no natural disasters",
+      "paragraphs": [
+        {
+          "text": "The official record has been agreeing with the slogan for some time. Japan’s Diet commission called Fukushima “a profoundly manmade disaster – that could and should have been foreseen and prevented”, the product of collusion between government, regulators and the operator, and “a typical example of ‘regulatory capture’”. It was careful about where the fault lay: the root causes were the organizational and regulatory systems rather than the competency of any specific individual. Lahaina’s attorney general reached the same shape of conclusion in 2024: the devastation “cannot be connected to one specific organization, individual, action or event”. These are parliamentary and investigative findings, not verdicts.",
+          "cites": ["naiic-2012", "ag-hawaii"]
+        },
+        {
+          "text": "The site’s data has a cruder version of the point. Per 1,000 people displaced, earthquakes kill 17.17 (58 countries), drought 5.96, storms 1.16, floods 0.64 and wildfires 0.41. An earthquake is about 27 times deadlier than a flood per person displaced, and earthquakes account for 50.8 per cent of recorded deaths since 2000 (796,370 of 1,569,792) against 9.3 per cent of hazard-attributed displacements. The periods differ (deaths 2000–25, displacement 2008–25), displacements are counted as flows, and a few large countries dominate, so treat the gradient as the data and “the building is the weapon” as our reading of it. The Bangladesh shelters point the same way: no one who reached a concrete structure in 1991 died.",
+          "cites": ["repo-hazards", "bern-1993", "sources-md"]
+        },
+        {
+          "text": "Turkey in 2023 shows where accountability goes when the building is the weapon. More than 53,000 people died. By February 2025 courts had sentenced just 118 defendants, and permission to investigate had been granted for just three public officials, because under Law no. 4483 prosecutors cannot open investigations of officials on their own initiative. Governments have also responded to such disasters by granting amnesty to contractors responsible for unlicensed construction, the most recent such amnesty law being that of May 2018.",
+          "cites": ["hrw-turkey"]
+        }
+      ]
+    },
+    {
+      "id": "e",
+      "eyebrow": "Five · The arithmetic",
+      "title": "What a life is priced at",
+      "paragraphs": [
+        {
+          "text": "The humanitarian system’s own scorecard falls as its bill rises. In the committed OCHA series, appeal coverage was last above 100 per cent in 2016 (110 per cent); the series treats the earlier over-100 years as a symptom of double counting. It was 86 per cent in 2017 and 68 per cent in 2023. Across the 17 appeal years, 2010 to a partial 2026, coverage against year has a rank correlation of about −0.96. That is one trend in 17 points, not a law. This page’s own 2025 level disagrees with OCHA’s, so it is not quoted here; OCHA’s head put 2025 funding at only $12 billion, the lowest in a decade.",
+          "cites": ["repo-funding", "sources-md", "ocha-fletcher"]
+        },
+        {
+          "text": "Set that $12 billion beside Los Angeles. Verisk estimated the insured losses from the January 2025 fires at $28 billion to $35 billion, which is 2.3 to 2.9 times the funding received by the world’s humanitarian appeals (our arithmetic). UCLA Anderson’s preliminary estimate of total property and capital losses was $76 billion to $131 billion. The comparison is not a moral equivalence. Insured loss is not economic loss; one metropolitan event is set against an annual global appeal; a stock of insured assets is set against a flow of aid to uninsured people; “received” is a floor, since not all aid moves through the appeal; and both estimates date from early 2025.",
+          "cites": ["verisk-ij", "ucla-anderson", "ocha-fletcher"]
+        },
+        {
+          "text": "The adaptation side of the ledger is worse stated. UNEP puts developing countries’ adaptation finance need at US$310–365 billion a year by 2035 (2023 prices), against international flows that fell from US$28 billion in 2022 to US$26 billion in 2023. That leaves a gap of US$284–339 billion a year, and the Glasgow doubling goal will be missed. The Loss and Damage Fund’s pledge total is deliberately not quoted: no machine-readable feed exists, and this site does not hand-enter figures from news coverage.",
+          "cites": ["unep-2025", "sources-md"]
+        }
+      ]
+    },
+    {
+      "id": "f",
+      "eyebrow": "Six · Back to the pictures",
+      "title": "What cinema gets wrong",
+      "paragraphs": [
+        {
+          "text": "The disaster film wants a villain, and the inquiries decline to supply one. Fukushima’s commission named systems rather than the competency of any individual; Lahaina’s findings decline to name one organization, individual, action or event; Katrina’s committee called its subject “primarily a failure of initiative” and observed that “we are still an analog government in a digital age”. That refusal is both the insight, since the failure is systemic, and the loophole, since nobody is liable. Villains do appear when they are builders: Turkey’s 118 sentences are the example. The fair sentence is that inquiries almost never find a villain in office, not that they never do.",
+          "cites": ["naiic-2012", "ag-hawaii", "katrina-house", "hrw-turkey"]
+        },
+        {
+          "text": "The scientist nobody believes is also backwards. In the record, the public is not ignoring a lone prophet; people are waiting for an official to tell them, and the message does not come. At Lahaina, many people did not leave because there did not appear to be official notification. In Bangladesh the residual behaviour is a wait-and-see approach in coastal areas. At Tōhoku, the Japan Meteorological Agency allows that small early observed heights may have misled people. Bureaucratic delay does not photograph, and the film’s substitute for it, one obstructive mayor, is dramatically necessary and analytically useless.",
+          "cites": ["fsri-lahaina", "haque-2012", "jma-tohoku"]
+        },
+        {
+          "text": "The Atlas of Ruin shows where the genre thinks the world ends. This page tries to show where it actually does.",
+          "cites": []
+        }
+      ]
+    }
+  ]
+}

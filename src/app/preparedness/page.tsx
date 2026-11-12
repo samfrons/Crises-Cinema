@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import metaJson from '../../data/preparedness-meta.json';
+import essayJson from '../../data/essay.json';
 import { abs } from '@/lib/site';
 import type { PreparednessMeta } from './types';
 import PreparednessMap from './PreparednessMap';
@@ -18,8 +19,12 @@ import Elsewhere from '@/app/components/Elsewhere';
  * figures are client components that fetch their own layer files and are each
  * responsible for describing their own absence.
  *
- * The essay prose in the six sections is DRAFT SCAFFOLD, clearly marked as
- * such in the page itself, for the site owner to replace.
+ * The essay prose in the six sections is a cited DRAFT for the site owner,
+ * marked as such in the page itself. It is not written here: it lives in
+ * data/essay/last-mile.json (validated by scripts/build-essay.mjs, bundled to
+ * src/data/essay.json) so the page and a later in-game edition share one
+ * source. Every paragraph's citations resolve to the numbered list in the
+ * colophon.
  */
 
 const meta = metaJson as unknown as PreparednessMeta;
@@ -49,12 +54,45 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', title, description },
 };
 
-/** Marks unfinished prose so it can never be mistaken for shipped copy. */
-function Scaffold({ children }: { children: React.ReactNode }) {
+type EssayParagraph = { text: string; cites: string[] };
+type EssaySourceT = { id: string; label: string; url: string | null };
+type EssaySectionT = { id: string; eyebrow: string; title: string; paragraphs: EssayParagraph[] };
+type Essay = { status: 'draft' | 'ready'; updated: string; sources: EssaySourceT[]; sections: EssaySectionT[] };
+
+const essay = (essayJson as unknown as Record<string, Essay>)['last-mile'];
+/** Sources arrive ordered by first citation, so [n] is the list position. */
+const srcNumber = new Map(essay.sources.map((x, i) => [x.id, i + 1]));
+const section = (id: string) => essay.sections.find((x) => x.id === id)!;
+
+/** Superscript citation marks, the same idiom as the Control Room's. */
+function Cites({ ids }: { ids: string[] }) {
+  if (!ids.length) return null;
+  return (
+    <sup className="pr-cite">
+      {ids.map((id) => {
+        const n = srcNumber.get(id);
+        const label = essay.sources.find((x) => x.id === id)?.label ?? id;
+        return n ? (
+          <a key={id} href={`#essay-src-${id}`} title={label} aria-label={`Source ${n}`}>[{n}]</a>
+        ) : null;
+      })}
+    </sup>
+  );
+}
+
+/** The essay prose for one section, boxed and labelled as a draft while status is "draft". */
+function EssayBody({ id }: { id: string }) {
+  const paras = section(id).paragraphs.map((p, i) => (
+    <p key={i}>
+      {p.text}
+      <Cites ids={p.cites} />
+    </p>
+  ));
+  if (essay.status !== 'draft') return <div className="essay-body">{paras}</div>;
   return (
     <div className="essay-placeholder">
-      <p className="essay-placeholder-tag">[ DRAFT SCAFFOLD — final essay text to come ]</p>
-      {children}
+      <p className="essay-placeholder-tag">[ DRAFT — cited, for your edit ]</p>
+      {paras}
     </div>
   );
 }
@@ -80,8 +118,8 @@ export default function PreparednessPage() {
           <p className="pr-lede rise rise-3">
             The films on the rest of this site are about the hazard: the wave, the fault, the
             virus, the fire on the ridge. The record says the hazard is rarely what kills people.
-            What kills people is the last mile — the ninety minutes between a correct forecast and
-            a message nobody sent, the amnesty that legalised the building, the appeal that closed
+            What kills people is the last mile — the alert that reached the phones forty-six
+            minutes after the first homes caught, the amnesty that legalised the building, the appeal that closed
             at sixty per cent. This page maps the machinery we built to close that mile, scores it
             against what actually happened, and prints the verdicts of the inquiries that examined
             the wreckage.
@@ -135,28 +173,9 @@ export default function PreparednessPage() {
         {/* ── a ────────────────────────────────────────────────────────── */}
         <section className="pr-essay" id="architecture" aria-labelledby="architecture-title">
           <div className="wrap">
-            <p className="eyebrow">One · The architecture</p>
-            <h2 className="section-title" id="architecture-title">The machine we built for this</h2>
-            <Scaffold>
-              <p>
-                There is a system. It has a name, a budget, a coordinating agency and a set of
-                acronyms that take a paragraph to unpack: OCHA at the centre, eleven clusters
-                splitting the work by sector, an emergency fund that can disburse in seventy-two
-                hours, and — since 2022 — the Early Warnings for All initiative, which promises
-                that every person on earth will be covered by a multi-hazard warning system by the
-                end of 2027.
-              </p>
-              <p>
-                Most of it was built in the wake of a specific failure. The cluster system came out
-                of the 2005 Humanitarian Response Review, which followed Darfur. Anticipatory
-                action — money released on a forecast rather than on a body count — came out of the
-                repeated observation that the cheapest moment to act is the one before anything has
-                happened. The architecture is, on paper, a record of lessons learned.
-              </p>
-              <p>
-                It is also, on paper, extremely good. That is the difficulty this page is about.
-              </p>
-            </Scaffold>
+            <p className="eyebrow">{section('a').eyebrow}</p>
+            <h2 className="section-title" id="architecture-title">{section('a').title}</h2>
+            <EssayBody id="a" />
           </div>
         </section>
 
@@ -165,26 +184,9 @@ export default function PreparednessPage() {
         {/* ── b ────────────────────────────────────────────────────────── */}
         <section className="pr-essay" id="last-mile" aria-labelledby="last-mile-title">
           <div className="wrap">
-            <p className="eyebrow">Two · The last mile</p>
-            <h2 className="section-title" id="last-mile-title">Where the graveyard is</h2>
-            <Scaffold>
-              <p>
-                In the Ahr valley in July 2021, the European Flood Awareness System issued its
-                warnings days ahead and the forecast was essentially right. One hundred and
-                thirty-five people died in a single German district, in the dark, in a country with
-                the meteorological data on a screen and no siren left standing to broadcast it.
-              </p>
-              <p>
-                In Valencia in October 2024, the national weather service raised its red warning at
-                half past seven in the morning. The mass alert to mobile phones went out at eleven
-                minutes past eight in the evening. The ravine had been in flood for hours.
-              </p>
-              <p>
-                The pattern repeats with a consistency that stops looking like coincidence: the
-                forecast is fine, and the last mile — dissemination, comprehension, authority to
-                order the evacuation, somewhere to evacuate to — is where the deaths accumulate.
-              </p>
-            </Scaffold>
+            <p className="eyebrow">{section('b').eyebrow}</p>
+            <h2 className="section-title" id="last-mile-title">{section('b').title}</h2>
+            <EssayBody id="b" />
           </div>
         </section>
 
@@ -195,26 +197,9 @@ export default function PreparednessPage() {
         {/* ── c ────────────────────────────────────────────────────────── */}
         <section className="pr-essay" id="scores" aria-labelledby="scores-title">
           <div className="wrap">
-            <p className="eyebrow">Three · Scores against reality</p>
-            <h2 className="section-title" id="scores-title">The index that ranked us first</h2>
-            <Scaffold>
-              <p>
-                In October 2019 the Global Health Security Index ranked one hundred and ninety-five
-                countries on their readiness for an epidemic. The United States came first. The
-                United Kingdom came second. Within eighteen months both were among the worst
-                performers in the world on deaths per head.
-              </p>
-              <p>
-                The index was not incompetent. It measured what could be measured — laboratories,
-                plans, surveillance systems, legal frameworks — and those things were genuinely
-                there. What it could not measure was whether a state would use them: political
-                will, public trust, the willingness of a government to act on its own early data.
-              </p>
-              <p>
-                Every index on the map above has the same structural problem, and the figure below
-                is an attempt to make it visible rather than to solve it.
-              </p>
-            </Scaffold>
+            <p className="eyebrow">{section('c').eyebrow}</p>
+            <h2 className="section-title" id="scores-title">{section('c').title}</h2>
+            <EssayBody id="c" />
           </div>
         </section>
 
@@ -225,27 +210,9 @@ export default function PreparednessPage() {
         {/* ── d ────────────────────────────────────────────────────────── */}
         <section className="pr-essay" id="manmade" aria-labelledby="manmade-title">
           <div className="wrap">
-            <p className="eyebrow">Four · The verdicts</p>
-            <h2 className="section-title" id="manmade-title">There are no natural disasters</h2>
-            <Scaffold>
-              <p>
-                The phrase is older than the discipline, and the official record has been quietly
-                agreeing with it for two decades. Japan&rsquo;s Diet called Fukushima &ldquo;a
-                profoundly man-made disaster&rdquo;. The US Army Corps&rsquo; own evaluation task
-                force called New Orleans&rsquo; flood defences &ldquo;a system in name only&rdquo;.
-                Turkish engineers put the collapse of 2023 on construction amnesties rather than on
-                the fault.
-              </p>
-              <p>
-                These are not activist framings. They are the findings of commissions convened by
-                the states responsible, and they converge on the same claim: the hazard was
-                natural, and the catastrophe was administrative.
-              </p>
-              <p>
-                What follows is the record, fourteen times over, with the inquiry named in each
-                case.
-              </p>
-            </Scaffold>
+            <p className="eyebrow">{section('d').eyebrow}</p>
+            <h2 className="section-title" id="manmade-title">{section('d').title}</h2>
+            <EssayBody id="d" />
 
             <CaseStudyCards />
           </div>
@@ -256,25 +223,9 @@ export default function PreparednessPage() {
         {/* ── e ────────────────────────────────────────────────────────── */}
         <section className="pr-essay" id="arithmetic" aria-labelledby="arithmetic-title">
           <div className="wrap">
-            <p className="eyebrow">Five · The arithmetic</p>
-            <h2 className="section-title" id="arithmetic-title">What a life is priced at</h2>
-            <Scaffold>
-              <p>
-                In January 2025, two fires in Los Angeles County destroyed around sixteen thousand
-                structures and generated insured losses in the tens of billions of dollars. In the
-                same period, the UN&rsquo;s coordinated humanitarian appeals — the bill for every
-                declared emergency on earth — asked for a comparable sum and received a fraction of
-                it.
-              </p>
-              <p>
-                The comparison is not a moral equivalence and should not be read as one. It is a
-                statement about where the world keeps its money and how quickly it can move it.
-              </p>
-              <p>
-                The figure below is the second half of that arithmetic: what was asked for, what
-                arrived, and the size of the space between.
-              </p>
-            </Scaffold>
+            <p className="eyebrow">{section('e').eyebrow}</p>
+            <h2 className="section-title" id="arithmetic-title">{section('e').title}</h2>
+            <EssayBody id="e" />
           </div>
         </section>
 
@@ -285,28 +236,9 @@ export default function PreparednessPage() {
         {/* ── f ────────────────────────────────────────────────────────── */}
         <section className="pr-essay" id="cinema" aria-labelledby="cinema-title">
           <div className="wrap">
-            <p className="eyebrow">Six · Back to the pictures</p>
-            <h2 className="section-title" id="cinema-title">What cinema gets wrong</h2>
-            <Scaffold>
-              <p>
-                The disaster film is structurally incapable of telling this story. Its engine is
-                the hazard: the wave has to be visible, the fault has to open, the virus has to do
-                something on camera. Bureaucratic delay does not photograph.
-              </p>
-              <p>
-                So the genre invents a substitute — one obstructive mayor, one venal executive, one
-                scientist nobody believes — and compresses a systemic failure into a character. It
-                is dramatically necessary and analytically useless. Real inquiries almost never
-                find a villain; they find a committee that met late.
-              </p>
-              <p>
-                The catalogue of {' '}
-                <a href="/">eight hundred-odd disaster films</a> next door is, read this way, an
-                archive of the wrong lesson repeated for a century. The{' '}
-                <a href="/atlas">Atlas of Ruin</a> shows where the genre thinks the world ends. This
-                page shows where it actually does.
-              </p>
-            </Scaffold>
+            <p className="eyebrow">{section('f').eyebrow}</p>
+            <h2 className="section-title" id="cinema-title">{section('f').title}</h2>
+            <EssayBody id="f" />
           </div>
         </section>
       </main>
@@ -316,9 +248,11 @@ export default function PreparednessPage() {
         <div className="wrap">
           <h2>How this page was assembled</h2>
           <p>
-            <b>The essay text on this page is a draft scaffold</b>, marked as such in every
-            section, and is not finished copy. The figures, the case studies and the data
-            provenance are real.
+            <b>The essay text on this page is a cited draft</b>, marked as such in every section,
+            for the site owner to edit. Each paragraph carries numbered sources, listed below; a
+            claim with no source here is a claim this draft declined to make. Wherever a number is
+            our own arithmetic, or a correlation computed from the layers on this page, the text
+            says so, and a correlation is an association, never a cause.
           </p>
           <p>
             Every number on this page is fetched at runtime from{' '}
@@ -376,6 +310,21 @@ export default function PreparednessPage() {
               <dd>Natural Earth 1:110m admin-0 boundaries, public domain, projected equirectangular at build time.</dd>
             </div>
           </dl>
+
+          <h3 id="essay-sources">Sources for this essay</h3>
+          <ol className="pr-essay-sources">
+            {essay.sources.map((x, i) => (
+              <li key={x.id} id={`essay-src-${x.id}`}>
+                <span className="pr-src-num">[{i + 1}]</span>{' '}
+                {x.url ? <a href={x.url} rel="noopener noreferrer">{x.label}</a> : x.label}
+              </li>
+            ))}
+          </ol>
+          <p className="pr-built">
+            Draft updated {essay.updated}. Prose and sources live in one file,{' '}
+            <code>data/essay/last-mile.json</code>, checked by <code>scripts/build-essay.mjs</code>:
+            every paragraph with a number must cite a source that exists.
+          </p>
 
           <Elsewhere current="/preparedness" tone="dark" />
           <p className="pr-built">
