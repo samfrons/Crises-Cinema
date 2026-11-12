@@ -11,6 +11,21 @@
     "end": "22:00"
   },
   "record_caveat": "The record here is strong on times and thin on reasons. The minute-by-minute facts come from the FSRI timeline dataset published for the Hawaiʻi Attorney General (dispatch audio, police and fire logs, MEMA and HI-EMA logs, NWS products, Hawaiian Electric statements, county social-media posts, and the administrator's own text messages), and from FSRI's Phase Two analysis of 13 September 2024. The Phase One report PDF could not be read as text, so Phase One facts are cited to its dataset rows by time and source. The county after-action report by the Western Fire Chiefs Association and MPD's own report could not be retrieved, and are not cited. Some entries in the dataset carry wrong or later timestamps; those were left out. The player is cast as the MEMA Administrator, who the record places in Honolulu for the Pacific Partnership 2023 meeting that day; the EOC was run in Maui by his staff, and some information shown here (dispatch traffic, 911 calls) is in the county's records but is not shown to have reached him. FSRI's staff interviews say siren activation was not discussed on 8 August, while the Administrator said on 16 August he had decided against it; the documents available here do not reconcile the two. Where this scenario cannot say what a different decision would have caused, it says so: the record is silent on every path not taken. How much Hurricane Dora itself contributed to the wind has been questioned in later analyses; this scenario reports only what the forecasts said. The origin and cause of the fire are under separate investigation and are not addressed.",
+  "warning_chain": {
+    "labels": {
+      "forecast": "NWS Honolulu",
+      "desk": "Maui EOC",
+      "phone": "WEA",
+      "siren": "Sirens",
+      "broadcast": "Radio · TV",
+      "social": "Posts"
+    },
+    "zones": {
+      "lahaina-lahainaluna": "Lahainaluna",
+      "lahaina-front-street": "Front St",
+      "upcountry-kula": "Kula · Olinda"
+    }
+  },
   "briefing_media": {
     "file": "maui-landsat-true-colour-2023-08-07.jpg",
     "type": "image",
@@ -45,7 +60,17 @@
             "lahaina-lahainaluna",
             "lahaina-front-street",
             "upcountry-kula"
-          ]
+          ],
+          "icon": "wind",
+          "chain": [
+            {
+              "link": "forecast",
+              "state": "used"
+            }
+          ],
+          "wind": {
+            "from": "E"
+          }
         },
         {
           "id": "t1-i2",
@@ -74,7 +99,8 @@
             "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-07)",
             "takenOn": "2023-08-07",
             "suggestedTimestep": "pre"
-          }
+          },
+          "icon": "wind"
         },
         {
           "id": "t1-i3",
@@ -87,7 +113,19 @@
           "zones": [
             "upcountry-kula"
           ],
-          "board_state": "impact"
+          "board_state": "impact",
+          "icon": "wea",
+          "origin": "00:22",
+          "chain": [
+            {
+              "link": "phone",
+              "state": "used",
+              "at": "04:09",
+              "zones": [
+                "upcountry-kula"
+              ]
+            }
+          ]
         },
         {
           "id": "t1-i4",
@@ -101,7 +139,8 @@
             "lahaina-lahainaluna",
             "lahaina-front-street"
           ],
-          "board_state": "none"
+          "board_state": "none",
+          "icon": "downed-line"
         },
         {
           "id": "t1-i5",
@@ -110,7 +149,8 @@
           "citation": {
             "sourceId": "mema-records",
             "detail": "MEMA log 7 Aug 21:33 'Activated the EOC at 2100 hrs, 8/7/23 for the wind warning'; Andaya texts 7 Aug 22:11 and 8 Aug 09:22-09:27; Phase Two §3.6.4 on the Mayor's arrival"
-          }
+          },
+          "icon": "committee"
         }
       ],
       "options": [
@@ -191,7 +231,9 @@
           },
           "zones": [
             "lahaina-lahainaluna"
-          ]
+          ],
+          "icon": "fire",
+          "origin": "06:34"
         },
         {
           "id": "t2-i2",
@@ -203,6 +245,16 @@
           },
           "zones": [
             "lahaina-lahainaluna"
+          ],
+          "icon": "roadblock",
+          "chain": [
+            {
+              "link": "social",
+              "state": "used",
+              "zones": [
+                "lahaina-lahainaluna"
+              ]
+            }
           ]
         },
         {
@@ -215,7 +267,8 @@
           },
           "zones": [
             "lahaina-lahainaluna"
-          ]
+          ],
+          "icon": "downed-line"
         },
         {
           "id": "t2-i4",
@@ -228,7 +281,8 @@
           "zones": [
             "upcountry-kula",
             "lahaina-lahainaluna"
-          ]
+          ],
+          "icon": "shelter"
         }
       ],
       "options": [
@@ -307,7 +361,8 @@
           },
           "zones": [
             "lahaina-lahainaluna"
-          ]
+          ],
+          "icon": "contained"
         },
         {
           "id": "t3-i2",
@@ -319,7 +374,8 @@
           },
           "zones": [
             "upcountry-kula"
-          ]
+          ],
+          "icon": "fire"
         },
         {
           "id": "t3-i3",
@@ -345,7 +401,11 @@
           "zones": [
             "lahaina-lahainaluna",
             "lahaina-front-street"
-          ]
+          ],
+          "icon": "wind",
+          "wind": {
+            "from": "E"
+          }
         }
       ],
       "options": [
@@ -426,7 +486,8 @@
             "lahaina-lahainaluna",
             "lahaina-front-street"
           ],
-          "board_state": "none"
+          "board_state": "none",
+          "icon": "roadblock"
         },
         {
           "id": "t4-i2",
@@ -438,7 +499,8 @@
           },
           "zones": [
             "lahaina-lahainaluna"
-          ]
+          ],
+          "icon": "fire"
         },
         {
           "id": "t4-i3",
@@ -451,7 +513,11 @@
           "zones": [
             "lahaina-lahainaluna",
             "lahaina-front-street"
-          ]
+          ],
+          "icon": "wind",
+          "wind": {
+            "from": "E"
+          }
         },
         {
           "id": "t4-i4",
@@ -544,7 +610,8 @@
           "zones": [
             "lahaina-lahainaluna"
           ],
-          "board_state": "impact"
+          "board_state": "impact",
+          "icon": "fire"
         },
         {
           "id": "t5-i2",
@@ -570,6 +637,17 @@
           "zones": [
             "upcountry-kula",
             "lahaina-lahainaluna"
+          ],
+          "icon": "wea",
+          "chain": [
+            {
+              "link": "phone",
+              "state": "used",
+              "at": "16:04",
+              "zones": [
+                "upcountry-kula"
+              ]
+            }
           ]
         },
         {
@@ -584,7 +662,14 @@
             "lahaina-lahainaluna",
             "lahaina-front-street"
           ],
-          "board_state": "none"
+          "board_state": "none",
+          "icon": "siren",
+          "chain": [
+            {
+              "link": "siren",
+              "state": "unused"
+            }
+          ]
         },
         {
           "id": "t5-i5",
@@ -611,7 +696,8 @@
             "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-07). Overpass times are the satellite's typical ones (about 01:30 and 13:30 local), not read from the product metadata.",
             "takenOn": "2023-08-08",
             "suggestedTimestep": "contained"
-          }
+          },
+          "icon": "satellite"
         }
       ],
       "options": [
@@ -699,7 +785,8 @@
           "zones": [
             "lahaina-lahainaluna"
           ],
-          "board_state": "impact"
+          "board_state": "impact",
+          "icon": "fire"
         },
         {
           "id": "t6-i2",
@@ -712,7 +799,8 @@
           "zones": [
             "lahaina-front-street"
           ],
-          "board_state": "impact"
+          "board_state": "impact",
+          "icon": "roadblock"
         },
         {
           "id": "t6-i3",
@@ -725,7 +813,8 @@
           "zones": [
             "lahaina-front-street"
           ],
-          "board_state": "impact"
+          "board_state": "impact",
+          "icon": "aircraft"
         },
         {
           "id": "t6-i4",
@@ -738,7 +827,56 @@
           "zones": [
             "lahaina-front-street",
             "lahaina-lahainaluna"
+          ],
+          "icon": "wea",
+          "chain": [
+            {
+              "link": "phone",
+              "state": "used",
+              "at": "16:16",
+              "zones": [
+                "lahaina-lahainaluna"
+              ]
+            },
+            {
+              "link": "phone",
+              "state": "cut",
+              "at": "17:43",
+              "zones": [
+                "lahaina-front-street",
+                "lahaina-lahainaluna"
+              ]
+            },
+            {
+              "link": "social",
+              "state": "used",
+              "at": "17:50"
+            }
           ]
+        },
+        {
+          "id": "t6-i5",
+          "kind": "gauge",
+          "text": "GOES-18 visible-band scan of Maui from 16:10 HST: a pale plume appears to stream southwest off West Maui across the channel toward Lānaʻi. In a single visible band, cloud and sun glint also read bright, so the scan alone cannot confirm smoke.",
+          "citation": {
+            "sourceId": "noaa-goes18",
+            "detail": "ABI-L2-CMIPF band 2, scan start 2023-08-09T02:10:20Z"
+          },
+          "media": {
+            "file": "maui-goes18-abi-visible-2023-08-09-0210utc.jpg",
+            "type": "image",
+            "caption": "8 August, scan from 16:10 HST per the file metadata (GOES-18 ABI visible band 2, greyscale): a pale plume appears to stream southwest off West Maui across the channel toward Lānaʻi. Cloud and sun glint also read bright in this band, so the frame alone cannot separate smoke from cloud or glint.",
+            "credit": "NOAA / NESDIS GOES-18 ABI-L2-CMIPF band 2 (0.64 µm), scan start 2023-08-09T02:10:20Z; crop of Maui and neighbouring islands rendered by the project (reflectance, gamma 0.5, contrast stretch, 3x Lanczos upscale)",
+            "license": "NOAA Open Data Dissemination (NODD): 'open to the public and can be used as desired'; attribution requested",
+            "licenseUrl": "https://registry.opendata.aws/noaa-goes/",
+            "sourcePage": "https://noaa-goes18.s3.amazonaws.com/ABI-L2-CMIPF/2023/221/02/OR_ABI-L2-CMIPF-M6C02_G18_s20232210210206_e20232210219514_c20232210219571.nc",
+            "width": 1200,
+            "height": 741,
+            "takenOn": "2023-08-08",
+            "bytes": 171501,
+            "licenseVerifiedOn": "https://registry.opendata.aws/noaa-goes/ (fetched 2026-11-08), License section: 'NOAA data disseminated through NODD are open to the public and can be used as desired ... NOAA requests attribution for the use or dissemination of unaltered NOAA data.'"
+          },
+          "icon": "satellite"
         }
       ],
       "options": [
@@ -831,7 +969,8 @@
           "zones": [
             "lahaina-lahainaluna",
             "lahaina-front-street"
-          ]
+          ],
+          "icon": "social"
         },
         {
           "id": "t7-i3",
@@ -844,7 +983,8 @@
           "zones": [
             "lahaina-front-street"
           ],
-          "board_state": "impact"
+          "board_state": "impact",
+          "icon": "fire"
         },
         {
           "id": "t7-i5",
@@ -857,7 +997,8 @@
           "zones": [
             "lahaina-lahainaluna",
             "lahaina-front-street"
-          ]
+          ],
+          "icon": "hydrant"
         },
         {
           "id": "t7-i4",
@@ -885,7 +1026,15 @@
             "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-07)",
             "takenOn": "2023-08-08",
             "suggestedTimestep": "pre"
-          }
+          },
+          "icon": "wind",
+          "chain": [
+            {
+              "link": "forecast",
+              "state": "used",
+              "at": "15:39"
+            }
+          ]
         }
       ],
       "options": [
@@ -1055,6 +1204,21 @@
   ],
   "debrief_media": [
     {
+      "file": "kihei-fire-glow-dusk-2023-08-08.jpg",
+      "type": "image",
+      "caption": "8 August, about 19:20 (the time in the file's EXIF as relayed by Wikimedia Commons; time zone not stated): fire glow and smoke on the horizon above Kihei, seen across rooftops. This is the Kihei-side fire, a separate fire from Lahaina's, and not the one on this desk.",
+      "credit": "Kahunapule Michael Johnson (Flickr), via Wikimedia Commons",
+      "license": "CC BY-SA 2.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:August_8_Fire_above_Kihei.jpg",
+      "width": 1280,
+      "height": 960,
+      "takenOn": "2023-08-08",
+      "bytes": 260713,
+      "licenseVerifiedOn": "Flickr original page (fetched 2026-11-08) shows 'Some rights reserved' with creativecommons.org/licenses/by-sa/2.0/ and 'Taken on August 8, 2023'; Commons API extmetadata also reads CC BY-SA 2.0.",
+      "relatedUrl": "https://www.flickr.com/photos/kahunapulej/53110609698/"
+    },
+    {
       "file": "maui-landsat-infrared-2023-08-08-2225.jpg",
       "type": "image",
       "caption": "Landsat 8, 22:25 HST, 8 August: shortwave-infrared view of Maui. Active fire shows yellow. Much of Lahaina is burning; a second large fire burns northeast of Kihei.",
@@ -1155,6 +1319,38 @@
       "bytes": 211256,
       "takenOn": "2023-08-10",
       "suggestedTimestep": "aftermath"
+    },
+    {
+      "file": "hfd-c17-airlift-kahului-2023-08-10.mp4",
+      "type": "video",
+      "caption": "10 August, Kahului Airport, Maui: a Hawaii Air National Guard C-17 delivers Honolulu Fire Department firefighters, four vehicles and relief cargo from Pearl Harbor-Hickam; loadmasters unload gear. 14-second excerpt (40 s to 54 s) of a DVIDS b-roll, 960x540, audio removed.",
+      "credit": "TSgt John Linzmeier, Hawaii Air National Guard (U.S. Air National Guard); excerpted and re-encoded by the project",
+      "license": "Public domain (U.S. military work; page labelled PUBLIC DOMAIN)",
+      "licenseUrl": "https://www.dvidshub.net/about/copyright",
+      "sourcePage": "https://www.dvidshub.net/video/893485/hawaii-air-national-guard-airlifts-fire-department-resources-maui",
+      "width": 960,
+      "height": 540,
+      "poster": "hfd-c17-airlift-kahului-2023-08-10-poster.jpg",
+      "takenOn": "2023-08-10",
+      "bytes": 2196819,
+      "licenseVerifiedOn": "DVIDS video page (fetched 2026-11-08): 'PUBLIC DOMAIN This work, Hawaii Air National Guard Airlifts Fire Department Resources to Maui, by TSgt John Linzmeier, identified by DVIDS, must comply with the restrictions shown on https://www.dvidshub.net/about/copyright.'",
+      "durationSeconds": 14
+    },
+    {
+      "file": "lahaina-guard-search-recovery-excerpt-2023-08-14.mp4",
+      "type": "video",
+      "caption": "Lahaina, mid-August: Hawaii National Guard search-and-recovery teams in helmets and masks work through burned lots and streets; orange search markings are on a wall. 18-second excerpt (0 s to 18 s) of a DVIDS package, vertical frame, audio removed. DVIDS date taken 14 August 2023; the package says the mobilisation began 9 August.",
+      "credit": "MSgt Amber Monio, Hawaii National Guard (U.S. National Guard); excerpted and re-encoded by the project",
+      "license": "Public domain (U.S. military work; page labelled PUBLIC DOMAIN)",
+      "licenseUrl": "https://www.dvidshub.net/about/copyright",
+      "sourcePage": "https://www.dvidshub.net/video/893750/hawaii-national-guard-aids-search-and-recovery-efforts-after-maui-wildfires",
+      "width": 540,
+      "height": 960,
+      "poster": "lahaina-guard-search-recovery-excerpt-2023-08-14-poster.jpg",
+      "takenOn": "2023-08-14",
+      "bytes": 2117163,
+      "licenseVerifiedOn": "DVIDS video page (fetched 2026-11-08): 'PUBLIC DOMAIN This work, Hawaii National Guard aids in search and recovery efforts after Maui wildfires, by MSgt Amber Monio, identified by DVIDS, must comply with the restrictions shown on https://www.dvidshub.net/about/copyright.'",
+      "durationSeconds": 18
     }
   ],
   "outcome": {
@@ -1242,6 +1438,12 @@
       "label": "NASA EOSDIS Global Imagery Browse Services (GIBS): VIIRS Suomi NPP corrected-reflectance true colour with the VIIRS 375 m thermal-anomalies (active fire) layer, Maui, UTC days of 8 and 9 August 2023; crops rendered by the project from the GIBS WMS.",
       "url": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
       "note": "URL is NASA's data-use guidance (CC0 for NASA-led missions). The exact WMS request for each crop is given on its figure. Overpass times are the satellite's typical ones, not read from the product metadata."
+    },
+    {
+      "id": "noaa-goes18",
+      "label": "NOAA GOES-18 ABI Level-2 Cloud and Moisture Imagery (ABI-L2-CMIPF), full disk, band 2 (0.64 µm visible), scan 2023-08-09 02:10:20 to 02:19:51 UTC (16:10 to 16:19 HST on 8 August), from the NOAA Open Data Dissemination archive; crop of Maui rendered by the project.",
+      "url": "https://noaa-goes18.s3.amazonaws.com/ABI-L2-CMIPF/2023/221/02/OR_ABI-L2-CMIPF-M6C02_G18_s20232210210206_e20232210219514_c20232210219571.nc",
+      "note": "Scan times from the file name and metadata. The crop is contrast-stretched (reflectance, gamma 0.5, 3x upscale): not unaltered NOAA data, and no NOAA endorsement is implied. A single visible band cannot separate thin smoke from cloud or sun glint."
     }
   ]
 }

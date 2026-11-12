@@ -31,6 +31,14 @@ export type MediaAttachment = {
  *  default for the item's kind; 'none' → it is zoned but lights nothing. */
 export type BoardState = 'none' | 'watch' | 'signal' | 'impact';
 
+/** The links of the warning chain (vocabulary.json `chain.links`): the
+ *  forecast reaching the desk, then each public channel out of it. */
+export type ChainLink = 'forecast' | 'siren' | 'phone' | 'broadcast' | 'social';
+/** used: the record shows the link carrying a warning · cut: the channel
+ *  failed · unused: the record says it was not used · pending: being drafted. */
+export type ChainState = 'used' | 'cut' | 'unused' | 'pending';
+export type ChainEntry = { link: ChainLink; state: ChainState; at?: string; zones?: string[] };
+
 export type InfoItem = {
   id: string;
   kind: 'forecast' | 'gauge' | 'message' | 'media' | 'field_report';
@@ -40,6 +48,18 @@ export type InfoItem = {
   zones?: string[];
   board_state?: BoardState;
   media?: MediaAttachment;
+  /* Presentational restatements of the item's own text — each is gated by
+     the build so it can say nothing the text does not (README, "Pictograms,
+     the warning chain and the board marks"). */
+  /** Slip pictogram (vocabulary.json `icons`). */
+  icon?: string;
+  /** Warning-chain links this item shows used / cut / unused / pending. */
+  chain?: ChainEntry[];
+  /** The record first places the hazard in this item's one zone: the HH:MM
+   *  the text states, or true for "by this decision point". */
+  origin?: true | string;
+  /** A wind direction the text states ("east winds"). */
+  wind?: { from: string };
 };
 
 export type WarningScope = 'none' | 'targeted' | 'province';
@@ -85,6 +105,8 @@ export type Scenario = {
   hazard: string;
   clock: { timezone: string; start: string; end: string };
   record_caveat: string;
+  /** Short names for the warning-chain diagram's nodes and zones. */
+  warning_chain?: { labels?: Partial<Record<'desk' | ChainLink, string>>; zones?: Record<string, string> };
   /** One figure on the briefing — only what existed before the clock starts. */
   briefing_media?: MediaAttachment;
   timesteps: Timestep[];

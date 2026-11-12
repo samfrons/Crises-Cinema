@@ -162,6 +162,53 @@ cited text itself says the zone is burning / flooding, and `"none"` where a
 zoned item is not a report of the hazard (a downed pole is not a fire). This is
 the interpretive layer, like `zones`; it never changes what an item says.
 
+## Pictograms, the warning chain and the board marks
+
+Presentational fields, all optional. They may only **restate** what the item's
+own cited text says, never add to it; the build checks every one, and where a
+field carries a time or a direction it checks that the text states it in so
+many words. The vocabulary is `src/app/control-room/vocabulary.json`, shared
+by the UI and the validator.
+
+```jsonc
+// on an info item
+"icon": "wea",            // slip pictogram, one of vocabulary.json `icons`:
+                          //   siren wea downed-line roadblock shelter aircraft
+                          //   boat dam river-gauge rain flood wind fire
+                          //   contained hydrant committee press social satellite
+                          //   (no natural icon → omit; the kind glyph stands alone)
+"chain": [{               // warning-chain links this item shows
+  "link": "phone",        //   forecast | siren | phone | broadcast | social
+  "state": "cut",         //   used | cut | unused | pending  (forecast: used only)
+  "at": "17:43",          //   optional; must appear verbatim in the item's text
+  "zones": ["…"]          //   optional; a subset of the item's own zones
+}],                       //   (default: the item's zones, or all zones)
+"origin": "06:34",        // the record first places the hazard in this item's
+                          //   ONE zone: an HH:MM the text states, or true
+                          //   ("by this decision point"). One per zone.
+"wind": { "from": "E" }   // compass point; the text must say "east winds"
+
+// at scenario level: short names for the chain diagram
+"warning_chain": {
+  "labels": { "forecast": "NWS Honolulu", "desk": "Maui EOC", "phone": "WEA", … },
+                          // forecast/desk ≤ 18 chars; siren/phone/broadcast/social ≤ 11
+  "zones": { "<at_risk zone id>": "Front St" }   // ≤ 14 chars
+}
+```
+
+The build **fails** on an icon, link, state or label key outside the
+vocabulary; an `at` or `origin` time the text does not state; chain `zones`
+outside the item's zones; a cut/unused/pending forecast link; an origin on an
+item with other than one zone, a second origin in a zone, or an origin on a
+`board_state: "none"` item; a `wind` direction the text does not state as
+"<direction> wind(s)"; an over-long label. Each gate has a fault-injection
+case in `tests/scenarios-contract.test.mjs`.
+
+The chain lights only from items the player has already been shown, the same
+discipline as the board. A link the record has not mentioned stays a faint
+hairline, meaning "not on the record yet", never "broken". Severed is drawn
+only where a cited item says the channel was cut or not used.
+
 ## Player telemetry (prototype: localStorage; later: backend)
 
 `src/app/control-room/telemetry.ts` logs anonymously — no PII, no identifiers

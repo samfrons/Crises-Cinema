@@ -27,6 +27,8 @@ export type HazardVocab = {
   /** What the at-risk areas are called in the debrief. */
   zoneNoun: string;
   desk: string;
+  /** The board's origin mark, in the legend: where the record first places … */
+  originNoun: string;
 };
 
 const KIND_LABEL: Record<Kind, string> = {
@@ -42,10 +44,12 @@ const VOCAB: Record<HazardFamily, HazardVocab> = {
     family: 'water',
     states: { quiet: 'quiet', watch: 'red warning', signal: 'gauge alert', impact: 'flooding' },
     kindState: { forecast: 'watch', gauge: 'signal', field_report: 'impact' },
-    kindLabel: KIND_LABEL,
+    // River gauges and the one satellite pass share the instrument kind.
+    kindLabel: { ...KIND_LABEL, gauge: 'Gauge · sensor' },
     feeds: 'forecasts, gauge readings, messages',
     zoneNoun: 'basins',
     desk: 'civil-protection desk',
+    originNoun: 'the flooding',
   },
   fire: {
     family: 'fire',
@@ -57,6 +61,7 @@ const VOCAB: Record<HazardFamily, HazardVocab> = {
     feeds: 'forecasts, fire reports, satellite passes, messages',
     zoneNoun: 'zones',
     desk: 'emergency-management desk',
+    originNoun: 'the fire',
   },
 };
 
@@ -72,3 +77,13 @@ export function itemState(info: InfoItem, vocab: HazardVocab): Exclude<ZoneState
   if (info.board_state === 'none') return null;
   return info.board_state ?? vocab.kindState[info.kind] ?? null;
 }
+
+/** A compass point as words, for the board's wind mark ("east winds"). The
+ *  build only lets an item carry `wind` when its text says this direction. */
+export const COMPASS_WORD: Record<string, string> = {
+  N: 'north', NE: 'north-east', E: 'east', SE: 'south-east', S: 'south', SW: 'south-west', W: 'west', NW: 'north-west',
+};
+/** Degrees the wind blows TOWARDS, clockwise from north (an east wind blows west). */
+export const COMPASS_TOWARD: Record<string, number> = {
+  N: 180, NE: 225, E: 270, SE: 315, S: 0, SW: 45, W: 90, NW: 135,
+};

@@ -119,6 +119,163 @@ export function FireGlyph({ size = 20, className }: P) {
   );
 }
 
+/* ── Slip pictograms ──────────────────────────────────────────────────────
+   One word per thing a cited slip talks about (vocabulary.json `icons`; the
+   build refuses any other word). Same 24-unit grid, 1.6 stroke and round
+   joins as the kind glyphs, so a slip's two marks read as one hand. Each is
+   a restatement of the slip's own text, never information of its own: the
+   slip is always the text, the pictogram only helps the eye find it. */
+
+const PICTOGRAMS: Record<string, JSX.Element> = {
+  siren: (
+    <>
+      <path d="M7 17v-4.5a5 5 0 0 1 10 0V17" />
+      <path d="M5 17h14v3H5z" />
+      <path d="M12 2.5v2M4.6 5.1l1.4 1.4M19.4 5.1L18 6.5M2.5 11.5h2M19.5 11.5h2" />
+    </>
+  ),
+  wea: (
+    <>
+      <rect x="8" y="3" width="8" height="18" rx="1.4" />
+      <path d="M10.6 5.6h2.8M12 9.5v4M12 16.4v.1" />
+      <path d="M5.2 8.6a4.6 4.6 0 0 0 0 6.8M18.8 8.6a4.6 4.6 0 0 1 0 6.8" />
+    </>
+  ),
+  'downed-line': (
+    <>
+      <path d="M5 21L10.6 3.5M3 21h6" />
+      <path d="M7.6 7.4l8.8 2.4" />
+      <path d="M16.4 9.8c1.5 2.4 2 4.8 1.6 7.4" />
+      <path d="M18 17.2l-1.6 1.8h2.6l-1.6 2" />
+    </>
+  ),
+  roadblock: (
+    <>
+      <path d="M3 8h18v6H3z" />
+      <path d="M7.5 8l-3 6M12.5 8l-3 6M17.5 8l-3 6" />
+      <path d="M6 14v6M18 14v6M4.5 20h3M16.5 20h3" />
+    </>
+  ),
+  shelter: (
+    <>
+      <path d="M3 11.5L12 4l9 7.5" />
+      <path d="M5.5 9.6V20h13V9.6" />
+      <path d="M10 20v-5.5h4V20" />
+    </>
+  ),
+  aircraft: (
+    <>
+      <path d="M4.5 6h15M12 6v3" />
+      <path d="M5 12.5C5 10.6 7 9 10 9h3c2.4 0 4 1.6 4 3.5S15.4 16 13 16h-3c-3 0-5-1.6-5-3.5z" />
+      <path d="M17 12h4.5M21.5 10v4" />
+      <path d="M9.5 16v3M14 16v3M7.5 19h8.5" />
+    </>
+  ),
+  boat: (
+    <>
+      <path d="M3 14.5h18l-2.6 4H5.6z" />
+      <path d="M7 14.5v-4h6.5l2.5 4" />
+      <path d="M10 10.5V6.5h2.5" />
+      <path d="M3 21.5c1.5-1 3-1 4.5 0s3 1 4.5 0 3-1 4.5 0 3 1 4.5 0" />
+    </>
+  ),
+  dam: (
+    <>
+      <path d="M9 4h6l2 16H7z" />
+      <path d="M8.2 10.5h7.6M7.6 15.5h8.8" />
+      <path d="M3 20c1.3-1.2 2.7-1.2 4 0M17 20c1.3-1.2 2.7-1.2 4 0" />
+    </>
+  ),
+  'river-gauge': (
+    <>
+      <path d="M10 3v15" />
+      <path d="M10 4.5h3.5M10 7.5h2.2M10 10.5h3.5M10 13.5h2.2" />
+      <path d="M3 18c1.5-1.2 3-1.2 4.5 0s3 1.2 4.5 0 3-1.2 4.5 0 3 1.2 4.5 0" />
+      <path d="M3 21.5c1.5-1.2 3-1.2 4.5 0s3 1.2 4.5 0 3-1.2 4.5 0 3 1.2 4.5 0" />
+    </>
+  ),
+  rain: (
+    <>
+      <path d="M6.5 13.5a4 4 0 1 1 .6-7.96A5.5 5.5 0 0 1 17.5 7.5a3.5 3.5 0 0 1 .5 6" />
+      <path d="M8 16v4.5M12 15.5v6M16 16v4.5" />
+    </>
+  ),
+  flood: (
+    <>
+      <path d="M5 12V7.5L10 4l5 3.5V12" />
+      <path d="M3 14c2-2 4-2 6 0s4 2 6 0 4-2 6 0" />
+      <path d="M3 19c2-2 4-2 6 0s4 2 6 0 4-2 6 0" />
+    </>
+  ),
+  wind: (
+    <>
+      <path d="M3 8.5h10.5A2.5 2.5 0 1 0 11 6" />
+      <path d="M3 12.5h15.5a2.5 2.5 0 1 1-2.5 2.5" />
+      <path d="M3 16.5h7" />
+    </>
+  ),
+  fire: (
+    <>
+      <path d="M12 21c-3.6 0-6-2.4-6-5.6 0-3.4 2.6-5.2 3.4-8.4 1.8 1.4 2.4 3.2 2.2 4.8 1.2-.8 2-2.6 1.8-4.6C16 9 18 11.8 18 15.4 18 18.6 15.6 21 12 21z" />
+      <path d="M12 21c-1.5 0-2.6-1-2.6-2.5 0-1.6 1.4-2.4 1.8-3.8 1.6 1 2.8 2.2 2.8 3.8 0 1.5-.9 2.5-2 2.5z" />
+    </>
+  ),
+  /* A small flame held inside a closed line: the perimeter the slip says
+     is held. */
+  contained: (
+    <>
+      <circle cx="12" cy="12" r="9" strokeDasharray="3.2 2.2" />
+      <path d="M12 16.5c-1.9 0-3.1-1.2-3.1-2.9 0-1.8 1.3-2.7 1.8-4.4 1 .8 1.3 1.7 1.2 2.6.6-.4 1-1.4.9-2.5 1.5 1.1 2.3 2.6 2.3 4.3 0 1.7-1.2 2.9-3.1 2.9z" />
+    </>
+  ),
+  hydrant: (
+    <>
+      <path d="M9 21V9.5h6V21M7.5 21h9" />
+      <path d="M8 9.5h8M10 9.5V8a2 2 0 0 1 4 0v1.5" />
+      <path d="M9 13H6.5v2.5H9M15 13h2.5v2.5H15" />
+    </>
+  ),
+  committee: (
+    <>
+      <circle cx="6.5" cy="8" r="1.9" />
+      <circle cx="12" cy="6.2" r="1.9" />
+      <circle cx="17.5" cy="8" r="1.9" />
+      <path d="M4 13.4a2.5 2.5 0 0 1 5 0M9.5 11.6a2.5 2.5 0 0 1 5 0M15 13.4a2.5 2.5 0 0 1 5 0" />
+      <path d="M3 15.5h18M5.5 15.5V20M18.5 15.5V20" />
+    </>
+  ),
+  press: (
+    <>
+      <circle cx="12" cy="7.5" r="1.6" />
+      <path d="M12 9.1V21M8.6 21L12 10l3.4 11M9.6 17h4.8" />
+      <path d="M8.2 4.6a4.8 4.8 0 0 0 0 5.8M15.8 4.6a4.8 4.8 0 0 1 0 5.8" />
+      <path d="M5.6 2.6a8.2 8.2 0 0 0 0 9.8M18.4 2.6a8.2 8.2 0 0 1 0 9.8" />
+    </>
+  ),
+  social: (
+    <>
+      <path d="M3.5 4.5h11v8H9l-3 3v-3H3.5z" />
+      <path d="M17 9h3.5v8.5h-2v3l-3-3H11v-2.5" />
+    </>
+  ),
+  satellite: (
+    <g transform="rotate(-40 12 11)">
+      <rect x="9.5" y="8.5" width="5" height="5.5" rx=".6" />
+      <path d="M2.5 9.5h5v3.5h-5zM16.5 9.5h5v3.5h-5zM7.5 11.2h2M14.5 11.2h2" />
+      <path d="M9.6 17a2.6 2.6 0 0 0 4.8 0M7.4 19.4a5.4 5.4 0 0 0 9.2 0" />
+    </g>
+  ),
+};
+
+/** True when `name` has a drawing; the slip falls back to the kind glyph alone. */
+export const hasPictogram = (name?: string): name is string => !!name && name in PICTOGRAMS;
+
+export function Pictogram({ name, size = 18, className }: P & { name: string }) {
+  const body = PICTOGRAMS[name];
+  if (!body) return null;
+  return <svg {...base(size)} className={className}>{body}</svg>;
+}
+
 export function HazardGlyph({ hazard, size, className }: P & { hazard: string }) {
   const h = hazard.toLowerCase();
   if (/fire|wildland/.test(h)) return <FireGlyph size={size} className={className} />;
