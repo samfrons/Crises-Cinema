@@ -1263,10 +1263,6 @@
 .cr-early-tag { font-family: var(--data); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 6px; }
 .cr-early-body { font-size: 14.5px; line-height: 1.6; margin: 0; }
 .cr-early-body + .cr-early-body { margin-top: 8px; color: var(--ink-soft); }
-.cr-timing-early-arrow { fill: none; stroke: var(--ink-soft); stroke-width: 1.4; stroke-dasharray: 4 3; }
-.cr-timing-early-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.1em; fill: var(--ink-soft); }
-.cr-timing.is-compact .cr-timing-early-label { font-size: 11.5px; letter-spacing: 0.04em; }
-.cr-timing-mark.cr-timing-early:hover .cr-timing-early-arrow { stroke: var(--ember); }
 .cr-score-caveat { font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); max-width: 66ch; margin: 0; }
 
 .cr-meter {
@@ -1282,77 +1278,166 @@
 .cr-meter i { flex: 1; height: 100%; background: var(--paper-deep); }
 .cr-meter i.is-diverged { background: var(--ember); }
 
-/* The timing chart, on paper */
-.cr-timing { margin: 0 0 var(--s3); max-width: 760px; }
-.cr-timing-key {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 18px;
-  margin: 0 0 6px;
-  font-family: var(--data);
-  font-size: 10.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+/* ── The reckoning ─────────────────────────────────────────────────────────
+   The debrief's centerpiece: three lanes on the day's clock, measured to the
+   impact line. Shape carries the lane (disc / square / hollow diamond on a
+   dashed rail); ember marks only the impact, a status. Bars grow out of the
+   impact line, staggered; reduced motion sets them down struck twice. */
+.cr-rk-dek { font-size: 15.5px; line-height: 1.6; max-width: 66ch; margin: 0 0 var(--s4); }
+.cr-rk-glyph { display: inline-block; vertical-align: -1px; overflow: visible; flex: none; }
+.cr-rk-glyph.is-you circle { fill: var(--ink); }
+.cr-rk-glyph.is-record rect { fill: var(--ink-soft); }
+.cr-rk-glyph.is-bench path { fill: none; stroke: var(--ink); stroke-width: 1.4; }
+
+.cr-rk-figs { display: grid; grid-template-columns: 1fr; gap: var(--s3) 28px; margin: 0 0 var(--s3); }
+@media (min-width: 640px) { .cr-rk-figs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.cr-rk-fig { border-top: 2px solid var(--ink); padding: 10px 0 0; position: relative; animation: cr-arrive var(--t-slow) var(--ease) both; }
+.cr-rk-fig.is-record { animation-delay: 90ms; }
+.cr-rk-fig.is-bench { animation-delay: 180ms; border-top-style: dashed; }
+.cr-rk-fig dt {
+  display: flex; align-items: center; gap: 7px;
+  font-family: var(--data); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft);
+  margin-bottom: 6px;
 }
-.cr-timing-key span { display: inline-flex; align-items: center; gap: 6px; }
-.cr-timing-key svg { width: 13px; height: 12px; overflow: visible; }
-.cr-timing-plot { position: relative; }
-.cr-timing-plot > svg { display: block; width: 100%; height: auto; }
-.cr-timing-impact { fill: rgba(184, 50, 26, 0.12); stroke: var(--ember); stroke-width: 1; }
-.cr-timing-impact-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.14em; fill: var(--ember); }
-.cr-timing-axis { stroke: var(--ink); stroke-width: 1.2; }
-.cr-timing-tick { stroke: var(--ink-soft); stroke-width: 1; }
-.cr-timing-hour { font-family: var(--data); font-size: 10px; fill: var(--ink-soft); font-variant-numeric: tabular-nums; }
-.cr-timing-lane { font-family: var(--data); font-size: 10px; letter-spacing: 0.2em; fill: var(--ink-soft); }
-.cr-timing-lanerail { stroke: var(--rule); stroke-width: 1; }
-.cr-timing-ring { fill: var(--cr-sheet); }
-.cr-timing-dot { fill: var(--paper); stroke: var(--ink); stroke-width: 1.6; }
-.cr-timing-dot.is-alert { fill: var(--ink); }
-.cr-timing-dot.is-they { fill: var(--ink-soft); stroke: var(--ink-soft); }
-.cr-timing-hit { fill: transparent; cursor: crosshair; }
-.cr-timing-mark:hover .cr-timing-dot { stroke: var(--ember); stroke-width: 2.2; }
-.cr-timing-flag line { stroke: var(--ink); stroke-width: 1; }
-.cr-timing-flag text { font-family: var(--data); font-size: 10px; letter-spacing: 0.1em; fill: var(--ink); }
-.cr-timing-flag.is-they line { stroke: var(--ink-soft); stroke-dasharray: 3 3; }
-.cr-timing-flag.is-they text { fill: var(--ink-soft); }
-.cr-timing-flag-muted { font-family: var(--data); font-size: 10px; letter-spacing: 0.1em; fill: var(--ember); }
-.cr-timing.is-compact .cr-timing-hour,
-.cr-timing.is-compact .cr-timing-lane,
-.cr-timing.is-compact .cr-timing-impact-label,
-.cr-timing.is-compact .cr-timing-flag text,
-.cr-timing.is-compact .cr-timing-flag-muted { font-size: 11.5px; letter-spacing: 0.06em; }
-/* Hover read-out: a slip of ink above the mark. */
-.cr-timing-tip {
-  position: absolute;
-  z-index: 2;
-  transform: translate(-12px, calc(-100% - 14px));
-  display: grid;
-  gap: 2px;
-  width: max-content;
-  max-width: min(280px, 70vw);
-  padding: 8px 10px 9px;
-  background: var(--ink);
-  color: var(--paper);
-  font-family: var(--data);
-  font-size: 11px;
-  line-height: 1.4;
-  pointer-events: none;
-  box-shadow: 3px 3px 0 rgba(25, 20, 16, 0.18);
+.cr-rk-fig dd { margin: 0; }
+.cr-rk-big { font-family: var(--poster); font-size: clamp(38px, 5.6vw, 56px); white-space: nowrap; line-height: 0.92; text-transform: uppercase; }
+.cr-rk-sub { font-family: var(--data); font-size: 11.5px; line-height: 1.5; color: var(--ink-soft); margin-top: 6px !important; }
+/* The success inversion: where the record met the benchmark, its tile is
+   printed in reverse and stamped, as an exhibitor's "held over" sticker. */
+.cr-rk.is-met .cr-rk-fig.is-record { background: var(--ink); color: var(--paper); padding: 10px 12px 12px; }
+.cr-rk.is-met .cr-rk-fig.is-record dt,
+.cr-rk.is-met .cr-rk-fig.is-record .cr-rk-sub { color: var(--paper-deep); }
+.cr-rk.is-met .cr-rk-fig.is-record .cr-rk-glyph rect { fill: var(--paper); }
+.cr-rk-stamp {
+  display: inline-block; margin-top: 10px !important; padding: 4px 9px 3px;
+  border: 2px solid currentColor;
+  font-family: var(--data); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  transform: rotate(-3deg);
+  animation: cr-stamp-down var(--t-mid) var(--ease-press) 520ms both;
 }
-.cr-timing-tip.is-left { transform: translate(calc(-100% + 12px), calc(-100% - 14px)); }
-.cr-timing-tip-head { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(241, 232, 213, 0.75); }
-.cr-timing-tip-text { text-transform: uppercase; letter-spacing: 0.04em; }
-.cr-timing-tip-note { color: rgba(241, 232, 213, 0.75); text-transform: capitalize; }
-.cr-timing-caption {
-  font-family: var(--data);
-  font-size: 11.5px;
-  line-height: 1.6;
-  color: var(--ink-soft);
-  margin-top: 8px;
-  max-width: 62ch;
+.cr-rk-verdict { font-size: 16px; line-height: 1.6; max-width: 66ch; margin: 0 0 var(--s4); }
+
+.cr-rk-lanes { margin: 0 0 var(--s4); max-width: 760px; }
+.cr-rk-lanes > svg { display: block; width: 100%; height: auto; overflow: visible; }
+.cr-rk-window { fill: color-mix(in srgb, var(--ember) 11%, transparent); }
+.cr-rk-impact { stroke: var(--ember); stroke-width: 1.6; }
+.cr-rk-impact-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.14em; fill: var(--ember); }
+.cr-rk-guide { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 2 4; }
+.cr-rk-lane-name { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.18em; fill: var(--ink-soft); }
+.cr-rk-rail { stroke: var(--rule); stroke-width: 1; }
+.cr-rk-lane.is-bench .cr-rk-rail { stroke: var(--ink-soft); stroke-dasharray: 5 4; }
+.cr-rk-step { fill: var(--paper); stroke: var(--ink-soft); stroke-width: 1; }
+.cr-rk-bar { stroke: none; transform-box: fill-box; transform-origin: right center; animation: cr-rk-grow var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 120ms + 220ms); }
+.cr-rk-bar.is-after { transform-origin: left center; }
+.cr-rk-lane.is-you .cr-rk-bar { fill: var(--ink); }
+.cr-rk-lane.is-record .cr-rk-bar { fill: var(--ink-soft); }
+.cr-rk-lane.is-bench .cr-rk-bar { stroke: var(--ink); stroke-width: 1; }
+.cr-rk-hatch-line { stroke: var(--ink); stroke-width: 1.3; }
+.cr-rk-bar-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.08em; fill: var(--ink); font-variant-numeric: tabular-nums; }
+.cr-rk-mark { animation: cr-fade var(--t-mid) var(--ease) both; animation-delay: calc(var(--i, 0) * 120ms + 440ms); }
+.cr-rk-ring { fill: var(--paper); }
+.cr-rk-lane.is-you .cr-rk-dot { fill: var(--ink); }
+.cr-rk-lane.is-record .cr-rk-dot { fill: var(--ink-soft); }
+.cr-rk-lane.is-bench .cr-rk-dot { fill: var(--paper); stroke: var(--ink); stroke-width: 1.8; }
+.cr-rk-mark-time { font-family: var(--data); font-size: 10.5px; fill: var(--ink); font-variant-numeric: tabular-nums; }
+.cr-rk-never { font-family: var(--data); font-size: 10px; letter-spacing: 0.12em; fill: var(--ink); }
+.cr-rk-early path { fill: none; stroke: var(--ink-soft); stroke-width: 1.4; stroke-dasharray: 4 3; }
+.cr-rk-early text { font-family: var(--data); font-size: 10px; letter-spacing: 0.08em; fill: var(--ink-soft); }
+.cr-rk-axis { stroke: var(--ink); stroke-width: 1.2; }
+.cr-rk-tick { stroke: var(--ink-soft); stroke-width: 1; }
+.cr-rk-hour { font-family: var(--data); font-size: 10px; fill: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.cr-rk-lanes.is-compact .cr-rk-impact-label, .cr-rk-lanes.is-compact .cr-rk-lane-name,
+.cr-rk-lanes.is-compact .cr-rk-bar-label, .cr-rk-lanes.is-compact .cr-rk-mark-time,
+.cr-rk-lanes.is-compact .cr-rk-never, .cr-rk-lanes.is-compact .cr-rk-early text,
+.cr-rk-lanes.is-compact .cr-rk-hour { font-size: 11.5px; letter-spacing: 0.04em; }
+.cr-rk-caption { font-family: var(--data); font-size: 11.5px; line-height: 1.6; color: var(--ink-soft); margin-top: 8px; max-width: 62ch; }
+@keyframes cr-rk-grow { from { transform: scaleX(0); } to { transform: none; } }
+
+.cr-rk-tag {
+  font-family: var(--data); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-soft);
+  border-top: 1px solid var(--ink); padding-top: 8px; margin: 0 0 10px;
 }
-.cr-timing-caption em { font-style: normal; color: var(--ink); }
+.cr-rk-note { font-size: 13.5px; line-height: 1.55; color: var(--ink-soft); max-width: 66ch; margin: 10px 0 0; }
+.cr-rk-note a { color: var(--ink); text-decoration-color: var(--ember); }
+.cr-rk-pair { display: grid; grid-template-columns: 1fr; gap: var(--s4) 36px; margin: 0 0 var(--s5); }
+@media (min-width: 860px) { .cr-rk-pair { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start; } }
+.cr-rk-bench-lede { font-size: 14.5px; line-height: 1.55; margin: 0 0 var(--s3); }
+.cr-rk-calls { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s3); }
+.cr-rk-calls li { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; align-items: first baseline; }
+.cr-rk-call-time { font-family: var(--poster); font-size: 30px; line-height: 1; }
+.cr-rk-call-basis { font-size: 15px; line-height: 1.55; margin: 0; }
+.cr-rk-call-meta { font-family: var(--data); font-size: 11px; line-height: 1.5; color: var(--ink-soft); margin: 4px 0 0; overflow-wrap: anywhere; }
+
+.cr-rk-context { border: 1px solid var(--ink); background: var(--paper-lit); padding: 14px 16px 16px; }
+.cr-rk-context .cr-rk-tag { border-top: 0; padding-top: 0; color: var(--ink); }
+.cr-rk-context-lede { font-size: 13.5px; line-height: 1.55; color: var(--ink-soft); margin: 0 0 12px; }
+.cr-rk-context ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.cr-rk-context li + li { border-top: 1px solid var(--rule); padding-top: 12px; }
+.cr-rk-context-about { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; margin: 0 0 4px; }
+.cr-rk-context blockquote { margin: 0; font-size: 15px; line-height: 1.5; }
+.cr-rk-context q { quotes: '“' '”'; }
+.cr-rk-context-caveat { font-size: 13px; line-height: 1.5; color: var(--ink-soft); margin: 6px 0 0; font-style: italic; }
+.cr-rk-context-cred { font-family: var(--data); font-size: 10.5px; line-height: 1.5; color: var(--ink-faint); margin: 6px 0 0; }
+
+.cr-rk-zones { margin: 0 0 var(--s5); max-width: 760px; }
+.cr-rk-zones table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.cr-rk-zones th, .cr-rk-zones td { text-align: left; padding: 8px 6px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: baseline; }
+.cr-rk-zones thead th { font-family: var(--data); font-weight: 400; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); border-bottom: 1px solid var(--ink); }
+.cr-rk-zones thead th:first-child { width: 40%; }
+.cr-rk-zones tbody th { font-weight: 400; font-size: 14px; line-height: 1.35; overflow-wrap: anywhere; }
+.cr-rk-z-time { font-family: var(--data); font-size: 14px; font-variant-numeric: tabular-nums; }
+.cr-rk-z-none { font-family: var(--data); font-size: 11px; color: var(--ink-soft); }
+@media (max-width: 479px) { .cr-rk-zones thead th:first-child { width: 34%; } .cr-rk-zones thead th { letter-spacing: 0.04em; } }
+
+.cr-rk-ladder { margin: 0 0 var(--s4); max-width: 760px; }
+.cr-rk-rungs { list-style: none; margin: 0; padding: 0; }
+.cr-rk-rung { display: grid; grid-template-columns: 58px repeat(3, minmax(0, 1fr)); gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.cr-rk-rung-head { margin-top: var(--s3); padding: 0 0 6px; border-bottom: 1px solid var(--ink); font-family: var(--data); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+.cr-rk-rung-time { font-family: var(--data); font-size: 14px; font-variant-numeric: tabular-nums; }
+.cr-rk-pair-cell { display: grid; gap: 3px; min-width: 0; }
+.cr-rk-pair-row { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.cr-rk-meter { display: inline-flex; gap: 2px; min-width: 0; }
+.cr-rk-meter i { width: 14px; height: 8px; border: 1px solid var(--ink); flex: 0 1 auto; }
+.cr-rk-meter i.on { background: var(--ink); }
+.cr-rk-pair-row.is-record .cr-rk-meter i { border-color: var(--ink-soft); }
+.cr-rk-pair-row.is-record .cr-rk-meter i.on { background: var(--ink-soft); }
+/* Same call: the pair fuses into one double-height bar. */
+.cr-rk-rung.is-same .cr-rk-meter i { height: 19px; }
+.cr-rk-fused { font-family: var(--data); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+.cr-rk-rung.is-apart .cr-rk-rung-time { font-weight: 700; }
+@media (max-width: 479px) {
+  .cr-rk-rung { grid-template-columns: 46px repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .cr-rk-meter i { width: 9px; }
+  .cr-rk-pair-row .cr-rk-glyph { display: none; }
+  .cr-rk-rung-time { font-size: 12.5px; }
+}
+.cr-rk-key { font-family: var(--data); font-size: 10.5px; line-height: 1.5; color: var(--ink-soft); margin: 8px 0 0; }
+.cr-rk-silent { font-size: 15px; line-height: 1.6; max-width: 66ch; margin: 0; padding-left: 14px; border-left: 3px solid var(--ink); }
+
+/* Score transparency: the rules in words, behind a hard-ruled fold. */
+.cr-howto { border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); margin: 0 0 var(--s3); max-width: 70ch; }
+.cr-howto summary {
+  display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; list-style: none;
+  font-family: var(--data); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+}
+.cr-howto summary::-webkit-details-marker { display: none; }
+.cr-howto summary::before { content: '+'; display: inline-block; width: 1ch; transition: transform var(--t-fast) var(--ease); }
+.cr-howto[open] summary::before { content: '−'; }
+.cr-howto summary:hover { color: var(--ember); }
+.cr-howto summary:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+.cr-howto dl { margin: 0 0 var(--s3); }
+.cr-howto dt { font-family: var(--data); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; margin-top: 12px; }
+.cr-howto dd { margin: 4px 0 0; font-size: 14.5px; line-height: 1.55; color: var(--ink-soft); }
+.cr-howto-best { font-size: 14.5px; line-height: 1.55; margin: 0 0 var(--s3); padding-top: 12px; border-top: 1px solid var(--rule); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cr-rk-fig, .cr-rk-bar, .cr-rk-mark, .cr-rk-stamp { animation: none !important; }
+  /* Set down at once, struck twice out of register — the Control Room's
+     still equivalent of a mark arriving. */
+  .cr-rk-bar { filter: drop-shadow(3px 3px 0 color-mix(in srgb, var(--ink) 45%, transparent)); }
+  .cr-rk-stamp { box-shadow: 3px 3px 0 color-mix(in srgb, currentColor 45%, transparent); }
+  .cr-howto summary::before { transition: none; }
+}
 
 /* The inquiry */
 .cr-findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; max-width: 70ch; }

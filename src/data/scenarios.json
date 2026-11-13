@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-12T23:42:34.664Z",
+  "generated": "2026-11-13T12:04:38.424Z",
   "playable": [
     {
       "id": "katrina-2005",
@@ -1164,7 +1164,62 @@
             "label": "Central Business District and the Superdome"
           }
         ],
-        "historical_first_public_alert": "09:30"
+        "historical_first_public_alert": "09:30",
+        "benchmark": [
+          {
+            "time": "07:00",
+            "from": "t1-i1",
+            "option": "t1-a1",
+            "zones": [
+              "lower-ninth",
+              "new-orleans-east",
+              "lakeview-gentilly",
+              "algiers",
+              "cbd-superdome"
+            ],
+            "basis": "NHC Special Advisory 22, at 07:00, puts a Hurricane Warning over the coast 'including the city of New Orleans and Lake Pontchartrain' and says 'preparations to protect life and property should be rushed to completion'.",
+            "citation": {
+              "sourceId": "nhc-adv",
+              "detail": "Special Advisory 22, 7 AM CDT Sun 28 Aug 2005"
+            }
+          }
+        ],
+        "minutes_matter": [
+          {
+            "quote": "Disaster-related mortality is nearly six times lower in countries with more comprehensive Multi-Hazard Early Warning System capabilities compared to countries with limited capabilities.",
+            "about": "Every country that reports on its warning systems",
+            "caveat": "A cross-country association, not a measured effect: richer countries tend to have both more warning capability and lower mortality.",
+            "publisher": "World Meteorological Organization (WMO) with UNDRR",
+            "license": "unconfirmed: page footer reads © WMO; quoted briefly",
+            "as_of": "2026-11-13",
+            "citation": {
+              "sourceId": "wmo-mhews-2025",
+              "detail": "Press release of 12 November 2025, 'Key Findings', first item"
+            }
+          },
+          {
+            "quote": "Fourteen minutes elapsed between the initial request and the time the warnings were upgraded to orders and exact zones were specified at 07:46.",
+            "about": "The Camp Fire, Paradise, California",
+            "publisher": "National Institute of Standards and Technology (NIST)",
+            "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+            "as_of": "2026-11-13",
+            "citation": {
+              "sourceId": "nist-tn-2252",
+              "detail": "Key findings, TF-N 10"
+            }
+          },
+          {
+            "quote": "The fire became the most deadly and destructive fire in California history, resulting in 85 fatalities and more than 18 000 destroyed structures.",
+            "about": "The Camp Fire, Butte County, California",
+            "publisher": "National Institute of Standards and Technology (NIST)",
+            "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+            "as_of": "2026-11-13",
+            "citation": {
+              "sourceId": "nist-tn-2252",
+              "detail": "Abstract"
+            }
+          }
+        ]
       },
       "alert_predates_clock": {
         "date": "2005-08-27",
@@ -1237,6 +1292,18 @@
           "label": "Bahamonde, M. (FEMA). Photograph, New Orleans, Louisiana, 28 August 2005: residents lining up to enter the Superdome, opened as a shelter in advance of Hurricane Katrina. FEMA Photo Library (obsolete since 2019), as held on Wikimedia Commons.",
           "url": "https://commons.wikimedia.org/wiki/File:People_lining_up_for_shelter_in_Superdome_in_New_Orleans.jpg",
           "note": "Used only for the photo and its own caption."
+        },
+        {
+          "id": "wmo-mhews-2025",
+          "label": "World Meteorological Organization, press release: 'Early warning systems reach new heights, but critical gaps jeopardize global progress', 12 November 2025, on the WMO/UNDRR Global Status of Multi-Hazard Early Warning Systems 2025.",
+          "url": "https://wmo.int/news/media-centre/early-warning-systems-reach-new-heights-critical-gaps-jeopardize-global-progress",
+          "note": "Context for the debrief only, not a fact of this day. Quoted from the press release, fetched 2026-11-13; the full report was not read. Licence unconfirmed (the page footer reads © WMO)."
+        },
+        {
+          "id": "nist-tn-2252",
+          "label": "Maranghides, A., Link, E., Mell, W., Hawks, S., Brown, C. and Walton, W. D. A Case Study of the Camp Fire — Notification, Evacuation, Traffic, and Temporary Refuge Areas (NETTRA). NIST Technical Note 2252, National Institute of Standards and Technology, July 2023.",
+          "url": "https://doi.org/10.6028/NIST.TN.2252",
+          "note": "Context for the debrief only, not a fact of this day. Quoted from the PDF, fetched 2026-11-13. Licence unconfirmed: the report links NIST's copyright, fair use and licensing statement, which was not opened."
         }
       ]
     },
@@ -2756,7 +2823,58 @@
             "label": "Upcountry: Kula and Olinda"
           }
         ],
-        "historical_first_public_alert": "16:16"
+        "historical_first_public_alert": "16:16",
+        "benchmark": [
+          {
+            "time": "14:55",
+            "from": "t4-i2",
+            "option": "t4-a1",
+            "zones": [
+              "lahaina-lahainaluna"
+            ],
+            "basis": "At 14:55 numerous callers say the fire is flaring up again at the end of the Kuʻialua cul-de-sac, the same area as the morning fire, and 'spreading fast'.",
+            "citation": {
+              "sourceId": "fsri-p1",
+              "detail": "MPD event chronology 14:55:19-14:57:55; Event Chronology Report 14:55"
+            }
+          }
+        ],
+        "minutes_matter": [
+          {
+            "quote": "Disaster-related mortality is nearly six times lower in countries with more comprehensive Multi-Hazard Early Warning System capabilities compared to countries with limited capabilities.",
+            "about": "Every country that reports on its warning systems",
+            "caveat": "A cross-country association, not a measured effect: richer countries tend to have both more warning capability and lower mortality.",
+            "publisher": "World Meteorological Organization (WMO) with UNDRR",
+            "license": "unconfirmed: page footer reads © WMO; quoted briefly",
+            "as_of": "2026-11-13",
+            "citation": {
+              "sourceId": "wmo-mhews-2025",
+              "detail": "Press release of 12 November 2025, 'Key Findings', first item"
+            }
+          },
+          {
+            "quote": "Fourteen minutes elapsed between the initial request and the time the warnings were upgraded to orders and exact zones were specified at 07:46.",
+            "about": "The Camp Fire, Paradise, California",
+            "publisher": "National Institute of Standards and Technology (NIST)",
+            "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+            "as_of": "2026-11-13",
+            "citation": {
+              "sourceId": "nist-tn-2252",
+              "detail": "Key findings, TF-N 10"
+            }
+          },
+          {
+            "quote": "The fire became the most deadly and destructive fire in California history, resulting in 85 fatalities and more than 18 000 destroyed structures.",
+            "about": "The Camp Fire, Butte County, California",
+            "publisher": "National Institute of Standards and Technology (NIST)",
+            "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+            "as_of": "2026-11-13",
+            "citation": {
+              "sourceId": "nist-tn-2252",
+              "detail": "Abstract"
+            }
+          }
+        ]
       },
       "sources": [
         {
@@ -2824,6 +2942,18 @@
           "label": "Code of Federal Regulations, Title 47 (Telecommunication), Part 10 — Wireless Emergency Alerts, § 10.10 Definitions, paragraph (c) 'Wireless Emergency Alerts'. Federal Communications Commission rules, Electronic Code of Federal Regulations (eCFR), current text consulted 12 November 2026.",
           "url": "https://www.ecfr.gov/current/title-47/chapter-I/subchapter-A/part-10/subpart-A/section-10.10",
           "note": "Used only for the definition under 'Terms of the desk'. The FCC's consumer guide to WEA could not be fetched; the rule text is the FCC's own definition."
+        },
+        {
+          "id": "wmo-mhews-2025",
+          "label": "World Meteorological Organization, press release: 'Early warning systems reach new heights, but critical gaps jeopardize global progress', 12 November 2025, on the WMO/UNDRR Global Status of Multi-Hazard Early Warning Systems 2025.",
+          "url": "https://wmo.int/news/media-centre/early-warning-systems-reach-new-heights-critical-gaps-jeopardize-global-progress",
+          "note": "Context for the debrief only, not a fact of this day. Quoted from the press release, fetched 2026-11-13; the full report was not read. Licence unconfirmed (the page footer reads © WMO)."
+        },
+        {
+          "id": "nist-tn-2252",
+          "label": "Maranghides, A., Link, E., Mell, W., Hawks, S., Brown, C. and Walton, W. D. A Case Study of the Camp Fire — Notification, Evacuation, Traffic, and Temporary Refuge Areas (NETTRA). NIST Technical Note 2252, National Institute of Standards and Technology, July 2023.",
+          "url": "https://doi.org/10.6028/NIST.TN.2252",
+          "note": "Context for the debrief only, not a fact of this day. Quoted from the PDF, fetched 2026-11-13. Licence unconfirmed: the report links NIST's copyright, fair use and licensing statement, which was not opened."
         }
       ]
     },
@@ -3517,7 +3647,60 @@
             "label": "Jagatsinghpur coast, named in IMD's storm-surge forecast"
           }
         ],
-        "historical_first_public_alert": "06:30"
+        "historical_first_public_alert": "06:30",
+        "benchmark": [
+          {
+            "time": "06:30",
+            "from": "t1-i2",
+            "option": "t1-a1",
+            "zones": [
+              "ganjam-coast",
+              "puri-khurda",
+              "jagatsinghpur"
+            ],
+            "basis": "IMD's storm-surge forecast of the evening before puts a surge of 3.0 to 3.5 m above the astronomical tide over the low-lying areas of Ganjam, Khurda, Puri and Jagatsinghpur at landfall.",
+            "citation": {
+              "sourceId": "imd-report",
+              "detail": "Table 13, forecast of 11.10.13/1730"
+            }
+          }
+        ],
+        "minutes_matter": [
+          {
+            "quote": "Disaster-related mortality is nearly six times lower in countries with more comprehensive Multi-Hazard Early Warning System capabilities compared to countries with limited capabilities.",
+            "about": "Every country that reports on its warning systems",
+            "caveat": "A cross-country association, not a measured effect: richer countries tend to have both more warning capability and lower mortality.",
+            "publisher": "World Meteorological Organization (WMO) with UNDRR",
+            "license": "unconfirmed: page footer reads © WMO; quoted briefly",
+            "as_of": "2026-11-13",
+            "citation": {
+              "sourceId": "wmo-mhews-2025",
+              "detail": "Press release of 12 November 2025, 'Key Findings', first item"
+            }
+          },
+          {
+            "quote": "Fourteen minutes elapsed between the initial request and the time the warnings were upgraded to orders and exact zones were specified at 07:46.",
+            "about": "The Camp Fire, Paradise, California",
+            "publisher": "National Institute of Standards and Technology (NIST)",
+            "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+            "as_of": "2026-11-13",
+            "citation": {
+              "sourceId": "nist-tn-2252",
+              "detail": "Key findings, TF-N 10"
+            }
+          },
+          {
+            "quote": "The fire became the most deadly and destructive fire in California history, resulting in 85 fatalities and more than 18 000 destroyed structures.",
+            "about": "The Camp Fire, Butte County, California",
+            "publisher": "National Institute of Standards and Technology (NIST)",
+            "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+            "as_of": "2026-11-13",
+            "citation": {
+              "sourceId": "nist-tn-2252",
+              "detail": "Abstract"
+            }
+          }
+        ]
       },
       "alert_predates_clock": {
         "date": "2013-10-08",
@@ -3571,6 +3754,18 @@
           "label": "Saudamini Das, 'Evaluating climate change adaptation through evacuation decisions: a case study of cyclone management in India', Climatic Change 152 (2019), 291-305, doi:10.1007/s10584-018-2292-1.",
           "url": "https://link.springer.com/article/10.1007/s10584-018-2292-1",
           "note": "Peer-reviewed study. Only the abstract (free to read) was fetched; the figures used are those in the abstract."
+        },
+        {
+          "id": "wmo-mhews-2025",
+          "label": "World Meteorological Organization, press release: 'Early warning systems reach new heights, but critical gaps jeopardize global progress', 12 November 2025, on the WMO/UNDRR Global Status of Multi-Hazard Early Warning Systems 2025.",
+          "url": "https://wmo.int/news/media-centre/early-warning-systems-reach-new-heights-critical-gaps-jeopardize-global-progress",
+          "note": "Context for the debrief only, not a fact of this day. Quoted from the press release, fetched 2026-11-13; the full report was not read. Licence unconfirmed (the page footer reads © WMO)."
+        },
+        {
+          "id": "nist-tn-2252",
+          "label": "Maranghides, A., Link, E., Mell, W., Hawks, S., Brown, C. and Walton, W. D. A Case Study of the Camp Fire — Notification, Evacuation, Traffic, and Temporary Refuge Areas (NETTRA). NIST Technical Note 2252, National Institute of Standards and Technology, July 2023.",
+          "url": "https://doi.org/10.6028/NIST.TN.2252",
+          "note": "Context for the debrief only, not a fact of this day. Quoted from the PDF, fetched 2026-11-13. Licence unconfirmed: the report links NIST's copyright, fair use and licensing statement, which was not opened."
         }
       ]
     },
@@ -4540,7 +4735,71 @@
             "label": "Magro basin — Utiel, Requena, downstream of Forata"
           }
         ],
-        "historical_first_public_alert": "20:11"
+        "historical_first_public_alert": "20:11",
+        "benchmark": [
+          {
+            "time": "12:20",
+            "from": "t2-i1",
+            "option": "t2-a2",
+            "zones": [
+              "poyo-horta-sud"
+            ],
+            "basis": "At 12:20 the basin authority tells the regional emergency service that flow in the Rambla del Poyo, the normally dry ravine above the towns south of Valencia city, has passed its alert threshold.",
+            "citation": {
+              "sourceId": "chj-record",
+              "detail": "CHJ hydrological alert for the Rambla del Poyo, 12:20 CET, as entered in the court record"
+            }
+          },
+          {
+            "time": "12:20",
+            "from": "t2-i2",
+            "option": "t2-a2",
+            "zones": [
+              "magro-utiel"
+            ],
+            "basis": "Inland, the Magro basin is already flooding: Utiel is under water by midday and asks for help for people trapped in their homes.",
+            "citation": {
+              "sourceId": "press-recon",
+              "detail": "Reconstructions of the flooding of Utiel around midday, 29 Oct"
+            }
+          }
+        ],
+        "minutes_matter": [
+          {
+            "quote": "Disaster-related mortality is nearly six times lower in countries with more comprehensive Multi-Hazard Early Warning System capabilities compared to countries with limited capabilities.",
+            "about": "Every country that reports on its warning systems",
+            "caveat": "A cross-country association, not a measured effect: richer countries tend to have both more warning capability and lower mortality.",
+            "publisher": "World Meteorological Organization (WMO) with UNDRR",
+            "license": "unconfirmed: page footer reads © WMO; quoted briefly",
+            "as_of": "2026-11-13",
+            "citation": {
+              "sourceId": "wmo-mhews-2025",
+              "detail": "Press release of 12 November 2025, 'Key Findings', first item"
+            }
+          },
+          {
+            "quote": "Fourteen minutes elapsed between the initial request and the time the warnings were upgraded to orders and exact zones were specified at 07:46.",
+            "about": "The Camp Fire, Paradise, California",
+            "publisher": "National Institute of Standards and Technology (NIST)",
+            "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+            "as_of": "2026-11-13",
+            "citation": {
+              "sourceId": "nist-tn-2252",
+              "detail": "Key findings, TF-N 10"
+            }
+          },
+          {
+            "quote": "The fire became the most deadly and destructive fire in California history, resulting in 85 fatalities and more than 18 000 destroyed structures.",
+            "about": "The Camp Fire, Butte County, California",
+            "publisher": "National Institute of Standards and Technology (NIST)",
+            "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+            "as_of": "2026-11-13",
+            "citation": {
+              "sourceId": "nist-tn-2252",
+              "detail": "Abstract"
+            }
+          }
+        ]
       },
       "sources": [
         {
@@ -4584,6 +4843,18 @@
           "label": "AEMET (Agencia Estatal de Meteorología). Plan Nacional de Predicción y Vigilancia de Fenómenos Meteorológicos Adversos — Meteoalerta. Version 9, 10 January 2025, section 4.2.2.3 'Nivel rojo' (p. 8). Consulted 12 November 2026.",
           "url": "https://www.aemet.es/documentos/es/eltiempo/prediccion/avisos/plan_meteoalerta/plan_meteoalerta.pdf",
           "note": "Used only for the definition under 'Terms of the desk'. Version 9 post-dates the day; its change log records that it altered only the warning-review periods (p. 9), so the level definitions stand as in version 8 of 26 May 2022, in force on 29 October 2024. English translation by the project."
+        },
+        {
+          "id": "wmo-mhews-2025",
+          "label": "World Meteorological Organization, press release: 'Early warning systems reach new heights, but critical gaps jeopardize global progress', 12 November 2025, on the WMO/UNDRR Global Status of Multi-Hazard Early Warning Systems 2025.",
+          "url": "https://wmo.int/news/media-centre/early-warning-systems-reach-new-heights-critical-gaps-jeopardize-global-progress",
+          "note": "Context for the debrief only, not a fact of this day. Quoted from the press release, fetched 2026-11-13; the full report was not read. Licence unconfirmed (the page footer reads © WMO)."
+        },
+        {
+          "id": "nist-tn-2252",
+          "label": "Maranghides, A., Link, E., Mell, W., Hawks, S., Brown, C. and Walton, W. D. A Case Study of the Camp Fire — Notification, Evacuation, Traffic, and Temporary Refuge Areas (NETTRA). NIST Technical Note 2252, National Institute of Standards and Technology, July 2023.",
+          "url": "https://doi.org/10.6028/NIST.TN.2252",
+          "note": "Context for the debrief only, not a fact of this day. Quoted from the PDF, fetched 2026-11-13. Licence unconfirmed: the report links NIST's copyright, fair use and licensing statement, which was not opened."
         }
       ]
     }

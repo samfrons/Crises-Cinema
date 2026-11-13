@@ -964,7 +964,71 @@
         "label": "Magro basin — Utiel, Requena, downstream of Forata"
       }
     ],
-    "historical_first_public_alert": "20:11"
+    "historical_first_public_alert": "20:11",
+    "benchmark": [
+      {
+        "time": "12:20",
+        "from": "t2-i1",
+        "option": "t2-a2",
+        "zones": [
+          "poyo-horta-sud"
+        ],
+        "basis": "At 12:20 the basin authority tells the regional emergency service that flow in the Rambla del Poyo, the normally dry ravine above the towns south of Valencia city, has passed its alert threshold.",
+        "citation": {
+          "sourceId": "chj-record",
+          "detail": "CHJ hydrological alert for the Rambla del Poyo, 12:20 CET, as entered in the court record"
+        }
+      },
+      {
+        "time": "12:20",
+        "from": "t2-i2",
+        "option": "t2-a2",
+        "zones": [
+          "magro-utiel"
+        ],
+        "basis": "Inland, the Magro basin is already flooding: Utiel is under water by midday and asks for help for people trapped in their homes.",
+        "citation": {
+          "sourceId": "press-recon",
+          "detail": "Reconstructions of the flooding of Utiel around midday, 29 Oct"
+        }
+      }
+    ],
+    "minutes_matter": [
+      {
+        "quote": "Disaster-related mortality is nearly six times lower in countries with more comprehensive Multi-Hazard Early Warning System capabilities compared to countries with limited capabilities.",
+        "about": "Every country that reports on its warning systems",
+        "caveat": "A cross-country association, not a measured effect: richer countries tend to have both more warning capability and lower mortality.",
+        "publisher": "World Meteorological Organization (WMO) with UNDRR",
+        "license": "unconfirmed: page footer reads © WMO; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "wmo-mhews-2025",
+          "detail": "Press release of 12 November 2025, 'Key Findings', first item"
+        }
+      },
+      {
+        "quote": "Fourteen minutes elapsed between the initial request and the time the warnings were upgraded to orders and exact zones were specified at 07:46.",
+        "about": "The Camp Fire, Paradise, California",
+        "publisher": "National Institute of Standards and Technology (NIST)",
+        "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "nist-tn-2252",
+          "detail": "Key findings, TF-N 10"
+        }
+      },
+      {
+        "quote": "The fire became the most deadly and destructive fire in California history, resulting in 85 fatalities and more than 18 000 destroyed structures.",
+        "about": "The Camp Fire, Butte County, California",
+        "publisher": "National Institute of Standards and Technology (NIST)",
+        "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "nist-tn-2252",
+          "detail": "Abstract"
+        }
+      }
+    ]
   },
   "sources": [
     {
@@ -1008,6 +1072,18 @@
       "label": "AEMET (Agencia Estatal de Meteorología). Plan Nacional de Predicción y Vigilancia de Fenómenos Meteorológicos Adversos — Meteoalerta. Version 9, 10 January 2025, section 4.2.2.3 'Nivel rojo' (p. 8). Consulted 12 November 2026.",
       "url": "https://www.aemet.es/documentos/es/eltiempo/prediccion/avisos/plan_meteoalerta/plan_meteoalerta.pdf",
       "note": "Used only for the definition under 'Terms of the desk'. Version 9 post-dates the day; its change log records that it altered only the warning-review periods (p. 9), so the level definitions stand as in version 8 of 26 May 2022, in force on 29 October 2024. English translation by the project."
+    },
+    {
+      "id": "wmo-mhews-2025",
+      "label": "World Meteorological Organization, press release: 'Early warning systems reach new heights, but critical gaps jeopardize global progress', 12 November 2025, on the WMO/UNDRR Global Status of Multi-Hazard Early Warning Systems 2025.",
+      "url": "https://wmo.int/news/media-centre/early-warning-systems-reach-new-heights-critical-gaps-jeopardize-global-progress",
+      "note": "Context for the debrief only, not a fact of this day. Quoted from the press release, fetched 2026-11-13; the full report was not read. Licence unconfirmed (the page footer reads © WMO)."
+    },
+    {
+      "id": "nist-tn-2252",
+      "label": "Maranghides, A., Link, E., Mell, W., Hawks, S., Brown, C. and Walton, W. D. A Case Study of the Camp Fire — Notification, Evacuation, Traffic, and Temporary Refuge Areas (NETTRA). NIST Technical Note 2252, National Institute of Standards and Technology, July 2023.",
+      "url": "https://doi.org/10.6028/NIST.TN.2252",
+      "note": "Context for the debrief only, not a fact of this day. Quoted from the PDF, fetched 2026-11-13. Licence unconfirmed: the report links NIST's copyright, fair use and licensing statement, which was not opened."
     }
   ]
 }

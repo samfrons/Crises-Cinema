@@ -3,11 +3,11 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import type { Citation, GlossaryEntry, InfoItem, MediaAttachment, Option, Scenario, ScenarioBundle, Timestep } from './types';
 import { startSession, logChoice, completeSession, type ChoiceEvent } from './telemetry';
-import { scoreRun, historicalLeadTime, formatLead, alertBeforeClock, type Choice } from './scoring';
+import { scoreRun, historicalLeadTime, formatLead, alertBeforeClock, bestMarks, span, type Choice } from './scoring';
 import DayStrip from './DayStrip';
 import OpsMap, { BoardMiniature, hasBoard } from './OpsMap';
 import { itemState, STATE_RANK, vocabFor, COMPASS_WORD, type ZoneState } from './hazards';
-import AlertTimingChart from './AlertTimingChart';
+import Reckoning from './Reckoning';
 import { KindGlyph, HazardGlyph, Pictogram, SilentGlyph, hasPictogram } from './glyphs';
 import Readings from './Readings';
 import WarningChain, { chainChanges, chainNews, deriveChain } from './WarningChain';
@@ -1038,6 +1038,9 @@ function Debrief({ scenario, choices, last, onReplay, onLeave }: {
       </div>
 
       <div className="wrap cr-debrief-body">
+        <Reckoning scenario={scenario} choices={choices} compact={compact}
+          cite={(c) => <Cite c={c} idx={sourceIndex} />} />
+
         <div className="cr-dsec">
           <h3 className="cr-dsec-title">Your day beside theirs</h3>
           {last && lastSame && (
@@ -1148,8 +1151,7 @@ function Debrief({ scenario, choices, last, onReplay, onLeave }: {
         )}
 
         <div className="cr-dsec">
-          <h3 className="cr-dsec-title">Your run, measured</h3>
-          <AlertTimingChart scenario={scenario} choices={choices} compact={compact} />
+          <h3 className="cr-dsec-title">The game&apos;s four scores</h3>
           {early && (
             <div className="cr-early" id="cr-early">
               <p className="cr-early-tag">Warnings before the clock</p>
@@ -1195,10 +1197,12 @@ function Debrief({ scenario, choices, last, onReplay, onLeave }: {
               <dd className="sub">decision points where you left the historical path</dd>
             </div>
           </dl>
+          <ScoreRules scenario={scenario} />
           <p className="cr-score-caveat">A scoring layer, not history: it measures your choices against the real
             clock and the documented impact at {scenario.scoring.impact.time} ({scenario.scoring.impact.label}{' '}
-            <Cite c={scenario.scoring.impact.citation} idx={sourceIndex} />). It makes no claim about lives a
-            different decision would have saved — the record is silent on paths not taken.</p>
+            <Cite c={scenario.scoring.impact.citation} idx={sourceIndex} />). The four are never added up or ranked
+            into one verdict. It makes no claim about lives a different decision would have saved — the record is
+            silent on paths not taken.</p>
         </div>
 
         <div className="cr-dsec">
@@ -1258,6 +1262,44 @@ function Debrief({ scenario, choices, last, onReplay, onLeave }: {
         </nav>
       </div>
     </section>
+  );
+}
+
+/** "How this is computed": each score's rule in words, read off scoring.ts,
+ *  with the author-set weights it rests on surfaced rather than hidden — and
+ *  the best marks the rules allow on this desk, which are game design too. */
+function ScoreRules({ scenario }: { scenario: Scenario }) {
+  const best = bestMarks(scenario);
+  const n = scenario.scoring.at_risk_zones.length;
+  const lead = (b: ReturnType<typeof bestMarks>['earliest']) => (b
+    ? `${span(b.lead)} ${b.lead >= 0 ? 'before' : 'after'} impact, by warning at ${b.time} (“${b.option.label}”)`
+    : 'no option on this desk issues a warning');
+  return (
+    <details className="cr-howto">
+      <summary>How these are computed</summary>
+      <dl>
+        <dt>Warning lead time</dt>
+        <dd>The documented impact time ({scenario.scoring.impact.time}) minus the clock time of the first decision
+          point at which your option issued a warning of any scope (targeted or province-wide). It counts decision
+          times, not minutes within an hour, and any zone counts.</dd>
+        <dt>Coverage</dt>
+        <dd>The at-risk zones reached by any warning or protective action you took at a decision point before the
+          impact time, divided by the {n} at-risk zones. Every zone counts the same: an unweighted design choice,
+          not a population measure.</dd>
+        <dt>False-alarm cost</dt>
+        <dd>The sum of each chosen option&apos;s false-alarm weight. The weights are set per option by the
+          scenario&apos;s author, from 0 to 2 (this day uses {best.weights.join(', ')}), to price a warning issued
+          before the signals on the desk warranted it. They are game design, not measurements.</dd>
+        <dt>Divergence from history</dt>
+        <dd>The number of decision points where your option is not the one the record shows the officials
+          taking. It is not a penalty: the officials&apos; call is what happened, not the right answer.</dd>
+      </dl>
+      <p className="cr-howto-best">
+        <strong>The best marks these rules allow on this desk.</strong> Longest lead time: {lead(best.earliest)}.
+        Longest lead with no false-alarm weight: {lead(best.earliestClean)}. These are what the scoring rewards,
+        not what would have saved the most lives: the record is silent on that, and the game does not guess.
+      </p>
+    </details>
   );
 }
 

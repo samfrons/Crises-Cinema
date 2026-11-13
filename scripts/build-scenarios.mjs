@@ -372,6 +372,124 @@ function checkAlertPredates(chk, s, sourceIds) {
   }
 }
 
+/** Every HH:MM clock time a sentence prints. */
+const clockTimesIn = (text) => (typeof text === 'string' ? text.match(/\b(?:[01]\d|2[0-3]):[0-5]\d\b/g) ?? [] : []);
+
+/**
+ * The earliest defensible call (`scoring.benchmark`): a GAME-DESIGN benchmark,
+ * one to N calls, each the earliest moment this desk's own record could
+ * justify warning some at-risk zones. It is a hypothesis the debrief sets
+ * beside the player and the record, never a verdict, and the build holds it
+ * to the slips:
+ *   from    — the id of ONE info item (the slip) that justifies the call;
+ *   time    — a decision time on the clock, at or after the slip's own
+ *             decision point (the desk cannot act on a slip not yet on it),
+ *             and no earlier than any HH:MM the basis prints;
+ *   option  — an option at that decision point that issues a warning
+ *             reaching every zone of the call (a call the desk could make);
+ *   zones   — at-risk zone ids the slip itself concerns; each zone in at most
+ *             one call;
+ *   basis   — one sentence in the slip's words, printing no number the slip
+ *             does not print;
+ *   citation — the slip's own source.
+ */
+function checkBenchmark(chk, s, sourceIds) {
+  const b = s.scoring?.benchmark;
+  const p = 'scoring.benchmark';
+  const zoneIds = new Set((s.scoring?.at_risk_zones ?? []).map((z) => z.id));
+  if (!chk.require(Array.isArray(b) && b.length >= 1 && b.length <= Math.max(1, zoneIds.size), p,
+    'required: an array of 1 call per at-risk zone at most, each { time, from, option, zones, basis, citation } — the earliest call the desk\'s own record could justify')) return;
+  const steps = s.timesteps ?? [];
+  const decisionTimes = new Set(steps.map((t) => t.time));
+  const claimed = new Set();
+  for (const [k, c] of b.entries()) {
+    const q = `${p}[${k}]`;
+    if (!chk.require(c && typeof c === 'object' && !Array.isArray(c), q, 'must be an object')) continue;
+    const timeOk = chk.require(HHMM.test(c.time ?? ''), `${q}.time`, 'must be HH:MM');
+    if (timeOk) chk.require(decisionTimes.has(c.time), `${q}.time`, `"${c.time}" is not a decision time on this clock — the desk can only act at a decision point`);
+
+    // The slip it rests on, and the decision point where it reaches the desk.
+    const stepOf = steps.find((t) => (t.info_available ?? []).some((i) => i.id === c.from));
+    const slip = stepOf?.info_available.find((i) => i.id === c.from);
+    if (!chk.require(!!slip, `${q}.from`, 'must be the id of the info item (slip) that justifies the call')) continue;
+    if (timeOk) {
+      chk.require(c.time >= stepOf.time, `${q}.time`,
+        `${c.time} is before slip ${slip.id} reaches the desk (${stepOf.time}) — a call cannot rest on information not yet on the desk`);
+    }
+
+    // The zones: ones the slip itself concerns, each claimed once.
+    const own = new Set(slip.zones ?? []);
+    if (chk.require(Array.isArray(c.zones) && c.zones.length > 0, `${q}.zones`, 'a non-empty array of at-risk zone ids')) {
+      for (const z of c.zones) {
+        if (!chk.require(zoneIds.has(z), `${q}.zones`, `"${z}" is not a scoring.at_risk_zones id`)) continue;
+        chk.require(own.has(z), `${q}.zones`, `slip ${slip.id} does not concern zone "${z}" — a call may only cover zones its slip names`);
+        chk.require(!claimed.has(z), `${q}.zones`, `zone "${z}" already has a benchmark call`);
+        claimed.add(z);
+      }
+    }
+
+    // A call the desk could actually make at that decision point.
+    const at = steps.find((t) => t.time === c.time);
+    const opt = at?.options?.find((o) => o.id === c.option);
+    if (chk.require(!!opt, `${q}.option`, `must be the id of an option at the ${c.time ?? '?'} decision point`)) {
+      chk.require(opt.effects?.warning_scope !== 'none', `${q}.option`, `option ${opt.id} issues no warning — a benchmark call is a warning`);
+      const reach = new Set(opt.effects?.zones ?? []);
+      chk.require(Array.isArray(c.zones) && c.zones.every((z) => reach.has(z)), `${q}.option`,
+        `option ${opt.id} does not reach every zone of the call`);
+    }
+
+    // The basis: the slip's words, its numbers, no time later than the call.
+    if (chk.require(typeof c.basis === 'string' && c.basis.trim().length >= 20 && c.basis.length <= 280, `${q}.basis`, 'one sentence of 20–280 characters')) {
+      chk.require(!PLACEHOLDER.test(c.basis), `${q}.basis`, 'placeholder text in a playable scenario');
+      const said = new Set(numbersIn(slip.text));
+      for (const n of numbersIn(c.basis)) {
+        chk.require(said.has(n), `${q}.basis`, `prints "${n}", which slip ${slip.id} does not — the basis may not add a figure`);
+      }
+      if (timeOk) {
+        for (const tm of clockTimesIn(c.basis)) {
+          chk.require(tm <= c.time, `${q}.basis`, `cites ${tm}, after the call at ${c.time} — a call cannot rest on a later time`);
+        }
+      }
+    }
+    checkCitation(chk, c.citation, `${q}.citation`, sourceIds, true);
+    chk.require(c.citation?.sourceId === slip.citation?.sourceId, `${q}.citation`,
+      `must cite the source of slip ${slip.id} ("${slip.citation?.sourceId}")`);
+  }
+}
+
+/**
+ * "Why minutes matter": cited context from other places and other days,
+ * printed beside the reckoning. Verbatim quotes only; each names its
+ * publisher, licence (or that it is unconfirmed) and the date it was read;
+ * an optional caveat prints no number its quote does not. The UI frames the
+ * block as context and never as a conversion of this run's minutes.
+ */
+function checkMinutesMatter(chk, s, sourceIds) {
+  const m = s.scoring.minutes_matter;
+  const p = 'scoring.minutes_matter';
+  if (!chk.require(Array.isArray(m) && m.length >= 1 && m.length <= 3, p, 'must be an array of 1–3 cited quotes')) return;
+  for (const [k, e] of m.entries()) {
+    const q = `${p}[${k}]`;
+    if (!chk.require(e && typeof e === 'object', q, 'must be an object')) continue;
+    if (chk.require(typeof e.quote === 'string' && e.quote.trim().length >= 20 && e.quote.length <= 320, `${q}.quote`, 'a verbatim quote of 20–320 characters')) {
+      chk.require(!PLACEHOLDER.test(e.quote), `${q}.quote`, 'placeholder text in a playable scenario');
+    }
+    chk.require(typeof e.about === 'string' && e.about.trim().length > 0 && e.about.length <= 80 && numbersIn(e.about).length === 0, `${q}.about`,
+      'what the quote is about, 1–80 characters, with no figures of its own');
+    for (const f of ['publisher', 'license']) {
+      chk.require(typeof e[f] === 'string' && e[f].trim().length > 0 && !PLACEHOLDER.test(e[f]), `${q}.${f}`, 'required — publisher · licence · as-of are printed with every figure');
+    }
+    chk.require(typeof e.as_of === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.as_of), `${q}.as_of`, 'must be the YYYY-MM-DD the quote was read at its source');
+    if (e.caveat !== undefined) {
+      if (chk.require(typeof e.caveat === 'string' && e.caveat.length > 0 && e.caveat.length <= 240, `${q}.caveat`, 'one sentence of up to 240 characters')) {
+        const said = new Set(numbersIn(e.quote));
+        for (const n of numbersIn(e.caveat)) chk.require(said.has(n), `${q}.caveat`, `prints "${n}", which the quote does not`);
+      }
+    }
+    checkCitation(chk, e.citation, `${q}.citation`, sourceIds, true);
+  }
+}
+
 function validate(file, s) {
   const chk = new Check(file);
   for (const field of ['id', 'status', 'title', 'date', 'location', 'hazard']) {
@@ -519,6 +637,8 @@ function validate(file, s) {
   }
   chk.require(Array.isArray(s.scoring?.at_risk_zones) && s.scoring.at_risk_zones.length >= 1, 'scoring.at_risk_zones', 'required');
   chk.require(HHMM.test(s.scoring?.historical_first_public_alert ?? ''), 'scoring.historical_first_public_alert', 'must be HH:MM');
+  if (s.scoring) checkBenchmark(chk, s, sourceIds);
+  if (s.scoring?.minutes_matter !== undefined) checkMinutesMatter(chk, s, sourceIds);
 
   return chk.errors;
 }

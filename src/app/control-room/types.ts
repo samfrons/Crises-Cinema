@@ -130,6 +130,30 @@ export type AlertPredatesClock = {
   citation: Citation;
 };
 
+/** One call of the earliest-defensible benchmark: at a decision time no
+ *  earlier than its slip reaches the desk, an option that warns `zones`. */
+export type BenchmarkCall = {
+  time: string;
+  /** The info item (slip) the call rests on. */
+  from: string;
+  /** The option at that decision point the call corresponds to. */
+  option: string;
+  zones: string[];
+  /** One sentence in the slip's words. */
+  basis: string;
+  citation: Citation;
+};
+
+export type MinutesMatter = {
+  quote: string;
+  about: string;
+  caveat?: string;
+  publisher: string;
+  license: string;
+  as_of: string;
+  citation: Citation;
+};
+
 export type Source = { id: string; label: string; url: string | null; note?: string | null };
 
 export type Scenario = {
@@ -165,6 +189,11 @@ export type Scenario = {
     impact: { time: string; label: string; citation: Citation; window_minutes?: number };
     at_risk_zones: { id: string; label: string }[];
     historical_first_public_alert: string;
+    /** The earliest defensible call — a game-design benchmark, each call
+     *  resting on one cited slip (README, "The reckoning"). */
+    benchmark: BenchmarkCall[];
+    /** Why minutes matter: cited context from elsewhere, never a conversion. */
+    minutes_matter?: MinutesMatter[];
   };
   /** The real public warnings came before the one-day clock opened, so the
    *  day's first-alert HH:MM is not the officials' lead time. Drawn from one

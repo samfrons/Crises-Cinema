@@ -1161,7 +1161,62 @@
         "label": "Central Business District and the Superdome"
       }
     ],
-    "historical_first_public_alert": "09:30"
+    "historical_first_public_alert": "09:30",
+    "benchmark": [
+      {
+        "time": "07:00",
+        "from": "t1-i1",
+        "option": "t1-a1",
+        "zones": [
+          "lower-ninth",
+          "new-orleans-east",
+          "lakeview-gentilly",
+          "algiers",
+          "cbd-superdome"
+        ],
+        "basis": "NHC Special Advisory 22, at 07:00, puts a Hurricane Warning over the coast 'including the city of New Orleans and Lake Pontchartrain' and says 'preparations to protect life and property should be rushed to completion'.",
+        "citation": {
+          "sourceId": "nhc-adv",
+          "detail": "Special Advisory 22, 7 AM CDT Sun 28 Aug 2005"
+        }
+      }
+    ],
+    "minutes_matter": [
+      {
+        "quote": "Disaster-related mortality is nearly six times lower in countries with more comprehensive Multi-Hazard Early Warning System capabilities compared to countries with limited capabilities.",
+        "about": "Every country that reports on its warning systems",
+        "caveat": "A cross-country association, not a measured effect: richer countries tend to have both more warning capability and lower mortality.",
+        "publisher": "World Meteorological Organization (WMO) with UNDRR",
+        "license": "unconfirmed: page footer reads © WMO; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "wmo-mhews-2025",
+          "detail": "Press release of 12 November 2025, 'Key Findings', first item"
+        }
+      },
+      {
+        "quote": "Fourteen minutes elapsed between the initial request and the time the warnings were upgraded to orders and exact zones were specified at 07:46.",
+        "about": "The Camp Fire, Paradise, California",
+        "publisher": "National Institute of Standards and Technology (NIST)",
+        "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "nist-tn-2252",
+          "detail": "Key findings, TF-N 10"
+        }
+      },
+      {
+        "quote": "The fire became the most deadly and destructive fire in California history, resulting in 85 fatalities and more than 18 000 destroyed structures.",
+        "about": "The Camp Fire, Butte County, California",
+        "publisher": "National Institute of Standards and Technology (NIST)",
+        "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "nist-tn-2252",
+          "detail": "Abstract"
+        }
+      }
+    ]
   },
   "alert_predates_clock": {
     "date": "2005-08-27",
@@ -1234,6 +1289,18 @@
       "label": "Bahamonde, M. (FEMA). Photograph, New Orleans, Louisiana, 28 August 2005: residents lining up to enter the Superdome, opened as a shelter in advance of Hurricane Katrina. FEMA Photo Library (obsolete since 2019), as held on Wikimedia Commons.",
       "url": "https://commons.wikimedia.org/wiki/File:People_lining_up_for_shelter_in_Superdome_in_New_Orleans.jpg",
       "note": "Used only for the photo and its own caption."
+    },
+    {
+      "id": "wmo-mhews-2025",
+      "label": "World Meteorological Organization, press release: 'Early warning systems reach new heights, but critical gaps jeopardize global progress', 12 November 2025, on the WMO/UNDRR Global Status of Multi-Hazard Early Warning Systems 2025.",
+      "url": "https://wmo.int/news/media-centre/early-warning-systems-reach-new-heights-critical-gaps-jeopardize-global-progress",
+      "note": "Context for the debrief only, not a fact of this day. Quoted from the press release, fetched 2026-11-13; the full report was not read. Licence unconfirmed (the page footer reads © WMO)."
+    },
+    {
+      "id": "nist-tn-2252",
+      "label": "Maranghides, A., Link, E., Mell, W., Hawks, S., Brown, C. and Walton, W. D. A Case Study of the Camp Fire — Notification, Evacuation, Traffic, and Temporary Refuge Areas (NETTRA). NIST Technical Note 2252, National Institute of Standards and Technology, July 2023.",
+      "url": "https://doi.org/10.6028/NIST.TN.2252",
+      "note": "Context for the debrief only, not a fact of this day. Quoted from the PDF, fetched 2026-11-13. Licence unconfirmed: the report links NIST's copyright, fair use and licensing statement, which was not opened."
     }
   ]
 }

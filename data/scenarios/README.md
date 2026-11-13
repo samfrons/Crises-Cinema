@@ -96,7 +96,10 @@ UI labels them as such in the debrief.
   "scoring": {                         // interpretive layer — labelled so in UI
     "impact": { "time": "19:00", "label": "…", "citation": { … } },
     "at_risk_zones": [{ "id": "poyo-horta-sud", "label": "…" }],
-    "historical_first_public_alert": "20:11"
+    "historical_first_public_alert": "20:11",
+    "benchmark": [{ …call }],          // REQUIRED: the earliest defensible call
+                                       //   (game design) — see "The reckoning"
+    "minutes_matter": [{ …quote }]     // optional: cited context, never a conversion
   },
 
   "sources": [{
@@ -271,11 +274,65 @@ with a date on or after the scenario day, or one the item does not name (its
 day and month, "8 October", or its weekday, "Saturday"); with a `time` the
 item does not state; with a placeholder; or with a note that prints a number
 the item does not print. When present, the debrief's lead-time line reads
-"officials, on this clock only", a slip under the alert-timing chart states
+"officials, on this clock only", a slip under the four scores states
 how many days earlier the public warning came (computed from `date`) with the
-cited note, and the chart's officials' lane gains a mark pointing off the
+cited note, and the reckoning's record lane gains a mark pointing off the
 plate's left edge ("FROM 8 OCT · 4 DAYS EARLIER"). Used by
 `odisha-phailin-2013` and `katrina-2005`.
+
+## The reckoning (the debrief's centerpiece)
+
+The debrief opens on three lanes on the day's clock — YOU, THE RECORD, THE
+EARLIEST DEFENSIBLE — each measured in minutes to `scoring.impact.time`. Every
+figure is arithmetic on a cited clock time already in the file, or a value an
+option already carries (scope, zones, false-alarm weight). The panel never
+prints lives saved or a simulated toll: the record is silent on paths not
+taken, and the panel says so.
+
+**`scoring.benchmark`** (required for a playable) is a GAME-DESIGN benchmark:
+the earliest call this desk's own record could justify, a hypothesis and not a
+verdict. It is an array of calls, at most one per at-risk zone:
+
+```jsonc
+"benchmark": [{
+  "time": "12:20",          // a decision time on the clock
+  "from": "t2-i1",          // the ONE slip the call rests on
+  "option": "t2-a2",        // the option at that decision point it corresponds to
+  "zones": ["poyo-horta-sud"],
+  "basis": "At 12:20 the basin authority tells … has passed its alert threshold.",
+  "citation": { "sourceId": "chj-record", "detail": "…" }
+}]
+```
+
+The build refuses a call whose `time` is not a decision time, or is earlier
+than the decision point where its slip reaches the desk (the desk cannot act
+on information not yet on it); whose `basis` prints an HH:MM later than the
+call, or any number the slip does not print, or a placeholder; whose `option`
+is not at that decision point, issues no warning, or does not reach every zone
+of the call; whose `zones` are not at-risk zones the slip itself concerns, or
+are already claimed by another call; or whose citation is not the slip's own
+source. A zone no call covers prints "no call set". The benchmark is set on
+the day's clock only; where `alert_predates_clock` is present the panel says
+the benchmark cannot see before the clock. Where the record's first warning is
+at or before the benchmark (Phailin), the record's tile is printed in reverse
+and stamped "Met the mark": the success case.
+
+Authored benchmarks, and why:
+
+| Scenario | Time | Slip | Basis |
+|---|---|---|---|
+| valencia-dana-2024 | 12:20 | t2-i1 (Poyo zone), t2-i2 (Magro zone) | CHJ: Poyo flow past its alert threshold; Utiel already under water. The 07:36 red warning is a forecast for the coastal north, and the game already prices a 07:36 province alert as a weak-signal call (false-alarm weight 1). |
+| lahaina-2023 | 14:55 | t4-i2 (Lahainaluna) | Callers report the fire flaring up again, "spreading fast". No single slip places the afternoon fire on Front Street or Upcountry before impact, so those zones have no call. |
+| katrina-2005 | 07:00 | t1-i1 (all zones) | NHC Special Advisory 22: Hurricane Warning including New Orleans, preparations "rushed to completion". The 56-hour finding is before this clock; the panel says so. |
+| odisha-phailin-2013 | 06:30 | t1-i2 (all zones) | IMD's surge forecast for Ganjam, Khurda, Puri and Jagatsinghpur. The record's first alert on this clock equals it, and its warnings began four days earlier. |
+
+**`scoring.minutes_matter`** (optional, 1–3) is cited context on why minutes
+matter, from other places and days: verbatim `quote`, `about` (no figures of
+its own), optional `caveat` (no number the quote does not print), `publisher`,
+`license` (or that it is unconfirmed), `as_of` (YYYY-MM-DD read at source) and
+a `citation` into `sources[]`. Only claims graded A in
+`data/preparedness/essay-research.md` belong here. The UI frames the block as
+"context, not a calculation" and never converts a run's minutes into lives.
 
 ## Lessons and terms (the debrief's takeaways, the briefing's glossary)
 

@@ -414,7 +414,60 @@
       { "id": "puri-khurda", "label": "Puri and Khurda: the coast and the Chilika lagoon" },
       { "id": "jagatsinghpur", "label": "Jagatsinghpur coast, named in IMD's storm-surge forecast" }
     ],
-    "historical_first_public_alert": "06:30"
+    "historical_first_public_alert": "06:30",
+    "benchmark": [
+      {
+        "time": "06:30",
+        "from": "t1-i2",
+        "option": "t1-a1",
+        "zones": [
+          "ganjam-coast",
+          "puri-khurda",
+          "jagatsinghpur"
+        ],
+        "basis": "IMD's storm-surge forecast of the evening before puts a surge of 3.0 to 3.5 m above the astronomical tide over the low-lying areas of Ganjam, Khurda, Puri and Jagatsinghpur at landfall.",
+        "citation": {
+          "sourceId": "imd-report",
+          "detail": "Table 13, forecast of 11.10.13/1730"
+        }
+      }
+    ],
+    "minutes_matter": [
+      {
+        "quote": "Disaster-related mortality is nearly six times lower in countries with more comprehensive Multi-Hazard Early Warning System capabilities compared to countries with limited capabilities.",
+        "about": "Every country that reports on its warning systems",
+        "caveat": "A cross-country association, not a measured effect: richer countries tend to have both more warning capability and lower mortality.",
+        "publisher": "World Meteorological Organization (WMO) with UNDRR",
+        "license": "unconfirmed: page footer reads © WMO; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "wmo-mhews-2025",
+          "detail": "Press release of 12 November 2025, 'Key Findings', first item"
+        }
+      },
+      {
+        "quote": "Fourteen minutes elapsed between the initial request and the time the warnings were upgraded to orders and exact zones were specified at 07:46.",
+        "about": "The Camp Fire, Paradise, California",
+        "publisher": "National Institute of Standards and Technology (NIST)",
+        "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "nist-tn-2252",
+          "detail": "Key findings, TF-N 10"
+        }
+      },
+      {
+        "quote": "The fire became the most deadly and destructive fire in California history, resulting in 85 fatalities and more than 18 000 destroyed structures.",
+        "about": "The Camp Fire, Butte County, California",
+        "publisher": "National Institute of Standards and Technology (NIST)",
+        "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "nist-tn-2252",
+          "detail": "Abstract"
+        }
+      }
+    ]
   },
   "alert_predates_clock": {
     "date": "2013-10-08",
@@ -465,6 +518,18 @@
       "label": "Saudamini Das, 'Evaluating climate change adaptation through evacuation decisions: a case study of cyclone management in India', Climatic Change 152 (2019), 291-305, doi:10.1007/s10584-018-2292-1.",
       "url": "https://link.springer.com/article/10.1007/s10584-018-2292-1",
       "note": "Peer-reviewed study. Only the abstract (free to read) was fetched; the figures used are those in the abstract."
+    },
+    {
+      "id": "wmo-mhews-2025",
+      "label": "World Meteorological Organization, press release: 'Early warning systems reach new heights, but critical gaps jeopardize global progress', 12 November 2025, on the WMO/UNDRR Global Status of Multi-Hazard Early Warning Systems 2025.",
+      "url": "https://wmo.int/news/media-centre/early-warning-systems-reach-new-heights-critical-gaps-jeopardize-global-progress",
+      "note": "Context for the debrief only, not a fact of this day. Quoted from the press release, fetched 2026-11-13; the full report was not read. Licence unconfirmed (the page footer reads © WMO)."
+    },
+    {
+      "id": "nist-tn-2252",
+      "label": "Maranghides, A., Link, E., Mell, W., Hawks, S., Brown, C. and Walton, W. D. A Case Study of the Camp Fire — Notification, Evacuation, Traffic, and Temporary Refuge Areas (NETTRA). NIST Technical Note 2252, National Institute of Standards and Technology, July 2023.",
+      "url": "https://doi.org/10.6028/NIST.TN.2252",
+      "note": "Context for the debrief only, not a fact of this day. Quoted from the PDF, fetched 2026-11-13. Licence unconfirmed: the report links NIST's copyright, fair use and licensing statement, which was not opened."
     }
   ]
 }

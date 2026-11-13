@@ -139,6 +139,49 @@ rejects('alert_predates_clock note that adds a figure', (e) => e(P, (s) => { s.a
 rejects('alert_predates_clock without a clock_alert', (e) => e(P, (s) => { delete s.alert_predates_clock.clock_alert; }), /alert_predates_clock\.clock_alert — what the day's 06:30 figure is/);
 rejects('alert_predates_clock with SOURCE NEEDED', (e) => e(K, (s) => { s.alert_predates_clock.note = 'SOURCE NEEDED: when did the first call go out?'; }), /alert_predates_clock\.note — placeholder/);
 
+// The earliest defensible call: a game-design benchmark, held to the slip it rests on.
+const bench = (s, k = 0) => s.scoring.benchmark[k];
+rejects('playable scenario without a benchmark', (e) => e(K, (s) => { delete s.scoring.benchmark; }), /scoring\.benchmark — required/);
+rejects('benchmark with more calls than at-risk zones', (e) => e(P, (s) => { s.scoring.benchmark = [bench(s), bench(s), bench(s), bench(s)]; }), /scoring\.benchmark — required: an array of 1 call per at-risk zone at most/);
+rejects('benchmark time that is not HH:MM', (e) => e(V, (s) => { bench(s).time = 'noon'; }), /benchmark\[0\]\.time — must be HH:MM/);
+rejects('benchmark time between decision points', (e) => e(V, (s) => { bench(s).time = '13:00'; }), /benchmark\[0\]\.time — "13:00" is not a decision time/);
+rejects('benchmark before its slip reaches the desk', (e) => e(V, (s) => { bench(s).time = '07:36'; bench(s).option = 't1-a1'; bench(s).basis = bench(s).basis.replace('At 12:20 the', 'The'); }), /07:36 is before slip t2-i1 reaches the desk \(12:20\)/);
+rejects('benchmark resting on no slip', (e) => e(L, (s) => { bench(s).from = 't9-i9'; }), /benchmark\[0\]\.from — must be the id of the info item/);
+rejects('benchmark zone the slip does not concern', (e) => e(L, (s) => { bench(s).zones.push('lahaina-front-street'); bench(s).option = 't4-a1'; }), /slip t4-i2 does not concern zone "lahaina-front-street"/);
+rejects('benchmark zone not in at_risk_zones', (e) => e(K, (s) => { bench(s).zones = ['atlantis']; }), /"atlantis" is not a scoring\.at_risk_zones id/);
+rejects('benchmark zone claimed by two calls', (e) => e(V, (s) => { s.scoring.benchmark[1].zones = ['poyo-horta-sud']; s.scoring.benchmark[1].from = 't2-i1'; s.scoring.benchmark[1].citation.sourceId = 'chj-record'; }), /zone "poyo-horta-sud" already has a benchmark call/);
+rejects('benchmark option not at that decision point', (e) => e(K, (s) => { bench(s).option = 't2-a1'; }), /benchmark\[0\]\.option — must be the id of an option at the 07:00 decision point/);
+rejects('benchmark option that issues no warning', (e) => e(K, (s) => { bench(s).option = 't1-a2'; }), /option t1-a2 issues no warning/);
+rejects('benchmark option that does not reach the call\'s zones', (e) => e(K, (s) => { bench(s).option = 't1-a3'; }), /option t1-a3 does not reach every zone of the call/);
+rejects('benchmark basis that adds a figure', (e) => e(P, (s) => { bench(s).basis = bench(s).basis.replace('3.0 to 3.5 m', '3.0 to 4 m'); }), /benchmark\[0\]\.basis — prints "4", which slip t1-i2 does not/);
+rejects('benchmark basis citing a time after the call', (e) => e(P, (s) => { bench(s).basis = bench(s).basis.replace('of the evening before', 'of 17:30'); }), /cites 17:30, after the call at 06:30/);
+rejects('benchmark basis with SOURCE NEEDED', (e) => e(L, (s) => { bench(s).basis = 'SOURCE NEEDED: which slip justifies the call?'; }), /benchmark\[0\]\.basis — placeholder/);
+rejects('benchmark basis missing', (e) => e(L, (s) => { delete bench(s).basis; }), /benchmark\[0\]\.basis — one sentence/);
+rejects('benchmark without a citation', (e) => e(K, (s) => { delete bench(s).citation; }), /benchmark\[0\]\.citation — missing citation/);
+rejects('benchmark citing a source not in sources[]', (e) => e(K, (s) => { bench(s).citation.sourceId = 'hindsight'; }), /citation sourceId "hindsight" not in sources/);
+rejects('benchmark citing a different source from its slip', (e) => e(K, (s) => { bench(s).citation.sourceId = 'senate-2006'; }), /must cite the source of slip t1-i1 \("nhc-adv"\)/);
+
+// Why minutes matter: cited context, never a conversion.
+const mm = (s, k = 0) => s.scoring.minutes_matter[k];
+rejects('minutes-matter quote without a citation', (e) => e(L, (s) => { delete mm(s).citation; }), /minutes_matter\[0\]\.citation — missing citation/);
+rejects('minutes-matter citing a source not in sources[]', (e) => e(V, (s) => { mm(s, 1).citation.sourceId = 'a-news-article'; }), /minutes_matter\[1\]\.citation — citation sourceId "a-news-article" not in sources/);
+rejects('minutes-matter without a licence line', (e) => e(P, (s) => { delete mm(s).license; }), /minutes_matter\[0\]\.license — required/);
+rejects('minutes-matter without an as-of date', (e) => e(K, (s) => { mm(s).as_of = 'recently'; }), /minutes_matter\[0\]\.as_of — must be the YYYY-MM-DD/);
+rejects('minutes-matter caveat that adds a figure', (e) => e(L, (s) => { mm(s).caveat = 'Roughly 40 percent of the gap is wealth.'; }), /minutes_matter\[0\]\.caveat — prints "40"/);
+rejects('minutes-matter "about" line that carries a figure', (e) => e(L, (s) => { mm(s, 2).about = 'The Camp Fire: 85 dead in 14 minutes'; }), /minutes_matter\[2\]\.about — .*no figures of its own/);
+rejects('minutes-matter with too many quotes', (e) => e(V, (s) => { s.scoring.minutes_matter.push(mm(s), mm(s)); }), /minutes_matter — must be an array of 1–3/);
+
+test('every playable benchmark rests on a slip at or before its own decision point (positive control)', () => {
+  for (const name of [L, V, K, P]) {
+    const s = JSON.parse(readFileSync(join(repo, 'data', 'scenarios', name), 'utf8'));
+    for (const c of s.scoring.benchmark) {
+      const step = s.timesteps.find((t) => t.info_available.some((i) => i.id === c.from));
+      assert.ok(step && c.time >= step.time, `${name} ${c.from}`);
+      assert.ok(s.timesteps.some((t) => t.time === c.time && t.options.some((o) => o.id === c.option)), `${name} ${c.option}`);
+    }
+  }
+});
+
 test('every icon, chain link and state used in the real data is in the vocabulary (positive control)', () => {
   const vocab = JSON.parse(readFileSync(join(repo, 'src', 'app', 'control-room', 'vocabulary.json'), 'utf8'));
   for (const name of [L, V, K, P]) {
