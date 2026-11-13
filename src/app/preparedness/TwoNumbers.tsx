@@ -170,7 +170,12 @@ export default function TwoNumbers() {
         </div>
 
         <p className="pr-plate-foot pr-foot-standalone">
-          <span>{sourceLine(funding?.source)}</span>
+          <span>
+            {sourceLine(funding?.source)}
+            {' · '}FTS plan totals; OCHA&rsquo;s own statement for 2025 reads lower (&ldquo;$12&nbsp;bn
+            received, the lowest in a decade&rdquo;) — the two count different things, so treat
+            recent-year bars as the FTS view, not the final word.
+          </span>
           <span className="pr-plate-no" aria-hidden>PREPAREDNESS — FIG. 3</span>
         </p>
       </div>

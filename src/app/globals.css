@@ -24,6 +24,17 @@
   font-weight: 700;
   font-display: swap;
 }
+/* Fallback tuned to the Hollywood face's own vertical metrics (hhea ascent
+   1516/2048, descent 80/2048, no line gap; read from the TTF), so the poster
+   headings sit on the same baseline in the fallback and the swap does not
+   shift them. local() only: nothing is downloaded. */
+@font-face {
+  font-family: 'Hollywood Fallback';
+  src: local('Impact'), local('Haettenschweiler');
+  ascent-override: 74%;
+  descent-override: 3.9%;
+  line-gap-override: 0%;
+}
 
 :root {
   /* Paper and ink */
@@ -38,7 +49,7 @@
      mistaken for a category. */
   --ember: #b8321a;
 
-  --poster: 'Hollywood', Impact, 'Haettenschweiler', sans-serif;
+  --poster: 'Hollywood', 'Hollywood Fallback', Impact, 'Haettenschweiler', sans-serif;
   --read: ui-serif, 'New York', Georgia, 'Times New Roman', serif;
   --data: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 

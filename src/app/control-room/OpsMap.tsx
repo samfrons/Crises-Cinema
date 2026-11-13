@@ -28,6 +28,16 @@ type Props = {
   wind?: { from: string; by: string } | null;
   /** What this hour's traffic changed: zones, origin marks, the wind mark. */
   fresh?: { zones: string[]; origins: string[]; wind: boolean };
+  /** Picture mode's stage: the plate alone — no key under it, and hidden
+   *  from assistive technology (the stage's transcript says it in words). */
+  bare?: boolean;
+  /** Picture mode: the zones the option under the pointer or focus would
+   *  warn, outlined as a preview (the option's own effects, nothing more). */
+  preview?: string[];
+  /** Picture mode: the zones your call has just warned, so the mark inks in. */
+  freshWarned?: string[];
+  /** Picture mode: the zones the slip now on the stage concerns. */
+  spot?: string[];
 };
 
 const NO_FRESH = { zones: [] as string[], origins: [] as string[], wind: false };
@@ -45,6 +55,9 @@ type Board = {
   /** A zone's outline (and, the hour its state changes, the new state's
    *  fill printed across it — see .cr-zone-sweep). */
   shape: (z: string, d: string) => JSX.Element;
+  /** The select screen's miniature: ground only, so a board drops anything
+   *  that is not geography (the contraflow arrows) when this is set. */
+  mini?: boolean;
 };
 
 /** Per board: where a zone's origin mark is stamped (clear of its labels —
@@ -57,9 +70,11 @@ const MARKS: Record<string, { origin: Record<string, [number, number]>; wind?: [
 const BOARDS: Record<string, (b: Board) => JSX.Element> = {
   'valencia-dana-2024': ValenciaBoard,
   'lahaina-2023': LahainaBoard,
+  'katrina-2005': KatrinaBoard,
+  'odisha-phailin-2013': PhailinBoard,
 };
 
-export default function OpsMap({ scenario, zoneStates, warnedZones, note, origins = {}, wind = null, fresh = NO_FRESH }: Props) {
+export default function OpsMap({ scenario, zoneStates, warnedZones, note, origins = {}, wind = null, fresh = NO_FRESH, bare = false, preview, freshWarned, spot }: Props) {
   // Pattern ids are per instance, so a board in the side panel and one in
   // the briefing or the phone sheet never resolve to each other's patterns.
   const uid = useId().replace(/:/g, '');
@@ -73,7 +88,8 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note, origin
   const board: Board = {
     st,
     warned,
-    zoneClass: (z) => `cr-zone is-${st(z)}${warned(z) ? ' is-warned' : ''}${fresh.zones.includes(z) ? ' is-fresh' : ''}`,
+    zoneClass: (z) => `cr-zone is-${st(z)}${warned(z) ? ' is-warned' : ''}${fresh.zones.includes(z) ? ' is-fresh' : ''}`
+      + `${preview?.includes(z) ? ' is-preview' : ''}${freshWarned?.includes(z) ? ' is-warned-fresh' : ''}${spot?.includes(z) ? ' is-spot' : ''}`,
     fill: (z) => (st(z) === 'impact' ? `url(#${impact})` : undefined),
     word: (z) => vocab.states[st(z)].toUpperCase(),
     sea,
@@ -82,7 +98,7 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note, origin
       const sweep = fresh.zones.includes(z) && (s === 'signal' || s === 'impact');
       return (
         <>
-          <path className="cr-zone-shape" style={{ fill: s === 'impact' && !sweep ? `url(#${impact})` : undefined }} d={d} />
+          <path className="cr-zone-shape" data-zone={z} style={{ fill: s === 'impact' && !sweep ? `url(#${impact})` : undefined }} d={d} />
           {sweep && (
             <path key={s} className={`cr-zone-sweep is-${s}`} d={d}
               style={{ fill: s === 'impact' ? `url(#${impact})` : undefined }} />
@@ -96,8 +112,8 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note, origin
   const showWind = !!(wind && marks?.wind && COMPASS_TOWARD[wind.from] !== undefined);
 
   return (
-    <figure className={`cr-map cr-map-${vocab.family}`}>
-      <svg viewBox="0 0 720 400" role="img" aria-label={ARIA[scenario.id]}>
+    <figure className={`cr-map cr-map-${vocab.family}${bare ? ' is-bare' : ''}`}>
+      <svg viewBox="0 0 720 400" {...(bare ? { 'aria-hidden': true, focusable: false } : { role: 'img', 'aria-label': ARIA[scenario.id] })}>
         <defs>
           <pattern id={sea} width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <line x1="0" y1="0" x2="0" y2="10" stroke="currentColor" strokeOpacity="0.14" strokeWidth="1" />
@@ -120,7 +136,7 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note, origin
           ever moves rightward along it, and may skip a step when the cited
           traffic does), then your own mark, set apart. Each swatch is drawn
           with the board's own strokes and pattern, so key and plate match. */}
-      <figcaption className="cr-map-legend">
+      {!bare && <figcaption className="cr-map-legend">
         <span className="cr-map-legend-scale">
           {(['quiet', 'watch', 'signal', 'impact'] as ZoneState[]).map((s, i) => (
             <span key={s} className="cr-leg">
@@ -150,14 +166,57 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note, origin
           </span>
         )}
         {note && <span className="cr-map-note">{note}</span>}
-      </figcaption>
+      </figcaption>}
     </figure>
+  );
+}
+
+/** Where a board stamps a zone's origin mark, in plate units (picture mode
+ *  frames the camera on it the beat the record first places the hazard). */
+export const originPoint = (id: string, zone: string): [number, number] | null => MARKS[id]?.origin[zone] ?? null;
+
+/** True when a day has a hand-drawn board. */
+export const hasBoard = (id: string) => id in BOARDS;
+
+/**
+ * The select screen's plate: the same hand-drawn board, geography only.
+ * Every zone is drawn quiet, nothing is warned, no mark is stamped and no
+ * label is set (the card says where it is), so the miniature tells the
+ * player nothing about how the day went: only the shape of the ground the
+ * desk will watch. The title band is cropped off. Decorative.
+ */
+export function BoardMiniature({ id, className }: { id: string; className?: string }) {
+  const uid = useId().replace(/:/g, '');
+  const Draw = BOARDS[id];
+  if (!Draw) return null;
+  const sea = `cr-mini-sea-${uid}`;
+  const board: Board = {
+    st: () => 'quiet',
+    warned: () => false,
+    zoneClass: () => 'cr-zone is-quiet',
+    fill: () => undefined,
+    word: () => '',
+    sea,
+    shape: (_z, d) => <path className="cr-zone-shape" d={d} />,
+    mini: true,
+  };
+  return (
+    <svg className={`cr-mini ${className ?? ''}`} viewBox="0 52 720 348" aria-hidden focusable="false">
+      <defs>
+        <pattern id={sea} width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="10" stroke="currentColor" strokeOpacity="0.18" strokeWidth="1.4" />
+        </pattern>
+      </defs>
+      <Draw {...board} />
+    </svg>
   );
 }
 
 const ARIA: Record<string, string> = {
   'valencia-dana-2024': 'Schematic map of the province of Valencia showing the state of the at-risk basins',
   'lahaina-2023': 'Schematic map of Lahaina on the West Maui coast, with an inset of Upcountry Maui, showing the state of the at-risk zones',
+  'katrina-2005': 'Schematic map of New Orleans between Lake Pontchartrain and the Mississippi, with the Superdome and the outbound contraflow highway, showing the state of the at-risk zones',
+  'odisha-phailin-2013': 'Schematic map of the south Odisha coast on the Bay of Bengal, from Ganjam and Gopalpur to Jagatsinghpur, with cyclone shelters, showing the state of the at-risk districts',
 };
 
 /** Water: a wave hatch. Fire: rows of small flame ticks. Both in ember. */
@@ -358,6 +417,168 @@ function LahainaBoard({ zoneClass, shape, word, warned, sea }: Board) {
 
       <PlateHead title="LAHAINA, WEST MAUI — OPERATIONS BOARD" />
       <North x={60} y={372} />
+    </>
+  );
+}
+
+/* ── New Orleans, Sunday 28 August 2005 ──────────────────────────────────
+   The east bank between Lake Pontchartrain (north) and the Mississippi's
+   crescent (south): Lakeview and Gentilly behind the 17th Street and London
+   Avenue canals, the Industrial Canal dividing off New Orleans East and the
+   Lower Ninth Ward, the CBD at the river's bend with the Superdome, and
+   Algiers across the river. The canals are drawn because the zones' own
+   labels name them. The contraflow arrows restate cited slips ("all highway
+   lanes outbound", evacuees heading for Baton Rouge): a direction of travel,
+   not a route — no highway is named. */
+
+function KatrinaBoard({ zoneClass, shape, word, warned, sea, mini }: Board) {
+  const river = 'M0 236C40 300 110 380 200 378C260 376 290 334 350 326C430 316 520 312 600 322C650 330 690 348 720 360';
+  return (
+    <>
+      {/* Lake Pontchartrain */}
+      <path d="M0 112c60 6 120-4 180 2s120 8 180 0 120-6 180 2 120 6 180-2V52H0z" fill={`url(#${sea})`} />
+      <path d="M0 112c60 6 120-4 180 2s120 8 180 0 120-6 180 2 120 6 180-2" className="cr-map-coast" />
+      <text className="cr-map-sea-label" x="380" y="88" textAnchor="middle">LAKE PONTCHARTRAIN</text>
+
+      {/* The Mississippi: banks, then the water between them */}
+      <path d={river} className="cr-map-riverbank" />
+      <path d={river} className="cr-map-riverbed" />
+      <path d={river} className="cr-map-riverhatch" stroke={`url(#${sea})`} />
+      <text className="cr-map-roadname" x="8" y="395">MISSISSIPPI RIVER</text>
+
+      {/* ZONE — Lakeview and Gentilly, behind the outfall canals */}
+      <g className={zoneClass('lakeview-gentilly')}>
+        {shape('lakeview-gentilly', 'M60 122L430 122L430 198L60 198z')}
+        <text className="cr-zone-label" x="244" y="146">LAKEVIEW · GENTILLY</text>
+        <text className="cr-zone-state" x="244" y="163">{word('lakeview-gentilly')}</text>
+        {warned('lakeview-gentilly') && <text className="cr-zone-state cr-zone-warned" x="244" y="179">WARNED BY YOU</text>}
+      </g>
+
+      {/* ZONE — New Orleans East, along the lake east of the Industrial Canal */}
+      <g className={zoneClass('new-orleans-east')}>
+        {shape('new-orleans-east', 'M470 122L706 122L706 202L470 202z')}
+        <text className="cr-zone-label" x="484" y="146">NEW ORLEANS EAST</text>
+        <text className="cr-zone-state" x="484" y="163">{word('new-orleans-east')}</text>
+        {warned('new-orleans-east') && <text className="cr-zone-state cr-zone-warned" x="484" y="179">WARNED BY YOU</text>}
+      </g>
+
+      {/* ZONE — the Lower Ninth Ward, Industrial Canal to the river */}
+      <g className={zoneClass('lower-ninth')}>
+        {shape('lower-ninth', 'M470 214L660 214L660 310L470 298z')}
+        <text className="cr-zone-label" x="484" y="236">LOWER NINTH</text>
+        <text className="cr-zone-state" x="484" y="252">{word('lower-ninth')}</text>
+        {warned('lower-ninth') && <text className="cr-zone-state cr-zone-warned" x="484" y="268">WARNED BY YOU</text>}
+      </g>
+
+      {/* ZONE — the CBD at the river's bend, and the Superdome */}
+      <g className={zoneClass('cbd-superdome')}>
+        {shape('cbd-superdome', 'M282 222L436 222L436 298L282 304z')}
+        <text className="cr-zone-label" x="294" y="242">CBD</text>
+        <rect x="294" y="251" width="11" height="11" className="cr-map-shelter" />
+        <text className="cr-map-minor" x="312" y="261">SUPERDOME</text>
+        <text className="cr-zone-state" x="294" y="279">{word('cbd-superdome')}</text>
+        {warned('cbd-superdome') && <text className="cr-zone-state cr-zone-warned" x="294" y="295">WARNED BY YOU</text>}
+      </g>
+
+      {/* ZONE — Algiers, across the river on the West Bank */}
+      <g className={zoneClass('algiers')}>
+        {shape('algiers', 'M318 356L372 340L520 332L590 340L590 396L304 396z')}
+        <text className="cr-zone-label" x="400" y="354">ALGIERS · WEST BANK</text>
+        <text className="cr-zone-state" x="400" y="370">{word('algiers')}</text>
+        {warned('algiers') && <text className="cr-zone-state cr-zone-warned" x="400" y="386">WARNED BY YOU</text>}
+      </g>
+
+      {/* The canals, lake to city (the Industrial Canal on to the river) */}
+      <path className="cr-map-canal" d="M120 110V198M230 112V198M452 112V312" />
+      <text className="cr-map-roadname" x="114" y="194" transform="rotate(-90 114 194)">17TH ST CANAL</text>
+      <text className="cr-map-roadname" x="224" y="194" transform="rotate(-90 224 194)">LONDON AVE CANAL</text>
+      <text className="cr-map-roadname" x="448" y="296" transform="rotate(-90 448 296)">INDUSTRIAL CANAL</text>
+
+      {/* The highway out, west towards Baton Rouge; under contraflow every lane runs outbound */}
+      <path className="cr-map-road cr-map-highway" d="M290 210H0" />
+      {!mini && (
+        <g className="cr-map-flow">
+          <path d="M262 203l-9 7 9 7M250 203l-9 7 9 7M152 203l-9 7 9 7M140 203l-9 7 9 7M42 203l-9 7 9 7M30 203l-9 7 9 7" />
+          <text className="cr-map-roadname" x="16" y="232">CONTRAFLOW · ALL LANES OUTBOUND</text>
+          <text className="cr-map-roadname" x="16" y="248">← TO BATON ROUGE</text>
+        </g>
+      )}
+
+      <PlateHead title="NEW ORLEANS — OPERATIONS BOARD" />
+      <North x={672} y={384} />
+    </>
+  );
+}
+
+/* ── Odisha, Saturday 12 October 2013 ────────────────────────────────────
+   The south Odisha coast running north-east along the Bay of Bengal: Ganjam
+   and Gopalpur (the forecast landfall), Puri and Khurda with the Chilika
+   lagoon, Jagatsinghpur and Paradip; Andhra Pradesh beyond Ganjam to the
+   south-west. Ports and districts are the ones the slips name. The shelter
+   squares restate cited items (cyclone shelters across the coastal
+   districts, Ganjam's people in shelters for the night); they are not
+   located. */
+
+function PhailinBoard({ zoneClass, shape, word, warned, sea, mini }: Board) {
+  const coast = 'M0 362C120 340 230 312 330 272S520 196 600 160S690 110 720 96';
+  return (
+    <>
+      {/* The Bay of Bengal and the coast */}
+      <path d={`${coast}V400H0z`} fill={`url(#${sea})`} />
+      <path d={coast} className="cr-map-coast" />
+      <text className="cr-map-sea-label" x="560" y="318" textAnchor="middle">BAY OF BENGAL</text>
+
+      <text className="cr-map-label" x="150" y="112">ODISHA</text>
+      <path className="cr-map-boundary" d="M74 352L58 296L66 236L48 180" />
+      <text className="cr-map-minor" x="10" y="166">↙ ANDHRA PRADESH</text>
+
+      {/* ZONE — Ganjam, the landfall district */}
+      <g className={zoneClass('ganjam-coast')}>
+        {shape('ganjam-coast', 'M82 344L190 320L300 280L300 186L82 236z')}
+        <text className="cr-zone-label" x="96" y="262">GANJAM</text>
+        <text className="cr-zone-state" x="96" y="278">{word('ganjam-coast')}</text>
+        {warned('ganjam-coast') && <text className="cr-zone-state cr-zone-warned" x="96" y="294">WARNED BY YOU</text>}
+        <rect x="244" y="222" width="11" height="11" className="cr-map-shelter" />
+      </g>
+
+      {/* ZONE — Puri and Khurda, with the Chilika lagoon */}
+      <g className={zoneClass('puri-khurda')}>
+        {shape('puri-khurda', 'M320 270L430 226L520 190L520 96L320 170z')}
+        <ellipse cx="362" cy="246" rx="30" ry="10" className="cr-map-water" transform="rotate(-22 362 246)" />
+        <text className="cr-zone-label" x="334" y="192">PURI · KHURDA</text>
+        <text className="cr-zone-state" x="334" y="208">{word('puri-khurda')}</text>
+        {warned('puri-khurda') && <text className="cr-zone-state cr-zone-warned" x="334" y="224">WARNED BY YOU</text>}
+        <rect x="480" y="150" width="11" height="11" className="cr-map-shelter" />
+      </g>
+
+      {/* ZONE — Jagatsinghpur and the port of Paradip */}
+      <g className={zoneClass('jagatsinghpur')}>
+        {shape('jagatsinghpur', 'M536 186L620 152L706 106L706 58L536 70z')}
+        <text className="cr-zone-label" x="548" y="92">JAGATSINGHPUR</text>
+        <text className="cr-zone-state" x="548" y="108">{word('jagatsinghpur')}</text>
+        {warned('jagatsinghpur') && <text className="cr-zone-state cr-zone-warned" x="548" y="124">WARNED BY YOU</text>}
+        <rect x="680" y="76" width="11" height="11" className="cr-map-shelter" />
+      </g>
+
+      {/* Coastal towns and ports named in the slips */}
+      <circle cx="232" cy="306" r="4.5" className="cr-map-town" />
+      <text className="cr-map-minor" x="226" y="334">GOPALPUR</text>
+      <text className="cr-map-minor" x="356" y="290">CHILIKA</text>
+      <circle cx="470" cy="214" r="4" className="cr-map-town" />
+      <text className="cr-map-minor" x="478" y="238">PURI</text>
+      <circle cx="642" cy="140" r="4" className="cr-map-town" />
+      <text className="cr-map-minor" x="650" y="164">PARADIP</text>
+
+      {/* Key for the shelter squares, set in the sea */}
+      {!mini && (
+        <>
+          <rect x="470" y="366" width="11" height="11" className="cr-map-shelter" />
+          <text className="cr-map-minor" x="488" y="376">CYCLONE SHELTERS</text>
+        </>
+      )}
+
+      <PlateHead title="SOUTH ODISHA COAST — OPERATIONS BOARD" />
+      <North x={28} y={388} />
     </>
   );
 }

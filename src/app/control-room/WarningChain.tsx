@@ -43,16 +43,19 @@ export type ChainSnapshot = {
 
 const stampOf = (t: Scenario['timesteps'][number]) => `${t.approx ? '≈' : ''}${t.time}`;
 
-/** The chain as the cited items up to and including decision `uptoIndex` show it. */
-export function deriveChain(scenario: Scenario, uptoIndex: number): ChainSnapshot {
+/** The chain as the cited items up to and including decision `uptoIndex` show
+ *  it — or, with `uptoItem`, only that decision's first `uptoItem` items
+ *  (picture mode plays an hour's slips one beat at a time). */
+export function deriveChain(scenario: Scenario, uptoIndex: number, uptoItem?: number): ChainSnapshot {
   const allZones = scenario.scoring.at_risk_zones.map((z) => z.id);
   const snap: ChainSnapshot = {
     forecast: [],
     channels: { siren: [], phone: [], broadcast: [], social: [] },
     reach: { siren: {}, phone: {}, broadcast: {}, social: {} },
   };
-  for (const t of scenario.timesteps.slice(0, uptoIndex + 1)) {
-    for (const info of t.info_available) {
+  scenario.timesteps.slice(0, uptoIndex + 1).forEach((t, ti) => {
+    const items = ti === uptoIndex && uptoItem !== undefined ? t.info_available.slice(0, uptoItem) : t.info_available;
+    for (const info of items) {
       for (const c of info.chain ?? []) {
         const seen: Seen = { state: c.state, at: c.at, by: stampOf(t), zones: c.zones ?? info.zones ?? allZones };
         if (c.link === 'forecast') { snap.forecast.push(seen); continue; }
@@ -60,7 +63,7 @@ export function deriveChain(scenario: Scenario, uptoIndex: number): ChainSnapsho
         if (c.state === 'used' || c.state === 'cut') for (const z of seen.zones) snap.reach[c.link][z] = seen;
       }
     }
-  }
+  });
   return snap;
 }
 
@@ -91,6 +94,15 @@ function looks(s: ChainSnapshot): Map<string, string> {
 export function chainChanges(scenario: Scenario, index: number): Set<string> {
   const before = looks(deriveChain(scenario, index - 1));
   const after = looks(deriveChain(scenario, index));
+  const fresh = new Set<string>();
+  after.forEach((v, k) => { if (before.get(k) !== v) fresh.add(k); });
+  return fresh;
+}
+
+/** What one slip (decision `index`, item `item`) changed on the chain. */
+export function chainChangesAt(scenario: Scenario, index: number, item: number): Set<string> {
+  const before = looks(deriveChain(scenario, index, item));
+  const after = looks(deriveChain(scenario, index, item + 1));
   const fresh = new Set<string>();
   after.forEach((v, k) => { if (before.get(k) !== v) fresh.add(k); });
   return fresh;

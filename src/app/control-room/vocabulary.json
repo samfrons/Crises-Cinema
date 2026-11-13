@@ -26,6 +26,38 @@
     "states": ["used", "cut", "unused", "pending"],
     "label_keys": ["forecast", "desk", "siren", "phone", "broadcast", "social"]
   },
+  "readings": {
+    "_comment": "Instrument readings drawn on a slip (glyphs.tsx READING_GLYPHS). `label` is what the drawing prints; `says` is a case-insensitive pattern the item's own text must match, so a drawn state is always one the slip states in words.",
+    "above-alert": { "label": "past alert", "says": "alert threshold" },
+    "falling": { "label": "falling", "says": "\\bfalling\\b" },
+    "surged": { "label": "surged", "says": "\\bsurged\\b" },
+    "filling": { "label": "filling fast", "says": "\\bfilling fast\\b" },
+    "may-fail": { "label": "may fail", "says": "\\bmay (fail|break)\\b" },
+    "good": { "label": "good", "says": "\\bgood water (supply|pressure)\\b" },
+    "low": { "label": "low", "says": "\\bget(ting)? low\\b" },
+    "nothing": { "label": "nothing", "says": "\\bgot nothing\\b" },
+    "contained": { "label": "contained", "says": "\\bcontained\\b" },
+    "flaring": { "label": "flaring up", "says": "\\bflaring up\\b" }
+  },
+  "hazards": {
+    "_comment": "Hazard families (hazards.ts). A scenario's `hazard` picks the FIRST family whose `match` pattern it contains (case-insensitive), so order matters: fire, then storm, then water. `states` are the board's words for watch / signal / impact. The build refuses a playable scenario whose hazard names no family. Documented in data/scenarios/README.md.",
+    "fire": {
+      "match": "fire|bushfire|wildland",
+      "states": { "watch": "red flag", "signal": "fire reported", "impact": "burning" }
+    },
+    "storm": {
+      "match": "cyclone|hurricane|typhoon",
+      "states": { "watch": "warning in force", "signal": "winds measured", "impact": "storm ashore" }
+    },
+    "water": {
+      "match": "flood|dam|levee|rain|river|surge",
+      "states": { "watch": "red warning", "signal": "gauge alert", "impact": "flooding" }
+    }
+  },
+  "headline": {
+    "_comment": "Picture mode's lower third (ControlRoomGame PictureStage). Every item of a playable scenario carries a `headline`: a contiguous, character-exact fragment of its own `text`, at most `max` characters. The build refuses anything else.",
+    "max": 90
+  },
   "compass": {
     "N": "north",
     "NE": "north-?east",

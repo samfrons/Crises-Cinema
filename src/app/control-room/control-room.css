@@ -136,7 +136,9 @@
   box-shadow: 4px 4px 0 var(--ink);
   transition: box-shadow var(--t-mid) var(--ease), transform var(--t-mid) var(--ease), border-color var(--t-fast) var(--ease);
 }
-@media (hover: hover) { .cr-card:hover { border-color: var(--ember); box-shadow: 6px 6px 0 var(--ember); transform: translate(-2px, -2px); } }
+/* Hover draws the card up out of its drawer, like a folder pulled from a
+   cabinet: it rises clear and its block shadow lengthens beneath it. */
+@media (hover: hover) { .cr-card:hover { border-color: var(--ember); box-shadow: 4px 11px 0 var(--ember); transform: translateY(-7px); } }
 .cr-card:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); transition-duration: var(--t-fast); transition-timing-function: var(--ease-press); }
 .cr-card-date, .cr-card-meta {
   font-family: var(--data);
@@ -165,7 +167,7 @@
 .cr-card-arrow { display: inline-block; transition: transform var(--t-mid) var(--ease); }
 @media (hover: hover) { .cr-card:hover .cr-card-arrow { transform: translateX(4px); } }
 .cr-card:focus-visible .cr-card-arrow { transform: translateX(4px); }
-.cr-card:focus-visible { border-color: var(--ember); box-shadow: 4px 4px 0 var(--ember); }
+.cr-card:focus-visible { border-color: var(--ember); box-shadow: 4px 11px 0 var(--ember); transform: translateY(-7px); }
 .cr-card-glyph { color: var(--ember); flex-shrink: 0; }
 .cr-card-stub {
   cursor: default;
@@ -255,9 +257,10 @@
   .cr-console-title { display: block; flex: 1; padding-left: 14px; border-left: 1px solid rgba(241, 232, 213, 0.25); }
 }
 
-/* One pip per decision point: hollow ahead, ringed now, filled square once
-   called on the historical path, an ember diamond where you left it. Shape
-   carries the meaning as well as tone. */
+/* One pip per decision point: hollow ahead, ringed now, a filled square once
+   called on the historical path, a filled diamond where you left it. Shape
+   alone carries the meaning: leaving the path is not drawn as an error, and
+   ember (interaction only) marks just the decision on the desk now. */
 .cr-pips { display: flex; align-items: center; gap: 7px; margin-left: auto; }
 .cr-pips i {
   width: 10px;
@@ -268,7 +271,7 @@
 .cr-pips i.is-kept { background: var(--paper); border-color: var(--paper); }
 /* A diamond is a square turned 45°: scaled so its diagonal matches the
    squares' side, the row reads as evenly spaced marks, not a jitter. */
-.cr-pips i.is-diverged { background: var(--ember); border-color: var(--paper); transform: rotate(45deg) scale(0.78); }
+.cr-pips i.is-diverged { background: var(--paper); border-color: var(--paper); transform: rotate(45deg) scale(0.78); }
 .cr-pips i.is-now { border: 2px solid var(--paper); border-radius: 50%; box-shadow: 0 0 0 2.5px var(--ember); }
 @media (min-width: 720px) { .cr-pips { gap: 9px; } .cr-pips i { width: 12px; height: 12px; } }
 
@@ -302,39 +305,32 @@
   background: rgba(241, 232, 213, 0.1);
   overflow: hidden;
 }
+/* Marks ride full-width carriers translated along the rail (transform only);
+   the bar itself is the carrier's ::before at its left edge. The sweep is the
+   advance beat's needle: 600ms, a breath after the press. */
 .cr-daystrip-elapsed {
   position: absolute;
-  inset: 0 auto 0 0;
+  inset: 0;
   background: rgba(241, 232, 213, 0.26);
-  transition: width 0.6s ease;
+  transform-origin: left center;
+  transition: transform 600ms var(--ease) 100ms;
 }
-.cr-daystrip-hour {
+.cr-daystrip-hour, .cr-daystrip-tick, .cr-daystrip-needle {
+  position: absolute;
+  inset: 0;
+  transition: transform 600ms var(--ease) 100ms;
+}
+.cr-daystrip-hour::before, .cr-daystrip-tick::before, .cr-daystrip-needle::before {
+  content: '';
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 1px;
-  background: rgba(241, 232, 213, 0.28);
-  transition: left 0.6s ease;
+  left: 0;
 }
-.cr-daystrip-tick {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  margin-left: -1px;
-  background: var(--paper);
-  transition: left 0.6s ease;
-}
-.cr-daystrip-tick.is-diverged { width: 4px; margin-left: -2px; background: var(--ember); box-shadow: 0 0 0 1px var(--paper); }
-.cr-daystrip-needle {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  margin-left: -2px;
-  background: var(--ember);
-  transition: left 0.6s ease;
-}
+.cr-daystrip-hour::before { width: 1px; background: rgba(241, 232, 213, 0.28); }
+.cr-daystrip-tick::before { width: 2px; margin-left: -1px; background: var(--paper); }
+.cr-daystrip-tick.is-diverged::before { width: 4px; margin-left: -2px; background: var(--ember); box-shadow: 0 0 0 1px var(--paper); }
+.cr-daystrip-needle::before { width: 4px; margin-left: -2px; background: var(--ember); }
 .cr-daystrip-fog {
   position: absolute;
   inset: 0 0 0 auto;
@@ -365,7 +361,7 @@
   padding: 0 0 var(--s5) 18px;
   border-left: 2px solid var(--ink);
   scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 14px);
-  animation: cr-arrive var(--t-slow) var(--ease) both;
+  animation: cr-arrive var(--t-slow) var(--ease) var(--beat, 0ms) both;
 }
 .cr-entry::before {
   content: '';
@@ -406,7 +402,7 @@
   margin: 0 0 var(--s3);
   padding-bottom: var(--s1);
   background: linear-gradient(var(--ink), var(--ink)) left bottom / 100% 1px no-repeat;
-  animation: cr-rule var(--t-slow) var(--ease) 60ms both;
+  animation: cr-rule var(--t-slow) var(--ease) calc(60ms + var(--beat, 0ms)) both;
 }
 /* Stamps and titles take focus only so keyboard and screen-reader users land
    on the new entry; they are not controls, so no focus ring. */
@@ -452,8 +448,11 @@
   border: 1px solid var(--rule);
   border-left: 3px solid var(--ink-soft);
   padding: 12px 16px 14px 14px;
-  animation: cr-arrive var(--t-slow) var(--ease) both;
-  animation-delay: calc(var(--i, 0) * 90ms + 120ms);
+  /* The staging clock (stage.ts: leaderAt, leaderMs): when this slip's
+     leader starts printing, and how long it takes, a character a step. */
+  --at: calc(var(--beat, 0ms) + 80ms + min(var(--i, 0) * 110ms, 440ms));
+  --type: min(calc(var(--ch, 14) * 16ms), 300ms);
+  animation: cr-slip-in var(--t-fast) var(--ease) var(--at) both;
 }
 .cr-slip-forecast, .cr-slip-gauge { border-left-color: var(--ink); }
 .cr-slip-field_report { border-left: 6px solid var(--ink); }
@@ -487,7 +486,7 @@
   margin: var(--s2) 0 0;
   color: var(--ink);
   animation: cr-arrive var(--t-slow) var(--ease) both;
-  animation-delay: calc(var(--i, 0) * 90ms + 120ms);
+  animation-delay: calc(var(--beat, 0ms) + min(var(--i, 0) * 110ms, 550ms) + 300ms);
 }
 .cr-boardline strong { font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
 .cr-boardline-tag {
@@ -507,7 +506,11 @@
 .cr-boardline-you .cr-boardline-item::before { content: '▪'; display: inline-block; width: 1.3em; text-indent: 0; color: var(--ink); }
 
 /* Your call */
-.cr-call { margin-top: var(--s4); animation: cr-arrive var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 90ms + 180ms); }
+.cr-call {
+  margin-top: var(--s4);
+  --call-at: calc(var(--beat, 0ms) + min(var(--i, 0) * 110ms, 660ms) + 420ms);
+  animation: cr-arrive var(--t-slow) var(--ease) var(--call-at) both;
+}
 .cr-call-head {
   font-family: var(--data);
   font-size: 12px;
@@ -791,6 +794,15 @@
 .cr-map-highway { stroke-width: 3.2; stroke: rgba(25, 20, 16, 0.85); }
 .cr-map-shelter { fill: var(--paper); stroke: var(--ink); stroke-width: 2; }
 .cr-map-inset { fill: none; stroke: var(--ink); stroke-width: 1.2; stroke-dasharray: 2 4; }
+/* New Orleans: the river drawn as two banks with water between; the canals;
+   the contraflow chevrons (a direction of travel, ink, never ember). */
+.cr-map-riverbank { fill: none; stroke: rgba(25, 20, 16, 0.6); stroke-width: 22; }
+.cr-map-riverbed { fill: none; stroke: var(--paper); stroke-width: 18.5; }
+.cr-map-riverhatch { fill: none; stroke-width: 18.5; }
+.cr-map-canal { fill: none; stroke: rgba(25, 20, 16, 0.6); stroke-width: 3; }
+.cr-map-flow path { fill: none; stroke: var(--ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+/* Odisha: the state line, dashed like the Lahaina inset frame. */
+.cr-map-boundary { fill: none; stroke: rgba(25, 20, 16, 0.5); stroke-width: 1.4; stroke-dasharray: 6 4 1.5 4; }
 .cr-map-contour path, .cr-map-ridge path { fill: none; stroke: rgba(25, 20, 16, 0.35); stroke-width: 1.4; }
 
 /* The title block: a paper band ruled off the top of the plate. */
@@ -815,7 +827,7 @@
   fill: transparent;
   stroke: rgba(25, 20, 16, 0.3);
   stroke-width: 1.4;
-  transition: fill var(--t-slow) var(--ease), stroke var(--t-slow) var(--ease);
+  transition: fill var(--t-slow) var(--ease) var(--beat, 0ms), stroke var(--t-slow) var(--ease) var(--beat, 0ms);
 }
 .cr-zone .cr-zone-label { font-family: var(--data); font-size: 14px; font-weight: 700; letter-spacing: 0.05em; fill: var(--ink); }
 .cr-zone .cr-zone-state { font-family: var(--data); font-size: 12.5px; letter-spacing: 0.06em; fill: var(--ink-soft); }
@@ -1058,7 +1070,7 @@
    mounts, and any rise would leave it short of its scroll margin — tucking
    the band's ember head-rule under the console. */
 @keyframes cr-fade { from { opacity: 0; } to { opacity: 1; } }
-.cr-debrief { padding: 0; scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h)); animation: cr-fade var(--t-slow) var(--ease) both; }
+.cr-debrief { padding: 0; scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h)); animation: cr-fade var(--t-slow) var(--ease) var(--beat, 0ms) both; }
 
 .cr-endband {
   background-color: var(--ink);
@@ -1078,7 +1090,7 @@
   height: 6px;
   background: var(--ember);
   transform-origin: left center;
-  animation: rule-draw var(--t-slow) var(--ease) 280ms both;
+  animation: rule-draw var(--t-slow) var(--ease) calc(280ms + var(--beat, 0ms)) both;
 }
 @keyframes cr-toll-set {
   0% { opacity: 0; transform: scale(1.06); }
@@ -1137,7 +1149,7 @@
   color: var(--paper);
   font-variant-numeric: tabular-nums;
   transform-origin: left bottom;
-  animation: cr-toll-set var(--t-slow) var(--ease-press) 640ms both;
+  animation: cr-toll-set var(--t-slow) var(--ease-press) calc(640ms + var(--beat, 0ms)) both;
 }
 .cr-toll-label {
   font-family: var(--data);
@@ -1147,7 +1159,7 @@
   background: var(--ember);
   color: #fff;
   padding: 4px 10px;
-  animation: cr-label-in var(--t-mid) var(--ease) 940ms both;
+  animation: cr-label-in var(--t-mid) var(--ease) calc(940ms + var(--beat, 0ms)) both;
 }
 .cr-toll-label .cr-cite a { color: #fff; }
 .cr-toll-note {
@@ -1240,6 +1252,20 @@
 .cr-score-grid dd { margin: 0; }
 .cr-score-grid .big { font-family: var(--poster); font-size: 34px; line-height: 1; text-transform: uppercase; }
 .cr-score-grid .sub { font-family: var(--data); font-size: 11.5px; line-height: 1.5; color: var(--ink-soft); margin-top: 6px; }
+.cr-score-grid .sub a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--ember); }
+/* Warnings issued before the clock opened: a hard-ruled typewriter slip under
+   the chart, so the day's HH:MM is never read as the officials' lead time. */
+.cr-early {
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding: 12px 0 14px;
+  margin: 0 0 var(--s3);
+  max-width: 66ch;
+  scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 14px);
+}
+.cr-early-tag { font-family: var(--data); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 6px; }
+.cr-early-body { font-size: 14.5px; line-height: 1.6; margin: 0; }
+.cr-early-body + .cr-early-body { margin-top: 8px; color: var(--ink-soft); }
 .cr-score-caveat { font-size: 14.5px; line-height: 1.6; color: var(--ink-soft); max-width: 66ch; margin: 0; }
 
 .cr-meter {
@@ -1253,79 +1279,168 @@
 }
 .cr-meter span { display: block; height: 100%; background: var(--ink); }
 .cr-meter i { flex: 1; height: 100%; background: var(--paper-deep); }
-.cr-meter i.is-diverged { background: var(--ember); }
+.cr-meter i.is-diverged { background: var(--ink); }
 
-/* The timing chart, on paper */
-.cr-timing { margin: 0 0 var(--s3); max-width: 760px; }
-.cr-timing-key {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 18px;
-  margin: 0 0 6px;
-  font-family: var(--data);
-  font-size: 10.5px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+/* ── The reckoning ─────────────────────────────────────────────────────────
+   The debrief's centerpiece: three lanes on the day's clock, measured to the
+   impact line. Shape carries the lane (disc / square / hollow diamond on a
+   dashed rail); ember marks only the impact, a status. Bars grow out of the
+   impact line, staggered; reduced motion sets them down struck twice. */
+.cr-rk-dek { font-size: 15.5px; line-height: 1.6; max-width: 66ch; margin: 0 0 var(--s4); }
+.cr-rk-glyph { display: inline-block; vertical-align: -1px; overflow: visible; flex: none; }
+.cr-rk-glyph.is-you circle { fill: var(--ink); }
+.cr-rk-glyph.is-record rect { fill: var(--ink-soft); }
+.cr-rk-glyph.is-bench path { fill: none; stroke: var(--ink); stroke-width: 1.4; }
+
+.cr-rk-figs { display: grid; grid-template-columns: 1fr; gap: var(--s3) 28px; margin: 0 0 var(--s3); }
+@media (min-width: 640px) { .cr-rk-figs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.cr-rk-fig { border-top: 2px solid var(--ink); padding: 10px 0 0; position: relative; animation: cr-arrive var(--t-slow) var(--ease) var(--beat, 0ms) both; }
+.cr-rk-fig.is-record { animation-delay: calc(90ms + var(--beat, 0ms)); }
+.cr-rk-fig.is-bench { animation-delay: calc(180ms + var(--beat, 0ms)); border-top-style: dashed; }
+.cr-rk-fig dt {
+  display: flex; align-items: center; gap: 7px;
+  font-family: var(--data); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft);
+  margin-bottom: 6px;
 }
-.cr-timing-key span { display: inline-flex; align-items: center; gap: 6px; }
-.cr-timing-key svg { width: 13px; height: 12px; overflow: visible; }
-.cr-timing-plot { position: relative; }
-.cr-timing-plot > svg { display: block; width: 100%; height: auto; }
-.cr-timing-impact { fill: rgba(184, 50, 26, 0.12); stroke: var(--ember); stroke-width: 1; }
-.cr-timing-impact-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.14em; fill: var(--ember); }
-.cr-timing-axis { stroke: var(--ink); stroke-width: 1.2; }
-.cr-timing-tick { stroke: var(--ink-soft); stroke-width: 1; }
-.cr-timing-hour { font-family: var(--data); font-size: 10px; fill: var(--ink-soft); font-variant-numeric: tabular-nums; }
-.cr-timing-lane { font-family: var(--data); font-size: 10px; letter-spacing: 0.2em; fill: var(--ink-soft); }
-.cr-timing-lanerail { stroke: var(--rule); stroke-width: 1; }
-.cr-timing-ring { fill: var(--cr-sheet); }
-.cr-timing-dot { fill: var(--paper); stroke: var(--ink); stroke-width: 1.6; }
-.cr-timing-dot.is-alert { fill: var(--ink); }
-.cr-timing-dot.is-they { fill: var(--ink-soft); stroke: var(--ink-soft); }
-.cr-timing-hit { fill: transparent; cursor: crosshair; }
-.cr-timing-mark:hover .cr-timing-dot { stroke: var(--ember); stroke-width: 2.2; }
-.cr-timing-flag line { stroke: var(--ink); stroke-width: 1; }
-.cr-timing-flag text { font-family: var(--data); font-size: 10px; letter-spacing: 0.1em; fill: var(--ink); }
-.cr-timing-flag.is-they line { stroke: var(--ink-soft); stroke-dasharray: 3 3; }
-.cr-timing-flag.is-they text { fill: var(--ink-soft); }
-.cr-timing-flag-muted { font-family: var(--data); font-size: 10px; letter-spacing: 0.1em; fill: var(--ember); }
-.cr-timing.is-compact .cr-timing-hour,
-.cr-timing.is-compact .cr-timing-lane,
-.cr-timing.is-compact .cr-timing-impact-label,
-.cr-timing.is-compact .cr-timing-flag text,
-.cr-timing.is-compact .cr-timing-flag-muted { font-size: 11.5px; letter-spacing: 0.06em; }
-/* Hover read-out: a slip of ink above the mark. */
-.cr-timing-tip {
-  position: absolute;
-  z-index: 2;
-  transform: translate(-12px, calc(-100% - 14px));
-  display: grid;
-  gap: 2px;
-  width: max-content;
-  max-width: min(280px, 70vw);
-  padding: 8px 10px 9px;
-  background: var(--ink);
-  color: var(--paper);
-  font-family: var(--data);
-  font-size: 11px;
-  line-height: 1.4;
-  pointer-events: none;
-  box-shadow: 3px 3px 0 rgba(25, 20, 16, 0.18);
+.cr-rk-fig dd { margin: 0; }
+.cr-rk-big { font-family: var(--poster); font-size: clamp(38px, 5.6vw, 56px); white-space: nowrap; line-height: 0.92; text-transform: uppercase; }
+.cr-rk-sub { font-family: var(--data); font-size: 11.5px; line-height: 1.5; color: var(--ink-soft); margin-top: 6px !important; }
+/* The success inversion: where the record met the benchmark, its tile is
+   printed in reverse and stamped, as an exhibitor's "held over" sticker. */
+.cr-rk.is-met .cr-rk-fig.is-record { background: var(--ink); color: var(--paper); padding: 10px 12px 12px; }
+.cr-rk.is-met .cr-rk-fig.is-record dt,
+.cr-rk.is-met .cr-rk-fig.is-record .cr-rk-sub { color: var(--paper-deep); }
+.cr-rk.is-met .cr-rk-fig.is-record .cr-rk-glyph rect { fill: var(--paper); }
+.cr-rk-stamp {
+  display: inline-block; margin-top: 10px !important; padding: 4px 9px 3px;
+  border: 2px solid currentColor;
+  font-family: var(--data); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
+  rotate: -3deg; /* its own property, so the stamp's arrival keeps the tilt */
+  animation: cr-stamp-down var(--t-mid) var(--ease-press) calc(520ms + var(--beat, 0ms)) both;
 }
-.cr-timing-tip.is-left { transform: translate(calc(-100% + 12px), calc(-100% - 14px)); }
-.cr-timing-tip-head { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(241, 232, 213, 0.75); }
-.cr-timing-tip-text { text-transform: uppercase; letter-spacing: 0.04em; }
-.cr-timing-tip-note { color: rgba(241, 232, 213, 0.75); text-transform: capitalize; }
-.cr-timing-caption {
-  font-family: var(--data);
-  font-size: 11.5px;
-  line-height: 1.6;
-  color: var(--ink-soft);
-  margin-top: 8px;
-  max-width: 62ch;
+.cr-rk-verdict { font-size: 16px; line-height: 1.6; max-width: 66ch; margin: 0 0 var(--s4); }
+
+.cr-rk-lanes { margin: 0 0 var(--s4); max-width: 760px; }
+.cr-rk-lanes > svg { display: block; width: 100%; height: auto; overflow: visible; }
+.cr-rk-window { fill: color-mix(in srgb, var(--ember) 11%, transparent); }
+.cr-rk-impact { stroke: var(--ember); stroke-width: 1.6; }
+.cr-rk-impact-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.14em; fill: var(--ember); }
+.cr-rk-guide { stroke: var(--ink-soft); stroke-width: 1; stroke-dasharray: 2 4; }
+.cr-rk-lane-name { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.18em; fill: var(--ink-soft); }
+.cr-rk-rail { stroke: var(--rule); stroke-width: 1; }
+.cr-rk-lane.is-bench .cr-rk-rail { stroke: var(--ink-soft); stroke-dasharray: 5 4; }
+.cr-rk-step { fill: var(--paper); stroke: var(--ink-soft); stroke-width: 1; }
+.cr-rk-bar { stroke: none; transform-box: fill-box; transform-origin: right center; animation: cr-rk-grow var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 120ms + 220ms + var(--beat, 0ms)); }
+.cr-rk-bar.is-after { transform-origin: left center; }
+.cr-rk-lane.is-you .cr-rk-bar { fill: var(--ink); }
+.cr-rk-lane.is-record .cr-rk-bar { fill: var(--ink-soft); }
+.cr-rk-lane.is-bench .cr-rk-bar { stroke: var(--ink); stroke-width: 1; }
+.cr-rk-hatch-line { stroke: var(--ink); stroke-width: 1.3; }
+.cr-rk-bar-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.08em; fill: var(--ink); font-variant-numeric: tabular-nums; }
+.cr-rk-mark { animation: cr-fade var(--t-mid) var(--ease) both; animation-delay: calc(var(--i, 0) * 120ms + 440ms + var(--beat, 0ms)); }
+.cr-rk-ring { fill: var(--paper); }
+.cr-rk-lane.is-you .cr-rk-dot { fill: var(--ink); }
+.cr-rk-lane.is-record .cr-rk-dot { fill: var(--ink-soft); }
+.cr-rk-lane.is-bench .cr-rk-dot { fill: var(--paper); stroke: var(--ink); stroke-width: 1.8; }
+.cr-rk-mark-time { font-family: var(--data); font-size: 10.5px; fill: var(--ink); font-variant-numeric: tabular-nums; }
+.cr-rk-never { font-family: var(--data); font-size: 10px; letter-spacing: 0.12em; fill: var(--ink); }
+.cr-rk-early path { fill: none; stroke: var(--ink-soft); stroke-width: 1.4; stroke-dasharray: 4 3; }
+.cr-rk-early text { font-family: var(--data); font-size: 10px; letter-spacing: 0.08em; fill: var(--ink-soft); }
+.cr-rk-axis { stroke: var(--ink); stroke-width: 1.2; }
+.cr-rk-tick { stroke: var(--ink-soft); stroke-width: 1; }
+.cr-rk-hour { font-family: var(--data); font-size: 10px; fill: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.cr-rk-lanes.is-compact .cr-rk-impact-label, .cr-rk-lanes.is-compact .cr-rk-lane-name,
+.cr-rk-lanes.is-compact .cr-rk-bar-label, .cr-rk-lanes.is-compact .cr-rk-mark-time,
+.cr-rk-lanes.is-compact .cr-rk-never, .cr-rk-lanes.is-compact .cr-rk-early text,
+.cr-rk-lanes.is-compact .cr-rk-hour { font-size: 11.5px; letter-spacing: 0.04em; }
+.cr-rk-caption { font-family: var(--data); font-size: 11.5px; line-height: 1.6; color: var(--ink-soft); margin-top: 8px; max-width: 62ch; }
+@keyframes cr-rk-grow { from { transform: scaleX(0); } to { transform: none; } }
+
+.cr-rk-tag {
+  font-family: var(--data); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-soft);
+  border-top: 1px solid var(--ink); padding-top: 8px; margin: 0 0 10px;
 }
-.cr-timing-caption em { font-style: normal; color: var(--ink); }
+.cr-rk-note { font-size: 13.5px; line-height: 1.55; color: var(--ink-soft); max-width: 66ch; margin: 10px 0 0; }
+.cr-rk-note a { color: var(--ink); text-decoration-color: var(--ember); }
+.cr-rk-pair { display: grid; grid-template-columns: 1fr; gap: var(--s4) 36px; margin: 0 0 var(--s5); }
+@media (min-width: 860px) { .cr-rk-pair { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); align-items: start; } }
+.cr-rk-bench-lede { font-size: 14.5px; line-height: 1.55; margin: 0 0 var(--s3); }
+.cr-rk-calls { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s3); }
+.cr-rk-calls li { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; align-items: first baseline; }
+.cr-rk-call-time { font-family: var(--poster); font-size: 30px; line-height: 1; }
+.cr-rk-call-basis { font-size: 15px; line-height: 1.55; margin: 0; }
+.cr-rk-call-meta { font-family: var(--data); font-size: 11px; line-height: 1.5; color: var(--ink-soft); margin: 4px 0 0; overflow-wrap: anywhere; }
+
+.cr-rk-context { border: 1px solid var(--ink); background: var(--paper-lit); padding: 14px 16px 16px; }
+.cr-rk-context .cr-rk-tag { border-top: 0; padding-top: 0; color: var(--ink); }
+.cr-rk-context-lede { font-size: 13.5px; line-height: 1.55; color: var(--ink-soft); margin: 0 0 12px; }
+.cr-rk-context ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.cr-rk-context li + li { border-top: 1px solid var(--rule); padding-top: 12px; }
+.cr-rk-context-about { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; margin: 0 0 4px; }
+.cr-rk-context blockquote { margin: 0; font-size: 15px; line-height: 1.5; }
+.cr-rk-context q { quotes: '“' '”'; }
+.cr-rk-context-caveat { font-size: 13px; line-height: 1.5; color: var(--ink-soft); margin: 6px 0 0; font-style: italic; }
+.cr-rk-context-cred { font-family: var(--data); font-size: 10.5px; line-height: 1.5; color: var(--ink-faint); margin: 6px 0 0; }
+
+.cr-rk-zones { margin: 0 0 var(--s5); max-width: 760px; }
+.cr-rk-zones table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.cr-rk-zones th, .cr-rk-zones td { text-align: left; padding: 8px 6px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: baseline; }
+.cr-rk-zones thead th { font-family: var(--data); font-weight: 400; font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); border-bottom: 1px solid var(--ink); }
+.cr-rk-zones thead th:first-child { width: 40%; }
+.cr-rk-zones tbody th { font-weight: 400; font-size: 14px; line-height: 1.35; overflow-wrap: anywhere; }
+.cr-rk-z-time { font-family: var(--data); font-size: 14px; font-variant-numeric: tabular-nums; }
+.cr-rk-z-none { font-family: var(--data); font-size: 11px; color: var(--ink-soft); }
+@media (max-width: 479px) { .cr-rk-zones thead th:first-child { width: 34%; } .cr-rk-zones thead th { letter-spacing: 0.04em; } }
+
+.cr-rk-ladder { margin: 0 0 var(--s4); max-width: 760px; }
+.cr-rk-rungs { list-style: none; margin: 0; padding: 0; }
+.cr-rk-rung { display: grid; grid-template-columns: 58px repeat(3, minmax(0, 1fr)); gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.cr-rk-rung-head { margin-top: var(--s3); padding: 0 0 6px; border-bottom: 1px solid var(--ink); font-family: var(--data); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+.cr-rk-rung-time { font-family: var(--data); font-size: 14px; font-variant-numeric: tabular-nums; }
+.cr-rk-pair-cell { display: grid; gap: 3px; min-width: 0; }
+.cr-rk-pair-row { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.cr-rk-meter { display: inline-flex; gap: 2px; min-width: 0; }
+.cr-rk-meter i { width: 14px; height: 8px; border: 1px solid var(--ink); flex: 0 1 auto; }
+.cr-rk-meter i.on { background: var(--ink); }
+.cr-rk-pair-row.is-record .cr-rk-meter i { border-color: var(--ink-soft); }
+.cr-rk-pair-row.is-record .cr-rk-meter i.on { background: var(--ink-soft); }
+/* Same call: the pair fuses into one double-height bar. */
+.cr-rk-rung.is-same .cr-rk-meter i { height: 19px; }
+.cr-rk-fused { font-family: var(--data); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); }
+.cr-rk-rung.is-apart .cr-rk-rung-time { font-weight: 700; }
+@media (max-width: 479px) {
+  .cr-rk-rung { grid-template-columns: 46px repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .cr-rk-meter i { width: 9px; }
+  .cr-rk-pair-row .cr-rk-glyph { display: none; }
+  .cr-rk-rung-time { font-size: 12.5px; }
+}
+.cr-rk-key { font-family: var(--data); font-size: 10.5px; line-height: 1.5; color: var(--ink-soft); margin: 8px 0 0; }
+.cr-rk-silent { font-size: 15px; line-height: 1.6; max-width: 66ch; margin: 0; padding-left: 14px; border-left: 3px solid var(--ink); }
+
+/* Score transparency: the rules in words, behind a hard-ruled fold. */
+.cr-howto { border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink); margin: 0 0 var(--s3); max-width: 70ch; }
+.cr-howto summary {
+  display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; list-style: none;
+  font-family: var(--data); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+}
+.cr-howto summary::-webkit-details-marker { display: none; }
+.cr-howto summary::before { content: '+'; display: inline-block; width: 1ch; transition: transform var(--t-fast) var(--ease); }
+.cr-howto[open] summary::before { content: '−'; }
+.cr-howto summary:hover { color: var(--ember); }
+.cr-howto summary:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+.cr-howto dl { margin: 0 0 var(--s3); }
+.cr-howto dt { font-family: var(--data); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; margin-top: 12px; }
+.cr-howto dd { margin: 4px 0 0; font-size: 14.5px; line-height: 1.55; color: var(--ink-soft); }
+.cr-howto-best { font-size: 14.5px; line-height: 1.55; margin: 0 0 var(--s3); padding-top: 12px; border-top: 1px solid var(--rule); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cr-rk-fig, .cr-rk-bar, .cr-rk-mark, .cr-rk-stamp { animation: none !important; }
+  /* Set down at once, struck twice out of register — the Control Room's
+     still equivalent of a mark arriving. */
+  .cr-rk-bar { filter: drop-shadow(3px 3px 0 color-mix(in srgb, var(--ink) 45%, transparent)); }
+  .cr-rk-stamp { box-shadow: 3px 3px 0 color-mix(in srgb, currentColor 45%, transparent); }
+  .cr-howto summary::before { transition: none; }
+}
 
 /* The inquiry */
 .cr-findings { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; max-width: 70ch; }
@@ -1414,7 +1529,7 @@
 .cr-zone .cr-zone-sweep {
   stroke: none;
   pointer-events: none;
-  animation: cr-sweep var(--t-slow) var(--ease) 120ms both;
+  animation: cr-sweep var(--t-slow) var(--ease) calc(120ms + var(--beat, 0ms)) both;
 }
 .cr-zone .cr-zone-sweep.is-signal { fill: rgba(25, 20, 16, 0.06); }
 
@@ -1429,9 +1544,9 @@
 .cr-map-origin.is-fresh .cr-map-origin-star {
   transform-box: fill-box;
   transform-origin: center;
-  animation: cr-mark-down var(--t-mid) var(--ease-press) 200ms both;
+  animation: cr-mark-down var(--t-mid) var(--ease-press) calc(200ms + var(--beat, 0ms)) both;
 }
-.cr-map-origin.is-fresh text { animation: cr-fade var(--t-mid) var(--ease) 300ms both; }
+.cr-map-origin.is-fresh text { animation: cr-fade var(--t-mid) var(--ease) calc(300ms + var(--beat, 0ms)) both; }
 .cr-leg-mark { color: var(--ink); }
 .cr-leg-mark .cr-leg-swatch { width: 14px; height: 14px; }
 .cr-leg-mark .cr-map-origin-star { stroke-width: 1.8; }
@@ -1444,7 +1559,7 @@
 .cr-map-wind-label { font-family: var(--data); font-size: 14px; font-weight: 700; letter-spacing: 0.1em; fill: var(--ink); }
 .cr-map-wind.is-fresh .cr-map-wind-arrow, .cr-map-wind.is-fresh .cr-map-wind-streak {
   stroke-dasharray: 1 1;
-  animation: cr-draw var(--t-slow) var(--ease) 200ms both;
+  animation: cr-draw var(--t-slow) var(--ease) calc(200ms + var(--beat, 0ms)) both;
 }
 .cr-boardlist-wind { border-left: 4px solid var(--rule); }
 .cr-boardlist-origin { display: block; color: var(--ink); text-transform: none; letter-spacing: 0.02em; font-weight: 400; }
@@ -1485,15 +1600,15 @@
 
 /* This hour's changes. A link now in use is drawn down the line; a cut
    link's two halves are laid, then the break is stamped across. */
-.cr-chain-edge.is-solid.is-fresh { stroke-dasharray: 1 1; animation: cr-draw var(--t-slow) var(--ease) 160ms both; }
-.cr-chain-edge.is-fresh .cr-chain-half { animation: cr-fade var(--t-mid) var(--ease) 120ms both; }
+.cr-chain-edge.is-solid.is-fresh { stroke-dasharray: 1 1; animation: cr-draw var(--t-slow) var(--ease) calc(160ms + var(--beat, 0ms)) both; }
+.cr-chain-edge.is-fresh .cr-chain-half { animation: cr-fade var(--t-mid) var(--ease) calc(120ms + var(--beat, 0ms)) both; }
 .cr-chain-edge.is-fresh .cr-chain-slash {
   transform-box: fill-box;
   transform-origin: center;
-  animation: cr-mark-down var(--t-mid) var(--ease-press) 300ms both;
+  animation: cr-mark-down var(--t-mid) var(--ease-press) calc(300ms + var(--beat, 0ms)) both;
 }
-.cr-chain-edge.is-pending.is-fresh { animation: cr-fade var(--t-slow) var(--ease) 160ms both; }
-.cr-chain-node.is-fresh rect { animation: cr-stamp-down var(--t-mid) var(--ease-press) 220ms both; transform-box: fill-box; transform-origin: center; }
+.cr-chain-edge.is-pending.is-fresh { animation: cr-fade var(--t-slow) var(--ease) calc(160ms + var(--beat, 0ms)) both; }
+.cr-chain-node.is-fresh rect { animation: cr-stamp-down var(--t-mid) var(--ease-press) calc(220ms + var(--beat, 0ms)) both; transform-box: fill-box; transform-origin: center; }
 
 /* The diagram in words, under it. */
 .cr-chainlist { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
@@ -1512,7 +1627,7 @@
 .cr-chainlist-what { color: var(--ink); text-transform: uppercase; letter-spacing: 0.06em; }
 
 /* In the log: the chain line, and on phones the chain at this hour. */
-.cr-chainline { animation: cr-arrive var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 90ms + 120ms); }
+.cr-chainline { animation: cr-arrive var(--t-slow) var(--ease) both; animation-delay: calc(var(--beat, 0ms) + min(var(--i, 0) * 110ms, 550ms) + 300ms); }
 .cr-chainline .cr-boardline { animation: none; }
 .cr-chainline .cr-chain { margin-top: var(--s2); max-width: 420px; }
 
@@ -1555,4 +1670,1984 @@
   .cr-map-wind.is-fresh,
   .cr-chain-edge.is-fresh,
   .cr-chain-node.is-fresh { filter: drop-shadow(2px 2px 0 rgba(25, 20, 16, 0.5)); }
+}
+
+
+/* ══ The engagement layer: the taught first hour, the terms, the second run ══
+   Interface teaching and the player's own memory, never record content. Ink
+   on paper like everything else; ember only where a hand is invited (the
+   note's button, the coached part's ring), never to encode anything. */
+
+/* Card: the memory line holds two lines of height whether or not this
+   browser has a run to report, so the grid never moves when it is read. */
+.cr-card-memory {
+  display: block;
+  min-height: calc(2 * 1.45em);
+  font-family: var(--data);
+  font-size: 12px;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  color: var(--ink-soft);
+  margin: -4px 0 6px;
+}
+.cr-card-memory.is-held { color: var(--ink); }
+@media (max-width: 699px) { .cr-card-memory { min-height: calc(3 * 1.45em); } }
+.cr-card-memory.is-held::before { content: '▪ '; }
+
+/* A desk note: a typed slip pinned beside the part it names, ink stock with
+   a notch pointing at it. It lands like a slip (the house arrival). */
+.cr-coach {
+  position: relative;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 16px 12px;
+  margin: 14px 0 6px;
+  max-width: 46ch;
+  box-shadow: 3px 3px 0 var(--ember);
+  animation: cr-arrive var(--t-slow) var(--ease) calc(420ms + var(--beat, 0ms)) both;
+  scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 24px);
+  scroll-margin-bottom: 120px;
+}
+.cr-coach::before {
+  content: '';
+  position: absolute;
+  left: 22px;
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+}
+.cr-coach.is-up::before { top: -16px; border-bottom-color: var(--ink); }
+.cr-coach.is-down::before { bottom: -16px; border-top-color: var(--ink); }
+.cr-coach.is-down { margin: 6px 0 16px; }
+.cr-coach-head {
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.78);
+  margin: 0 0 4px;
+}
+.cr-coach-text { margin: 0; font-size: 15.5px; line-height: 1.5; }
+.cr-coach-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin-top: 10px; }
+.cr-coach-next, .cr-coach-skip {
+  min-height: 40px;
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease), transform var(--t-fast) var(--ease-press);
+}
+.cr-coach-next {
+  padding: 8px 16px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1.5px solid var(--paper);
+}
+.cr-coach-skip {
+  padding: 8px 2px;
+  background: none;
+  border: 0;
+  color: var(--paper);
+  text-decoration: underline;
+  text-decoration-color: rgba(241, 232, 213, 0.5);
+  text-underline-offset: 3px;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-size: 13px;
+}
+@media (hover: hover) {
+  .cr-coach-next:hover { background: var(--ember); border-color: var(--ember); color: #fff; }
+  .cr-coach-skip:hover { text-decoration-color: var(--paper); }
+}
+.cr-coach-next:active { transform: translate(1px, 1px); }
+.cr-desk .cr-coach :focus-visible, .cr-console .cr-coach :focus-visible { outline: 3px solid var(--ember); outline-offset: 2px; }
+
+/* The clock's note hangs from the console strip, over the log. */
+.cr-coach-dock { position: absolute; top: 100%; left: 0; right: 0; pointer-events: none; }
+.cr-coach-dock .cr-coach { pointer-events: auto; margin-top: 12px; box-shadow: 3px 3px 0 var(--ember), 0 10px 30px rgba(25, 20, 16, 0.25); }
+.cr-coach-dock .cr-coach.is-up::before { border-bottom-color: var(--ink); }
+
+/* The part being named: an ember ring that pulses once on arrival (one
+   in-out over the slow step), then holds as a quiet dashed rule. */
+@keyframes cr-coach-ring {
+  from { box-shadow: 0 0 0 0 rgba(184, 50, 26, 0.55); }
+  to { box-shadow: 0 0 0 10px rgba(184, 50, 26, 0); }
+}
+.is-coached { outline: 2px dashed var(--ember); outline-offset: 4px; }
+.cr-slip.is-coached {
+  animation: cr-slip-in var(--t-fast) var(--ease) var(--at) both, cr-coach-ring var(--t-slow) var(--ease) calc(var(--at) + 600ms) 2 alternate both;
+}
+.cr-coach-target.is-coached, .cr-options.is-coached { animation: cr-coach-ring var(--t-slow) var(--ease) calc(480ms + var(--beat, 0ms)) 2 alternate; }
+.cr-console-clock.is-coached { outline-color: var(--paper); outline-offset: -2px; padding: 0 6px; }
+
+/* Between calls: how far through the record the player is. */
+.cr-advance-note {
+  font-family: var(--data);
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+  margin: 10px 0 0;
+  text-align: center;
+}
+@media (min-width: 760px) { .cr-advance-note { text-align: left; } }
+.cr-advance-note strong { color: var(--ink); font-weight: 700; }
+.cr-advance-note.is-penultimate { color: var(--ink); }
+.cr-advance-note.is-penultimate::before { content: '◆ '; color: var(--ink); }
+
+/* Terms of the desk: the briefing's fold-out list. */
+.cr-brief-again { margin-top: 8px; color: var(--ink); }
+.cr-terms { margin: 16px 0 4px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); max-width: 62ch; }
+.cr-terms summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.cr-terms summary::-webkit-details-marker { display: none; }
+.cr-terms summary::before { content: '+'; width: 1em; font-size: 16px; color: var(--ember); transition: transform var(--t-fast) var(--ease); }
+.cr-terms[open] summary::before { content: '–'; }
+.cr-terms-count { color: var(--ink-soft); letter-spacing: 0.06em; text-transform: none; margin-left: auto; }
+.cr-terms dl { margin: 4px 0 12px; display: grid; gap: 12px; }
+.cr-terms dt { font-family: var(--data); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; }
+.cr-terms dd { margin: 2px 0 0; font-size: 15px; line-height: 1.55; }
+.cr-terms-note { font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); font-style: italic; margin: 0 0 12px; }
+.cr-def-quote { quotes: '“' '”'; }
+
+/* A term in a slip: dotted underline, a 40px-tall hit area that does not
+   move the line, the definition printed under the slip as a footnote. */
+.cr-term {
+  position: relative;
+  display: inline;
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: help;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--ink-soft);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  transition: color var(--t-fast) var(--ease), text-decoration-color var(--t-fast) var(--ease);
+}
+.cr-term::after { content: ''; position: absolute; left: -2px; right: -2px; top: 50%; height: 40px; transform: translateY(-50%); }
+@media (hover: hover) { .cr-term:hover { color: var(--ember); text-decoration-color: var(--ember); } }
+.cr-term.is-open { text-decoration-style: solid; text-decoration-color: var(--ember); }
+.cr-term-note {
+  margin: 10px 0 0;
+  padding: 8px 0 0 12px;
+  border-top: 1px dashed var(--rule);
+  border-left: 3px solid var(--ink-soft);
+  font-size: 14.5px;
+  line-height: 1.55;
+  animation: cr-arrive var(--t-mid) var(--ease) both;
+}
+.cr-term-note[hidden] { display: none; }
+.cr-term-tag { font-family: var(--data); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); }
+
+/* Debrief: this run, the last one, the record. */
+.cr-vs-legend { margin: 0 0 var(--s3); }
+.cr-vs-key { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 0 0 10px; font-family: var(--data); font-size: 11.5px; color: var(--ink-soft); }
+.cr-vs-key > span { display: inline-flex; align-items: center; gap: 8px; }
+.cr-vs-key .cr-vs-who { width: 50px; display: inline-block; }
+.cr-vs-key .cr-vs-who.is-you { background: var(--ink); color: var(--paper); }
+.cr-vs-key .cr-vs-who.is-last, .cr-vs-last .cr-vs-who { border-style: dashed; }
+.cr-vs-compare { margin: 0; font-size: 15.5px; line-height: 1.6; max-width: 68ch; }
+.cr-vs-compare strong { font-family: var(--data); font-size: 14px; }
+.cr-vs-compare-note { color: var(--ink-soft); font-style: italic; }
+.cr-vs-mine { display: grid; gap: 8px; }
+.cr-vs-last { display: grid; grid-template-columns: 52px 1fr; gap: 10px; align-items: baseline; font-family: var(--data); font-size: 12.5px; letter-spacing: 0.03em; text-transform: uppercase; line-height: 1.45; color: var(--ink-soft); }
+.cr-vs-last .cr-vs-meta { text-transform: none; }
+@media (min-width: 760px) {
+  .cr-vs-last { grid-template-columns: 50px minmax(0, 1fr); gap: 12px; align-items: first baseline; }
+}
+
+/* What the record teaches: three lessons, numbered like reel cans. */
+.cr-lessons { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s4); max-width: 70ch; }
+.cr-lessons li { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 14px; border-top: 2px solid var(--ink); padding-top: 12px; }
+.cr-lesson-num { grid-row: span 2; font-family: var(--data); font-size: 22px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.cr-lesson-text { margin: 0; font-size: clamp(17px, 2.2vw, 20px); line-height: 1.45; text-wrap: pretty; }
+.cr-lesson-from { margin: 8px 0 0; font-family: var(--data); font-size: 11.5px; letter-spacing: 0.04em; color: var(--ink-soft); }
+.cr-lesson-from a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--ember); text-underline-offset: 2px; }
+/* The inquiry's entries carry a number, so a lesson can point at one. */
+.cr-findings { counter-reset: cr-finding; }
+.cr-findings li { counter-increment: cr-finding; }
+.cr-findings li::before {
+  content: 'No. ' counter(cr-finding);
+  display: block;
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+.cr-findings li:target { background: rgba(184, 50, 26, 0.06); outline: 1px solid var(--ember); outline-offset: 4px; }
+.cr-findings li, .cr-vs li { scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 14px); }
+
+/* After the replay buttons: the bridge out to the site's thesis. */
+.cr-replay-note { font-family: var(--data); font-size: 11.5px; color: var(--ink-soft); margin: 12px 0 0; }
+.cr-bridge { margin-top: 56px; border-top: 3px solid var(--ink); padding-top: 18px; }
+.cr-bridge-line { font-family: var(--data); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 14px; }
+.cr-bridge ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+@media (min-width: 700px) { .cr-bridge ul { grid-template-columns: 1fr 1fr; } }
+.cr-bridge a {
+  display: grid;
+  gap: 6px;
+  min-height: 44px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--paper);
+  transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-mid) var(--ease), transform var(--t-mid) var(--ease);
+}
+.cr-bridge-title { font-family: var(--poster); font-size: clamp(22px, 4vw, 28px); line-height: 1; text-transform: uppercase; }
+.cr-bridge-title::after { content: ' →'; color: var(--ember); }
+.cr-bridge-sub { font-size: 14.5px; color: var(--ink-soft); line-height: 1.45; }
+@media (hover: hover) { .cr-bridge a:hover { border-color: var(--ember); box-shadow: 4px 4px 0 var(--ember); transform: translate(-2px, -2px); } }
+.cr-bridge a:active { transform: translate(1px, 1px); box-shadow: none; transition-duration: var(--t-fast); transition-timing-function: var(--ease-press); }
+
+/* Reduced motion: the notes arrive set, the named part carries its ring
+   still and struck twice out of register (the house "this is new" mark),
+   and nothing lifts on hover. */
+@media (prefers-reduced-motion: reduce) {
+  .cr-coach, .cr-term-note, .cr-slip.is-coached, .cr-coach-target.is-coached, .cr-options.is-coached { animation: none !important; }
+  .is-coached { outline-style: solid; filter: drop-shadow(3px 3px 0 rgba(184, 50, 26, 0.45)); }
+  .cr-bridge a:hover, .cr-bridge a:active, .cr-coach-next:active { transform: none !important; }
+}
+
+
+/* ══ The desk officer's file, seen from the desk ═══════════════════════════
+   The file itself is /control-room/file (file/file.css). Here: its entry on
+   the select screen, the briefing and log lines for a player the file sent,
+   and its place in the debrief's bridge. Interface only; ink on paper, ember
+   for the hand. */
+
+/* Select: the file sits under the playable days as a manila folder, the full
+   width of the grid, its tab standing proud of the top edge. */
+.cr-card-file {
+  grid-column: 1 / -1;
+  position: relative;
+  margin-top: 18px;
+  text-decoration: none;
+  background: var(--paper-lit);
+  background-image: repeating-linear-gradient(0deg, color-mix(in srgb, var(--ink) 3.5%, transparent) 0 1px, transparent 1px 28px);
+}
+.cr-card-filetab {
+  position: absolute;
+  left: 18px;
+  bottom: 100%;
+  transform: translateY(1.5px);
+  padding: 4px 12px 3px;
+  background: var(--ink);
+  color: var(--paper-lit);
+  border: 1.5px solid var(--ink);
+  border-bottom: 0;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: background-color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+@media (hover: hover) { .cr-card-file:hover .cr-card-filetab { background: var(--ember); border-color: var(--ember); } }
+.cr-card-file:focus-visible .cr-card-filetab { background: var(--ember); border-color: var(--ember); }
+.cr-card-file .cr-card-loc { color: var(--ink); max-width: 62ch; }
+
+/* Briefing and log: the line that says the file sent you, and where. */
+.cr-filed {
+  display: grid;
+  gap: 2px;
+  margin: var(--s3) 0 var(--s4);
+  max-width: 62ch;
+  padding: 10px 14px 4px;
+  background: var(--paper-lit);
+  border: 1px solid var(--rule);
+  border-left: 6px double var(--ink);
+}
+.cr-filed-step { margin: 0 0 var(--s3); animation: cr-arrive var(--t-slow) var(--ease) calc(120ms + var(--beat, 0ms)) both; }
+.cr-filed-tag {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.cr-filed-body { font-size: 15px; line-height: 1.55; }
+.cr-filed-body a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  font-family: var(--data);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ember);
+}
+
+/* Debrief bridge: the file leads, across the full width. */
+.cr-bridge li.cr-bridge-file { grid-column: 1 / -1; }
+.cr-bridge-file a { background: var(--paper-lit); border-width: 1.5px 1.5px 1.5px 6px; border-style: solid solid solid double; }
+
+/* Reduced motion: the log line arrives set, struck twice out of register. */
+@media (prefers-reduced-motion: reduce) {
+  .cr-filed-step { animation: none; box-shadow: 3px 3px 0 color-mix(in srgb, var(--ink) 30%, transparent); }
+  .cr-card-filetab { transition: none; }
+}
+
+
+/* ══ Visuals throughout ═════════════════════════════════════════════════════
+   Three more drawings, each a restatement: the select screen's plate (the
+   board's ground, nothing lit), an instrument's readings under the slip that
+   carries them, and the silent record's empty ledger page. Ink only; ember
+   stays the hand's colour. */
+
+/* ── The card plate: the board's ground, at card scale ─────────────────── */
+.cr-card-plate {
+  position: relative;
+  display: block;
+  margin: -4px -6px 8px;
+  border: 1px solid var(--rule);
+  background: var(--paper-lit);
+  color: var(--ink);
+  overflow: hidden;
+}
+.cr-mini { display: block; width: 100%; height: auto; aspect-ratio: 720 / 348; }
+.cr-mini.is-pending { aspect-ratio: 720 / 150; }
+.cr-mini text { display: none; }
+.cr-mini .cr-map-coast { stroke-width: 3; }
+.cr-mini .cr-map-river, .cr-mini .cr-map-road { stroke-width: 3; }
+.cr-mini .cr-zone .cr-zone-shape { stroke: color-mix(in srgb, var(--ink) 55%, transparent); stroke-width: 2.4; stroke-dasharray: 9 6; }
+.cr-mini .cr-map-north path { fill: var(--ink); }
+.cr-card-plate-tag {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 3px 8px 2px;
+  background: var(--paper-lit);
+  border-top: 1px solid var(--rule);
+  border-right: 1px solid var(--rule);
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+/* The plate settles under the card's hover lift, a beat behind it. */
+.cr-card-plate .cr-mini { transition: transform var(--t-slow) var(--ease); transform-origin: 50% 60%; }
+@media (hover: hover) { .cr-card:hover .cr-card-plate .cr-mini { transform: scale(1.03); } }
+.cr-card:focus-visible .cr-card-plate .cr-mini { transform: scale(1.03); }
+/* A stub's plate: an empty frame, struck through, as a pressbook marks a
+   still not yet delivered. */
+.cr-card-plate.is-pending { background: transparent; border-style: dashed; border-color: var(--ink-faint); }
+.cr-mini-pending { fill: none; stroke: color-mix(in srgb, var(--ink-soft) 45%, transparent); stroke-width: 2; stroke-dasharray: 10 8; }
+.cr-card-plate.is-pending .cr-card-plate-tag { background: var(--paper); border-color: var(--ink-faint); border-style: dashed; color: var(--ink-faint); }
+
+/* ── Instrument readings, under the slip that carries the latest ───────── */
+.cr-reads {
+  margin: 12px 0 2px;
+  padding: 10px 0 4px;
+  border-top: 1px dashed var(--rule);
+}
+.cr-reads-head {
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 8px;
+}
+.cr-reads-name { color: var(--ink); font-weight: 700; }
+.cr-reads-cols {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--n, 1), minmax(0, 1fr));
+  gap: 8px;
+}
+.cr-reads-cols li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+  min-width: 0;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.35;
+}
+.cr-reads-glyph { margin-bottom: 4px; }
+.cr-reads-cols .is-now { color: var(--ink); }
+.cr-reads-cols .is-past { color: var(--ink-faint); }
+.cr-reads-time { font-weight: 700; font-size: 12px; }
+.cr-reads-desk { font-weight: 400; }
+.cr-reads-state { overflow-wrap: anywhere; }
+.cr-reads-value { font-weight: 700; letter-spacing: 0.02em; text-transform: none; }
+.cr-reads-cols .is-now .cr-reads-value { font-size: 13px; }
+/* The clock axis: the leaders run from each column down to where its time
+   falls, so a long silence between two readings is a long stretch of rail. */
+.cr-reads-axis { padding: 0 18px; margin-top: 2px; }
+.cr-reads-leaders { display: block; width: 100%; height: 22px; overflow: visible; }
+.cr-reads-leaders path { fill: none; stroke: var(--ink-faint); stroke-width: 1; }
+.cr-reads-leaders path.is-now { stroke: var(--ink); stroke-width: 1.4; }
+.cr-reads-rail { position: relative; height: 26px; border-top: 1.5px solid var(--ink-soft); }
+.cr-reads-hour { position: absolute; top: -4px; width: 1px; height: 7px; background: var(--ink-faint); }
+.cr-reads-hourlabel {
+  position: absolute;
+  top: 9px;
+  left: 0;
+  transform: translateX(-50%);
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+.cr-reads-node {
+  position: absolute;
+  top: -5px;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1.5px solid var(--ink-faint);
+}
+.cr-reads-node.is-now { background: var(--ink); border-color: var(--ink); }
+/* Arrival: the new reading is inked in after its slip lands — the glyph
+   prints, the leader is inked down to the rail, the node is set. (Faded,
+   not drawn: a non-scaling stroke ignores pathLength, so a dash draw would
+   break up on a stretched axis.) */
+.cr-reads .is-now .cr-reads-glyph { animation: cr-arrive var(--t-slow) var(--ease) both; animation-delay: calc(var(--at, 0ms) + var(--type, 0ms) + 120ms); }
+.cr-reads-leaders path.is-now { animation: cr-fade var(--t-slow) var(--ease) both; animation-delay: calc(var(--at, 0ms) + var(--type, 0ms) + 240ms); }
+.cr-reads-node.is-now { animation: cr-fade var(--t-mid) var(--ease-press) both; animation-delay: calc(var(--at, 0ms) + var(--type, 0ms) + 420ms); }
+@media (prefers-reduced-motion: reduce) {
+  .cr-reads .is-now .cr-reads-glyph, .cr-reads-leaders path.is-now, .cr-reads-node.is-now { animation: none !important; }
+  /* The house second impression stands in for the ink arriving. */
+  .cr-reads .is-now .cr-reads-glyph, .cr-reads-node.is-now { filter: drop-shadow(2px 2px 0 color-mix(in srgb, var(--ink) 45%, transparent)); }
+}
+
+/* ── The silent record: an empty ledger page ───────────────────────────── */
+.cr-consequence-silent { display: flow-root; }
+.cr-silent-glyph { float: right; margin: 0 0 6px 12px; color: var(--ink-soft); }
+
+
+/* ══ Staging: the overture, the beat, the teleprinter ══════════════════════
+   Presentation only; the run's state commits at the press and this is how
+   the commit is shown. The root of a run carries data attributes set by
+   ControlRoomGame — data-boot (full | quick) for the opening overture,
+   data-beat (start | advance | close) and data-beat-p (its parity, so two
+   beats in a row restart) for the clock's verb — and every timing here has
+   a twin in stage.ts. All motion is transform or opacity on the house
+   curves; the one exception is that nothing here touches layout at all.
+   Reduced motion: none of it moves (every rule below that moves sits in a
+   no-preference query); the still equivalents are at the end. */
+
+/* The beat's offset, inherited by everything that arrives with it: the new
+   entry (stamp at 720ms, then the slips), the side board's fresh marks, and
+   the debrief for the log's close. 720 = stage.ts BEAT_MS. */
+@media (prefers-reduced-motion: no-preference) {
+  .cr-run[data-beat="start"] .cr-log > .cr-entry:last-child,
+  .cr-run[data-beat="advance"] .cr-log > .cr-entry:last-child,
+  .cr-run[data-beat="start"] .cr-side,
+  .cr-run[data-beat="advance"] .cr-side { --beat: 720ms; }
+  .cr-run[data-beat="close"] .cr-debrief { --beat: 720ms; }
+}
+
+/* ── The console clock: odometer, stamp, live colon ────────────────────── */
+
+.cr-reel {
+  display: inline-block;
+  vertical-align: top;
+  height: 1.1em;
+  line-height: 1.1;
+  overflow: hidden;
+}
+.cr-reel-strip { display: block; }
+.cr-reel-frame { display: block; height: 1.1em; white-space: nowrap; }
+@keyframes cr-roll { from { transform: translateY(0); } to { transform: translateY(var(--roll-to)); } }
+/* The landing time is struck: a kick a touch larger, then flush. */
+@keyframes cr-kick { 0%, 100% { transform: none; } 35% { transform: scale(1.12); } }
+@keyframes cr-colon { 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-reel { transform-origin: left 70%; animation: cr-kick var(--t-mid) var(--ease-press) calc(var(--reel-at) + var(--reel-ms) - 40ms) both; }
+  .cr-reel-strip { animation: cr-roll var(--reel-ms) var(--ease) var(--reel-at) both; }
+  /* Four blinks (4s, under WCAG 2.2.2's five) after each change of time,
+     then the colon holds: a running clock, never an endless blink. */
+  .cr-colon { animation: cr-colon 1s steps(1, end) 900ms 4; }
+  /* The pips and the strip move with the stamp, not the press. */
+  .cr-run[data-beat] .cr-pips i { transition-delay: 600ms; }
+}
+
+/* ── The beat: the log dims a breath while the clock moves ─────────────── */
+
+@keyframes cr-dim-0 { 0%, 100% { opacity: 1; } 18%, 70% { opacity: 0.5; } }
+@keyframes cr-dim-1 { 0%, 100% { opacity: 1; } 18%, 70% { opacity: 0.5; } }
+/* The new timecode in the log is stamped down as the console's lands. */
+@keyframes cr-stamp-tc {
+  0% { opacity: 0; transform: scale(1.14); }
+  55% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cr-run[data-beat][data-beat-p="0"] .cr-log { animation: cr-dim-0 820ms var(--ease) both; }
+  .cr-run[data-beat][data-beat-p="1"] .cr-log { animation: cr-dim-1 820ms var(--ease) both; }
+  .cr-entry:not(.cr-entry-brief) .cr-stamp-time {
+    display: inline-block;
+    transform-origin: left 80%;
+    animation: cr-stamp-tc var(--t-mid) var(--ease-press) var(--beat, 0ms) both;
+  }
+}
+
+/* ── Slips as teleprinter traffic ──────────────────────────────────────── */
+/* The slip lands (150ms), its leader — kind · time — prints a character a
+   step as a paper cover with an ink print-head is drawn back across it
+   (steps() over the leader's own length), the pictogram is stamped in the
+   margin, then the body feeds out under it. Per slip: at most 80 + 300 +
+   240ms; the stagger caps at 440ms, so five slips are down in about 1.1s. */
+
+.cr-slip-leader { position: relative; display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: bottom; }
+.cr-slip-leader-at { color: var(--ink-faint); }
+@keyframes cr-slip-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes cr-type { from { transform: none; } to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-slip-leader::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--paper);
+    border-left: 0.62em solid var(--ink);
+    animation: cr-type var(--type) steps(var(--ch, 14), end) var(--at) both;
+  }
+  .cr-slip .cr-slip-pict {
+    transform-origin: center;
+    animation: cr-mark-down var(--t-mid) var(--ease-press) calc(var(--at) + var(--type)) both;
+  }
+  .cr-slip > :is(.cr-slip-text, .cr-reads, .cr-figure) {
+    animation: cr-arrive var(--t-mid) var(--ease) calc(var(--at) + var(--type) - 40ms) both;
+  }
+}
+
+/* ── YOUR CALL is stamped, the options arm ─────────────────────────────── */
+
+@keyframes cr-call-stamp {
+  0% { opacity: 0; transform: scale(1.22); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+.cr-option { position: relative; }
+/* The lead-in rule: drawn in from the left edge as a hand hovers or a key
+   lands on an option — armed, not chosen. Every option arms alike. */
+.cr-option::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 23px;
+  width: 9px;
+  height: 2px;
+  background: var(--ember);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--t-mid) var(--ease);
+}
+@media (hover: hover) { .cr-option:hover::before { transform: scaleX(1); } }
+.cr-option:focus-visible::before { transform: scaleX(1); }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-call .cr-call-head {
+    display: inline-block;
+    transform-origin: left center;
+    animation: cr-call-stamp var(--t-mid) var(--ease-press) calc(var(--call-at) + 90ms) both;
+  }
+}
+
+/* ── The board answers the hour: a changed zone's label flashes once ───── */
+
+@keyframes cr-flash { 0% { opacity: 1; } 30% { opacity: 0.15; } 62% { opacity: 1; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-map .cr-zone.is-fresh .cr-zone-label,
+  .cr-map .cr-zone.is-fresh .cr-zone-state { animation: cr-flash 520ms steps(1, end) calc(var(--beat, 0ms) + 260ms) both; }
+}
+
+/* ── Plates held like cutscenes ────────────────────────────────────────── */
+
+.cr-figure-hold {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: zoom-in;
+  overflow: hidden;
+}
+.cr-figure-zoom {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 3px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: background-color var(--t-fast) var(--ease);
+}
+.cr-figure-zoom-mark { font-size: 13px; line-height: 1; letter-spacing: 0; }
+@media (hover: hover) { .cr-figure-hold:hover .cr-figure-zoom { background: var(--ember); color: #fff; } }
+.cr-figure-hold:focus-visible .cr-figure-zoom { background: var(--ember); color: #fff; }
+/* The drift: one slow pass, a 3% push settling back onto the whole frame,
+   transform only. It waits while the plate is off screen (the observer in
+   Figure sets data-onscreen) and is 4.8s so it ends inside WCAG's five. */
+@keyframes cr-drift { from { transform: scale(1.03) translate(-0.8%, 0.5%); } to { transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-figure.is-held .cr-figure-hold img {
+    transform-origin: 58% 45%;
+    animation: cr-drift 4800ms cubic-bezier(0.3, 0.1, 0.3, 1) calc(var(--at, 0ms) + var(--type, 0ms)) both;
+    animation-play-state: paused;
+  }
+  .cr-figure.is-held[data-onscreen="1"] .cr-figure-hold img { animation-play-state: running; }
+}
+
+/* The full plate: the map sheet's dialog, opened to the whole viewport. */
+.cr-plate-sheet {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--ink);
+  color: var(--paper);
+  overflow: hidden;
+}
+.cr-plate-sheet[open] { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+.cr-plate-sheet::backdrop { background: rgba(25, 20, 16, 0.85); }
+.cr-ps-stage { min-height: 0; display: grid; place-items: center; padding: 18px; cursor: zoom-out; }
+.cr-ps-stage img { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; cursor: default; }
+.cr-ps-third {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 20px calc(16px + env(safe-area-inset-bottom));
+  border-top: 3px solid var(--ember);
+  background: var(--ink);
+}
+@media (max-width: 599px) { .cr-ps-third { flex-direction: column; align-items: stretch; padding: 12px 18px calc(14px + env(safe-area-inset-bottom)); gap: 10px; } }
+.cr-ps-text { display: grid; gap: 6px; min-width: 0; max-width: 78ch; }
+.cr-ps-tag { margin: 0; font-family: var(--data); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(241, 232, 213, 0.75); }
+.cr-ps-caption { margin: 0; font-family: var(--read); font-size: 15.5px; line-height: 1.5; color: var(--paper); }
+@media (max-width: 599px) { .cr-ps-caption { font-size: 14px; max-height: 7.5em; overflow-y: auto; } }
+.cr-plate-sheet .cr-figure-credit { color: rgba(241, 232, 213, 0.8); }
+.cr-plate-sheet .cr-figure-credit a { color: var(--paper); text-decoration-color: rgba(241, 232, 213, 0.45); text-underline-offset: 2px; }
+.cr-plate-sheet .cr-figure-credit a:hover { color: #fff; text-decoration-color: var(--ember); }
+.cr-plate-sheet .cr-figure-terms-body { border-left-color: rgba(241, 232, 213, 0.3); background: rgba(241, 232, 213, 0.05); }
+.cr-plate-sheet .cr-figure-terms-body b { color: var(--paper); }
+.cr-plate-sheet :focus-visible { outline: 3px solid var(--paper); outline-offset: 2px; }
+.cr-ps-close {
+  flex: none;
+  min-height: 44px;
+  min-width: 88px;
+  padding: 0 16px;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: transparent;
+  border: 1.5px solid var(--paper);
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+@media (hover: hover) { .cr-ps-close:hover { background: var(--paper); color: var(--ink); } }
+@keyframes cr-ps-in { from { opacity: 0; transform: scale(0.975); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-plate-sheet[open] .cr-ps-stage img { animation: cr-ps-in var(--t-slow) var(--ease) both; }
+  .cr-plate-sheet[open] .cr-ps-third { animation: cr-arrive var(--t-slow) var(--ease) 120ms both; }
+}
+
+/* ── The sound toggle, in the console strip ────────────────────────────── */
+
+.cr-console-sound {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex-shrink: 0;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.82);
+  background: transparent;
+  border: 1px solid rgba(241, 232, 213, 0.35);
+  cursor: pointer;
+  transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.cr-console-sound.is-on { color: var(--paper); border-color: rgba(241, 232, 213, 0.75); }
+.cr-console-sound.is-on .cr-sound-state { text-decoration: underline; text-decoration-color: var(--ember); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+@media (hover: hover) { .cr-console-sound:hover { border-color: var(--paper); color: var(--paper); } }
+.cr-console-sound:active { background: rgba(241, 232, 213, 0.12); }
+.cr-sound-glyph { display: block; flex: none; }
+/* Phones: the glyph and the state, then the glyph alone (its waves or its
+   cross say on or off; "Sound" and aria-pressed are its name and state), so
+   the clock's "Decision n of N" is never truncated beside it. */
+@media (max-width: 479px) { .cr-sound-word { display: none; } .cr-console-sound { padding: 0 8px; gap: 5px; } }
+@media (max-width: 429px) {
+  .cr-sound-state { display: none; }
+  .cr-console-sound { min-width: 40px; padding: 0; }
+  /* The room the toggle takes is given back by the strip's spacing. */
+  .cr-console-row { gap: 8px; }
+  .cr-pips { gap: 5px; }
+  .cr-pips i { width: 9px; height: 9px; }
+  .cr-console-map { min-width: 48px; padding: 0 10px; }
+  .cr-console-status { letter-spacing: 0.1em; }
+}
+
+/* ── The overture: the first desk of the session ───────────────────────── */
+/* 0      the console band darkens out of the paper (420ms)
+   360    the clock powers on, flickering up like a lamp
+   420    the odometer rolls from midnight up to the day's opening (680ms)
+   700    the rail runs out; 760 the status line types; 820 the pips come on
+   1000   the title; 1050 the board inks across, left to right (640ms)
+   1350   the chain prints; the board's rows; the briefing lands
+   1500   the day's title is stamped; 1650 the briefing's body
+   ~2.1s  all down; at 2.4s (stage.ts BOOT_MS) the attribute clears.
+   Repeat desks this session: the band alone, in 300ms. */
+
+.cr-map, .cr-chain { position: relative; }
+@keyframes cr-band { from { opacity: 1; } to { opacity: 0; } }
+@keyframes cr-power { 0% { opacity: 0; } 30% { opacity: 0.85; } 46% { opacity: 0.3; } 100% { opacity: 1; } }
+@keyframes cr-rail-on { from { transform: scaleX(0); } to { transform: none; } }
+@keyframes cr-pip-on { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: none; } }
+@keyframes cr-ink-across { from { transform: none; } to { transform: translateX(101%); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-run[data-boot] .cr-console::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: var(--cr-sheet);
+    animation: cr-band 420ms var(--ease) both;
+  }
+  .cr-run[data-boot="quick"] .cr-console::after { animation-duration: 300ms; }
+
+  .cr-run[data-boot="full"] .cr-console-clock { animation: cr-power 320ms linear 360ms both; }
+  .cr-run[data-boot="full"] .cr-daystrip-rail { transform-origin: left center; animation: cr-rail-on var(--t-slow) var(--ease) 700ms both; }
+  .cr-run[data-boot="full"] .cr-console-status { position: relative; }
+  .cr-run[data-boot="full"] .cr-console-status::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    border-left: 0.7em solid var(--paper);
+    animation: cr-type 360ms steps(22, end) 760ms both;
+  }
+  .cr-run[data-boot="full"] .cr-pips i { animation: cr-pip-on var(--t-fast) var(--ease-press) calc(820ms + var(--i, 0) * 50ms) both; }
+  .cr-run[data-boot="full"] .cr-console-title { animation: cr-fade var(--t-slow) var(--ease) 1000ms both; }
+  .cr-run[data-boot="full"] :is(.cr-console-map, .cr-console-sound) { animation: cr-fade var(--t-slow) var(--ease) 1000ms both; }
+
+  /* The board inks in: a paper cover with an ink edge drawn off it. */
+  .cr-run[data-boot="full"] :is(.cr-side, .cr-entry-brief) :is(.cr-map, .cr-chain) { overflow: clip; }
+  .cr-run[data-boot="full"] :is(.cr-side, .cr-entry-brief) :is(.cr-map, .cr-chain)::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: var(--cr-sheet);
+    border-left: 3px solid var(--ink);
+    animation: cr-ink-across 640ms cubic-bezier(0.5, 0, 0.3, 1) 1050ms both;
+  }
+  .cr-run[data-boot="full"] .cr-side .cr-chain::after { animation-delay: 1350ms; animation-duration: 480ms; }
+  .cr-run[data-boot="full"] .cr-side-head { animation: cr-fade var(--t-slow) var(--ease) 950ms both; }
+  .cr-run[data-boot="full"] .cr-boardlist li { animation: cr-arrive var(--t-slow) var(--ease) 1400ms both; }
+  .cr-run[data-boot="full"] .cr-boardlist li:nth-child(2) { animation-delay: 1460ms; }
+  .cr-run[data-boot="full"] .cr-boardlist li:nth-child(3) { animation-delay: 1520ms; }
+  .cr-run[data-boot="full"] .cr-boardlist li:nth-child(n+4) { animation-delay: 1580ms; }
+  .cr-run[data-boot="full"] :is(.cr-chainlist, .cr-side-empty, .cr-trace) { animation: cr-fade var(--t-slow) var(--ease) 1700ms both; }
+
+  /* Then the first slip of the log: the briefing. */
+  .cr-run[data-boot="full"] .cr-entry-brief { animation-delay: 1350ms; }
+  .cr-run[data-boot="full"] .cr-entry-brief .cr-stamp { animation-delay: 1400ms; }
+  .cr-run[data-boot="full"] .cr-brief-title { transform-origin: left center; animation: cr-call-stamp var(--t-mid) var(--ease-press) 1500ms both; }
+  .cr-run[data-boot="full"] .cr-entry-brief > :is(.cr-brief, .cr-brief-count, .cr-filed, .cr-terms, .cr-figure, .cr-dock) {
+    animation: cr-arrive var(--t-slow) var(--ease) 1650ms both;
+  }
+  .cr-run[data-boot="full"] .cr-entry-brief > .cr-map { animation: cr-fade var(--t-fast) var(--ease) 1000ms both; }
+}
+
+/* ── Reduced motion: the still equivalents ─────────────────────────────── */
+/* Nothing above moves. The overture is an immediate cut: the console's time
+   and the day's title arrive struck twice out of register — the house mark
+   for "this is new" — and the strike lifts after 0.9s (stage.ts
+   BOOT_STILL_MS). The beat is instant: the console's time and the new
+   timecode in the log are struck the same way until the beat clears.
+   Plates do not drift; the lead-in rule is simply there on hover. */
+@media (prefers-reduced-motion: reduce) {
+  .cr-run[data-boot="full"] .cr-console-time,
+  .cr-run[data-settle] .cr-console-time { filter: drop-shadow(2px 2px 0 rgba(241, 232, 213, 0.45)); }
+  .cr-run[data-boot="full"] .cr-brief-title,
+  .cr-run[data-settle] .cr-log > .cr-entry:last-child .cr-stamp-time { filter: drop-shadow(3px 3px 0 color-mix(in srgb, var(--ink) 35%, transparent)); }
+  .cr-run[data-settle] .cr-log > .cr-entry:last-child .cr-stamp-time { display: inline-block; }
+  .cr-option::before, .cr-console-sound, .cr-figure-zoom, .cr-ps-close { transition: none; }
+  .cr-card:focus-visible { transform: none; }
+  .cr-map .cr-zone.is-fresh .cr-zone-label { filter: drop-shadow(2px 2px 0 rgba(25, 20, 16, 0.5)); }
+}
+
+/* ══ Picture mode: the same record, played out on the board ═══════════════
+   PictureStage.tsx. The ops board becomes the viewport and a camera moves
+   over it (one transform on .cr-cam, the house arrival curve, 760ms =
+   PictureStage CAM_MS); slips stamp where they happened and print as an ink
+   lower third; the call is set as cards in the same band. Ink band, paper
+   type: the console's idiom carried down the stage, so ember appears here
+   only as interaction (the primary button, a previewed option, focus rings
+   on paper) and never as text on ink. Reduced motion: no travel, no
+   autoplay; every frame cuts in, and what is new is struck twice. */
+
+/* The camera's scale, animatable so the stamps can stay a constant size on
+   screen (each counter-scales by 1 / --s) while the board zooms under them.
+   Set and transitioned on the stamps' layer only, never on the camera. */
+@property --s { syntax: '<number>'; inherits: true; initial-value: 1; }
+
+/* The mode switch, in the console. A pressed pair, the console's own
+   outline buttons; the pressed one is filled paper. */
+.cr-console-mode { display: inline-flex; align-items: center; flex-shrink: 0; border: 1px solid rgba(241, 232, 213, 0.35); }
+.cr-mode-btn {
+  min-height: 42px;
+  min-width: 40px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.82);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.cr-mode-btn[aria-pressed="true"] { background: var(--paper); color: var(--ink); }
+@media (hover: hover) { .cr-mode-btn[aria-pressed="false"]:hover { color: var(--paper); background: rgba(241, 232, 213, 0.12); } }
+.cr-mode-btn:active { transform: translate(1px, 1px); transition: transform var(--t-fast) var(--ease-press); }
+.cr-mode-glyph { display: block; flex: none; }
+.cr-mode-sep { display: none; }
+.cr-console .cr-mode-btn:focus-visible { outline-offset: -4px; }
+.cr-console .cr-mode-btn[aria-pressed="true"]:focus-visible { outline-color: var(--ember); }
+/* Phones: the glyphs alone ("Log" and "Picture" stay their names), and the
+   strip gives back the room: "Decision" drops from the clock's status (the
+   numbers stay, and the clock's own label says it in full), the pips close
+   up, and on the narrowest screens they give way to the day strip below. */
+@media (max-width: 479px) { .cr-mode-word { display: none; } .cr-mode-btn { padding: 0; } }
+@media (max-width: 429px) {
+  .cr-console-dword { display: none; }
+  .cr-console-row { gap: 6px; }
+  .cr-pips { gap: 4px; }
+  .cr-pips i { width: 7px; height: 7px; }
+  .cr-console-map { min-width: 44px; padding: 0 8px; }
+}
+@media (max-width: 359px) { .cr-pips { display: none; } .cr-console-sound { margin-left: auto; } }
+
+.cr-footnote-mode { margin-bottom: 8px; }
+.cr-footnote-mode strong { font-family: var(--data); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.9em; }
+
+/* ── The stage ─────────────────────────────────────────────────────────── */
+.cr-play.cr-play-picture { display: block; padding-top: 14px; }
+.cr-stage {
+  position: relative;
+  height: clamp(540px, calc(100svh - var(--cr-nav) - var(--cr-console-h) - 28px), 860px);
+  background: var(--paper-deep);
+  border: 1px solid var(--ink);
+  overflow: hidden;
+  isolation: isolate;
+  scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 14px);
+}
+@media (max-width: 599px) {
+  .cr-page .cr-play-picture { padding: 0; }
+  .cr-stage {
+    height: max(560px, calc(100svh - var(--cr-nav) - var(--cr-console-h)));
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h));
+  }
+}
+.cr-stage-view { position: absolute; inset: 0; overflow: hidden; }
+
+/* The camera: one transform (and its scale as --s), on the arrival curve. */
+.cr-cam {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 720px;
+  height: 400px;
+  transform-origin: 0 0;
+  transition: transform var(--cam-ms) var(--ease);
+}
+.cr-cam .cr-stamps { transition: --s var(--cam-ms) var(--ease); }
+.cr-stage.is-still .cr-cam .cr-stamps { transition: none; }
+.cr-cam.is-unmeasured { visibility: hidden; }
+.cr-stage.is-still .cr-cam { transition: none; }
+.cr-cam .cr-map > svg { width: 720px; height: 400px; }
+/* Dimmed for the call: the board stays readable under the options. */
+.cr-stage-view::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-slow) var(--ease);
+}
+.cr-stage.is-call .cr-stage-view::after { opacity: 0.18; }
+
+/* The slip's zone, while it is on the stage: its outline drawn heavier. */
+.cr-stage .cr-zone.is-spot .cr-zone-shape { stroke: var(--ink); stroke-width: 3.2; }
+.cr-stage .cr-zone.is-spot.is-impact .cr-zone-shape { stroke: var(--ember); }
+/* The option under the hand or the key: the zones it would warn, previewed. */
+.cr-stage .cr-zone.is-preview .cr-zone-shape { stroke: var(--ember); stroke-width: 3.4; stroke-dasharray: 2 5; stroke-linecap: round; }
+
+/* A slip's stamp on the board: its pictogram on a paper chit, counter-scaled
+   so it holds one size on screen whatever the camera does. */
+.cr-stamps { position: absolute; inset: 0; pointer-events: none; }
+/* Each stamp its own compositor layer: its counter-scale changes every frame
+   of a camera move, and must not repaint the board it sits on. */
+.cr-pmark { position: absolute; width: 0; height: 0; transform: scale(calc(1 / var(--s))); will-change: transform; }
+.cr-pmark-face {
+  position: absolute;
+  left: calc(-21px + var(--off, 0) * 48px);
+  top: -21px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: opacity var(--t-slow) var(--ease), box-shadow var(--t-slow) var(--ease);
+}
+.cr-pmark-face svg { display: block; }
+.cr-pmark.is-past .cr-pmark-face, .cr-pmark.is-set .cr-pmark-face { opacity: 0.5; box-shadow: none; }
+/* Once your call lands, the hour's stamps clear so the orders and the
+   zones' WARNED BY YOU read clean. */
+.cr-stage.is-record .cr-pmark-face { opacity: 0; }
+.cr-pmark.is-active { z-index: 2; }
+@keyframes cr-pmark-in {
+  0% { opacity: 0; transform: scale(1.8) rotate(-6deg); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes cr-pmark-ring { from { opacity: 0.7; transform: scale(1); } to { opacity: 0; transform: scale(2.1); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-pmark.is-active .cr-pmark-face { animation: cr-pmark-in var(--t-slow) var(--ease-press) calc(var(--cam-ms) * 0.55) both; }
+  .cr-pmark.is-active .cr-pmark-face::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border: 2px solid var(--ink);
+    animation: cr-pmark-ring 600ms var(--ease) calc(var(--cam-ms) * 0.55 + 200ms) both;
+  }
+}
+@media (max-width: 599px) {
+  .cr-pmark-face { left: calc(-14px + var(--off, 0) * 33px); top: -14px; width: 28px; height: 28px; border-width: 1.5px; box-shadow: 2px 2px 0 var(--ink); }
+  .cr-pmark-face svg { width: 18px; height: 18px; }
+}
+
+/* The order going out: a line from the desk to each zone you warned, drawn
+   once the camera has framed them, then a ring stamped where it lands. */
+.cr-dispatch { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+.cr-dispatch-line { fill: none; stroke: var(--ink); stroke-linecap: round; stroke-dasharray: 1 1; }
+.cr-dispatch-hit { fill: var(--paper); stroke: var(--ink); }
+.cr-stage .cr-zone.is-warned-fresh .cr-zone-warned { --warn-at: calc(var(--cam-ms) + 560ms); }
+@keyframes cr-warn-in { from { stroke-width: 1.4; } to { stroke-width: 4; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-dispatch-line { animation: cr-draw 520ms var(--ease) calc(var(--cam-ms) + var(--i, 0) * 120ms) both; }
+  .cr-dispatch-hit {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cr-mark-down var(--t-mid) var(--ease-press) calc(var(--cam-ms) + 480ms + var(--i, 0) * 120ms) both;
+  }
+  .cr-stage .cr-zone.cr-zone.is-warned-fresh .cr-zone-shape { animation: cr-warn-in var(--t-slow) var(--ease-press) calc(var(--cam-ms) + 520ms) both; }
+  .cr-stage .cr-zone.is-warned-fresh .cr-zone-warned { animation: cr-fade var(--t-mid) var(--ease) calc(var(--cam-ms) + 600ms) both; }
+}
+
+/* A figure's moment: the plate fills the stage on ink, contained (never
+   cropped, the same file), and drifts once like the log's held plates. */
+.cr-pplate { position: absolute; background: var(--ink); overflow: hidden; }
+.cr-pplate img { position: absolute; inset: 10px; display: block; width: calc(100% - 20px); height: calc(100% - 20px); object-fit: contain; }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-pplate { animation: cr-fade var(--t-slow) var(--ease) both; }
+  .cr-pplate img { transform-origin: 58% 45%; animation: cr-drift 4800ms cubic-bezier(0.3, 0.1, 0.3, 1) both; }
+}
+
+/* An instrument's readings, set over the board for the slip that carries them. */
+.cr-preads {
+  position: absolute;
+  max-width: 440px;
+  background: var(--paper-lit);
+  border: 1.5px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  padding: 8px 12px 10px;
+}
+.cr-preads .cr-reads { margin: 0; }
+@media (prefers-reduced-motion: no-preference) { .cr-preads { animation: cr-arrive var(--t-slow) var(--ease) 260ms both; } }
+
+/* The warning chain, as a corner inset; it pulses the beat a link changes. */
+.cr-pchain { position: absolute; width: 196px; z-index: 1; }
+.cr-pchain .cr-chain > svg { box-shadow: 3px 3px 0 var(--ink); }
+.cr-pchain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--ink);
+  opacity: 0;
+  pointer-events: none;
+}
+@keyframes cr-chain-pulse { 0% { opacity: 0.8; transform: scale(1); } 100% { opacity: 0; transform: scale(1.12); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-pchain.is-pulse::after { animation: cr-chain-pulse 700ms var(--ease) 2 both; }
+}
+@media (max-width: 599px) {
+  .cr-pchain { width: 124px; }
+  /* Phones: the inset gives the board its corner back for the call and the
+     record (the full chain is a press away, under MAP). */
+  .cr-stage:is(.is-call, .is-record) .cr-pchain { display: none; }
+}
+
+/* The desk margin: an ink rail (left on wide stages, along the top on
+   phones) where slips that name no zone land, and your orders leave from. */
+.cr-tray {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  background: var(--ink);
+  color: var(--paper);
+  z-index: 2;
+}
+.cr-tray-name { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(241, 232, 213, 0.82); white-space: nowrap; }
+.cr-tray-marks { display: flex; gap: 6px; align-items: center; overflow: hidden; }
+.cr-tray-mark {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--paper);
+  transition: opacity var(--t-slow) var(--ease);
+}
+.cr-tray-mark svg { display: block; width: 20px; height: 20px; }
+.cr-tray-mark.is-past, .cr-tray-mark.is-set { opacity: 0.45; }
+.cr-tray-mark.is-active { outline: 2px solid var(--paper); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-tray-mark.is-active { animation: cr-pmark-in var(--t-slow) var(--ease-press) 120ms both; }
+}
+@media (min-width: 760px) {
+  .cr-tray { right: auto; bottom: 0; height: auto; width: 76px; flex-direction: column; padding: 16px 0; gap: 16px; }
+  .cr-tray-name { writing-mode: vertical-rl; transform: rotate(180deg); }
+  .cr-tray-marks { flex-direction: column; }
+  .cr-tray-mark { width: 40px; height: 40px; }
+  .cr-tray-mark svg { width: 24px; height: 24px; }
+}
+
+/* ── The foot: the lower third, the call, the record ───────────────────── */
+.cr-foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  max-height: 72%;
+  overflow-y: auto;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 18px calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(241, 232, 213, 0.3);
+}
+@media (min-width: 760px) { .cr-foot { padding: 14px 24px 18px; } }
+.cr-foot :focus-visible { outline: 3px solid var(--paper); outline-offset: 2px; }
+.cr-foot-slug {
+  margin: 0 0 8px;
+  font-family: var(--data);
+  font-weight: 400;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.78);
+}
+/* The slug takes focus only so keyboard and screen-reader users land on the
+   hour (as the log's stamps do); it is not a control, so it draws no ring. */
+.cr-foot .cr-foot-slug:focus, .cr-foot .cr-foot-slug:focus-visible { outline: none; }
+.cr-foot-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin-top: 12px; }
+.cr-foot .cr-btn-primary { box-shadow: 3px 3px 0 rgba(241, 232, 213, 0.45); }
+@media (hover: hover) { .cr-foot .cr-btn-primary:hover { box-shadow: 5px 5px 0 rgba(241, 232, 213, 0.45); } }
+.cr-foot .cr-btn-primary:active { box-shadow: 0 0 0 transparent; }
+@media (max-width: 599px) { .cr-foot-actions .cr-btn-primary { flex: 1 1 100%; } }
+
+/* The lower third: what sort of slip and where, then the time, the slip's
+   headline (its own words) and its citation, wiped in a step at a time like
+   the leader of a teleprinter slip. The whole line is the button to the full slip. */
+.cr-third-main {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-height: 44px;
+  padding: 4px 0;
+  text-align: left;
+  font: inherit;
+  color: var(--paper);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.cr-third-kind {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.82);
+}
+.cr-third-kind svg { display: block; flex: none; }
+.cr-third-line { font-family: var(--read); font-size: 19px; line-height: 1.32; }
+@media (min-width: 760px) { .cr-third-line { font-size: 24px; line-height: 1.28; } }
+.cr-third-time { font-family: var(--data); font-weight: 700; font-size: 0.78em; letter-spacing: 0.04em; }
+.cr-third-sep { color: rgba(241, 232, 213, 0.6); }
+.cr-third-cite { font-family: var(--data); font-size: 0.6em; vertical-align: 0.35em; color: rgba(241, 232, 213, 0.82); }
+.cr-third-more {
+  justify-self: start;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.82);
+  border-bottom: 1px solid rgba(241, 232, 213, 0.45);
+  padding-bottom: 1px;
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+.cr-third-plus { font-size: 13px; letter-spacing: 0; }
+@media (hover: hover) {
+  .cr-third-main:hover .cr-third-more, .cr-precord-rec:hover .cr-third-more { color: var(--paper); border-bottom-color: var(--paper); }
+}
+.cr-third.is-waiting .cr-third-line { font-family: var(--data); font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(241, 232, 213, 0.6); }
+.cr-third-cap { margin: 8px 0 0; display: grid; gap: 4px; font-size: 14px; line-height: 1.45; color: rgba(241, 232, 213, 0.9); }
+.cr-third-capt { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cr-third-cap .cr-figure-credit { color: rgba(241, 232, 213, 0.82); }
+.cr-third-cap .cr-figure-credit a { color: var(--paper); }
+@keyframes cr-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-third .cr-third-kind { animation: cr-fade var(--t-mid) var(--ease) 60ms both; }
+  .cr-third .cr-third-line { animation: cr-wipe var(--type, 400ms) steps(24, end) 140ms both; }
+  .cr-third .cr-third-more { animation: cr-fade var(--t-mid) var(--ease) calc(var(--type, 400ms) + 160ms) both; }
+  .cr-third-cap { animation: cr-arrive var(--t-slow) var(--ease) calc(var(--type, 400ms) + 120ms) both; }
+}
+
+/* Playback: pause, step, skip — and a tick per slip of the hour. */
+.cr-ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.cr-pbtn {
+  min-height: 40px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: transparent;
+  border: 1px solid rgba(241, 232, 213, 0.5);
+  cursor: pointer;
+  transition: border-color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
+}
+.cr-pbtn svg { display: block; }
+.cr-pbtn[aria-pressed="true"] { background: rgba(241, 232, 213, 0.14); border-color: var(--paper); }
+@media (hover: hover) { .cr-pbtn:hover { border-color: var(--paper); background: rgba(241, 232, 213, 0.1); } }
+.cr-pbtn:active { transform: translate(1px, 1px); transition: transform var(--t-fast) var(--ease-press); }
+.cr-ptitle .cr-pbtn { min-height: 52px; padding: 0 18px; }
+.cr-ticks { display: inline-flex; gap: 5px; margin-left: auto; padding-left: 6px; }
+.cr-ticks i { width: 14px; height: 4px; background: rgba(241, 232, 213, 0.25); transition: background-color var(--t-mid) var(--ease); }
+.cr-ticks i.is-done { background: rgba(241, 232, 213, 0.6); }
+.cr-ticks i.is-now { background: var(--paper); }
+
+/* The call: the options as cards in the band, the board dimmed above them. */
+.cr-pcall-head { margin: 0 0 10px; font-family: var(--data); font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--paper); }
+.cr-pcards { display: grid; gap: 10px; }
+@media (min-width: 760px) {
+  .cr-pcards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+  .cr-pcards.is-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) { .cr-pcards.is-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.cr-pcard { position: relative; display: grid; }
+.cr-pcard-btn.cr-option { height: 100%; min-height: 76px; align-content: start; box-shadow: 3px 3px 0 rgba(241, 232, 213, 0.4); }
+.cr-pcard-btn .cr-option-label { font-size: 15px; }
+.cr-pcard-more + .cr-pcard-btn, .cr-pcard:has(.cr-pcard-more) .cr-pcard-btn { padding-bottom: 46px; }
+.cr-pcard-more {
+  position: absolute;
+  left: 8px;
+  bottom: 6px;
+  min-height: 40px;
+  padding: 0 8px;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.cr-foot .cr-pcard-more:focus-visible { outline: 2px solid var(--ember); outline-offset: -2px; }
+.cr-foot .cr-option:focus-visible { outline: 3px solid var(--paper); outline-offset: 3px; border-color: var(--ember); box-shadow: 3px 3px 0 var(--ember); }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-pcall { animation: cr-arrive var(--t-slow) var(--ease) both; }
+  .cr-pcall-head { display: inline-block; transform-origin: left center; animation: cr-call-stamp var(--t-mid) var(--ease-press) 90ms both; }
+  .cr-pcard { animation: cr-arrive var(--t-slow) var(--ease) both; }
+  .cr-pcard:nth-child(2) { animation-delay: 60ms; }
+  .cr-pcard:nth-child(3) { animation-delay: 120ms; }
+  .cr-pcard:nth-child(4) { animation-delay: 180ms; }
+}
+
+/* The record: your call stamped, then what the record says followed. */
+.cr-precord-call { margin: 0; display: grid; gap: 3px; }
+.cr-precord-tag { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(241, 232, 213, 0.82); }
+.cr-precord-label { font-family: var(--data); font-size: 15px; letter-spacing: 0.05em; text-transform: uppercase; }
+.cr-precord-warned { font-family: var(--data); font-size: 11.5px; letter-spacing: 0.08em; color: var(--paper); }
+.cr-precord-warned::before { content: '▪ '; }
+.cr-precord-rec {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 6px 0 6px 12px;
+  text-align: left;
+  font: inherit;
+  color: var(--paper);
+  background: none;
+  border: 0;
+  border-left: 3px solid var(--paper);
+  cursor: pointer;
+}
+.cr-precord-text { font-size: 16px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.cr-precord-rec.is-silent { border-left-style: dashed; grid-template-columns: auto minmax(0, 1fr); column-gap: 12px; }
+.cr-precord-rec.is-silent .cr-silent-glyph { grid-row: span 2; color: var(--paper); }
+.cr-precord-note { font-family: var(--data); font-size: 11px; letter-spacing: 0.08em; color: rgba(241, 232, 213, 0.78); }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-precord-call { animation: cr-call-stamp var(--t-mid) var(--ease-press) both; transform-origin: left center; }
+  .cr-precord-rec { animation: cr-arrive var(--t-slow) var(--ease) calc(var(--cam-ms) + 700ms) both; }
+  .cr-precord .cr-foot-actions { animation: cr-arrive var(--t-slow) var(--ease) calc(var(--cam-ms) + 820ms) both; }
+}
+
+/* The briefing on the stage: the day's title card. */
+.cr-ptitle-name { margin: 0; font-family: var(--poster); font-size: clamp(30px, 6vw, 48px); line-height: 0.98; letter-spacing: 0.01em; text-transform: uppercase; }
+.cr-ptitle-loc { margin: 8px 0 0; font-size: 16px; line-height: 1.5; max-width: 62ch; color: rgba(241, 232, 213, 0.9); }
+
+/* The stage's one desk note sits over the board's top corner. */
+.cr-coach.cr-coach-stage { position: absolute; z-index: 4; left: 12px; right: 12px; top: 62px; margin: 0; max-width: 46ch; box-shadow: 3px 3px 0 var(--ember), 0 10px 30px rgba(25, 20, 16, 0.25); }
+@media (min-width: 760px) { .cr-coach.cr-coach-stage { left: 96px; top: 18px; right: auto; } }
+.cr-coach.cr-coach-stage::before { display: none; }
+
+/* The sheet, for a slip or a call in full: the phone board's dialog, kept to
+   a reading measure on wide screens. */
+.cr-psheet { left: 0; right: 0; margin: 0 auto; width: min(760px, 100%); }
+@media (min-width: 760px) { .cr-psheet { padding: 10px 28px 26px; border-left: 1px solid var(--ink); border-right: 1px solid var(--ink); } }
+.cr-psheet .cr-slip { animation: none; }
+.cr-psheet .cr-record { margin-top: 4px; animation: none; }
+
+/* Reduced motion, picture mode: frames cut in; what is new is struck twice. */
+@media (prefers-reduced-motion: reduce) {
+  .cr-stage-view::after, .cr-pmark-face, .cr-tray-mark, .cr-ticks i, .cr-mode-btn, .cr-pbtn { transition: none; }
+  .cr-stage .cr-zone.is-spot .cr-zone-shape { filter: drop-shadow(4px 4px 0 rgba(25, 20, 16, 0.55)); }
+  .cr-stage .cr-zone.is-spot.is-impact .cr-zone-shape { filter: drop-shadow(4px 4px 0 rgba(184, 50, 26, 0.6)); }
+  .cr-pmark.is-active .cr-pmark-face { box-shadow: 3px 3px 0 var(--ink), 6px 6px 0 rgba(25, 20, 16, 0.4); }
+  .cr-tray-mark.is-active { box-shadow: 3px 3px 0 rgba(241, 232, 213, 0.5); }
+  .cr-stage .cr-zone.is-warned-fresh .cr-zone-shape { filter: drop-shadow(3px 3px 0 rgba(25, 20, 16, 0.5)); }
+  .cr-dispatch-line { stroke-dasharray: none; }
+  .cr-pchain.is-pulse .cr-chain > svg { box-shadow: 3px 3px 0 var(--ink), 6px 6px 0 rgba(25, 20, 16, 0.4); }
+  .cr-third .cr-third-line { text-shadow: 1.5px 1.5px 0 rgba(241, 232, 213, 0.28); }
+}
+
+/* ── Picture mode, the game register: dialogue boxes, a choice list, the
+   level card and the end card. A classic game's grammar in the pressbook's
+   materials: a paper text box with a double ink frame, an ink nameplate
+   tab, a generic ink-line role portrait (never a likeness), the ▸ advance
+   mark. Grammar only: no lives, no score, no coin — the stakes on this desk
+   are the record's, and the debrief keeps them in words. */
+
+.cr-dbox {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 14px;
+  align-items: start;
+  position: relative;
+  margin-top: 14px;
+  padding: 16px 16px 12px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--paper);
+  box-shadow: inset 0 0 0 3px var(--ink), inset 0 0 0 4.5px var(--paper), inset 0 0 0 6px var(--ink);
+}
+.cr-dbox-body { position: relative; min-width: 0; padding-right: 40px; }
+.cr-portrait {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin-top: 4px;
+  color: var(--ink);
+  background: var(--paper-deep);
+  border: 1.5px solid var(--ink);
+}
+.cr-nameplate {
+  position: absolute;
+  top: -30px;
+  left: 0;
+  max-width: 100%;
+  padding: 4px 10px 3px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1.5px solid var(--paper);
+  font-family: var(--data);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cr-dbox .cr-third-main, .cr-dbox .cr-precord-rec { color: var(--ink); }
+.cr-dbox .cr-third-kind, .cr-dbox .cr-third-cite, .cr-dbox .cr-third-sep { color: var(--ink-soft); }
+.cr-dbox .cr-third-more { color: var(--ink-soft); border-bottom-color: var(--rule); }
+@media (hover: hover) { .cr-dbox .cr-third-main:hover .cr-third-more { color: var(--ink); border-bottom-color: var(--ink); } }
+.cr-dbox .cr-third-cap { grid-column: 1 / -1; color: var(--ink); }
+.cr-dbox .cr-third-cap .cr-figure-credit { color: var(--ink-soft); }
+.cr-dbox .cr-third-cap .cr-figure-credit a { color: var(--ink); }
+.cr-dbox :focus-visible { outline: 3px solid var(--ember); outline-offset: 2px; }
+/* The ▸: the classic box's "more" mark, and a real button to the next slip. */
+.cr-dbox-next {
+  position: absolute;
+  right: -6px;
+  bottom: -4px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+@media (hover: hover) { .cr-dbox-next:hover { color: var(--ember); } }
+/* Four blinks once the line is typed, then it holds (WCAG 2.2.2). */
+@keyframes cr-caret-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-dbox-next span { animation: cr-caret-blink 1s steps(1, end) calc(var(--type, 400ms) + 300ms) 4; }
+}
+@media (max-width: 599px) {
+  .cr-dbox { grid-template-columns: minmax(0, 1fr); padding: 14px 12px 10px; }
+  .cr-dbox > .cr-portrait { display: none; }
+  .cr-nameplate { top: -27px; font-size: 10px; }
+  .cr-dbox .cr-third-line { font-size: 18px; }
+}
+.cr-third.is-waiting { margin-top: 14px; }
+
+/* The call as a dialogue choice list: one framed box, the options stacked,
+   a ▸ selector at the one under the hand or the key; ↑ ↓ move, Enter takes. */
+.cr-pcall.cr-dbox { margin-top: 26px; }
+.cr-pcall-head.cr-nameplate { margin: 0; }
+.cr-pcards, .cr-pcards[class] { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
+.cr-pcard-btn.cr-option {
+  min-height: 48px;
+  padding: 10px 12px 10px 34px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed var(--rule);
+  box-shadow: none;
+  transform: none;
+}
+.cr-pcard:last-child .cr-pcard-btn.cr-option { border-bottom: 0; }
+.cr-pcard-btn.cr-option::before {
+  content: '▸';
+  left: 10px;
+  top: 10px;
+  width: auto;
+  height: auto;
+  background: none;
+  color: var(--ember);
+  font-size: 17px;
+  line-height: 1.2;
+  transform: none;
+  opacity: 0;
+  transition: opacity var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+@media (hover: hover) {
+  .cr-pcard-btn.cr-option:hover { background: var(--paper-deep); box-shadow: none; transform: none; border-color: var(--rule); }
+  .cr-pcard-btn.cr-option:hover::before { opacity: 1; transform: translateX(2px); }
+}
+.cr-foot .cr-pcard-btn.cr-option:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; background: var(--paper-deep); border-color: var(--rule); box-shadow: none; }
+.cr-pcard-btn.cr-option:focus-visible::before { opacity: 1; }
+.cr-pcard-btn .cr-option-label { font-size: 14.5px; }
+.cr-pcard:has(.cr-pcard-more) .cr-pcard-btn { padding-bottom: 10px; padding-right: 96px; }
+.cr-pcard-more { left: auto; right: 4px; top: 4px; bottom: auto; }
+@media (max-width: 599px) {
+  .cr-pcard:has(.cr-pcard-more) .cr-pcard-btn { padding-right: 12px; padding-bottom: 40px; }
+  .cr-pcard-more { top: auto; bottom: 2px; left: 26px; right: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .cr-pcard-btn.cr-option::before { transition: none; } }
+
+/* The level card: the briefing's title as a stage's opening plate. */
+.cr-level {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 0;
+  margin: 0 0 10px;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+.cr-level span + span::before { content: '—'; margin: 0 10px; color: rgba(241, 232, 213, 0.6); }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-level { animation: cr-arrive var(--t-slow) var(--ease) both; }
+  .cr-ptitle-name { animation: cr-call-stamp var(--t-slow) var(--ease-press) 160ms both; transform-origin: left center; }
+}
+
+/* The end card: the day closes across the board before the debrief. */
+.cr-endcard { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 2; }
+.cr-endcard-band {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  width: 100%;
+  padding: 18px 16px;
+  background: var(--ink);
+  color: var(--paper);
+  border-top: 3px solid var(--paper);
+  border-bottom: 3px solid var(--paper);
+  text-align: center;
+}
+.cr-endcard-title { font-family: var(--poster); font-size: clamp(34px, 7vw, 64px); line-height: 0.95; text-transform: uppercase; }
+.cr-endcard-sub { font-family: var(--data); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(241, 232, 213, 0.85); }
+@keyframes cr-band-in { from { transform: scaleY(0); } to { transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-endcard-band { animation: cr-band-in var(--t-slow) var(--ease-press) 200ms both; }
+  .cr-endcard-title { animation: cr-call-stamp var(--t-slow) var(--ease-press) 520ms both; }
+  .cr-endcard-sub { animation: cr-fade var(--t-mid) var(--ease) 760ms both; }
+}
+.cr-precord.cr-dbox { margin-top: 26px; }
+.cr-dbox :is(.cr-precord-tag, .cr-precord-note) { color: var(--ink-soft); }
+.cr-dbox :is(.cr-precord-label, .cr-precord-warned) { color: var(--ink); }
+.cr-dbox .cr-precord-rec { border-left-color: var(--ink); }
+.cr-dbox .cr-precord-rec.is-silent .cr-silent-glyph { color: var(--ink); }
+.cr-dbox .cr-btn-primary { box-shadow: 3px 3px 0 var(--ink); }
+@media (hover: hover) { .cr-dbox .cr-btn-primary:hover { box-shadow: 5px 5px 0 var(--ink); } }
+.cr-dbox .cr-btn-primary:focus-visible { outline-color: var(--ink); }
+/* On the stage the board is scaled up to 2.6x, and the log's live-zone pulse
+   (an opacity animation on the zone path) would repaint the whole enlarged
+   plate every frame: on the stage a live zone holds still (its state is
+   carried by stroke, hatch and word as everywhere), and the zone the slip
+   concerns is drawn heavier instead. */
+.cr-stage .cr-zone .cr-zone-shape { animation: none; }
+
+/* ══ The diorama: the same stage on a paper model of the real ground ════════
+   Diorama.tsx + diorama-engine.ts (WebGL, loaded only in this mode). The
+   canvas draws the ground, the zones' drapes, the chits and the dispatch
+   arcs; everything worded is DOM laid over it (placed from the model each
+   frame), in the board's own type: the mono labels on a paper halo, ember
+   only where the board uses it (the impact state). The stage's table is
+   the deep paper stock, darkened a breath at its edges like a lit plate.
+   Reduced motion: no travel, no drift, no rise; the band and the labels
+   cut in, and the slip's zone is struck twice (in the shader). */
+
+.cr-stage.is-diorama { background: var(--paper-deep); }
+.cr-dio { position: absolute; inset: 0; touch-action: pan-y; cursor: grab; }
+.cr-dio:active { cursor: grabbing; }
+.cr-dio::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 45%, transparent 55%, color-mix(in srgb, var(--ink) 16%, transparent) 100%);
+}
+.cr-dio-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.cr-dio-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* Labels: zero-size anchors moved by the engine; their bodies hang off them. */
+.cr-dio-labels { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.cr-dio-lab { position: absolute; left: 0; top: 0; width: 0; height: 0; will-change: transform; }
+.cr-dio-lab > span {
+  position: absolute;
+  white-space: nowrap;
+  font-family: var(--data);
+  text-shadow: 0 0 2px var(--paper), 0 0 3px var(--paper), 1px 1px 0 var(--paper), -1px -1px 0 var(--paper), 1px -1px 0 var(--paper), -1px 1px 0 var(--paper);
+}
+.cr-dio-zone-body { display: grid; justify-items: center; gap: 1px; transform: translate(-50%, 9px); text-transform: uppercase; }
+.cr-dio-zone-name { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink); }
+.cr-dio-zone-state { font-size: 11px; letter-spacing: 0.08em; color: var(--ink-soft); }
+.cr-dio-zone:is(.is-watch, .is-signal) .cr-dio-zone-state { color: var(--ink); }
+.cr-dio-zone.is-signal .cr-dio-zone-state { font-weight: 700; }
+.cr-dio-zone.is-impact .cr-dio-zone-state { color: var(--ember); font-weight: 700; }
+.cr-dio-zone-warned { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink); }
+.cr-dio-zone-beyond { font-size: 10px; letter-spacing: 0.08em; color: var(--ink-faint); }
+.cr-dio-zone.is-spot .cr-dio-zone-name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.cr-dio-place { transition: opacity var(--t-mid) var(--ease); }
+.cr-dio-labels[data-near="0"] .cr-dio-place { opacity: 0; }
+.cr-dio-place-body { transform: translate(-3px, -50%); font-size: 10px; letter-spacing: 0.04em; color: var(--ink-soft); padding-left: 10px; }
+.cr-dio-place-body::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+}
+.cr-dio-origin-body { transform: translate(16px, -50%); font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink); }
+.cr-dio-frame-body {
+  transform: translate(-50%, 6px);
+  padding: 2px 8px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper-lit);
+  border: 1px solid var(--ink);
+  text-shadow: none !important;
+}
+@media (max-width: 599px) {
+  .cr-dio-frame-body { font-size: 9px; letter-spacing: 0.08em; white-space: normal !important; width: 220px; text-align: center; }
+  .cr-dio-zone-name { font-size: 11px; }
+  .cr-dio-zone-state, .cr-dio-zone-warned { font-size: 10px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cr-dio-origin.is-fresh .cr-dio-origin-body { animation: cr-fade var(--t-mid) var(--ease) 700ms both; }
+}
+
+/* The wind a cited forecast states, as on the board's title band. */
+.cr-dio-wind {
+  justify-self: start;
+  margin: 0;
+  font-family: var(--data);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  background: var(--paper-lit);
+  border: 1px solid var(--ink);
+  padding: 3px 8px;
+}
+
+/* The top of the stage: one grid, so nothing printed there overlaps. The
+   wind tag and the impact band share the open column; the plate keeps its
+   own. On a narrow stage they stack, the plate first, folded to a strip. */
+.cr-dio-top {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min(372px, 62%);
+  column-gap: 14px;
+  align-items: start;
+  pointer-events: none;
+}
+.cr-dio-top-l { display: grid; gap: 8px; min-width: 0; }
+/* A slip's readings card drops below the stack (Diorama.tsx measures it). */
+.cr-stage.is-diorama .cr-preads { margin-top: var(--cr-dio-reads-dy, 0px); }
+
+/* The ground's plate: what the model is, whose data, and the view controls. */
+.cr-dio-plate {
+  pointer-events: auto;
+  min-width: 0;
+  padding: 8px 10px 8px;
+  background: var(--paper-lit);
+  border: 1px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-family: var(--data);
+  color: var(--ink);
+}
+.cr-dio-plate p { margin: 0; }
+.cr-dio-plate-head { display: flex; align-items: flex-start; gap: 8px; }
+.cr-dio-plate-text { flex: 1 1 auto; min-width: 0; }
+.cr-dio-short { display: none; }
+.cr-dio-plate-line { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.cr-dio-plate-src { margin-top: 3px !important; font-size: 10.5px; line-height: 1.4; color: var(--ink-faint); }
+.cr-dio-view { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+.cr-dio-vbtn-word { flex: 1 1 auto; }
+.cr-dio-vbtn {
+  min-width: 40px;
+  min-height: 40px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 8px;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+@media (hover: hover) { .cr-dio-vbtn:hover { background: var(--ink); color: var(--paper); } }
+.cr-dio-vbtn:active { transform: translate(1px, 1px); transition: transform var(--t-fast) var(--ease-press); }
+.cr-dio-vbtn:focus-visible { outline: 3px solid var(--ember); outline-offset: 2px; }
+.cr-dio-plate-toggle { display: none; }
+.cr-dio-hint { margin-top: 6px !important; font-size: 10px; line-height: 1.45; color: var(--ink-faint); }
+.cr-dio-hint kbd {
+  font-family: var(--data);
+  font-size: 10px;
+  padding: 0 4px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+}
+.cr-dio-hint-touch { display: none; }
+@media (pointer: coarse) { .cr-dio-hint-touch { display: inline; } .cr-dio-hint-keys { display: none; } }
+@media (max-width: 599px) {
+  .cr-dio-top { left: 8px; right: 8px; display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+  .cr-dio-top-l { order: 2; gap: 6px; }
+  .cr-dio-plate { padding: 4px 4px 4px 8px; box-shadow: 2px 2px 0 var(--ink); }
+  .cr-dio-plate-head { align-items: center; }
+  .cr-dio-long { display: none; }
+  .cr-dio-short { display: inline; }
+  .cr-dio-plate-line { font-size: 10px; }
+  .cr-dio-plate-src { margin-top: 1px !important; font-size: 9.5px; line-height: 1.35; }
+  .cr-dio-plate-toggle { display: inline-flex; flex: 0 0 auto; gap: 6px; align-items: center; }
+  .cr-dio-hint { display: none; }
+  /* Folded: one strip (what the model is, whose ground); the view opens below. */
+  .cr-dio-plate:not(.is-open) .cr-dio-view { display: none; }
+  .cr-dio-view { margin-top: 4px; padding-right: 4px; }
+  .cr-dio-vbtn { min-width: 40px; padding: 0 6px; }
+  .cr-dio-wind { font-size: 10px; padding: 2px 6px; }
+}
+@media (max-width: 599px) and (prefers-reduced-motion: no-preference) {
+  .cr-dio-plate.is-open .cr-dio-view { animation: cr-fade var(--t-mid) var(--ease) both; }
+}
+
+/* The impact beat: a band across the model with the cited time, the zone's
+   drape swept under it. Presentation of a time the record already holds. */
+.cr-dio-impact { display: grid; pointer-events: none; }
+.cr-dio-impact-band {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  padding: 12px 16px;
+  background: var(--ink);
+  color: var(--paper);
+  border-top: 2px solid var(--paper);
+  border-bottom: 2px solid var(--paper);
+  text-align: center;
+}
+.cr-dio-impact-time { font-family: var(--data); font-size: 12px; font-weight: 700; letter-spacing: 0.2em; }
+.cr-dio-impact-title { font-family: var(--poster); font-size: clamp(24px, 3.4vw, 44px); line-height: 0.95; text-transform: uppercase; text-wrap: balance; }
+.cr-dio-impact-sub { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: color-mix(in srgb, var(--paper) 85%, transparent); }
+@keyframes cr-dio-band { 0% { transform: scaleY(0); opacity: 1; } 10% { transform: none; } 82% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-dio-impact-band { animation: cr-dio-band 3400ms var(--ease-press) both; }
+  .cr-dio-impact-title { animation: cr-call-stamp var(--t-slow) var(--ease-press) 260ms both; }
+}
+/* Still: the band is printed twice out of register, and holds. */
+.cr-dio-impact.is-still .cr-dio-impact-band { box-shadow: 5px 5px 0 color-mix(in srgb, var(--ink) 55%, transparent); }
+
+/* The fallback's one line, over the stage. */
+.cr-stage-notice {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 5;
+  margin: 0;
+  padding: 8px 14px;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--paper);
+  background: var(--ink);
+  border-bottom: 2px solid var(--ember);
+}
+
+/* The ground sheet. */
+.cr-dio-about { font-family: var(--read); font-size: 16px; line-height: 1.55; }
+.cr-dio-about p { margin: 0 0 10px; }
+.cr-dio-about-zones { margin: 0 0 12px; padding-left: 20px; }
+.cr-dio-about-src { border-top: 1px solid var(--rule); padding-top: 10px; margin-top: 10px; font-size: 14px; }
+.cr-dio-about-name { font-family: var(--data); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+.cr-dio-about-lic { font-family: var(--data); font-size: 11.5px; white-space: pre-wrap; color: var(--ink-soft); }
+.cr-dio-about a { color: var(--ink); text-decoration-color: var(--ember); }
+
+
+/* ══ The feel pass: commitment, the scorecard, the payoff ═════════════════
+   Presentation only, on the house tokens (150 / 240 / 350 ms; one arrival
+   curve, one press curve). Every moving rule sits in a no-preference query;
+   the still equivalents follow it — set at once, and what is new is struck
+   twice out of register, the Control Room's mark for "this just landed". */
+
+/* ── The pip punches in as the call commits ─────────────────────────────
+   `scale` is its own property, so it composes with the diamond's rotation. */
+@keyframes cr-pip-punch { 0% { scale: 1.9; } 60% { scale: 0.92; } 100% { scale: 1; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-pips i.is-last { animation: cr-pip-punch var(--t-slow) var(--ease-press) both; }
+  .cr-pips i.is-now { animation: cr-pip-now var(--t-slow) var(--ease) both; }
+}
+@keyframes cr-pip-now { from { box-shadow: 0 0 0 7px transparent; } }
+@media (prefers-reduced-motion: reduce) {
+  .cr-pips i.is-last { filter: drop-shadow(2px 2px 0 rgba(241, 232, 213, 0.5)); }
+}
+
+/* ── Commitment: the record is laid down in order ───────────────────────
+   The call you took stamps (from a touch larger, with a press), the calls
+   you did not take are struck through as it lands, the zones you warned
+   are marked, the record is set down beneath, and the scorecard last. */
+@keyframes cr-commit {
+  0% { opacity: 0; transform: scale(1.06) rotate(-0.6deg); }
+  55% { opacity: 1; transform: scale(0.99); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes cr-strike { from { text-decoration-color: transparent; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-record .cr-taken .is-chosen { transform-origin: left center; animation: cr-commit var(--t-slow) var(--ease-press) 40ms both; }
+  .cr-record .cr-taken .is-not .cr-taken-label { animation: cr-strike var(--t-mid) var(--ease) 200ms both; }
+  .cr-record > .cr-boardline-you { animation: cr-arrive var(--t-mid) var(--ease) 180ms both; }
+  .cr-record > .cr-consequence { animation: cr-arrive var(--t-slow) var(--ease) 300ms both; }
+  .cr-record > .cr-ledger { animation: cr-arrive var(--t-slow) var(--ease) 460ms both; }
+  .cr-record .cr-ledger-flag { animation: cr-stamp-down var(--t-mid) var(--ease-press) 640ms both; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-record .cr-taken .is-chosen { animation: none !important; box-shadow: 4px 4px 0 color-mix(in srgb, var(--ink) 40%, transparent); }
+  .cr-record .cr-ledger-flag { box-shadow: 3px 3px 0 color-mix(in srgb, var(--ink) 35%, transparent); }
+}
+
+/* ── The scorecard, kept as you go (Ledger.tsx) ─────────────────────────
+   Game design, set apart from the record: a dashed rule, the data face,
+   ink only. */
+.cr-ledger { margin-top: var(--s3); border-top: 1.5px dashed var(--ink-soft); padding-top: 10px; max-width: 640px; }
+.cr-ledger-tag { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink); margin: 0 0 8px; }
+.cr-ledger-tag-sub { color: var(--ink-faint); letter-spacing: 0.1em; }
+.cr-ledger-grid { display: grid; grid-template-columns: repeat(3, minmax(0, auto)); justify-content: start; gap: 6px 26px; margin: 0; }
+.cr-ledger-grid dt { font-family: var(--data); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 4px; }
+.cr-ledger-grid dd { margin: 0; display: flex; align-items: center; gap: 7px; }
+.cr-ledger-v { font-family: var(--data); font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 479px) {
+  .cr-ledger-grid { grid-template-columns: 1fr; gap: 6px; }
+  .cr-ledger-grid > div { display: grid; grid-template-columns: 9.5em 1fr; align-items: center; }
+  .cr-ledger-grid dt { margin: 0; }
+}
+.cr-ledger-flag {
+  display: inline-block; margin: 10px 0 0; padding: 4px 9px 3px;
+  border: 1.5px solid var(--ink);
+  font-family: var(--data); font-size: 11px; letter-spacing: 0.08em; line-height: 1.45;
+}
+.cr-ledger-note { font-family: var(--data); font-size: 11.5px; line-height: 1.5; color: var(--ink-soft); margin: 8px 0 0; max-width: 62ch; }
+.cr-ledger-run {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px;
+  margin: 10px 0 0; padding-top: 8px; border-top: 1px solid var(--rule);
+  font-family: var(--data); font-size: 11.5px; line-height: 1.5; color: var(--ink-soft);
+}
+.cr-ledger-run b { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+.cr-ledger-run-k { flex-basis: 100%; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); }
+.cr-ledger-run > span { display: inline-flex; align-items: center; gap: 6px; }
+.cr-ledger-pips { display: inline-flex; gap: 2px; }
+.cr-ledger-pips i { width: 9px; height: 9px; border: 1px solid var(--ink); }
+.cr-ledger-pips i.on { background: var(--ink); }
+/* Beside the log on wide screens: the same line, stacked, over the trace. */
+.cr-ledger-run.is-side { flex-direction: column; align-items: flex-start; gap: 3px; border-top: 0; padding-top: 0; margin: 0 0 12px; }
+.cr-ledger-run.is-side .cr-ledger-run-k { display: none; }
+/* Picture mode: one line inside the dialogue box, paper on ink. */
+.cr-ledger.is-compact { border-top: 1px dashed rgba(241, 232, 213, 0.45); padding-top: 6px; margin: 8px 0 0; display: grid; gap: 2px; }
+.cr-ledger.is-compact .cr-ledger-tag { color: rgba(241, 232, 213, 0.7); margin: 0; font-size: 9.5px; }
+.cr-ledger-line { font-family: var(--data); font-size: 11.5px; letter-spacing: 0.04em; line-height: 1.45; }
+
+/* ── The reckoning lays itself out when reached ─────────────────────────
+   The figures arrive, then lane by lane (you, the record, the benchmark):
+   the name, the bar growing out of the impact line, the mark stamped down;
+   then the gaps between them, then your stamp. Held until the stage is a
+   fifth on screen (seen.ts). */
+.cr-rk-gaps { list-style: none; margin: 0 0 var(--s3); padding: 0; display: grid; gap: 6px; max-width: 66ch; }
+.cr-rk-gaps li { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: baseline; font-size: 16px; line-height: 1.45; }
+.cr-rk-gap-who { display: inline-flex; align-items: center; gap: 4px; }
+.cr-rk-gap-to { font-family: var(--data); font-size: 11px; color: var(--ink-soft); }
+.cr-rk-gap-name { font-family: var(--data); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; }
+.cr-rk-stamp.is-you { color: var(--ink); background: var(--paper-lit); }
+.cr-rk-verdict { font-size: 14.5px; color: var(--ink-soft); }
+.cr-rk-rung-flag { display: grid; gap: 1px; margin-top: 3px; font-family: var(--data); font-size: 9px; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); white-space: nowrap; }
+.cr-rk-rung-flag > span { display: inline-flex; align-items: center; gap: 3px; }
+.cr-rk-val { font-family: var(--data); font-size: 10.5px; font-variant-numeric: tabular-nums; color: var(--ink-soft); white-space: nowrap; }
+.cr-rk-pair-row.is-you .cr-rk-val { color: var(--ink); }
+.cr-rk-rung.is-same .cr-rk-val { display: none; }
+@media (min-width: 480px) { .cr-rk-rung { grid-template-columns: 84px repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 479px) { .cr-rk-val, .cr-rk-flag-x { display: none; } .cr-rk-rung-flag { font-size: 9px; } }
+.cr-rk-gap-to { font-size: 13px; }
+
+@keyframes cr-rk-set { 0% { opacity: 0; transform: scale(1.7); } 60% { opacity: 1; transform: scale(0.94); } 100% { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-rk-lane .cr-rk-lane-name { animation: cr-fade var(--t-mid) var(--ease) calc(var(--i, 0) * 260ms + 200ms + var(--beat, 0ms)) both; }
+  .cr-rk-bar { animation-delay: calc(var(--i, 0) * 260ms + 300ms + var(--beat, 0ms)); }
+  .cr-rk-bar-label { animation: cr-fade var(--t-mid) var(--ease) calc(var(--i, 0) * 260ms + 560ms + var(--beat, 0ms)) both; }
+  .cr-rk-mark { transform-box: fill-box; transform-origin: center; animation: cr-rk-set var(--t-mid) var(--ease-press) calc(var(--i, 0) * 260ms + 580ms + var(--beat, 0ms)) both; }
+  .cr-rk-mark-time, .cr-rk-never { animation: cr-fade var(--t-fast) var(--ease) calc(var(--i, 0) * 260ms + 700ms + var(--beat, 0ms)) both; }
+  .cr-rk-gaps li { animation: cr-arrive var(--t-slow) var(--ease) calc(var(--i, 0) * 120ms + 1120ms + var(--beat, 0ms)) both; }
+  .cr-rk-stamp.is-you { animation: cr-stamp-down var(--t-mid) var(--ease-press) calc(1420ms + var(--beat, 0ms)) both; }
+  .cr-rk-stage:not([data-seen]) :is(.cr-rk-fig, .cr-rk-lane-name, .cr-rk-bar, .cr-rk-bar-label, .cr-rk-mark, .cr-rk-mark-time, .cr-rk-never, .cr-rk-gaps li, .cr-rk-stamp) { animation-play-state: paused; }
+  /* The ladder: rung by rung, a quick count down the day. */
+  .cr-rk-ladder .cr-rk-rung:not(.cr-rk-rung-head) { animation: cr-arrive var(--t-mid) var(--ease) calc(min(var(--i, 0) * 70ms, 560ms) + 80ms) both; }
+  .cr-rk-ladder:not([data-seen]) .cr-rk-rung { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-rk-lane-name, .cr-rk-bar-label, .cr-rk-mark-time, .cr-rk-never, .cr-rk-gaps li, .cr-rk-rung { animation: none !important; }
+  .cr-rk-mark { filter: drop-shadow(2px 2px 0 color-mix(in srgb, var(--ink) 40%, transparent)); }
+  .cr-rk-stamp.is-you { box-shadow: 3px 3px 0 color-mix(in srgb, var(--ink) 45%, transparent); }
+}
+
+/* ── The scorecard: four marks settle when reached ──────────────────────── */
+.cr-scorecard-tag {
+  display: inline-block; margin-right: 6px; padding: 2px 6px 1px;
+  border: 1px dashed var(--ink-soft);
+  font-family: var(--data); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink);
+  vertical-align: 1px;
+}
+.cr-scorecard-dek { max-width: 66ch; }
+@keyframes cr-settle { 0% { opacity: 0; transform: translateY(-8px) scale(1.08); } 70% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+@keyframes cr-fill { from { transform: scaleX(0); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-score-grid .big { transform-origin: left bottom; animation: cr-settle var(--t-slow) var(--ease-press) both; }
+  .cr-score-grid > div:nth-child(2) .big { animation-delay: 110ms; }
+  .cr-score-grid > div:nth-child(3) .big { animation-delay: 220ms; }
+  .cr-score-grid > div:nth-child(4) .big { animation-delay: 330ms; }
+  .cr-score-grid .cr-meter span { transform-origin: left; animation: cr-fill var(--t-slow) var(--ease) 260ms both; }
+  .cr-score-grid .cr-meter i { animation: cr-fade var(--t-fast) var(--ease) both; animation-delay: calc(400ms + 40ms * var(--k, 0)); }
+  .cr-scorecard:not([data-seen]) :is(.big, .cr-meter span, .cr-meter i) { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-score-grid .big { filter: drop-shadow(2px 2px 0 color-mix(in srgb, var(--ink) 30%, transparent)); }
+}
+
+/* ── The briefing remembers you ─────────────────────────────────────────── */
+.cr-brief-again-tag {
+  display: inline-block; margin-right: 8px; padding: 1px 6px;
+  background: var(--ink); color: var(--paper);
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+}
+
+/* ── The end card: the desk open again ──────────────────────────────────── */
+.cr-again { margin-top: var(--s5); border-top: 3px double var(--ink); padding-top: var(--s3); }
+.cr-again-tag { font-family: var(--data); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 8px; }
+.cr-again-title { font-family: var(--poster); font-size: clamp(32px, 5.4vw, 52px); line-height: 0.95; text-transform: uppercase; margin: 0 0 12px; text-wrap: balance; }
+.cr-again-body { font-size: 16.5px; line-height: 1.6; max-width: 60ch; margin: 0; }
+.cr-again-body b { font-family: var(--data); font-size: 0.92em; font-variant-numeric: tabular-nums; }
+.cr-again .cr-end-actions { margin-top: var(--s3); }
+.cr-again-tag-days { margin-top: var(--s4); }
+.cr-again-days { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+@media (min-width: 640px) { .cr-again-days { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); } }
+.cr-again-day {
+  width: 100%; height: 100%; display: flex; flex-direction: column; gap: 6px; text-align: left; cursor: pointer;
+  padding: 14px 16px 12px; min-height: 44px;
+  background: var(--paper); color: var(--ink); border: 1.5px solid var(--ink); box-shadow: 3px 3px 0 var(--ink);
+  font: inherit;
+  transition: box-shadow var(--t-mid) var(--ease), transform var(--t-mid) var(--ease), border-color var(--t-fast) var(--ease);
+}
+.cr-again-day:disabled { opacity: 0.55; cursor: default; }
+@media (hover: hover) { .cr-again-day:not(:disabled):hover { border-color: var(--ember); box-shadow: 3px 8px 0 var(--ember); transform: translateY(-5px); } }
+.cr-again-day:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); transition-duration: var(--t-fast); transition-timing-function: var(--ease-press); }
+.cr-again-day:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
+.cr-again-day-head { display: flex; align-items: center; gap: 8px; font-family: var(--data); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
+.cr-again-day-title { font-family: var(--poster); font-size: 24px; line-height: 1; text-transform: uppercase; text-wrap: balance; }
+.cr-again-day-meta { font-family: var(--data); font-size: 11px; line-height: 1.5; color: var(--ink-soft); }
+.cr-again-day-cta { margin-top: auto; padding-top: 6px; font-family: var(--data); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ember); }
+.cr-again-all {
+  margin-top: var(--s3); min-height: 44px; padding: 0; background: none; border: 0; cursor: pointer;
+  font-family: var(--data); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink);
+  text-decoration: underline; text-decoration-color: var(--ember); text-underline-offset: 4px;
+}
+@media (hover: hover) { .cr-again-all:hover { color: var(--ember); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-again-title { transform-origin: left bottom; animation: cr-settle var(--t-slow) var(--ease-press) 80ms both; }
+  .cr-again-days li { animation: cr-arrive var(--t-slow) var(--ease) calc(320ms + var(--i, 0) * 90ms) both; }
+  .cr-again:not([data-seen]) :is(.cr-again-title, .cr-again-days li) { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-again-day { transition: none; }
+  .cr-again-day:hover, .cr-again-day:active { transform: none !important; }
+  .cr-again-title { text-shadow: 3px 3px 0 color-mix(in srgb, var(--ink) 22%, transparent); }
+}
+
+/* Narrow phones: the clock keeps its own width (the pips used to slide in
+   over its digits), and the strip gives back the room from the pips' spacing
+   and a size step on the time. */
+@media (max-width: 429px) {
+  .cr-console-clock { flex-shrink: 0; width: 66px; }
+  .cr-console-time { font-size: 18px; white-space: nowrap; }
+  .cr-console-row { gap: 4px; }
+  .cr-pips { gap: 3px; flex-shrink: 0; }
+  .cr-pips i { width: 6px; height: 6px; }
+  .cr-pips i.is-now { border-width: 1.5px; box-shadow: 0 0 0 1.5px var(--ember); }
+}
+
+/* The scorecard line in picture mode's dialogue box (paper), between the
+   call's stamp and the record: it reads the call before the record answers. */
+.cr-dbox .cr-ledger.is-compact { border-top-color: var(--rule); color: var(--ink); }
+.cr-dbox .cr-ledger.is-compact .cr-ledger-tag { color: var(--ink-faint); }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-precord .cr-ledger.is-compact { animation: cr-arrive var(--t-slow) var(--ease) calc(var(--cam-ms) + 520ms) both; }
 }

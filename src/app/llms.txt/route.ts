@@ -63,6 +63,7 @@ function build(): string {
   L(`- [films.json](${abs('/data/films.json')}): the machine-readable catalogue the explorer fetches.`);
   L(`- [Preparedness](${abs('/preparedness')}): the non-fiction companion — who is actually ready, on real risk indices (INFORM, ND-GAIN, WHO SPAR, Sendai Target G, OCHA FTS), with case files and sources at /data/preparedness/.`);
   L(`- [The Control Room](${abs('/control-room')}): real disasters replayed on their real clocks — you make the calls, then meet what officials did and what the inquiry found. Every fact cited; where the record is silent, it says so.`);
+  L(`- [The Desk Officer’s File](${abs('/control-room/file')}): the Last Mile essay filed for reading at the Control Room desk — six cited folders, server-rendered in full, cross-referenced to the playable days and to the figures on /preparedness. A draft, marked as such.`);
   L();
 
   L('## The finding');

@@ -276,12 +276,103 @@ export function Pictogram({ name, size = 18, className }: P & { name: string }) 
   return <svg {...base(size)} className={className}>{body}</svg>;
 }
 
+/* ── Instrument readings ──────────────────────────────────────────────────
+   One drawing per reading state (vocabulary.json `readings`), on the same
+   grid and stroke. Each says only the state's word: an arrow for a level the
+   slip says moved, a dial needle for a pressure the slip names, a dam for the
+   warning the slip carries. No drawing implies a quantity the slip lacks: the
+   arrows have no scale and the dial no numbers. */
+
+const DAM_WALL = 'M14 4h4.5l2 16H12z';
+const READING_GLYPHS: Record<string, JSX.Element> = {
+  /* the level crosses the dashed alert line the slip names */
+  'above-alert': (
+    <>
+      <path d="M3 11h18" strokeDasharray="2.2 2.2" />
+      <path d="M12 20V4M8 8l4-4 4 4" />
+    </>
+  ),
+  falling: (
+    <>
+      <path d="M12 3v15M8 14l4 4 4-4" />
+      <path d="M3 21.5c1.5-1.2 3-1.2 4.5 0s3 1.2 4.5 0 3-1.2 4.5 0 3 1.2 4.5 0" />
+    </>
+  ),
+  /* a double arrow: the slip's "surged", not a measured height */
+  surged: <path d="M12 21V3M7 8l5-5 5 5M7 14l5-5 5 5" />,
+  filling: (
+    <>
+      <path d={DAM_WALL} />
+      <path d="M2.5 8h9.5M2.5 20h17.5" />
+      <path d="M6.5 17.5V11M4.5 13l2-2 2 2" />
+    </>
+  ),
+  'may-fail': (
+    <>
+      <path d={DAM_WALL} />
+      <path d="M2.5 8h9.5M2.5 20h9" />
+      <path d="M16.6 6.5l-1.6 3.2 2.2 2-1.8 3.6" />
+    </>
+  ),
+  /* a dial with no numbers: the needle restates the crew's word */
+  good: (
+    <>
+      <path d="M3.5 17a8.5 8.5 0 0 1 17 0" />
+      <path d="M12 17l5.2-6.2" />
+      <path d="M4.5 21h15" />
+    </>
+  ),
+  low: (
+    <>
+      <path d="M3.5 17a8.5 8.5 0 0 1 17 0" />
+      <path d="M12 17L7.4 11.4" />
+      <path d="M4.5 21h15" />
+    </>
+  ),
+  nothing: (
+    <>
+      <path d="M3.5 17a8.5 8.5 0 0 1 17 0" />
+      <path d="M12 17H4.6" />
+      <path d="M4.5 21h15" />
+    </>
+  ),
+  contained: PICTOGRAMS.contained,
+  flaring: (
+    <>
+      {PICTOGRAMS.fire}
+      <path d="M4 6.5l1.6 1.2M20 6.5l-1.6 1.2M12 2v1.8" />
+    </>
+  ),
+};
+
+export function ReadingGlyph({ state, size = 24, className }: P & { state: string }) {
+  const body = READING_GLYPHS[state];
+  if (!body) return null;
+  return <svg {...base(size)} className={className}>{body}</svg>;
+}
+
+/* ── The record is silent ─────────────────────────────────────────────────
+   A ledger page with its lines ruled and nothing written on them: the log's
+   mark for a path no one took. Decorative; the block says it in words. */
+export function SilentGlyph({ size = 34, className }: P) {
+  return (
+    <svg {...base(size)} className={className}>
+      <path d="M5.5 3h10l3 3v15h-13z" />
+      <path d="M15.5 3v3h3" />
+      <path d="M8.5 10.5h7M8.5 14h7M8.5 17.5h7" strokeWidth={1} strokeOpacity={0.5} />
+    </svg>
+  );
+}
+
 export function HazardGlyph({ hazard, size, className }: P & { hazard: string }) {
   const h = hazard.toLowerCase();
   if (/fire|wildland/.test(h)) return <FireGlyph size={size} className={className} />;
-  if (h.includes('dam') || h.includes('levee')) return <DamGlyph size={size} className={className} />;
-  if (h.includes('cyclone') || h.includes('hurricane') || h.includes('typhoon') || h.includes('surge')) {
+  // Storm before dam, as in the board's hazard families: "hurricane / levee
+  // failure" is a storm day (the levees fail after its clock ends).
+  if (h.includes('cyclone') || h.includes('hurricane') || h.includes('typhoon')) {
     return <CycloneGlyph size={size} className={className} />;
   }
+  if (h.includes('dam') || h.includes('levee')) return <DamGlyph size={size} className={className} />;
+  if (h.includes('surge')) return <CycloneGlyph size={size} className={className} />;
   return <FloodGlyph size={size} className={className} />;
 }

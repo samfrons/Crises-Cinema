@@ -33,6 +33,12 @@ const ICONS = new Set(VOCAB.icons);
 const CHAIN_LINKS = new Set(VOCAB.chain.links);
 const CHAIN_STATES = new Set(VOCAB.chain.states);
 const CHAIN_LABEL_KEYS = new Set(VOCAB.chain.label_keys);
+const READINGS = VOCAB.readings;
+const HEADLINE_MAX = VOCAB.headline?.max ?? 90;
+// Hazard families, in match order (the first whose pattern the hazard contains).
+const HAZARD_FAMILIES = Object.entries(VOCAB.hazards ?? {}).filter(([k]) => k !== '_comment');
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 /** Collects human-readable errors for one scenario file. */
 class Check {
@@ -163,6 +169,81 @@ function checkPresentation(chk, info, q, origins) {
   }
 }
 
+/**
+ * The lower third: picture mode prints each slip as one located line, its
+ * `headline`, and defers the full text to a press. The headline is the
+ * item's own words, never a summary: it must be a contiguous fragment of the
+ * item's text, character for character (case and punctuation exact), no
+ * longer than vocabulary.json `headline.max`. Required on every item of a
+ * playable scenario, so no slip reaches the stage without one.
+ */
+function checkHeadline(chk, info, q) {
+  const h = info.headline;
+  if (!chk.require(typeof h === 'string' && h.trim().length > 0, `${q}.headline`,
+    'required on every item of a playable scenario — a verbatim fragment of the item\'s text (picture mode\'s lower third)')) return;
+  chk.require(!PLACEHOLDER.test(h), `${q}.headline`, 'placeholder headline in a playable scenario');
+  chk.require(h.length <= HEADLINE_MAX, `${q}.headline`, `a headline of at most ${HEADLINE_MAX} characters (this one is ${h.length})`);
+  chk.require(h === h.trim(), `${q}.headline`, 'no leading or trailing whitespace');
+  chk.require(typeof info.text === 'string' && info.text.includes(h), `${q}.headline`,
+    'must appear verbatim in the item\'s own text — a contiguous fragment, case and punctuation exact');
+}
+
+/**
+ * Instrument readings: a drawn restatement of what an item says an instrument
+ * (a river gauge, a dam, a fire's containment, the hydrants) read. Each
+ * reading names a series the scenario declares in `instruments`, a state from
+ * the shared vocabulary whose phrase the item's own text must contain, and
+ * optionally the HH:MM the text gives it (`by: true` prints "by HH:MM") and a
+ * value whose every number the text already prints. Within a series the
+ * readings run forward in time, and a series is either timed throughout (drawn
+ * on a clock axis) or untimed throughout (drawn in log order) — never a mix,
+ * so the drawing never places a reading at a time the record does not give.
+ */
+function checkReadings(chk, info, q, s, series) {
+  if (info.readings === undefined) return;
+  if (!chk.require(Array.isArray(info.readings) && info.readings.length > 0, `${q}.readings`, 'must be a non-empty array of { series, state }')) return;
+  const declared = s.instruments && typeof s.instruments === 'object' ? s.instruments : {};
+  for (const [k, r] of info.readings.entries()) {
+    const p = `${q}.readings[${k}]`;
+    if (!chk.require(r && typeof r === 'object', p, 'must be an object')) continue;
+    chk.require(typeof r.series === 'string' && Object.hasOwn(declared, r.series), `${p}.series`,
+      `"${r.series}" is not declared in the scenario's instruments`);
+    const st = READINGS[r.state];
+    if (chk.require(!!st && r.state !== '_comment', `${p}.state`, `must be one of ${Object.keys(READINGS).filter((x) => x !== '_comment').join('|')}`)) {
+      chk.require(new RegExp(st.says, 'i').test(info.text ?? ''), `${p}.state`,
+        `the item's text does not say "${st.label}" — a drawn reading may only restate the slip`);
+    }
+    if (r.at !== undefined) {
+      chk.require(HHMM.test(r.at ?? '') && saysTime(info.text, r.at), `${p}.at`, `"${r.at}" must be an HH:MM that the item's own text states`);
+    }
+    if (r.by !== undefined) chk.require(r.by === true && r.at !== undefined, `${p}.by`, 'only `true`, and only with an `at`');
+    if (r.value !== undefined) {
+      const nums = numbersIn(r.value);
+      const said = new Set(numbersIn(info.text));
+      chk.require(typeof r.value === 'string' && r.value.length <= 16 && nums.length > 0 && nums.every((n) => said.has(n)), `${p}.value`,
+        'a value of at most 16 characters whose every number the item\'s text already prints');
+    }
+    if (typeof r.series !== 'string') continue;
+    const prev = series.get(r.series);
+    const timed = r.at !== undefined;
+    if (prev) {
+      chk.require(prev.timed === timed, `${p}.at`, `series "${r.series}" mixes timed and untimed readings`);
+      if (timed && prev.at) chk.require(r.at >= prev.at, `${p}.at`, `series "${r.series}" runs backwards in time (${r.at} after ${prev.at})`);
+    }
+    series.set(r.series, { timed, at: timed ? r.at : prev?.at });
+  }
+}
+
+/** Short series names for the instrument drawings. */
+function checkInstruments(chk, s) {
+  if (s.instruments === undefined) return;
+  if (!chk.require(s.instruments && typeof s.instruments === 'object' && !Array.isArray(s.instruments), 'instruments', 'must be an object of id → label')) return;
+  for (const [k, v] of Object.entries(s.instruments)) {
+    chk.require(/^[a-z0-9-]+$/.test(k), `instruments.${k}`, 'id must be kebab-case');
+    chk.require(typeof v === 'string' && v.trim().length > 0 && v.length <= 40, `instruments.${k}`, 'a label of 1–40 characters');
+  }
+}
+
 /** Scenario-level labels for the warning-chain diagram: short names only. */
 function checkChainLabels(chk, wc, s) {
   if (!chk.require(wc && typeof wc === 'object' && !Array.isArray(wc), 'warning_chain', 'must be an object')) return;
@@ -176,6 +257,400 @@ function checkChainLabels(chk, wc, s) {
   for (const [k, v] of Object.entries(wc.zones ?? {})) {
     chk.require(known.has(k), `warning_chain.zones.${k}`, 'must be a scoring.at_risk_zones id');
     chk.require(typeof v === 'string' && v.trim().length > 0 && v.length <= 14, `warning_chain.zones.${k}`, 'a short label of 1–14 characters');
+  }
+}
+
+/* ── The diorama's ground: cartographic anchors ──────────────────────────────
+   Diorama mode plays the day on a model of the real ground (the committed
+   heightmaps in public/control-room/terrain/). The hand-drawn boards are
+   schematic, so each zone gets real coordinates here: the named places it
+   covers, as WGS84 points. Presentational, like the atlas gazetteer — but
+   held to the same discipline as everything else on the desk:
+     · every playable scenario names its terrain frames, and each frame's meta
+       exists and says it belongs to this scenario;
+     · every at-risk zone has an entry, and nothing else does;
+     · every place is a name the scenario's own text prints (a zone label, the
+       location, a slip, a chain label), so the model never names a place the
+       record does not;
+     · the anchor is one of those places, and it lies inside a frame — unless
+       the zone is flagged `beyond_frame`, which is honest only when every one
+       of its places lies outside every frame (the model then points to it
+       from the table's edge instead of draping it);
+     · two zones' footprints (the places' hull widened by radius_km) do not
+       overlap, so a drape never reads as two states at once;
+     · `impact_zone`, when set, is a zone the cited impact label names (by one
+       of its places or its chain label) — the stage's impact beat restates
+       where the record puts the impact, nothing more;
+     · relief exaggeration is bounded (1–3×) and is printed on the stage.   */
+const terrainRoot = join(root, 'public', 'control-room', 'terrain');
+const KM_PER_DEG_LAT = 110.574;
+const toKm = (lat0) => (p) => [p.lon * 111.32 * Math.cos((lat0 * Math.PI) / 180), p.lat * KM_PER_DEG_LAT];
+const inBox = (b, p) => p.lon >= b[0] && p.lon <= b[2] && p.lat >= b[1] && p.lat <= b[3];
+function segDist(p, a, b) {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const l2 = dx * dx + dy * dy;
+  const t = l2 ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l2)) : 0;
+  return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy);
+}
+/** Least distance between two point sets' hulls (vertex-to-edge both ways;
+ *  0 if a vertex of one lies inside the other's hull). Convex hulls of at
+ *  most a handful of points: exact enough for a no-overlap gate. */
+function hullOf(pts) {
+  if (pts.length < 3) return pts;
+  const s = [...pts].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lo = [];
+  const hi = [];
+  for (const p of s) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+  for (const p of s.reverse()) { while (hi.length >= 2 && cross(hi[hi.length - 2], hi[hi.length - 1], p) <= 0) hi.pop(); hi.push(p); }
+  return lo.slice(0, -1).concat(hi.slice(0, -1));
+}
+function insideHull(h, p) {
+  if (h.length < 3) return false;
+  let sign = 0;
+  for (let i = 0; i < h.length; i++) {
+    const a = h[i];
+    const b = h[(i + 1) % h.length];
+    const c = (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+    if (c !== 0) { if (sign && Math.sign(c) !== sign) return false; sign = Math.sign(c); }
+  }
+  return true;
+}
+function hullGap(A, B) {
+  const ha = hullOf(A);
+  const hb = hullOf(B);
+  if (ha.some((p) => insideHull(hb, p)) || hb.some((p) => insideHull(ha, p))) return 0;
+  const edges = (h) => (h.length === 1 ? [[h[0], h[0]]] : h.map((p, i) => [p, h[(i + 1) % h.length]]));
+  let d = Infinity;
+  for (const p of ha) for (const [a, b] of edges(hb)) d = Math.min(d, segDist(p, a, b));
+  for (const p of hb) for (const [a, b] of edges(ha)) d = Math.min(d, segDist(p, a, b));
+  return d;
+}
+
+function checkDiorama(chk, s) {
+  const d = s.diorama;
+  if (!chk.require(d && typeof d === 'object' && !Array.isArray(d), 'diorama',
+    'a playable scenario needs a diorama block (terrain frames + a cartographic anchor per at-risk zone)')) return;
+  chk.require(typeof d.exaggeration === 'number' && d.exaggeration >= 1 && d.exaggeration <= 3, 'diorama.exaggeration',
+    'relief exaggeration must be a number from 1 to 3 (it is printed on the stage)');
+  chk.require(typeof d.contour_m === 'number' && d.contour_m > 0 && d.contour_m <= 500, 'diorama.contour_m', 'a contour interval in metres, 0–500');
+  const frames = [];
+  if (chk.require(Array.isArray(d.frames) && d.frames.length >= 1 && d.frames.length <= 3, 'diorama.frames', 'list 1–3 terrain frame ids')) {
+    for (const f of d.frames) {
+      const p = join(terrainRoot, `${f}.json`);
+      if (!chk.require(typeof f === 'string' && SAFE_FILE.test(f) && existsSync(p) && existsSync(join(terrainRoot, `${f}.png`)),
+        `diorama.frames.${f}`, 'no terrain at public/control-room/terrain/<frame>.{json,png} (npm run build:terrain)')) continue;
+      const m = JSON.parse(readFileSync(p, 'utf8'));
+      if (chk.require(m.scenario === s.id && Array.isArray(m.bbox) && m.bbox.length === 4, `diorama.frames.${f}`,
+        `terrain meta must carry a bbox and say it belongs to scenario "${s.id}"`)) frames.push(m);
+    }
+  }
+  const zones = d.zones && typeof d.zones === 'object' ? d.zones : {};
+  const known = new Set((s.scoring?.at_risk_zones ?? []).map((z) => z.id));
+  for (const z of known) chk.require(z in zones, `diorama.zones.${z}`, 'every at-risk zone needs a diorama anchor');
+  // The names the record prints: zone labels, the location, every slip, the chain's short labels.
+  const said = [
+    s.location,
+    ...(s.scoring?.at_risk_zones ?? []).map((z) => z.label),
+    ...Object.values(s.warning_chain?.zones ?? {}),
+    ...(s.timesteps ?? []).flatMap((t) => (t.info_available ?? []).map((i) => i.text)),
+  ].filter((x) => typeof x === 'string').join('\n');
+  const lat0 = frames.length ? (frames[0].bbox[1] + frames[0].bbox[3]) / 2 : 0;
+  const km = toKm(lat0);
+  const draped = [];
+  for (const [z, e] of Object.entries(zones)) {
+    const q = `diorama.zones.${z}`;
+    if (!chk.require(known.has(z), q, 'must be a scoring.at_risk_zones id')) continue;
+    if (!chk.require(e && Array.isArray(e.places) && e.places.length >= 1 && e.places.length <= 6, `${q}.places`, '1–6 named places')) continue;
+    chk.require(typeof e.radius_km === 'number' && e.radius_km >= 0.1 && e.radius_km <= 15, `${q}.radius_km`, 'a footprint radius of 0.1–15 km');
+    let ok = true;
+    for (const [i, p] of e.places.entries()) {
+      const pq = `${q}.places[${i}]`;
+      ok = chk.require(p && typeof p.name === 'string' && p.name.length > 0 && Number.isFinite(p.lat) && Number.isFinite(p.lon)
+        && Math.abs(p.lat) <= 90 && Math.abs(p.lon) <= 180, pq, 'needs { name, lat, lon } in decimal degrees') && ok;
+      if (p && typeof p.name === 'string') {
+        chk.require(said.includes(p.name), pq, `"${p.name}" is not a name the scenario's own text prints (zone labels, location, slips) — the model names only places the record names`);
+      }
+    }
+    chk.require(e.places.some((p) => p?.name === e.anchor), `${q}.anchor`, 'must name one of the zone\'s places');
+    if (!ok) continue;
+    const inside = e.places.map((p) => frames.some((f) => inBox(f.bbox, p)));
+    const anchor = e.places.find((p) => p.name === e.anchor);
+    if (e.beyond_frame === true) {
+      chk.require(inside.every((x) => !x), `${q}.beyond_frame`, 'flagged beyond the frame, but a place lies inside a terrain frame — drape it instead');
+    } else {
+      chk.require(e.beyond_frame === undefined, `${q}.beyond_frame`, 'is true or absent');
+      chk.require(!anchor || frames.some((f) => inBox(f.bbox, anchor)), `${q}.anchor`,
+        `anchor "${e.anchor}" lies outside every terrain frame (${frames.map((f) => f.id).join(', ')}): move it to a place in the frame, or flag the zone beyond_frame`);
+      e.places.forEach((p, i) => chk.require(inside[i], `${q}.places[${i}]`, `"${p.name}" lies outside every terrain frame`));
+      draped.push({ z, r: e.radius_km, pts: e.places.map(km) });
+    }
+  }
+  for (let i = 0; i < draped.length; i++) {
+    for (let j = i + 1; j < draped.length; j++) {
+      const a = draped[i];
+      const b = draped[j];
+      const gap = hullGap(a.pts, b.pts) - a.r - b.r;
+      chk.require(gap > 0, `diorama.zones.${a.z}`, `footprint overlaps ${b.z} by ${(-gap).toFixed(2)} km — shrink radius_km so each drape reads as one zone`);
+    }
+  }
+  if (d.impact_zone !== undefined) {
+    const e = zones[d.impact_zone];
+    const names = [...(e?.places ?? []).map((p) => p?.name), s.warning_chain?.zones?.[d.impact_zone]].filter(Boolean);
+    const label = s.scoring?.impact?.label ?? '';
+    chk.require(known.has(d.impact_zone) && names.some((n) => label.includes(n)), 'diorama.impact_zone',
+      'must be an at-risk zone that the cited scoring.impact.label names (by one of its places or its chain label)');
+  }
+}
+
+/** Every number a sentence prints ("16:30", "1,686", "9"), as written. */
+const numbersIn = (text) => (typeof text === 'string' ? text.match(/\d+(?:[.,:]\d+)*/g) ?? [] : []);
+
+/**
+ * "What the record teaches": a lesson in the project's words, one sentence,
+ * tied to ONE cited line of the scenario — an inquiry finding (`from.finding`,
+ * its index) or a historical-path entry (`from.step`, its timestep id). The
+ * lesson's citation must be that line's own source, and the lesson may not
+ * print a number its line does not already print: a reading of the record
+ * can sharpen it, never add to it.
+ */
+function checkTakeaways(chk, s, sourceIds) {
+  if (!chk.require(Array.isArray(s.takeaways) && s.takeaways.length >= 1 && s.takeaways.length <= 4,
+    'takeaways', 'must be an array of 1–4 lessons')) return;
+  for (const [i, t] of s.takeaways.entries()) {
+    const p = `takeaways[${i}]`;
+    if (!chk.require(t && typeof t === 'object', p, 'must be an object')) continue;
+    const ok = chk.require(typeof t.text === 'string' && t.text.trim().length >= 20 && t.text.length <= 280,
+      `${p}.text`, 'one sentence of 20–280 characters');
+    if (ok) chk.require(!PLACEHOLDER.test(t.text), `${p}.text`, 'placeholder text in a playable scenario');
+    checkCitation(chk, t.citation, `${p}.citation`, sourceIds, true);
+
+    // Which cited line the lesson is drawn from.
+    const from = t.from ?? {};
+    const hasF = from.finding !== undefined;
+    const hasS = from.step !== undefined;
+    if (!chk.require(hasF !== hasS, `${p}.from`, 'must name exactly one cited line: { finding: <index> } or { step: <timestep id> }')) continue;
+    let line = null; // { sourceId, text }
+    if (hasF) {
+      const f = Number.isInteger(from.finding) ? s.inquiry_findings?.[from.finding] : undefined;
+      if (chk.require(!!f, `${p}.from.finding`, `must be an index into inquiry_findings (0–${(s.inquiry_findings?.length ?? 1) - 1})`)) {
+        line = { sourceId: f.citation?.sourceId, text: `${f.quote ?? ''} ${f.translation ?? ''}` };
+      }
+    } else {
+      const h = (s.historical_path ?? []).find((x) => x.timestep_id === from.step);
+      if (chk.require(!!h, `${p}.from.step`, 'must be a timestep id that has a historical_path entry')) {
+        line = { sourceId: h.citation?.sourceId, text: h.action ?? '' };
+      }
+    }
+    if (!line) continue;
+    chk.require(t.citation?.sourceId === line.sourceId, `${p}.citation`,
+      `must cite the source of the line it is drawn from ("${line.sourceId}")`);
+    for (const n of numbersIn(t.text)) {
+      chk.require(line.text.includes(n), `${p}.text`,
+        `prints "${n}", which the line it is drawn from does not — a lesson may not add a figure`);
+    }
+  }
+}
+
+/**
+ * "Terms of the desk": a civilian's gloss on a word the slips use. Each entry
+ * is an official definition, quoted (`verbatim`) or tightly paraphrased
+ * (`paraphrase`), with a citation like any other fact. `match` lists the
+ * spellings that mark the term in the slips (whole words, case-sensitive);
+ * at least one must actually appear on the desk, or the gloss explains
+ * nothing the player will meet.
+ */
+function checkGlossary(chk, s, sourceIds) {
+  if (!chk.require(Array.isArray(s.glossary) && s.glossary.length >= 1, 'glossary', 'must be a non-empty array')) return;
+  const desk = (s.timesteps ?? []).flatMap((t) => (t.info_available ?? []).map((i) => i.text ?? ''));
+  const esc = (x) => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const terms = new Set();
+  for (const [i, g] of s.glossary.entries()) {
+    const p = `glossary[${i}]`;
+    if (!chk.require(g && typeof g === 'object', p, 'must be an object')) continue;
+    if (chk.require(typeof g.term === 'string' && g.term.trim().length > 0 && g.term.length <= 48, `${p}.term`, 'a term of 1–48 characters')) {
+      chk.require(!terms.has(g.term), `${p}.term`, `duplicate term "${g.term}"`);
+      terms.add(g.term);
+    }
+    chk.require(g.kind === 'verbatim' || g.kind === 'paraphrase', `${p}.kind`, 'must be "verbatim" or "paraphrase"');
+    if (chk.require(typeof g.definition === 'string' && g.definition.trim().length > 0 && g.definition.length <= 320,
+      `${p}.definition`, 'a definition of 1–320 characters')) {
+      chk.require(!PLACEHOLDER.test(g.definition), `${p}.definition`, 'placeholder definition in a playable scenario');
+    }
+    if (g.translation !== undefined) chk.require(typeof g.translation === 'string' && g.translation.length > 0, `${p}.translation`, 'must be a string when present');
+    checkCitation(chk, g.citation, `${p}.citation`, sourceIds, true);
+    if (chk.require(Array.isArray(g.match) && g.match.length > 0 && g.match.every((m) => typeof m === 'string' && m.length >= 2),
+      `${p}.match`, 'must be a non-empty array of spellings (2+ characters)')) {
+      const onDesk = g.match.some((m) => desk.some((text) => new RegExp(`\\b${esc(m)}\\b`).test(text)));
+      chk.require(onDesk, `${p}.match`, 'none of these spellings appears in any slip — a gloss must explain a word the player meets');
+    }
+  }
+}
+
+/**
+ * When the real first public warnings came before the one-day clock opens,
+ * `historical_first_public_alert` (an HH:MM on this day) would flatter or
+ * distort the officials' lead time. `alert_predates_clock` says so, and is
+ * held to the takeaway discipline: it is drawn from ONE info item whose own
+ * text names the earlier day (its date, "8 October", or its weekday,
+ * "Saturday"); its citation is that item's source; its note prints no number
+ * the item does not print; an optional `time` is one the item states. The UI
+ * computes "N days before this clock" from `date` and prints `clock_alert` —
+ * what the day's HH:MM figure actually is — beside it.
+ */
+function checkAlertPredates(chk, s, sourceIds) {
+  const a = s.alert_predates_clock;
+  const p = 'alert_predates_clock';
+  if (!chk.require(a && typeof a === 'object' && !Array.isArray(a), p, 'must be an object')) return;
+  const dateOk = chk.require(typeof a.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(a.date) && !Number.isNaN(Date.parse(`${a.date}T00:00:00Z`)),
+    `${p}.date`, 'must be a real YYYY-MM-DD');
+  if (dateOk) chk.require(a.date < s.date, `${p}.date`, `must be before the scenario day (${s.date}) — a warning on the clock needs no note`);
+  if (chk.require(typeof a.note === 'string' && a.note.trim().length >= 20 && a.note.length <= 280, `${p}.note`, 'one sentence of 20–280 characters')) {
+    chk.require(!PLACEHOLDER.test(a.note), `${p}.note`, 'placeholder text in a playable scenario');
+  }
+  chk.require(typeof a.clock_alert === 'string' && a.clock_alert.trim().length > 0 && a.clock_alert.length <= 60, `${p}.clock_alert`,
+    `what the day's ${s.scoring?.historical_first_public_alert ?? 'HH:MM'} figure is, in 1–60 characters`);
+  checkCitation(chk, a.citation, `${p}.citation`, sourceIds, true);
+
+  const info = (s.timesteps ?? []).flatMap((t) => t.info_available ?? []).find((i) => i.id === a.from);
+  if (!chk.require(!!info, `${p}.from`, 'must be the id of an info item that states the earlier warning')) return;
+  chk.require(a.citation?.sourceId === info.citation?.sourceId, `${p}.citation`,
+    `must cite the source of the item it is drawn from ("${info.citation?.sourceId}")`);
+  if (dateOk) {
+    const d = new Date(`${a.date}T00:00:00Z`);
+    const day = d.getUTCDate();
+    const month = MONTHS[d.getUTCMonth()];
+    const names = [`${day} ${month}`, `${month} ${day}`, WEEKDAYS[d.getUTCDay()]];
+    chk.require(names.some((n) => new RegExp(`\\b${n}\\b`).test(info.text ?? '')), `${p}.date`,
+      `item ${info.id} does not name ${a.date} ("${names.join('" / "')}") — the date must be one the record states`);
+  }
+  if (a.time !== undefined) {
+    chk.require(HHMM.test(a.time ?? '') && saysTime(info.text, a.time), `${p}.time`, `"${a.time}" must be an HH:MM that item ${info.id} states`);
+  }
+  if (typeof a.note === 'string') {
+    const said = new Set(numbersIn(info.text)); // whole numbers as printed: "6" is not in "06:30"
+    for (const n of numbersIn(a.note)) {
+      chk.require(said.has(n),`${p}.note`, `prints "${n}", which item ${info.id} does not — the note may not add a figure`);
+    }
+  }
+}
+
+/** Every HH:MM clock time a sentence prints. */
+const clockTimesIn = (text) => (typeof text === 'string' ? text.match(/\b(?:[01]\d|2[0-3]):[0-5]\d\b/g) ?? [] : []);
+
+/**
+ * The earliest defensible call (`scoring.benchmark`): a GAME-DESIGN benchmark,
+ * one to N calls, each the earliest moment this desk's own record could
+ * justify warning some at-risk zones. It is a hypothesis the debrief sets
+ * beside the player and the record, never a verdict, and the build holds it
+ * to the slips:
+ *   from    — the id of ONE info item (the slip) that justifies the call;
+ *   time    — a decision time on the clock, at or after the slip's own
+ *             decision point (the desk cannot act on a slip not yet on it),
+ *             and no earlier than any HH:MM the basis prints;
+ *   option  — an option at that decision point that issues a warning
+ *             reaching every zone of the call (a call the desk could make);
+ *   zones   — at-risk zone ids the slip itself concerns; each zone in at most
+ *             one call;
+ *   basis   — one sentence in the slip's words, printing no number the slip
+ *             does not print;
+ *   citation — the slip's own source.
+ */
+function checkBenchmark(chk, s, sourceIds) {
+  const b = s.scoring?.benchmark;
+  const p = 'scoring.benchmark';
+  const zoneIds = new Set((s.scoring?.at_risk_zones ?? []).map((z) => z.id));
+  if (!chk.require(Array.isArray(b) && b.length >= 1 && b.length <= Math.max(1, zoneIds.size), p,
+    'required: an array of 1 call per at-risk zone at most, each { time, from, option, zones, basis, citation } — the earliest call the desk\'s own record could justify')) return;
+  const steps = s.timesteps ?? [];
+  const decisionTimes = new Set(steps.map((t) => t.time));
+  const claimed = new Set();
+  for (const [k, c] of b.entries()) {
+    const q = `${p}[${k}]`;
+    if (!chk.require(c && typeof c === 'object' && !Array.isArray(c), q, 'must be an object')) continue;
+    const timeOk = chk.require(HHMM.test(c.time ?? ''), `${q}.time`, 'must be HH:MM');
+    if (timeOk) chk.require(decisionTimes.has(c.time), `${q}.time`, `"${c.time}" is not a decision time on this clock — the desk can only act at a decision point`);
+
+    // The slip it rests on, and the decision point where it reaches the desk.
+    const stepOf = steps.find((t) => (t.info_available ?? []).some((i) => i.id === c.from));
+    const slip = stepOf?.info_available.find((i) => i.id === c.from);
+    if (!chk.require(!!slip, `${q}.from`, 'must be the id of the info item (slip) that justifies the call')) continue;
+    if (timeOk) {
+      chk.require(c.time >= stepOf.time, `${q}.time`,
+        `${c.time} is before slip ${slip.id} reaches the desk (${stepOf.time}) — a call cannot rest on information not yet on the desk`);
+    }
+
+    // The zones: ones the slip itself concerns, each claimed once.
+    const own = new Set(slip.zones ?? []);
+    if (chk.require(Array.isArray(c.zones) && c.zones.length > 0, `${q}.zones`, 'a non-empty array of at-risk zone ids')) {
+      for (const z of c.zones) {
+        if (!chk.require(zoneIds.has(z), `${q}.zones`, `"${z}" is not a scoring.at_risk_zones id`)) continue;
+        chk.require(own.has(z), `${q}.zones`, `slip ${slip.id} does not concern zone "${z}" — a call may only cover zones its slip names`);
+        chk.require(!claimed.has(z), `${q}.zones`, `zone "${z}" already has a benchmark call`);
+        claimed.add(z);
+      }
+    }
+
+    // A call the desk could actually make at that decision point.
+    const at = steps.find((t) => t.time === c.time);
+    const opt = at?.options?.find((o) => o.id === c.option);
+    if (chk.require(!!opt, `${q}.option`, `must be the id of an option at the ${c.time ?? '?'} decision point`)) {
+      chk.require(opt.effects?.warning_scope !== 'none', `${q}.option`, `option ${opt.id} issues no warning — a benchmark call is a warning`);
+      const reach = new Set(opt.effects?.zones ?? []);
+      chk.require(Array.isArray(c.zones) && c.zones.every((z) => reach.has(z)), `${q}.option`,
+        `option ${opt.id} does not reach every zone of the call`);
+    }
+
+    // The basis: the slip's words, its numbers, no time later than the call.
+    if (chk.require(typeof c.basis === 'string' && c.basis.trim().length >= 20 && c.basis.length <= 280, `${q}.basis`, 'one sentence of 20–280 characters')) {
+      chk.require(!PLACEHOLDER.test(c.basis), `${q}.basis`, 'placeholder text in a playable scenario');
+      const said = new Set(numbersIn(slip.text));
+      for (const n of numbersIn(c.basis)) {
+        chk.require(said.has(n), `${q}.basis`, `prints "${n}", which slip ${slip.id} does not — the basis may not add a figure`);
+      }
+      if (timeOk) {
+        for (const tm of clockTimesIn(c.basis)) {
+          chk.require(tm <= c.time, `${q}.basis`, `cites ${tm}, after the call at ${c.time} — a call cannot rest on a later time`);
+        }
+      }
+    }
+    checkCitation(chk, c.citation, `${q}.citation`, sourceIds, true);
+    chk.require(c.citation?.sourceId === slip.citation?.sourceId, `${q}.citation`,
+      `must cite the source of slip ${slip.id} ("${slip.citation?.sourceId}")`);
+  }
+}
+
+/**
+ * "Why minutes matter": cited context from other places and other days,
+ * printed beside the reckoning. Verbatim quotes only; each names its
+ * publisher, licence (or that it is unconfirmed) and the date it was read;
+ * an optional caveat prints no number its quote does not. The UI frames the
+ * block as context and never as a conversion of this run's minutes.
+ */
+function checkMinutesMatter(chk, s, sourceIds) {
+  const m = s.scoring.minutes_matter;
+  const p = 'scoring.minutes_matter';
+  if (!chk.require(Array.isArray(m) && m.length >= 1 && m.length <= 3, p, 'must be an array of 1–3 cited quotes')) return;
+  for (const [k, e] of m.entries()) {
+    const q = `${p}[${k}]`;
+    if (!chk.require(e && typeof e === 'object', q, 'must be an object')) continue;
+    if (chk.require(typeof e.quote === 'string' && e.quote.trim().length >= 20 && e.quote.length <= 320, `${q}.quote`, 'a verbatim quote of 20–320 characters')) {
+      chk.require(!PLACEHOLDER.test(e.quote), `${q}.quote`, 'placeholder text in a playable scenario');
+    }
+    chk.require(typeof e.about === 'string' && e.about.trim().length > 0 && e.about.length <= 80 && numbersIn(e.about).length === 0, `${q}.about`,
+      'what the quote is about, 1–80 characters, with no figures of its own');
+    for (const f of ['publisher', 'license']) {
+      chk.require(typeof e[f] === 'string' && e[f].trim().length > 0 && !PLACEHOLDER.test(e[f]), `${q}.${f}`, 'required — publisher · licence · as-of are printed with every figure');
+    }
+    chk.require(typeof e.as_of === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(e.as_of), `${q}.as_of`, 'must be the YYYY-MM-DD the quote was read at its source');
+    if (e.caveat !== undefined) {
+      if (chk.require(typeof e.caveat === 'string' && e.caveat.length > 0 && e.caveat.length <= 240, `${q}.caveat`, 'one sentence of up to 240 characters')) {
+        const said = new Set(numbersIn(e.quote));
+        for (const n of numbersIn(e.caveat)) chk.require(said.has(n), `${q}.caveat`, `prints "${n}", which the quote does not`);
+      }
+    }
+    checkCitation(chk, e.citation, `${q}.citation`, sourceIds, true);
   }
 }
 
@@ -212,6 +687,11 @@ function validate(file, s) {
   chk.require(s.clock && HHMM.test(s.clock.start ?? '') && HHMM.test(s.clock.end ?? '') && typeof s.clock.timezone === 'string',
     'clock', 'needs {timezone, start HH:MM, end HH:MM}');
   chk.require(typeof s.record_caveat === 'string' && s.record_caveat.length > 0, 'record_caveat', 'required — say honestly what the record is');
+  // The hazard picks the board's words (hazards.ts); a word the UI has no family for cannot ship.
+  if (typeof s.hazard === 'string') {
+    chk.require(HAZARD_FAMILIES.some(([, f]) => new RegExp(f.match, 'i').test(s.hazard)), 'hazard',
+      `"${s.hazard}" names no hazard family in vocabulary.json (${HAZARD_FAMILIES.map(([k, f]) => `${k}: ${f.match}`).join('; ')})`);
+  }
 
   if (s.briefing_media !== undefined) checkMedia(chk, s.briefing_media, 'briefing_media', s.id, s.date);
   if (s.debrief_media !== undefined) {
@@ -221,6 +701,8 @@ function validate(file, s) {
   }
 
   if (s.warning_chain !== undefined) checkChainLabels(chk, s.warning_chain, s);
+  checkInstruments(chk, s);
+  const series = new Map(); // instrument series → { timed, at } as the log reaches it
 
   chk.require(Array.isArray(s.timesteps) && s.timesteps.length >= 2, 'timesteps', 'a playable scenario needs at least 2 timesteps');
   const stepIds = new Set();
@@ -249,6 +731,8 @@ function validate(file, s) {
       }
       if (info.media !== undefined) checkMedia(chk, info.media, `${q}.media`, s.id, s.date);
       checkPresentation(chk, info, q, origins);
+      checkHeadline(chk, info, q);
+      checkReadings(chk, info, q, s, series);
       if (info.zones !== undefined) {
         const known = new Set((s.scoring?.at_risk_zones ?? []).map((z) => z.id));
         chk.require(Array.isArray(info.zones) && info.zones.every((z) => known.has(z)),
@@ -299,6 +783,10 @@ function validate(file, s) {
     checkCitation(chk, f.citation, `${p}.citation`, sourceIds, playable);
   }
 
+  if (s.takeaways !== undefined) checkTakeaways(chk, s, sourceIds);
+  if (s.glossary !== undefined) checkGlossary(chk, s, sourceIds);
+  if (s.alert_predates_clock !== undefined) checkAlertPredates(chk, s, sourceIds);
+
   const d = s.outcome?.deaths;
   chk.require(d && Number.isFinite(d.min) && Number.isFinite(d.max) && d.min <= d.max && typeof d.contested === 'boolean',
     'outcome.deaths', 'needs {min, max, contested}');
@@ -314,6 +802,9 @@ function validate(file, s) {
   }
   chk.require(Array.isArray(s.scoring?.at_risk_zones) && s.scoring.at_risk_zones.length >= 1, 'scoring.at_risk_zones', 'required');
   chk.require(HHMM.test(s.scoring?.historical_first_public_alert ?? ''), 'scoring.historical_first_public_alert', 'must be HH:MM');
+  if (s.scoring) checkBenchmark(chk, s, sourceIds);
+  if (s.scoring?.minutes_matter !== undefined) checkMinutesMatter(chk, s, sourceIds);
+  checkDiorama(chk, s);
 
   return chk.errors;
 }

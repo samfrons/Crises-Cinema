@@ -87,9 +87,122 @@ rejects('warning-chain label key outside the vocabulary', (e) => e(L, (s) => { s
 rejects('warning-chain channel label too long for its box', (e) => e(L, (s) => { s.warning_chain.labels.social = 'County social media'; }), /labels\.social — a label of 1–11 characters/);
 rejects('warning-chain zone label for an unknown zone', (e) => e(L, (s) => { s.warning_chain.zones.atlantis = 'Atlantis'; }), /warning_chain\.zones\.atlantis — must be a scoring\.at_risk_zones id/);
 
+// "What the record teaches": each lesson is tied to one cited line and may not outrun it.
+rejects('takeaway without a citation', (e) => e(L, (s) => { delete s.takeaways[0].citation; }), /takeaways\[0\]\.citation — missing citation/);
+rejects('takeaway citing a source not in sources[]', (e) => e(L, (s) => { s.takeaways[0].citation.sourceId = 'my-memory'; }), /not in sources\[\]/);
+rejects('takeaway that names no cited line', (e) => e(L, (s) => { delete s.takeaways[0].from; }), /takeaways\[0\]\.from — must name exactly one cited line/);
+rejects('takeaway drawn from a finding that does not exist', (e) => e(L, (s) => { s.takeaways[0].from = { finding: 99 }; }), /from\.finding — must be an index into inquiry_findings/);
+rejects('takeaway drawn from a step with no historical path', (e) => e(V, (s) => { s.takeaways[0].from = { step: 't99' }; }), /from\.step — must be a timestep id/);
+rejects('takeaway citing a different source from its line', (e) => e(L, (s) => { s.takeaways[0].citation.sourceId = 'fsri-p1'; }), /must cite the source of the line it is drawn from/);
+rejects('takeaway that adds a figure its line does not print', (e) => e(L, (s) => { s.takeaways[1].text = s.takeaways[1].text.replace('16:30', '15:00'); }), /prints "15:00".*may not add a figure/);
+rejects('takeaway with SOURCE NEEDED', (e) => e(V, (s) => { s.takeaways[0].text = 'SOURCE NEEDED — lesson to be written later'; }), /takeaways\[0\]\.text — placeholder/);
+
+// "Terms of the desk": official definitions, cited, for words the slips actually use.
+rejects('glossary definition without a citation', (e) => e(L, (s) => { delete s.glossary[0].citation; }), /glossary\[0\]\.citation — missing citation/);
+rejects('glossary definition citing a source not in sources[]', (e) => e(V, (s) => { s.glossary[0].citation.sourceId = 'wikipedia'; }), /glossary\[0\]\.citation — citation sourceId "wikipedia" not in sources/);
+rejects('glossary term that never appears on the desk', (e) => e(L, (s) => { s.glossary[0].match = ['Tsunami Warning']; }), /glossary\[0\]\.match — none of these spellings appears/);
+rejects('glossary definition with no kind', (e) => e(L, (s) => { delete s.glossary[0].kind; }), /glossary\[0\]\.kind — must be "verbatim" or "paraphrase"/);
+rejects('glossary definition that runs long', (e) => e(L, (s) => { s.glossary[0].definition = 'x'.repeat(400); }), /glossary\[0\]\.definition — a definition of 1–320/);
+
+// Instrument readings: a drawn reading may only restate its slip.
+rejects('reading on a series the scenario does not declare', (e) => e(V, (s) => { item(s, 't2-i1').readings[0].series = 'turia'; }), /readings\[0\]\.series — "turia" is not declared/);
+rejects('reading state outside the vocabulary', (e) => e(V, (s) => { item(s, 't2-i1').readings[0].state = 'catastrophic'; }), /readings\[0\]\.state — must be one of/);
+rejects('reading state the slip does not say', (e) => e(V, (s) => { item(s, 't2-i1').readings[0].state = 'falling'; }), /does not say "falling"/);
+rejects('reading time the slip does not state', (e) => e(V, (s) => { item(s, 't5-i1').readings[0].at = '18:30'; }), /readings\[0\]\.at — "18:30" must be an HH:MM/);
+rejects('reading value with a number the slip does not print', (e) => e(V, (s) => { item(s, 't5-i1').readings[0].value = '1,700 m³/s'; }), /readings\[0\]\.value — .*every number the item's text already prints/);
+rejects('reading series that runs backwards in time', (e) => e(L, (s) => {
+  // 14:55's slip, re-timed to 08:00 (and saying so), lands after the 09:00 reading
+  const i = item(s, 't4-i2');
+  i.text = i.text.replace('14:55:', '08:00 and 14:55:');
+  i.readings[0].at = '08:00';
+}), /runs backwards in time/);
+rejects('reading series mixing timed and untimed readings', (e) => e(L, (s) => { delete item(s, 't4-i2').readings[0].at; }), /mixes timed and untimed readings/);
+rejects('reading "by" without a time', (e) => e(L, (s) => { delete item(s, 't3-i1').readings[1].at; item(s, 't3-i1').readings[0].by = true; delete item(s, 't3-i1').readings[0].at; }), /by — only `true`, and only with an `at`/);
+rejects('instrument label that runs long', (e) => e(V, (s) => { s.instruments.poyo = 'x'.repeat(41); }), /instruments\.poyo — a label of 1–40/);
+
+// The hazard picks the board's words; a hazard with no family has none.
+const K = 'katrina-2005.json';
+const P = 'odisha-phailin-2013.json';
+rejects('playable hazard that names no hazard family', (e) => e(P, (s) => { s.hazard = 'volcanic eruption'; }), /hazard — "volcanic eruption" names no hazard family/);
+
+// Alert before the clock: the earlier warning is drawn from one cited slip and may not outrun it.
+rejects('alert_predates_clock without a note', (e) => e(P, (s) => { delete s.alert_predates_clock.note; }), /alert_predates_clock\.note — one sentence/);
+rejects('alert_predates_clock without a citation', (e) => e(P, (s) => { delete s.alert_predates_clock.citation; }), /alert_predates_clock\.citation — missing citation/);
+rejects('alert_predates_clock citing a source not in sources[]', (e) => e(P, (s) => { s.alert_predates_clock.citation.sourceId = 'memory'; }), /alert_predates_clock\.citation — citation sourceId "memory" not in sources/);
+rejects('alert_predates_clock citing a different source from its slip', (e) => e(P, (s) => { s.alert_predates_clock.citation.sourceId = 'rdna'; }), /must cite the source of the item it is drawn from \("imd-report"\)/);
+rejects('alert_predates_clock drawn from no slip', (e) => e(P, (s) => { s.alert_predates_clock.from = 't9-i9'; }), /alert_predates_clock\.from — must be the id of an info item/);
+rejects('alert_predates_clock dated on or after the scenario day', (e) => e(P, (s) => { s.alert_predates_clock.date = '2013-10-12'; }), /must be before the scenario day/);
+rejects('alert_predates_clock date its slip does not name', (e) => e(P, (s) => { s.alert_predates_clock.date = '2013-10-06'; }), /does not name 2013-10-06/);
+rejects('alert_predates_clock weekday its slip does not name', (e) => e(K, (s) => { s.alert_predates_clock.date = '2005-08-26'; }), /does not name 2005-08-26 \("26 August" \/ "August 26" \/ "Friday"\)/);
+rejects('alert_predates_clock time its slip does not state', (e) => e(K, (s) => { s.alert_predates_clock.time = '10:00'; }), /alert_predates_clock\.time — "10:00" must be an HH:MM/);
+rejects('alert_predates_clock note that adds a figure', (e) => e(P, (s) => { s.alert_predates_clock.note += ' Some 6 days of warnings in all.'; }), /prints "6", which item t1-i4 does not/);
+rejects('alert_predates_clock without a clock_alert', (e) => e(P, (s) => { delete s.alert_predates_clock.clock_alert; }), /alert_predates_clock\.clock_alert — what the day's 06:30 figure is/);
+rejects('alert_predates_clock with SOURCE NEEDED', (e) => e(K, (s) => { s.alert_predates_clock.note = 'SOURCE NEEDED: when did the first call go out?'; }), /alert_predates_clock\.note — placeholder/);
+
+// The earliest defensible call: a game-design benchmark, held to the slip it rests on.
+const bench = (s, k = 0) => s.scoring.benchmark[k];
+rejects('playable scenario without a benchmark', (e) => e(K, (s) => { delete s.scoring.benchmark; }), /scoring\.benchmark — required/);
+rejects('benchmark with more calls than at-risk zones', (e) => e(P, (s) => { s.scoring.benchmark = [bench(s), bench(s), bench(s), bench(s)]; }), /scoring\.benchmark — required: an array of 1 call per at-risk zone at most/);
+rejects('benchmark time that is not HH:MM', (e) => e(V, (s) => { bench(s).time = 'noon'; }), /benchmark\[0\]\.time — must be HH:MM/);
+rejects('benchmark time between decision points', (e) => e(V, (s) => { bench(s).time = '13:00'; }), /benchmark\[0\]\.time — "13:00" is not a decision time/);
+rejects('benchmark before its slip reaches the desk', (e) => e(V, (s) => { bench(s).time = '07:36'; bench(s).option = 't1-a1'; bench(s).basis = bench(s).basis.replace('At 12:20 the', 'The'); }), /07:36 is before slip t2-i1 reaches the desk \(12:20\)/);
+rejects('benchmark resting on no slip', (e) => e(L, (s) => { bench(s).from = 't9-i9'; }), /benchmark\[0\]\.from — must be the id of the info item/);
+rejects('benchmark zone the slip does not concern', (e) => e(L, (s) => { bench(s).zones.push('lahaina-front-street'); bench(s).option = 't4-a1'; }), /slip t4-i2 does not concern zone "lahaina-front-street"/);
+rejects('benchmark zone not in at_risk_zones', (e) => e(K, (s) => { bench(s).zones = ['atlantis']; }), /"atlantis" is not a scoring\.at_risk_zones id/);
+rejects('benchmark zone claimed by two calls', (e) => e(V, (s) => { s.scoring.benchmark[1].zones = ['poyo-horta-sud']; s.scoring.benchmark[1].from = 't2-i1'; s.scoring.benchmark[1].citation.sourceId = 'chj-record'; }), /zone "poyo-horta-sud" already has a benchmark call/);
+rejects('benchmark option not at that decision point', (e) => e(K, (s) => { bench(s).option = 't2-a1'; }), /benchmark\[0\]\.option — must be the id of an option at the 07:00 decision point/);
+rejects('benchmark option that issues no warning', (e) => e(K, (s) => { bench(s).option = 't1-a2'; }), /option t1-a2 issues no warning/);
+rejects('benchmark option that does not reach the call\'s zones', (e) => e(K, (s) => { bench(s).option = 't1-a3'; }), /option t1-a3 does not reach every zone of the call/);
+rejects('benchmark basis that adds a figure', (e) => e(P, (s) => { bench(s).basis = bench(s).basis.replace('3.0 to 3.5 m', '3.0 to 4 m'); }), /benchmark\[0\]\.basis — prints "4", which slip t1-i2 does not/);
+rejects('benchmark basis citing a time after the call', (e) => e(P, (s) => { bench(s).basis = bench(s).basis.replace('of the evening before', 'of 17:30'); }), /cites 17:30, after the call at 06:30/);
+rejects('benchmark basis with SOURCE NEEDED', (e) => e(L, (s) => { bench(s).basis = 'SOURCE NEEDED: which slip justifies the call?'; }), /benchmark\[0\]\.basis — placeholder/);
+rejects('benchmark basis missing', (e) => e(L, (s) => { delete bench(s).basis; }), /benchmark\[0\]\.basis — one sentence/);
+rejects('benchmark without a citation', (e) => e(K, (s) => { delete bench(s).citation; }), /benchmark\[0\]\.citation — missing citation/);
+rejects('benchmark citing a source not in sources[]', (e) => e(K, (s) => { bench(s).citation.sourceId = 'hindsight'; }), /citation sourceId "hindsight" not in sources/);
+rejects('benchmark citing a different source from its slip', (e) => e(K, (s) => { bench(s).citation.sourceId = 'senate-2006'; }), /must cite the source of slip t1-i1 \("nhc-adv"\)/);
+
+// Why minutes matter: cited context, never a conversion.
+const mm = (s, k = 0) => s.scoring.minutes_matter[k];
+rejects('minutes-matter quote without a citation', (e) => e(L, (s) => { delete mm(s).citation; }), /minutes_matter\[0\]\.citation — missing citation/);
+rejects('minutes-matter citing a source not in sources[]', (e) => e(V, (s) => { mm(s, 1).citation.sourceId = 'a-news-article'; }), /minutes_matter\[1\]\.citation — citation sourceId "a-news-article" not in sources/);
+rejects('minutes-matter without a licence line', (e) => e(P, (s) => { delete mm(s).license; }), /minutes_matter\[0\]\.license — required/);
+rejects('minutes-matter without an as-of date', (e) => e(K, (s) => { mm(s).as_of = 'recently'; }), /minutes_matter\[0\]\.as_of — must be the YYYY-MM-DD/);
+rejects('minutes-matter caveat that adds a figure', (e) => e(L, (s) => { mm(s).caveat = 'Roughly 40 percent of the gap is wealth.'; }), /minutes_matter\[0\]\.caveat — prints "40"/);
+rejects('minutes-matter "about" line that carries a figure', (e) => e(L, (s) => { mm(s, 2).about = 'The Camp Fire: 85 dead in 14 minutes'; }), /minutes_matter\[2\]\.about — .*no figures of its own/);
+rejects('minutes-matter with too many quotes', (e) => e(V, (s) => { s.scoring.minutes_matter.push(mm(s), mm(s)); }), /minutes_matter — must be an array of 1–3/);
+
+// Picture mode's lower third: the item's own words, a fragment, never a summary.
+rejects('playable item without a headline', (e) => e(K, (s) => { delete item(s, 't2-i1').headline; }), /timesteps\[1\]\.info_available\[0\]\.headline — required on every item of a playable scenario/);
+rejects('headline that is not a verbatim fragment of its text', (e) => e(V, (s) => { item(s, 't5-i1').headline = 'The Poyo surges to 1,686 cubic metres per second'; }), /headline — must appear verbatim in the item's own text/);
+rejects('headline that changes case from its text', (e) => e(L, (s) => { item(s, 't1-i4').headline = 'west Maui is losing its grid.'; }), /headline — must appear verbatim/);
+rejects('headline that changes punctuation from its text', (e) => e(P, (s) => { item(s, 't4-i1').headline = "IMD's 20:30 cyclone warning is out!"; }), /headline — must appear verbatim/);
+rejects('headline over 90 characters', (e) => e(K, (s) => { const i = item(s, 't1-i1'); i.headline = i.text.slice(0, 91); }), /headline — a headline of at most 90 characters \(this one is 91\)/);
+rejects('headline with SOURCE NEEDED', (e) => e(L, (s) => { const i = item(s, 't2-i3'); i.text += ' SOURCE NEEDED'; i.headline = 'SOURCE NEEDED'; }), /headline — placeholder headline/);
+rejects('headline with padding whitespace', (e) => e(V, (s) => { item(s, 't1-i2').headline = ' There is no province-wide instruction.'; }), /headline — no leading or trailing whitespace/);
+
+test('every playable item carries a verbatim headline of at most 90 characters (positive control)', () => {
+  for (const name of [L, V, K, P]) {
+    const s = JSON.parse(readFileSync(join(repo, 'data', 'scenarios', name), 'utf8'));
+    for (const i of s.timesteps.flatMap((t) => t.info_available)) {
+      assert.ok(typeof i.headline === 'string' && i.headline.length <= 90 && i.text.includes(i.headline), `${name} ${i.id}`);
+    }
+  }
+});
+
+test('every playable benchmark rests on a slip at or before its own decision point (positive control)', () => {
+  for (const name of [L, V, K, P]) {
+    const s = JSON.parse(readFileSync(join(repo, 'data', 'scenarios', name), 'utf8'));
+    for (const c of s.scoring.benchmark) {
+      const step = s.timesteps.find((t) => t.info_available.some((i) => i.id === c.from));
+      assert.ok(step && c.time >= step.time, `${name} ${c.from}`);
+      assert.ok(s.timesteps.some((t) => t.time === c.time && t.options.some((o) => o.id === c.option)), `${name} ${c.option}`);
+    }
+  }
+});
+
 test('every icon, chain link and state used in the real data is in the vocabulary (positive control)', () => {
   const vocab = JSON.parse(readFileSync(join(repo, 'src', 'app', 'control-room', 'vocabulary.json'), 'utf8'));
-  for (const name of [L, V]) {
+  for (const name of [L, V, K, P]) {
     const s = JSON.parse(readFileSync(join(repo, 'data', 'scenarios', name), 'utf8'));
     for (const i of s.timesteps.flatMap((t) => t.info_available)) {
       if (i.icon) assert.ok(vocab.icons.includes(i.icon), `${name} ${i.id} icon ${i.icon}`);
@@ -101,4 +214,37 @@ test('every icon, chain link and state used in the real data is in the vocabular
 test('debrief media taken after the day is allowed (positive control)', () => {
   const r = run((e) => e(L, (s) => { s.debrief_media[0].takenOn = '2024-01-01'; }));
   assert.equal(r.code, 0, r.out);
+});
+
+// The diorama's ground (README, "The diorama"): each zone's cartographic anchor
+// is a named place the record prints, inside the scenario's terrain, and drapes
+// never overlap. Every gate below proves the build fails on the bad input.
+const P2 = 'odisha-phailin-2013.json';
+rejects('playable scenario without a diorama block', (e) => e(V, (s) => { delete s.diorama; }), /needs a diorama block/);
+rejects('at-risk zone without a diorama anchor', (e) => e(L, (s) => { delete s.diorama.zones['upcountry-kula']; }), /diorama\.zones\.upcountry-kula — every at-risk zone needs a diorama anchor/);
+rejects('diorama zone that is not an at-risk zone', (e) => e(V, (s) => { s.diorama.zones.atlantis = { anchor: 'Paiporta', radius_km: 1, places: [{ name: 'Paiporta', lat: 39.428, lon: -0.417 }] }; }), /diorama\.zones\.atlantis — must be a scoring\.at_risk_zones id/);
+rejects('anchor outside every terrain frame', (e) => e(V, (s) => { const z = s.diorama.zones['poyo-horta-sud']; z.places[0].lon = 2.5; }), /anchor "Paiporta" lies outside every terrain frame/);
+rejects('a draped zone place outside the frame', (e) => e(L, (s) => { s.diorama.zones['upcountry-kula'].places[1].lat = 21.5; }), /"Olinda" lies outside every terrain frame/);
+rejects('beyond_frame flag on a zone inside the frame', (e) => e(V, (s) => { s.diorama.zones['magro-utiel'].beyond_frame = true; }), /flagged beyond the frame, but a place lies inside/);
+rejects('place name the record never prints', (e) => e(K, (s) => { s.diorama.zones.algiers.places[0].name = 'Gretna'; s.diorama.zones.algiers.anchor = 'Gretna'; }), /"Gretna" is not a name the scenario's own text prints/);
+rejects('anchor that is not one of the zone\'s places', (e) => e(K, (s) => { s.diorama.zones.algiers.anchor = 'Superdome'; }), /diorama\.zones\.algiers\.anchor — must name one of the zone's places/);
+rejects('overlapping zone footprints', (e) => e(L, (s) => { s.diorama.zones['lahaina-front-street'].radius_km = 1.2; }), /footprint overlaps lahaina-(lahainaluna|front-street)/);
+rejects('relief exaggeration out of range', (e) => e(P2, (s) => { s.diorama.exaggeration = 8; }), /relief exaggeration must be a number from 1 to 3/);
+rejects('terrain frame that does not exist', (e) => e(V, (s) => { s.diorama.frames = ['valencia-dana-2024-nowhere']; }), /no terrain at public\/control-room\/terrain/);
+rejects('terrain frame of another scenario', (e) => e(V, (s) => { s.diorama.frames = ['katrina-2005']; }), /say it belongs to scenario "valencia-dana-2024"/);
+rejects('impact zone the impact label does not name', (e) => e(V, (s) => { s.diorama.impact_zone = 'magro-utiel'; }), /diorama\.impact_zone — must be an at-risk zone that the cited scoring\.impact\.label names/);
+
+test('every playable at-risk zone has a diorama anchor inside its terrain, or is honestly beyond it (positive control)', () => {
+  for (const name of [L, V, K, P]) {
+    const s = JSON.parse(readFileSync(join(repo, 'data', 'scenarios', name), 'utf8'));
+    const boxes = s.diorama.frames.map((f) => JSON.parse(readFileSync(join(repo, 'public', 'control-room', 'terrain', `${f}.json`), 'utf8')).bbox);
+    const inAny = (p) => boxes.some((b) => p.lon >= b[0] && p.lon <= b[2] && p.lat >= b[1] && p.lat <= b[3]);
+    for (const z of s.scoring.at_risk_zones) {
+      const e = s.diorama.zones[z.id];
+      assert.ok(e, `${name} ${z.id} has an entry`);
+      const a = e.places.find((p) => p.name === e.anchor);
+      assert.ok(a, `${name} ${z.id} anchor is a place`);
+      assert.equal(inAny(a), e.beyond_frame !== true, `${name} ${z.id} anchor in frame unless beyond_frame`);
+    }
+  }
 });

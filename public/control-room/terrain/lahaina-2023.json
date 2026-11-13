@@ -1,0 +1,48 @@
+{
+  "id": "lahaina-2023",
+  "scenario": "lahaina-2023",
+  "name": "West Maui: Lahaina coast to the West Maui Mountains",
+  "bbox": [
+    -156.72,
+    20.8,
+    -156.5,
+    20.97
+  ],
+  "widthPx": 256,
+  "heightPx": 210,
+  "minElev": -97.947,
+  "maxElev": 1753.206,
+  "metresPerPixel": 89.4,
+  "metresPerPixelX": 89.4,
+  "metresPerPixelY": 89.5,
+  "verticalQuantumM": 0.0282,
+  "encoding": {
+    "file": "lahaina-2023.png",
+    "type": "png16-greyscale",
+    "decode": "elevation_m = minElev + (sample / 65535) * (maxElev - minElev)",
+    "rowOrder": "row 0 = north edge",
+    "colOrder": "column 0 = west edge",
+    "grid": "linear in longitude/latitude over bbox; sample at cell centres",
+    "resample": "3x3 box average of bilinear samples from the zoom-12 mosaic (native ~36 m/px)",
+    "decodedFrom": "terrarium RGB: (R*256 + G + B/256) - 32768"
+  },
+  "stats": {
+    "belowSeaLevelPct": 23.4,
+    "atOrBelowOneMetrePct": 23.9,
+    "note": "Percent of grid cells (sea and lake surface read ~0 m, so they count toward atOrBelowOneMetrePct). The source tiles resolve land to about 1 m; shallow subsidence below that is not visible in this dataset."
+  },
+  "water": {
+    "seaLevelM": 0,
+    "note": "Elevations are metres relative to mean sea level. Negative values are real: land below sea level, and sea/lake bed (terrarium carries bathymetry). The grid has no separate water mask; 0 m is the sea surface."
+  },
+  "source": {
+    "publisher": "Mapzen, a Linux Foundation project (dataset \"Terrain Tiles\", hosted on the Registry of Open Data on AWS)",
+    "dataset": "AWS Terrain Tiles, terrarium encoding (Mapzen joerd; aggregates SRTM, GMTED2010, ETOPO1, USGS 3DEP/NED, EU-DEM and others)",
+    "url": "https://registry.opendata.aws/terrain-tiles/",
+    "tileUrlTemplate": "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png",
+    "license": "The registry page's License field reads: \"https://github.com/tilezen/joerd/blob/master/docs/attribution.md\" (an attribution file, not a named licence). The \"Required attribution\" block in that file reads:\n* ArcticDEM terrain data DEM(s) were created from DigitalGlobe, Inc., imagery and\n  funded under National Science Foundation awards 1043681, 1559691, and 1542736;\n* Australia terrain data © Commonwealth of Australia (Geoscience Australia) 2017;\n* Austria terrain data © offene Daten Österreichs – Digitales Geländemodell (DGM)\n  Österreich;\n* Canada terrain data contains information licensed under the Open Government\n  Licence – Canada;\n* Europe terrain data produced using Copernicus data and information funded by the\n  European Union - EU-DEM layers;\n* Global ETOPO1 terrain data U.S. National Oceanic and Atmospheric Administration\n* Mexico terrain data source: INEGI, Continental relief, 2016;\n* New Zealand terrain data Copyright 2011 Crown copyright (c) Land Information New\n  Zealand and the New Zealand Government (All rights reserved);\n* Norway terrain data © Kartverket;\n* United Kingdom terrain data © Environment Agency copyright and/or database right\n  2015. All rights reserved;\n* United States 3DEP (formerly NED) and global GMTED2010 and SRTM terrain data\n  courtesy of the U.S. Geological Survey.",
+    "licenseUrl": "https://github.com/tilezen/joerd/blob/master/docs/attribution.md",
+    "retrieved": "2026-11-13",
+    "tilesZoom": 12
+  }
+}

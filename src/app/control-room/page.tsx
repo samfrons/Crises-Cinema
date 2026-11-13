@@ -1,15 +1,32 @@
 import type { Metadata } from 'next';
 import scenariosData from '../../data/scenarios.json';
+import essayJson from '../../data/essay.json';
 import { abs } from '@/lib/site';
 import type { ScenarioBundle } from './types';
-import ControlRoomGame from './ControlRoomGame';
+import { toCards, WPM } from './summary';
+import ControlRoomGame, { type FileCard } from './ControlRoomGame';
+import Elsewhere from '@/app/components/Elsewhere';
 import './control-room.css';
 
 // The bundle is produced by scripts/build-scenarios.mjs, which refuses to
 // build any playable scenario containing an unsourced fact — so everything
 // this page can show the player is either cited or explicitly marked as
 // absent from the record.
-const bundle = scenariosData as unknown as ScenarioBundle;
+// Only card summaries cross to the client here; the game loads the full
+// scenarios on demand once a day is picked.
+const cards = toCards(scenariosData as unknown as ScenarioBundle);
+
+// The desk officer's file (/control-room/file) is the Last Mile essay filed
+// for reading at the desk. Only its count line crosses to the client.
+type EssayShape = { status: string; sources: unknown[]; sections: { paragraphs: { text: string }[] }[] };
+const essay = (essayJson as unknown as Record<string, EssayShape>)['last-mile'];
+const essayWords = essay.sections.reduce((n, s) => n + s.paragraphs.reduce((m, p) => m + p.text.split(/\s+/).filter(Boolean).length, 0), 0);
+const file: FileCard = {
+  folders: essay.sections.length,
+  sources: essay.sources.length,
+  minutes: Math.max(1, Math.round(essayWords / WPM)),
+  draft: essay.status === 'draft',
+};
 
 const title = 'The Control Room — Disasters by the Decade';
 const description =
@@ -59,7 +76,7 @@ export default function ControlRoomPage() {
       </header>
 
       <main id="desk" className="cr-desk">
-        <ControlRoomGame bundle={bundle} />
+        <ControlRoomGame cards={cards} file={file} />
       </main>
 
       <footer className="cr-colophon">
@@ -71,10 +88,14 @@ export default function ControlRoomPage() {
             behaviour can one day be charted next to the historical path.
           </p>
           <p>
-            Part of <a href="/">Disasters by the Decade</a>. See also{' '}
-            <a href="/preparedness">the preparedness field report</a> and{' '}
-            <a href="/dispatches">dispatches from the ground</a>.
+            What the desk does not measure: the score, the option wording and each option&apos;s effects are
+            game design, labelled as such in the debrief; the record says what officials did, never what a
+            different call would have saved. The lessons under &ldquo;What the record teaches&rdquo; are the
+            project&apos;s reading, each tied to the cited line it is drawn from, and the terms of the desk are
+            official definitions, quoted with their source. Your last completed run of each day is kept in
+            this browser&apos;s storage only, so a replay can be set beside it.
           </p>
+          <Elsewhere current="/control-room" />
         </div>
       </footer>
     </div>

@@ -1,39 +1,603 @@
 {
   "id": "odisha-phailin-2013",
-  "status": "stub",
+  "status": "playable",
   "title": "The Million-Person Evacuation",
   "date": "2013-10-12",
   "location": "Odisha, India",
   "hazard": "tropical cyclone",
-  "research_notes": "SOURCE NEEDED — every timestep, option, historical action, inquiry finding and outcome figure must be filled from primary sources (official inquiry reports, meteorological archives, court or commission records) before this scenario can be marked playable. The validator will reject it otherwise.",
-  "clock": {
-    "timezone": "SOURCE NEEDED",
-    "start": "00:00",
-    "end": "00:00"
+  "clock": { "timezone": "IST", "start": "06:30", "end": "20:30" },
+  "record_caveat": "This is the success case, and its record is thinner than the US and Spanish inquiries. There is no public inquiry. The sources are IMD's own report on the storm (primary: bulletin times, forecasts, radar, tolls as supplied by the state), the joint Government of Odisha / World Bank / Asian Development Bank damage assessment, a slide presentation by an OSDMA chief general manager (undated), and three press reports. The Odisha government's own order-by-order timeline was not fetchable, so the record does not say at what hour any evacuation order was given, and most of the evacuation (the 36 hours before landfall) began on 11 October, before this clock opens. The clock is a single day because the game cannot cross midnight. Where an item comes from an undated source it is placed by plausibility and says so in its text. The IMD report stamps its warning bulletins in a day-hour-minute form with an unexplained suffix (for example 120630ef); they are read here as IST. The landfall hour varies inside IMD's own report (about 21:30 IST in its satellite section, 22:30 in its summary; radar shows the eye over land by 22:05) and in press (about 21:15). Wind figures are not comparable across agencies: IMD reports 3-minute winds, the US Joint Typhoon Warning Center 1-minute winds. Where this scenario cannot say what a different decision would have caused, it says so: the record is silent on every path not taken. The score is game design, not a claim about lives saved. The scoring field for the first public alert is set to the first listed bulletin of this day, 06:30, only because the clock cannot hold the real first alerts of 8 to 10 October.",
+  "briefing_media": {
+    "file": "phailin-terra-modis-true-colour-2013-10-11.jpg",
+    "type": "image",
+    "caption": "11 October 2013, late morning local time: Phailin over the Bay of Bengal the day before landfall, in a true-colour view from NASA's Terra satellite. IMD's own analysis has the storm at its peak of 115 knots and 940 hPa on this date. A satellite picture, not a wind measurement.",
+    "credit": "NASA EOSDIS GIBS, MODIS Terra corrected reflectance (true colour) with coastlines; crop (80E-96E, 10N-24N) rendered by the project",
+    "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+    "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+    "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/jpeg&layers=MODIS_Terra_CorrectedReflectance_TrueColor,Coastlines_15m&bbox=80,10,96,24&width=1200&height=1050&time=2013-10-11",
+    "width": 1200,
+    "height": 1050,
+    "takenOn": "2013-10-11",
+    "bytes": 219464,
+    "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-12)"
   },
-  "record_caveat": "SOURCE NEEDED",
-  "timesteps": [],
-  "historical_path": [],
-  "inquiry_findings": [],
+  "warning_chain": {
+    "labels": { "forecast": "IMD Bhubaneswar", "desk": "OSDMA · SRC", "phone": "Mobiles", "broadcast": "AIR · TV" },
+    "zones": { "ganjam-coast": "Ganjam", "puri-khurda": "Puri · Khurda", "jagatsinghpur": "Jagatsinghpur" }
+  },
+  "timesteps": [
+    {
+      "id": "t1",
+      "time": "06:30",
+      "time_label": "06:30, Saturday 12 October",
+      "approx": false,
+      "info_available": [
+        {
+          "id": "t1-i1",
+          "kind": "forecast",
+          "text": "IMD raised its landfall wind forecast in yesterday's 08:30 bulletin: gale winds of 210-220 kmph along and off the coastal districts of north coastal Andhra Pradesh and south Odisha at landfall. Its forecast of the morning of 9 October had said 175-185 kmph, gusting to 200. Landfall is forecast near Gopalpur, by night of the 12th.",
+          "headline": "IMD raised its landfall wind forecast in yesterday's 08:30 bulletin",
+          "citation": { "sourceId": "imd-report", "detail": "Section 9, items (iv) and (v), and Table 12 (bulletin of 11.10.13, 0830 IST)" },
+          "zones": ["ganjam-coast"],
+          "icon": "wind",
+          "chain": [{ "link": "forecast", "state": "used" }]
+        },
+        {
+          "id": "t1-i2",
+          "kind": "forecast",
+          "text": "IMD's storm-surge forecast of 17:30 yesterday: a surge of 3.0 to 3.5 m above the astronomical tide, flooding the low-lying areas of Ganjam, Khurda, Puri and Jagatsinghpur districts of Odisha and Srikakulam district of Andhra Pradesh at landfall. The forecast of 17:30 on 10 October had said around 1.5 to 2.0 m.",
+          "headline": "a surge of 3.0 to 3.5 m above the astronomical tide",
+          "citation": { "sourceId": "imd-report", "detail": "Table 13, forecasts of 10.10.13/1730 and 11.10.13/1730" },
+          "zones": ["ganjam-coast", "puri-khurda", "jagatsinghpur"],
+          "icon": "flood"
+        },
+        {
+          "id": "t1-i3",
+          "kind": "media",
+          "text": "Press reports of the day carry a second number. The US Navy's Joint Typhoon Warning Center forecasts maximum sustained winds of 269 kph with gusts up to 315 kph. A weather presenter says: 'There are some discrepancies in terms of the forecast. The Indian forecasts are slightly different from the Joint Typhoon Warning Center.' Some foreign forecasters are suggesting that India's weather office is underestimating the storm.",
+          "headline": "forecasters are suggesting that India's weather office is underestimating the storm",
+          "citation": { "sourceId": "aljazeera", "detail": "Al Jazeera, 'Cyclone Phailin hits India's east coast', 12 Oct 2013: the JTWC forecast, the presenter's remark and the report of foreign forecasters' view. Article time of day not stated" },
+          "icon": "press"
+        },
+        {
+          "id": "t1-i4",
+          "kind": "message",
+          "text": "IMD's Bhubaneswar warning centre has issued cyclone watch (from 8 October), alert (from 9 October) and warning (from 10 October) bulletins; the same time stamps appear in its list of press, All India Radio and Doordarshan/TV bulletins. Fishermen warnings have gone out since 21:30 on 8 October. From 06:30 today the port signal is GD-X at Gopalpur and Puri and GD-IX at Paradip and Chandbali.",
+          "headline": "Fishermen warnings have gone out since 21:30 on 8 October.",
+          "citation": { "sourceId": "imd-report", "detail": "Section 8.2 (Cyclone Warning Centre Bhubaneswar): watch, alert, warning, press/AIR/Doordarshan, fishermen and port-warning lists" },
+          "icon": "press",
+          "chain": [{ "link": "broadcast", "state": "used" }]
+        }
+      ],
+      "options": [
+        {
+          "id": "t1-a1",
+          "label": "One voice: every public message carries IMD's forecast",
+          "detail": "Radio bulletins, public appeals and district orders all rest on IMD's numbers. The foreign estimate stays out of the messaging.",
+          "effects": { "warning_scope": "province", "zones": ["ganjam-coast", "puri-khurda", "jagatsinghpur"], "protective": true, "false_alarm_weight": 0 },
+          "consequence": {
+            "known": true,
+            "text": "This is what happened: the state's warnings rested on IMD's forecast ('accurate early warning by IMD' heads OSDMA's list of what went right), were repeated on All India Radio every 15 minutes, and the Chief Minister appealed to the public not to panic and to co-operate with the administration.",
+            "citation": { "sourceId": "osdma-mishra", "detail": "Slides '10 front preparedness' (item 1) and 'Continuous Govt.-public interface'" }
+          }
+        },
+        {
+          "id": "t1-a2",
+          "label": "Lead public messaging with the foreign Category-5 estimate",
+          "detail": "Tell the coast that the US Navy's Joint Typhoon Warning Center expects stronger winds than IMD, and warn for that.",
+          "effects": { "warning_scope": "province", "zones": ["ganjam-coast", "puri-khurda", "jagatsinghpur"], "protective": true, "false_alarm_weight": 0.5 },
+          "consequence": { "known": false }
+        },
+        {
+          "id": "t1-a3",
+          "label": "No new message today: the evacuation order is out, leave it there",
+          "detail": "People have had days of warnings. Add nothing, change nothing.",
+          "effects": { "warning_scope": "none", "zones": [], "protective": false, "false_alarm_weight": 0 },
+          "consequence": { "known": false }
+        }
+      ],
+      "historical_option_id": "t1-a1",
+      "historical_citation": { "sourceId": "osdma-mishra", "detail": "Slides 'Early warning' (single authority) and '10 front preparedness' (accurate early warning by IMD)" }
+    },
+    {
+      "id": "t2",
+      "time": "11:30",
+      "time_label": "11:30",
+      "approx": false,
+      "info_available": [
+        {
+          "id": "t2-i1",
+          "kind": "gauge",
+          "text": "IMD's track puts the centre at 18.1N, 85.7E at 11:30 (06:00 UTC), moving northwest at about 15 kmph, with sustained winds of 115 knots (215 kmph) and a central pressure of 940 hPa. The Visakhapatnam radar, watching since 06:30, shows an almost closed eye about 30 km across.",
+          "headline": "The Visakhapatnam radar, watching since 06:30, shows an almost closed eye",
+          "citation": { "sourceId": "imd-report", "detail": "Table 1 (best track, 12-10-2013 0600 UTC), Table 3 row 8 (DWR Visakhapatnam, 0600z) and Section 2.2" },
+          "zones": ["ganjam-coast"],
+          "board_state": "watch",
+          "icon": "satellite"
+        },
+        {
+          "id": "t2-i2",
+          "kind": "field_report",
+          "text": "Ganjam's most senior civil servant, Krishan Kumar, has not slept for three nights, setting up hundreds of temporary shelters in schools and temples and persuading villagers to leave flimsy homes. 'The weather was very good, the sun was shining and to convince people was not an easy job.' He has asked to be authorised to decide at his own level, and has told officials across Ganjam to act as they see fit, including keeping village shops open so supplies are not hoarded. (The record gives no hour for his account.)",
+          "headline": "setting up hundreds of temporary shelters in schools and temples",
+          "citation": { "sourceId": "reuters-dailyft", "detail": "Reuters, 'In the eye of a storm: How Indian bureaucrats got it right', section 'Empowering local officials'" },
+          "icon": "shelter"
+        },
+        {
+          "id": "t2-i3",
+          "kind": "message",
+          "text": "Mobile phones are a tool the state did not have in 1999: Kumar says he is able to reach officials in remote villages by phone to spread word of the coming storm. About 25 million people in Odisha, 60% of the state's population, carry a phone. (The record gives no hour for this.)",
+          "headline": "About 25 million people in Odisha, 60% of the state's population, carry a phone.",
+          "citation": { "sourceId": "reuters-dailyft", "detail": "Reuters, same article: district chief Kumar on mobile phones; 25 million users, 60% of the state's population" },
+          "icon": "wea",
+          "chain": [{ "link": "phone", "state": "used" }]
+        }
+      ],
+      "options": [
+        {
+          "id": "t2-a1",
+          "label": "Let district officials use force on people who refuse to leave",
+          "detail": "The order is out and the law allows force. Tell the districts to use it where persuasion has failed.",
+          "effects": { "warning_scope": "targeted", "zones": ["ganjam-coast", "puri-khurda", "jagatsinghpur"], "protective": true, "false_alarm_weight": 0 },
+          "consequence": {
+            "known": true,
+            "text": "This is what happened: Section 34(C) of the Disaster Management Act 2005 was promulgated, empowering the district administration to use force if required for evacuation.",
+            "citation": { "sourceId": "osdma-mishra", "detail": "Slide 'Preparing for combat'" }
+          }
+        },
+        {
+          "id": "t2-a2",
+          "label": "Persuasion only: no force, however long the holdouts take",
+          "detail": "Keep sending officials and volunteers village to village, and ask nothing of those who still refuse.",
+          "effects": { "warning_scope": "targeted", "zones": ["ganjam-coast", "puri-khurda", "jagatsinghpur"], "protective": true, "false_alarm_weight": 0 },
+          "consequence": { "known": false }
+        },
+        {
+          "id": "t2-a3",
+          "label": "Stop pressing the holdouts: they have had days of warnings",
+          "detail": "Whoever is still in a flimsy house has chosen. Put the effort into the shelters instead.",
+          "effects": { "warning_scope": "none", "zones": [], "protective": false, "false_alarm_weight": 0 },
+          "consequence": { "known": false }
+        }
+      ],
+      "historical_option_id": "t2-a1",
+      "historical_citation": { "sourceId": "osdma-mishra", "detail": "Slide 'Preparing for combat': Section 34(C) of the Disaster Management Act 2005 promulgated, empowering the district administration to use force if required for evacuation" }
+    },
+    {
+      "id": "t3",
+      "time": "17:30",
+      "time_label": "17:30",
+      "approx": false,
+      "info_available": [
+        {
+          "id": "t3-i1",
+          "kind": "forecast",
+          "text": "IMD's 17:30 storm-surge forecast holds at 3.0 to 3.5 m above the astronomical tide, flooding the low-lying areas of Ganjam, Khurda, Puri and Jagatsinghpur at landfall. Model guidance from INCOIS and IIT Delhi gives a surge of 2 to 3 m; the IIT Bhubaneswar model gives 3.5 m.",
+          "headline": "IMD's 17:30 storm-surge forecast holds at 3.0 to 3.5 m above the astronomical tide",
+          "citation": { "sourceId": "imd-report", "detail": "Table 13 (forecast of 12.10.13/1730) and Section 7.6 (storm surge guidance)" },
+          "zones": ["ganjam-coast", "puri-khurda", "jagatsinghpur"],
+          "icon": "flood",
+          "media": {
+            "file": "phailin-terra-modis-true-colour-2013-10-12.jpg",
+            "type": "image",
+            "caption": "12 October 2013, morning local time: Phailin's eye close to the Odisha and Andhra coast on the day of landfall, in a true-colour view from NASA's Terra satellite (the pass is hours old by the evening). The black wedge is the gap between two satellite swaths, not cloud or smoke. A satellite picture, not a wind or surge measurement.",
+            "credit": "NASA EOSDIS GIBS, MODIS Terra corrected reflectance (true colour) with coastlines; crop (80E-96E, 10N-24N) rendered by the project",
+            "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+            "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+            "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/jpeg&layers=MODIS_Terra_CorrectedReflectance_TrueColor,Coastlines_15m&bbox=80,10,96,24&width=1200&height=1050&time=2013-10-12",
+            "width": 1200,
+            "height": 1050,
+            "takenOn": "2013-10-12",
+            "bytes": 225190,
+            "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-12)",
+            "suggestedTimestep": "t3"
+          }
+        },
+        {
+          "id": "t3-i2",
+          "kind": "message",
+          "text": "The state's public line, as OSDMA later described it: warnings on All India Radio every 15 minutes, in the commonly used language; an appeal from the Chief Minister not to panic and to co-operate with the administration; and the Special Relief Commissioner, through the media, asking the public to co-operate with the government on evacuation. (The record gives no hour for this.)",
+          "headline": "warnings on All India Radio every 15 minutes, in the commonly used language",
+          "citation": { "sourceId": "osdma-mishra", "detail": "Slide 'Continuous Govt.-public interface'" },
+          "icon": "press",
+          "chain": [{ "link": "broadcast", "state": "used" }]
+        },
+        {
+          "id": "t3-i3",
+          "kind": "message",
+          "text": "The shelters are ready: OSDMA has run mock drills at all the cyclone shelters and checked or replaced their equipment; the cyclone and flood shelter management committees are activated to help move the vulnerable; all 14 cyclone-prone districts hold satellite phones in case the phone lines fail; free kitchens have been open since 11 October. Government employees' Dussehra holidays are cancelled.",
+          "headline": "OSDMA has run mock drills at all the cyclone shelters",
+          "citation": { "sourceId": "rdna", "detail": "Section 1.3 'State Government Response', paragraph 12" },
+          "icon": "shelter"
+        }
+      ],
+      "options": [
+        {
+          "id": "t3-a1",
+          "label": "Hold the order as issued and keep the shelters filling",
+          "detail": "Everyone in low-lying areas, and in flimsy houses within 10 km of the coast, goes to a shelter or a safe building, as already ordered.",
+          "effects": { "warning_scope": "targeted", "zones": ["ganjam-coast", "puri-khurda", "jagatsinghpur"], "protective": true, "false_alarm_weight": 0 },
+          "consequence": {
+            "known": true,
+            "text": "This is what happened: the order stood. All people living in low-lying areas and in kutcha or tin-roof houses within 0-10 km of the coastline were ordered to nearby cyclone shelters or other identified safe buildings, and over 1 million people were evacuated within 36 hours preceding landfall.",
+            "citation": { "sourceId": "rdna", "detail": "Section 1.3, paragraph 13" }
+          }
+        },
+        {
+          "id": "t3-a2",
+          "label": "Widen the order: move people from beyond the 10 km line too",
+          "detail": "The surge forecast has risen. Bring in people from further inland before dark.",
+          "effects": { "warning_scope": "province", "zones": ["ganjam-coast", "puri-khurda", "jagatsinghpur"], "protective": true, "false_alarm_weight": 1 },
+          "consequence": { "known": false }
+        },
+        {
+          "id": "t3-a3",
+          "label": "Declare the evacuation complete: stop moving people",
+          "detail": "Those who have not come by now will not come. Close admission to the shelters and prepare to shelter in place.",
+          "effects": { "warning_scope": "none", "zones": [], "protective": false, "false_alarm_weight": 0 },
+          "consequence": { "known": false }
+        }
+      ],
+      "historical_option_id": "t3-a1",
+      "historical_citation": { "sourceId": "rdna", "detail": "Section 1.3, paragraph 13 (the 0-10 km order and the evacuation in the 36 hours before landfall)" }
+    },
+    {
+      "id": "t4",
+      "time": "20:30",
+      "time_label": "20:30",
+      "approx": false,
+      "info_available": [
+        {
+          "id": "t4-i1",
+          "kind": "gauge",
+          "text": "IMD's 20:30 cyclone warning is out. The Visakhapatnam radar measured winds of 60 m/s at 4 km height at 19:40 (14:10 UTC) with an eye 18 km across. IMD's track puts the centre at 19.1N, 85.2E at 20:30 (15:00 UTC), still at 115 knots and 940 hPa, heading for a landfall near Gopalpur.",
+          "headline": "IMD's 20:30 cyclone warning is out.",
+          "citation": { "sourceId": "imd-report", "detail": "Table 3 row 16 and Section 4.2 (DWR Visakhapatnam); Table 1 (12-10-2013 1500 UTC); Section 8.2 (warning at 122030)" },
+          "zones": ["ganjam-coast"],
+          "icon": "satellite"
+        },
+        {
+          "id": "t4-i2",
+          "kind": "field_report",
+          "text": "In Ganjam, with a couple of hours to go before landfall, some 350,000 people living up to 10 km from the shoreline are in shelters for the night.",
+          "headline": "some 350,000 people living up to 10 km from the shoreline are in shelters for the night",
+          "citation": { "sourceId": "reuters-dailyft", "detail": "Reuters, same article: 'With a couple of hours to go before the storm made landfall, some 350,000 people living up to 10 km (6 miles) from the shoreline were safely sheltered for the night'" },
+          "icon": "shelter"
+        },
+        {
+          "id": "t4-i3",
+          "kind": "message",
+          "text": "Teams and stock are in position. Odisha's rapid-action force, the state fire service and the national disaster-response force are deployed with equipment at strategic locations; tracks are assigned to teams for clearing the relief lines; seven days of food, fuel and relief materials are prepositioned; satellite phones are with the vulnerable districts as the last line of communication. (The record gives no hour for this.)",
+          "headline": "Teams and stock are in position.",
+          "citation": { "sourceId": "osdma-mishra", "detail": "Slide 'Preparing for combat'" },
+          "icon": "committee"
+        }
+      ],
+      "options": [
+        {
+          "id": "t4-a1",
+          "label": "Keep the teams prepositioned and clear the roads once the cyclone abates",
+          "detail": "Control rooms stay open; response teams, equipment and relief stock stay where they are placed.",
+          "effects": { "warning_scope": "targeted", "zones": ["ganjam-coast"], "protective": true, "false_alarm_weight": 0 },
+          "consequence": {
+            "known": true,
+            "text": "This is what happened: major roads were cleared within 24 hours, and about 5.7 MT of dry food was airdropped by IAF helicopters to inaccessible areas.",
+            "citation": { "sourceId": "rdna", "detail": "Section 1.3, paragraph 14" }
+          }
+        },
+        {
+          "id": "t4-a2",
+          "label": "Send crews onto the coast roads now, ahead of the wind",
+          "detail": "Put teams out to reach anyone still moving toward the shelters before the eye arrives.",
+          "effects": { "warning_scope": "targeted", "zones": ["ganjam-coast"], "protective": true, "false_alarm_weight": 1 },
+          "consequence": { "known": false }
+        },
+        {
+          "id": "t4-a3",
+          "label": "Stand the control rooms down for the night and resume at first light",
+          "detail": "Nothing more can be done until the wind drops. Rest the staff.",
+          "effects": { "warning_scope": "none", "zones": [], "protective": false, "false_alarm_weight": 0 },
+          "consequence": { "known": false }
+        }
+      ],
+      "historical_option_id": "t4-a1",
+      "historical_citation": { "sourceId": "osdma-mishra", "detail": "Slides 'Preparing for combat' (prepositioning, relief-line clearance plans) and 'Milestones' (restoration of road communication within 12-24 hours of abatement)" }
+    }
+  ],
+  "historical_path": [
+    {
+      "timestep_id": "t1",
+      "action": "The state kept to IMD's forecast as the single early warning, repeated on All India Radio every 15 minutes, with the Chief Minister's appeal not to panic. The record does not say whether the Joint Typhoon Warning Center's higher numbers were discussed.",
+      "citation": { "sourceId": "osdma-mishra", "detail": "Slides 'Early warning', '10 front preparedness' and 'Continuous Govt.-public interface'" }
+    },
+    {
+      "timestep_id": "t2",
+      "action": "Section 34(C) of the Disaster Management Act 2005 was promulgated, empowering the district administration to use force if required for evacuation.",
+      "citation": { "sourceId": "osdma-mishra", "detail": "Slide 'Preparing for combat'" }
+    },
+    {
+      "timestep_id": "t3",
+      "action": "The 0-10 km order stood: all people in low-lying areas and in kutcha or tin-roof houses within 0-10 km of the coastline to nearby cyclone shelters or other safe buildings. Over 1 million people were evacuated within 36 hours before landfall.",
+      "citation": { "sourceId": "rdna", "detail": "Section 1.3, paragraph 13" }
+    },
+    {
+      "timestep_id": "t4",
+      "action": "Response teams stayed prepositioned with their equipment; major roads were cleared within 24 hours of the cyclone and IAF helicopters airdropped dry food to cut-off areas.",
+      "citation": { "sourceId": "rdna", "detail": "Section 1.3, paragraph 14" }
+    }
+  ],
+  "inquiry_findings": [
+    {
+      "kind": "verbatim",
+      "quote": "Preparedness of the Government of Odisha (GoO) and the coastal communities and their resolve to ensure zero casualties resulted in prompt action to the warning of the cyclone.",
+      "citation": { "sourceId": "rdna", "detail": "Executive Summary, paragraph 2 (joint Government of Odisha, World Bank and ADB assessment; there was no public inquiry)" }
+    },
+    {
+      "kind": "verbatim",
+      "quote": "To ensure zero casualties, the GoO ordered all people living in low lying areas and kutcha houses or tin roof houses within 0-10 km of the coastline to be evacuated to nearby cyclone shelters or other identified safe buildings.",
+      "citation": { "sourceId": "rdna", "detail": "Section 1.3, paragraph 13" }
+    },
+    {
+      "kind": "verbatim",
+      "quote": "Single authority for EW or people may act on incorrect or misleading information",
+      "translation": "OSDMA's own slide on early warning (EW): one authority should issue the warning, or people may act on wrong information.",
+      "citation": { "sourceId": "osdma-mishra", "detail": "Slide 'Early warning'" }
+    },
+    {
+      "kind": "verbatim",
+      "quote": "After the 1999 super cyclone, the state government has taken measures like the installation of modern communication systems, construction of cyclone shelters, and other improved infrastructure",
+      "citation": { "sourceId": "rdna", "detail": "Section 1.1, paragraph 4" }
+    },
+    {
+      "kind": "paraphrase",
+      "quote": "Compliance with the evacuation order was high but uneven. In some areas as many as 95% of residents left; in others as few as 33% did. Unemployment, theft and no provision for evacuating livestock to safety explained the failures to leave significantly.",
+      "citation": { "sourceId": "das-2019", "detail": "Abstract, Climatic Change 152:291-305 (peer-reviewed study of evacuation responses to Phailin in Odisha's coastal districts)" }
+    },
+    {
+      "kind": "paraphrase",
+      "quote": "The forecasters' own numbers differ by agency and by averaging period. In the archive's reanalysis the US Joint Typhoon Warning Center has Phailin at 140 knots (1-minute winds, Category 5 on the Saffir-Simpson scale) at its peak on 11 and 12 October; IMD has 115 knots (3-minute winds). The archive says it makes no adjustment for differing averaging periods, so the two figures cannot be read straight across.",
+      "citation": { "sourceId": "ibtracs", "detail": "IBTrACS v04r01, storm 2013281N12098: USA_WIND and WMO_WIND columns, 11-12 Oct 2013; column documentation on averaging periods" }
+    }
+  ],
+  "takeaways": [
+    {
+      "text": "When forecasters disagree, the desk can still speak with one voice: OSDMA's own lesson is that a single authority for early warning stops people acting on incorrect or misleading information.",
+      "from": { "finding": 2 },
+      "citation": { "sourceId": "osdma-mishra", "detail": "Slide 'Early warning'" }
+    },
+    {
+      "text": "An order that names who must move and how far from the sea can be carried out village by village: here, low-lying areas and flimsy houses within 0-10 km of the coast.",
+      "from": { "finding": 1 },
+      "citation": { "sourceId": "rdna", "detail": "Section 1.3, paragraph 13" }
+    },
+    {
+      "text": "Shelters and communications built after the 1999 super cyclone were already in place when Phailin came; the evacuation was a matter of using them, not building them.",
+      "from": { "finding": 3 },
+      "citation": { "sourceId": "rdna", "detail": "Section 1.1, paragraph 4" }
+    }
+  ],
+  "debrief_media": [
+    {
+      "file": "phailin-aqua-modis-true-colour-2013-10-13.jpg",
+      "type": "image",
+      "caption": "13 October 2013, afternoon pass: Phailin's cloud mass over eastern India the day after landfall, in a true-colour view from NASA's Aqua satellite. Pale, sediment-coloured water lies along the Odisha coast. A satellite picture; it carries no measurement of wind, rain or flooding. Taken after the last decision; it was not on the desk.",
+      "credit": "NASA EOSDIS GIBS, MODIS Aqua corrected reflectance (true colour) with coastlines; crop (78E-94E, 14N-28N) rendered by the project",
+      "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+      "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+      "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/jpeg&layers=MODIS_Aqua_CorrectedReflectance_TrueColor,Coastlines_15m&bbox=78,14,94,28&width=1200&height=1050&time=2013-10-13",
+      "width": 1200,
+      "height": 1050,
+      "takenOn": "2013-10-13",
+      "bytes": 323501,
+      "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-12)"
+    },
+    {
+      "file": "phailin-terra-modis-true-colour-2013-10-14.jpg",
+      "type": "image",
+      "caption": "14 October 2013, morning pass: the skies clearing over the Odisha coast two days after landfall, in a true-colour view from NASA's Terra satellite. Brown, sediment-laden water lies along the coast; the black wedge at right is the gap between two satellite swaths. A satellite picture; it carries no measurement of flooding or damage. Taken after the last decision; it was not on the desk.",
+      "credit": "NASA EOSDIS GIBS, MODIS Terra corrected reflectance (true colour) with coastlines; crop (80E-92E, 16N-26N) rendered by the project",
+      "license": "CC0 1.0 (NASA data-use guidance: data from a NASA-led mission are licensed CC0 unless marked otherwise; no restrictions on use, citation strongly urged)",
+      "licenseUrl": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
+      "sourcePage": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi?version=1.1.1&service=WMS&request=GetMap&styles=&srs=EPSG:4326&format=image/jpeg&layers=MODIS_Terra_CorrectedReflectance_TrueColor,Coastlines_15m&bbox=80,16,92,26&width=1200&height=1000&time=2013-10-14",
+      "width": 1200,
+      "height": 1000,
+      "takenOn": "2013-10-14",
+      "bytes": 244944,
+      "licenseVerifiedOn": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance (fetched 2026-11-12)"
+    }
+  ],
   "outcome": {
     "deaths": {
-      "min": 0,
-      "max": 0,
+      "min": 21,
+      "max": 44,
       "contested": true,
-      "note": "SOURCE NEEDED"
+      "note": "Counts differ by what they include. 21 were killed by the cyclone itself (IMD's report, as supplied by the state; OSDMA). The floods that followed add 17 in IMD's report and 23 in OSDMA's table, and the joint damage assessment gives 44 dead in all. IMD lists one further death in coastal Andhra Pradesh. Press counts were 25 on 14 October (AP) and 21 on 16 October (Reuters). For comparison, the 1999 super cyclone is given as 'about 10,000' dead in the damage assessment, as 8,900 in OSDMA's comparison table, and as 8,243 in a government report quoted by Al Jazeera; this scenario does not resolve those to one figure. Evacuation is graded the same way: the state's own tally is 983,642 for the cyclone (and 171,083 more for the floods that followed), the damage assessment says 'over 1 million' within 36 hours, and the 1.2 million sometimes quoted rests on secondary summaries only."
     },
-    "citation": {
-      "sourceId": "SOURCE NEEDED",
-      "detail": "SOURCE NEEDED"
+    "citation": { "sourceId": "rdna", "detail": "Executive Summary, paragraph 1 ('left 44 people dead'). The other figures in the note come from the IMD report (section 6.1), the OSDMA slides 'Phailin and floods' and 'Super cyclone 1999 vs Phailin 2013', and the press reports named" }
+  },
+  "scoring": {
+    "impact": {
+      "time": "21:30",
+      "label": "the eye crosses the Odisha coast near Gopalpur (IMD's report gives about 21:30 in one section and 22:30 in its summary; radar shows the eye over land by 22:05)",
+      "citation": { "sourceId": "imd-report", "detail": "Introduction and Section 4.1 (landfall near Gopalpur, 1600 and 1700 UTC in different sections); Table 3 rows 19-20 (eye over land at 1635 UTC)" },
+      "window_minutes": 60
+    },
+    "at_risk_zones": [
+      { "id": "ganjam-coast", "label": "Ganjam: the coast around Gopalpur, the landfall district" },
+      { "id": "puri-khurda", "label": "Puri and Khurda: the coast and the Chilika lagoon" },
+      { "id": "jagatsinghpur", "label": "Jagatsinghpur coast, named in IMD's storm-surge forecast" }
+    ],
+    "historical_first_public_alert": "06:30",
+    "benchmark": [
+      {
+        "time": "06:30",
+        "from": "t1-i2",
+        "option": "t1-a1",
+        "zones": [
+          "ganjam-coast",
+          "puri-khurda",
+          "jagatsinghpur"
+        ],
+        "basis": "IMD's storm-surge forecast of the evening before puts a surge of 3.0 to 3.5 m above the astronomical tide over the low-lying areas of Ganjam, Khurda, Puri and Jagatsinghpur at landfall.",
+        "citation": {
+          "sourceId": "imd-report",
+          "detail": "Table 13, forecast of 11.10.13/1730"
+        }
+      }
+    ],
+    "minutes_matter": [
+      {
+        "quote": "Disaster-related mortality is nearly six times lower in countries with more comprehensive Multi-Hazard Early Warning System capabilities compared to countries with limited capabilities.",
+        "about": "Every country that reports on its warning systems",
+        "caveat": "A cross-country association, not a measured effect: richer countries tend to have both more warning capability and lower mortality.",
+        "publisher": "World Meteorological Organization (WMO) with UNDRR",
+        "license": "unconfirmed: page footer reads © WMO; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "wmo-mhews-2025",
+          "detail": "Press release of 12 November 2025, 'Key Findings', first item"
+        }
+      },
+      {
+        "quote": "Fourteen minutes elapsed between the initial request and the time the warnings were upgraded to orders and exact zones were specified at 07:46.",
+        "about": "The Camp Fire, Paradise, California",
+        "publisher": "National Institute of Standards and Technology (NIST)",
+        "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "nist-tn-2252",
+          "detail": "Key findings, TF-N 10"
+        }
+      },
+      {
+        "quote": "The fire became the most deadly and destructive fire in California history, resulting in 85 fatalities and more than 18 000 destroyed structures.",
+        "about": "The Camp Fire, Butte County, California",
+        "publisher": "National Institute of Standards and Technology (NIST)",
+        "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "nist-tn-2252",
+          "detail": "Abstract"
+        }
+      }
+    ]
+  },
+  "alert_predates_clock": {
+    "date": "2013-10-08",
+    "from": "t1-i4",
+    "note": "IMD's Bhubaneswar warning centre issued cyclone watch bulletins from 8 October, alert bulletins from 9 October and warning bulletins from 10 October, and fishermen warnings from 21:30 on 8 October.",
+    "clock_alert": "this day's first listed IMD bulletin",
+    "citation": { "sourceId": "imd-report", "detail": "Section 8.2 (Cyclone Warning Centre Bhubaneswar): watch, alert, warning and fishermen-warning lists" }
+  },
+  "diorama": {
+    "_note": "Presentational (diorama mode): a cartographic anchor for each named place a zone covers, WGS84 decimal degrees to about 100 m — verifiable geography like the atlas gazetteer, not a record fact and not a boundary. The drape is the places' hull widened by radius_km.",
+    "frames": [
+      "odisha-phailin-2013"
+    ],
+    "exaggeration": 2.5,
+    "contour_m": 50,
+    "impact_zone": "ganjam-coast",
+    "zones": {
+      "ganjam-coast": {
+        "anchor": "Gopalpur",
+        "radius_km": 3,
+        "places": [
+          {
+            "name": "Gopalpur",
+            "lat": 19.263,
+            "lon": 84.905
+          },
+          {
+            "name": "Ganjam",
+            "lat": 19.387,
+            "lon": 85.051
+          }
+        ]
+      },
+      "puri-khurda": {
+        "anchor": "Chilika",
+        "radius_km": 5,
+        "places": [
+          {
+            "name": "Chilika",
+            "lat": 19.72,
+            "lon": 85.3
+          }
+        ]
+      },
+      "jagatsinghpur": {
+        "anchor": "Jagatsinghpur",
+        "beyond_frame": true,
+        "radius_km": 3,
+        "places": [
+          {
+            "name": "Jagatsinghpur",
+            "lat": 20.26,
+            "lon": 86.17
+          },
+          {
+            "name": "Paradip",
+            "lat": 20.316,
+            "lon": 86.61
+          }
+        ]
+      }
     }
   },
-  "scoring": null,
   "sources": [
     {
-      "id": "todo",
-      "label": "SOURCE NEEDED — primary inquiry / meteorological / judicial records",
-      "url": null,
-      "note": null
+      "id": "imd-report",
+      "label": "India Meteorological Department (Cyclone Warning Division, New Delhi), Ministry of Earth Sciences / Earth System Science Organisation, 'Very Severe Cyclonic Storm, PHAILIN over the Bay of Bengal (08-14 October 2013): A Report', October 2013.",
+      "url": "https://rsmcnewdelhi.imd.gov.in/uploads/report/26/26_38a1d4_phailin.pdf",
+      "note": "Primary meteorological record: best track, radar log, bulletin and warning times, forecast verification, Odisha casualty and evacuation tallies as supplied by the state. Cited for text and figures only, not reproduced. Warning-time stamps read as IST (suffix 'ef' unexplained in the report). The report's observed surge (2-2.5 m) differs from the damage assessment's (3.5 m)."
+    },
+    {
+      "id": "rdna",
+      "label": "Government of Odisha, The World Bank and the Asian Development Bank, 'India: Cyclone Phailin in Odisha, October 2013: Rapid Damage and Needs Assessment Report', assessment of 26 November to 3 December 2013 (World Bank report no. 83886).",
+      "url": "https://documents1.worldbank.org/curated/en/168471468257979992/pdf/838860WP0P14880Box0382116B00PUBLIC0.pdf",
+      "note": "Joint government and multilateral assessment, not an inquiry. Gives 44 dead, over 1 million evacuated within 36 hours, the 0-10 km order, and the 1999 comparison. Does not date the evacuation order."
+    },
+    {
+      "id": "osdma-mishra",
+      "label": "Dr Kamal Lochan Mishra, Chief General Manager, Odisha State Disaster Management Authority, 'Cyclones and Disaster Preparedness', slide presentation hosted by the Centre for Science and Environment (undated).",
+      "url": "https://cdn.cseindia.org/userfiles/kamal%20mishra.pdf",
+      "note": "OSDMA's own post-event account. Slides give the 'Section 34(C)' provision, the All India Radio cadence, prepositioning, and a 1999-versus-Phailin table (8,900 versus 21 casualties; 983,642 evacuated). Undated; used where nothing dated is available, and items drawn from it say the record gives no hour."
+    },
+    {
+      "id": "reuters-dailyft",
+      "label": "Reuters (Bhubaneshwar), 'In the eye of a storm: How Indian bureaucrats got it right', as published by the Daily FT (Colombo), 16 October 2013.",
+      "url": "https://www.ft.lk/Other-Sectors/in-the-eye-of-a-storm-how-indian-bureaucrats-got-it-right/57-201796",
+      "note": "Press report of 16 October built on interviews with the Ganjam district chief and the state's disaster-management head; their accounts are retrospective and carry no clock times."
+    },
+    {
+      "id": "aljazeera",
+      "label": "Al Jazeera and news agencies, 'Cyclone Phailin hits India's east coast', 12 October 2013.",
+      "url": "https://www.aljazeera.com/news/2013/10/12/cyclone-phailin-hits-indias-east-coast",
+      "note": "Press report written as the storm made landfall; the only fetched contemporaneous source for the Joint Typhoon Warning Center's forecast winds and for the reported disagreement with Indian forecasts. Article hour not stated."
+    },
+    {
+      "id": "ibtracs",
+      "label": "NOAA National Centers for Environmental Information, International Best Track Archive for Climate Stewardship (IBTrACS) v04r01, North Indian Ocean subset, storm 2013281N12098 (PHAILIN); Knapp et al. 2010, Bulletin of the American Meteorological Society 91:363-376; IBTrACS v04 column documentation.",
+      "url": "https://www.ncei.noaa.gov/products/international-best-track-archive",
+      "note": "Post-event reanalysis, not what was on the desk. Used only for the debrief comparison of the JTWC (1-minute) and IMD (3-minute) peak winds and the archive's statement that it does not adjust for averaging periods."
+    },
+    {
+      "id": "das-2019",
+      "label": "Saudamini Das, 'Evaluating climate change adaptation through evacuation decisions: a case study of cyclone management in India', Climatic Change 152 (2019), 291-305, doi:10.1007/s10584-018-2292-1.",
+      "url": "https://link.springer.com/article/10.1007/s10584-018-2292-1",
+      "note": "Peer-reviewed study. Only the abstract (free to read) was fetched; the figures used are those in the abstract."
+    },
+    {
+      "id": "wmo-mhews-2025",
+      "label": "World Meteorological Organization, press release: 'Early warning systems reach new heights, but critical gaps jeopardize global progress', 12 November 2025, on the WMO/UNDRR Global Status of Multi-Hazard Early Warning Systems 2025.",
+      "url": "https://wmo.int/news/media-centre/early-warning-systems-reach-new-heights-critical-gaps-jeopardize-global-progress",
+      "note": "Context for the debrief only, not a fact of this day. Quoted from the press release, fetched 2026-11-13; the full report was not read. Licence unconfirmed (the page footer reads © WMO)."
+    },
+    {
+      "id": "nist-tn-2252",
+      "label": "Maranghides, A., Link, E., Mell, W., Hawks, S., Brown, C. and Walton, W. D. A Case Study of the Camp Fire — Notification, Evacuation, Traffic, and Temporary Refuge Areas (NETTRA). NIST Technical Note 2252, National Institute of Standards and Technology, July 2023.",
+      "url": "https://doi.org/10.6028/NIST.TN.2252",
+      "note": "Context for the debrief only, not a fact of this day. Quoted from the PDF, fetched 2026-11-13. Licence unconfirmed: the report links NIST's copyright, fair use and licensing statement, which was not opened."
     }
   ]
 }

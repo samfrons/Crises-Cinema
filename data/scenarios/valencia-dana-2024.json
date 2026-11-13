@@ -25,6 +25,10 @@
       "magro-utiel": "Magro"
     }
   },
+  "instruments": {
+    "poyo": "Rambla del Poyo · flow, as CHJ sent it",
+    "forata": "Forata dam · basin authority warnings"
+  },
   "timesteps": [
     {
       "id": "t1",
@@ -36,6 +40,7 @@
           "id": "t1-i1",
           "kind": "forecast",
           "text": "AEMET, the state meteorological agency, raises its warning for the coastal north of the province of Valencia to RED — the highest level, meaning torrential rain above roughly 90 mm in a single hour is expected. The warning is broadcast on morning radio and television.",
+          "headline": "raises its warning for the coastal north of the province of Valencia to RED",
           "citation": {
             "sourceId": "aemet-2024",
             "detail": "Red-level warning issued 07:36 CET, 29 Oct 2024, litoral norte de Valencia"
@@ -55,6 +60,7 @@
           "id": "t1-i2",
           "kind": "message",
           "text": "Some inland municipalities, acting on their own authority, begin suspending classes for the day. There is no province-wide instruction.",
+          "headline": "There is no province-wide instruction.",
           "citation": {
             "sourceId": "press-recon",
             "detail": "Timeline reconstructions of local school suspensions on the morning of 29 Oct"
@@ -131,6 +137,7 @@
           "id": "t2-i1",
           "kind": "gauge",
           "text": "12:20 — the Júcar basin authority (CHJ) notifies the regional emergency service that flow in the Rambla del Poyo, the normally dry ravine that runs above the dense towns south of Valencia city, has passed its alert threshold.",
+          "headline": "has passed its alert threshold.",
           "citation": {
             "sourceId": "chj-record",
             "detail": "CHJ hydrological alert for the Rambla del Poyo, 12:20 CET, as entered in the court record"
@@ -145,12 +152,20 @@
               "state": "used",
               "at": "12:20"
             }
+          ],
+          "readings": [
+            {
+              "series": "poyo",
+              "at": "12:20",
+              "state": "above-alert"
+            }
           ]
         },
         {
           "id": "t2-i2",
           "kind": "field_report",
           "text": "Inland, the Magro basin is already flooding. Utiel is under water by midday; the town asks for help for people trapped in their homes.",
+          "headline": "Inland, the Magro basin is already flooding.",
           "citation": {
             "sourceId": "press-recon",
             "detail": "Reconstructions of the flooding of Utiel around midday, 29 Oct"
@@ -165,6 +180,7 @@
           "id": "t2-i3",
           "kind": "forecast",
           "text": "AEMET's red warnings remain in force and are extended across further zones of the province during the day.",
+          "headline": "AEMET's red warnings remain in force and are extended across further zones of the province",
           "citation": {
             "sourceId": "aemet-2024",
             "detail": "Warning bulletins for the province of Valencia through 29 Oct"
@@ -246,6 +262,7 @@
           "id": "t3-i1",
           "kind": "media",
           "text": "The regional president posts a video message: the storm is expected to move away towards the Serranía de Cuenca, with intensity easing across the region from around 18:00. (The video was later deleted.)",
+          "headline": "intensity easing across the region from around 18:00",
           "citation": {
             "sourceId": "press-recon",
             "detail": "The early-afternoon video message of 29 Oct, later deleted; widely reproduced in press reconstructions"
@@ -256,6 +273,7 @@
           "id": "t3-i2",
           "kind": "field_report",
           "text": "Rain continues over the interior of the province. Emergency calls keep coming from the Magro and Utiel–Requena.",
+          "headline": "Emergency calls keep coming from the Magro and Utiel–Requena.",
           "citation": {
             "sourceId": "press-recon",
             "detail": "Afternoon situation in the interior comarcas, 29 Oct"
@@ -334,6 +352,7 @@
           "id": "t4-i1",
           "kind": "message",
           "text": "17:00 — CECOPI, the integrated emergency coordination committee, finally convenes, with the regional interior minister presiding.",
+          "headline": "CECOPI, the integrated emergency coordination committee, finally convenes",
           "citation": {
             "sourceId": "court-catarroja",
             "detail": "CECOPI convened at 17:00 on 29 Oct, per the court record and press reconstructions"
@@ -344,6 +363,7 @@
           "id": "t4-i2",
           "kind": "message",
           "text": "Discussion is dominated by the Forata dam on the river Magro, which is filling fast towards its limit and which the basin authority warns may fail.",
+          "headline": "the Forata dam on the river Magro, which is filling fast towards its limit",
           "citation": {
             "sourceId": "press-recon",
             "detail": "CECOPI's focus on the Forata dam during the evening session"
@@ -351,12 +371,23 @@
           "zones": [
             "magro-utiel"
           ],
-          "icon": "dam"
+          "icon": "dam",
+          "readings": [
+            {
+              "series": "forata",
+              "state": "filling"
+            },
+            {
+              "series": "forata",
+              "state": "may-fail"
+            }
+          ]
         },
         {
           "id": "t4-i3",
           "kind": "gauge",
           "text": "The most recent CHJ email on the Rambla del Poyo, from 16:13, showed the flow falling. No further update on the Poyo has arrived since.",
+          "headline": "No further update on the Poyo has arrived since.",
           "citation": {
             "sourceId": "chj-record",
             "detail": "Gap in CHJ notifications on the Poyo between 16:13 and 18:43, per the court record"
@@ -364,7 +395,14 @@
           "zones": [
             "poyo-horta-sud"
           ],
-          "icon": "river-gauge"
+          "icon": "river-gauge",
+          "readings": [
+            {
+              "series": "poyo",
+              "at": "16:13",
+              "state": "falling"
+            }
+          ]
         }
       ],
       "options": [
@@ -451,6 +489,7 @@
           "id": "t5-i1",
           "kind": "gauge",
           "text": "18:43 — after a silence of two and a half hours, the CHJ emails the emergency service: flow in the Rambla del Poyo has surged to 1,686 cubic metres per second — an extraordinary rise, and the water is heading for the towns of the Horta Sud.",
+          "headline": "flow in the Rambla del Poyo has surged to 1,686 cubic metres per second",
           "citation": {
             "sourceId": "chj-record",
             "detail": "CHJ email of 18:43 CET reporting the surge in the Poyo, as entered in the court record"
@@ -465,12 +504,21 @@
               "state": "used",
               "at": "18:43"
             }
+          ],
+          "readings": [
+            {
+              "series": "poyo",
+              "at": "18:43",
+              "state": "surged",
+              "value": "1,686 m³/s"
+            }
           ]
         },
         {
           "id": "t5-i2",
           "kind": "message",
           "text": "The basin authority maintains its warning that the Forata dam may break.",
+          "headline": "The basin authority maintains its warning that the Forata dam may break.",
           "citation": {
             "sourceId": "press-recon",
             "detail": "Evening warnings on the state of the Forata dam"
@@ -478,12 +526,19 @@
           "zones": [
             "magro-utiel"
           ],
-          "icon": "dam"
+          "icon": "dam",
+          "readings": [
+            {
+              "series": "forata",
+              "state": "may-fail"
+            }
+          ]
         },
         {
           "id": "t5-i3",
           "kind": "gauge",
           "text": "Satellite true colour (VIIRS, Suomi NPP) for 29 October, from the early-afternoon pass: a broad band of cloud lies across eastern and southern Iberia and the western Mediterranean, with the Valencia region under it.",
+          "headline": "a broad band of cloud lies across eastern and southern Iberia",
           "citation": {
             "sourceId": "nasa-gibs",
             "detail": "GIBS WMS, layer VIIRS_SNPP_CorrectedReflectance_TrueColor, time=2024-10-29, bbox -12,34,8,46"
@@ -575,6 +630,7 @@
           "id": "t6-i1",
           "kind": "field_report",
           "text": "Water is in the streets of the Horta Sud — Paiporta, Catarroja, Alfafar and their neighbours. The 112 line is overwhelmed with calls from people trapped in ground floors, garages and cars.",
+          "headline": "Water is in the streets of the Horta Sud",
           "citation": {
             "sourceId": "press-recon",
             "detail": "The flood's arrival in the Horta Sud towns during the 19:00–20:00 hour"
@@ -588,6 +644,7 @@
           "id": "t6-i2",
           "kind": "message",
           "text": "In the committee, a mobile alert message is being drafted; its wording and scope are still under discussion.",
+          "headline": "a mobile alert message is being drafted; its wording and scope are still under discussion.",
           "citation": {
             "sourceId": "court-catarroja",
             "detail": "Drafting of the ES-Alert message before 20:11, per the court record"
@@ -740,6 +797,54 @@
       }
     }
   ],
+  "takeaways": [
+    {
+      "text": "A red warning is not a decision: the coordinating committee met at 17:00, more than nine hours after the red warning was issued.",
+      "from": {
+        "step": "t4"
+      },
+      "citation": {
+        "sourceId": "court-catarroja",
+        "detail": "Historical path at 17:00, as cited in the debrief"
+      }
+    },
+    {
+      "text": "Data that is tracked is not data that is acted on: the 12:20 hydrological alert on the Poyo was received and followed, and no population-wide warning came from it.",
+      "from": {
+        "step": "t2"
+      },
+      "citation": {
+        "sourceId": "chj-record",
+        "detail": "Historical path at 12:20, as cited in the debrief"
+      }
+    },
+    {
+      "text": "A warning is measured against the water, not the clock on the wall: most of the deaths came between about 19:00 and 20:00, before the 20:11 alert reached a single phone.",
+      "from": {
+        "finding": 1
+      },
+      "citation": {
+        "sourceId": "court-catarroja",
+        "detail": "Findings on the timing of deaths in the interlocutory orders"
+      }
+    }
+  ],
+  "glossary": [
+    {
+      "term": "Red warning (AEMET)",
+      "match": [
+        "RED",
+        "red warning"
+      ],
+      "kind": "verbatim",
+      "definition": "El peligro es extraordinario. Los bienes y la población vulnerables o en zonas expuestas podrían sufrir impactos muy graves o catastróficos.",
+      "translation": "The danger is extraordinary. Vulnerable people and property, or those in exposed areas, could suffer very serious or catastrophic impacts.",
+      "citation": {
+        "sourceId": "aemet-meteoalerta",
+        "detail": "Section 4.2.2.3 'Nivel rojo', p. 8"
+      }
+    }
+  ],
   "debrief_media": [
     {
       "file": "spain-imerg-precipitation-rate-2024-10-29-1400utc.jpg",
@@ -874,7 +979,124 @@
         "label": "Magro basin — Utiel, Requena, downstream of Forata"
       }
     ],
-    "historical_first_public_alert": "20:11"
+    "historical_first_public_alert": "20:11",
+    "benchmark": [
+      {
+        "time": "12:20",
+        "from": "t2-i1",
+        "option": "t2-a2",
+        "zones": [
+          "poyo-horta-sud"
+        ],
+        "basis": "At 12:20 the basin authority tells the regional emergency service that flow in the Rambla del Poyo, the normally dry ravine above the towns south of Valencia city, has passed its alert threshold.",
+        "citation": {
+          "sourceId": "chj-record",
+          "detail": "CHJ hydrological alert for the Rambla del Poyo, 12:20 CET, as entered in the court record"
+        }
+      },
+      {
+        "time": "12:20",
+        "from": "t2-i2",
+        "option": "t2-a2",
+        "zones": [
+          "magro-utiel"
+        ],
+        "basis": "Inland, the Magro basin is already flooding: Utiel is under water by midday and asks for help for people trapped in their homes.",
+        "citation": {
+          "sourceId": "press-recon",
+          "detail": "Reconstructions of the flooding of Utiel around midday, 29 Oct"
+        }
+      }
+    ],
+    "minutes_matter": [
+      {
+        "quote": "Disaster-related mortality is nearly six times lower in countries with more comprehensive Multi-Hazard Early Warning System capabilities compared to countries with limited capabilities.",
+        "about": "Every country that reports on its warning systems",
+        "caveat": "A cross-country association, not a measured effect: richer countries tend to have both more warning capability and lower mortality.",
+        "publisher": "World Meteorological Organization (WMO) with UNDRR",
+        "license": "unconfirmed: page footer reads © WMO; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "wmo-mhews-2025",
+          "detail": "Press release of 12 November 2025, 'Key Findings', first item"
+        }
+      },
+      {
+        "quote": "Fourteen minutes elapsed between the initial request and the time the warnings were upgraded to orders and exact zones were specified at 07:46.",
+        "about": "The Camp Fire, Paradise, California",
+        "publisher": "National Institute of Standards and Technology (NIST)",
+        "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "nist-tn-2252",
+          "detail": "Key findings, TF-N 10"
+        }
+      },
+      {
+        "quote": "The fire became the most deadly and destructive fire in California history, resulting in 85 fatalities and more than 18 000 destroyed structures.",
+        "about": "The Camp Fire, Butte County, California",
+        "publisher": "National Institute of Standards and Technology (NIST)",
+        "license": "unconfirmed: the report links NIST's copyright, fair use and licensing statement; quoted briefly",
+        "as_of": "2026-11-13",
+        "citation": {
+          "sourceId": "nist-tn-2252",
+          "detail": "Abstract"
+        }
+      }
+    ]
+  },
+  "diorama": {
+    "_note": "Presentational (diorama mode): a cartographic anchor for each named place a zone covers, WGS84 decimal degrees to about 100 m — verifiable geography like the atlas gazetteer, not a record fact and not a boundary. The drape is the places' hull widened by radius_km.",
+    "frames": [
+      "valencia-dana-2024"
+    ],
+    "exaggeration": 2.5,
+    "contour_m": 100,
+    "impact_zone": "poyo-horta-sud",
+    "zones": {
+      "poyo-horta-sud": {
+        "anchor": "Paiporta",
+        "radius_km": 1.4,
+        "places": [
+          {
+            "name": "Paiporta",
+            "lat": 39.428,
+            "lon": -0.417
+          },
+          {
+            "name": "Catarroja",
+            "lat": 39.403,
+            "lon": -0.404
+          },
+          {
+            "name": "Alfafar",
+            "lat": 39.422,
+            "lon": -0.39
+          }
+        ]
+      },
+      "magro-utiel": {
+        "anchor": "Requena",
+        "radius_km": 3,
+        "places": [
+          {
+            "name": "Utiel",
+            "lat": 39.567,
+            "lon": -1.205
+          },
+          {
+            "name": "Requena",
+            "lat": 39.488,
+            "lon": -1.101
+          },
+          {
+            "name": "Forata",
+            "lat": 39.383,
+            "lon": -0.817
+          }
+        ]
+      }
+    }
   },
   "sources": [
     {
@@ -912,6 +1134,24 @@
       "label": "NASA EOSDIS Global Imagery Browse Services (GIBS): VIIRS Suomi NPP corrected-reflectance true colour over Iberia and the western Mediterranean, UTC day of 29 October 2024; crop rendered by the project from the GIBS WMS.",
       "url": "https://www.earthdata.nasa.gov/engage/open-data-services-software-policies/data-use-guidance",
       "note": "URL is NASA's data-use guidance (CC0 for NASA-led missions). The exact WMS request is given on the figure. The overpass time is the satellite's typical one, not read from the product metadata; the image is a daily composite."
+    },
+    {
+      "id": "aemet-meteoalerta",
+      "label": "AEMET (Agencia Estatal de Meteorología). Plan Nacional de Predicción y Vigilancia de Fenómenos Meteorológicos Adversos — Meteoalerta. Version 9, 10 January 2025, section 4.2.2.3 'Nivel rojo' (p. 8). Consulted 12 November 2026.",
+      "url": "https://www.aemet.es/documentos/es/eltiempo/prediccion/avisos/plan_meteoalerta/plan_meteoalerta.pdf",
+      "note": "Used only for the definition under 'Terms of the desk'. Version 9 post-dates the day; its change log records that it altered only the warning-review periods (p. 9), so the level definitions stand as in version 8 of 26 May 2022, in force on 29 October 2024. English translation by the project."
+    },
+    {
+      "id": "wmo-mhews-2025",
+      "label": "World Meteorological Organization, press release: 'Early warning systems reach new heights, but critical gaps jeopardize global progress', 12 November 2025, on the WMO/UNDRR Global Status of Multi-Hazard Early Warning Systems 2025.",
+      "url": "https://wmo.int/news/media-centre/early-warning-systems-reach-new-heights-critical-gaps-jeopardize-global-progress",
+      "note": "Context for the debrief only, not a fact of this day. Quoted from the press release, fetched 2026-11-13; the full report was not read. Licence unconfirmed (the page footer reads © WMO)."
+    },
+    {
+      "id": "nist-tn-2252",
+      "label": "Maranghides, A., Link, E., Mell, W., Hawks, S., Brown, C. and Walton, W. D. A Case Study of the Camp Fire — Notification, Evacuation, Traffic, and Temporary Refuge Areas (NETTRA). NIST Technical Note 2252, National Institute of Standards and Technology, July 2023.",
+      "url": "https://doi.org/10.6028/NIST.TN.2252",
+      "note": "Context for the debrief only, not a fact of this day. Quoted from the PDF, fetched 2026-11-13. Licence unconfirmed: the report links NIST's copyright, fair use and licensing statement, which was not opened."
     }
   ]
 }

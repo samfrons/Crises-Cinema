@@ -34,21 +34,25 @@ export default function DayStrip({ scenario, currentIndex, choices, ended }: {
   const hours: number[] = [];
   for (let h = Math.ceil(start / 60) * 60; h < start + span; h += 60) hours.push(h);
 
+  // Every mark moves on transform alone (a full-width carrier translated by a
+  // percentage of the rail, the elapsed bar scaled from its left edge), so the
+  // needle's sweep during the advance beat never asks for layout.
+  const at = (m: number) => ({ transform: `translateX(${x(m)}%)` });
   return (
     <div className={`cr-daystrip${ended ? ' is-ended' : ''}`} aria-hidden>
       <div className="cr-daystrip-rail">
-        <div className="cr-daystrip-elapsed" style={{ width: `${x(now)}%` }} />
+        <div className="cr-daystrip-elapsed" style={{ transform: `scaleX(${x(now) / 100})` }} />
         {hours.map((h) => (
-          <span key={h} className="cr-daystrip-hour" style={{ left: `${x(h)}%` }} />
+          <span key={h} className="cr-daystrip-hour" style={at(h)} />
         ))}
         {steps.slice(0, currentIndex + 1).map((t, i) => (
           <span
             key={t.id}
             className={`cr-daystrip-tick${choices[i]?.event.divergedFromHistory ? ' is-diverged' : ''}`}
-            style={{ left: `${x(minutes(t.time))}%` }}
+            style={at(minutes(t.time))}
           />
         ))}
-        <span className="cr-daystrip-needle" style={{ left: `${x(now)}%` }} />
+        <span className="cr-daystrip-needle" style={at(now)} />
         {!ended && <div className="cr-daystrip-fog" />}
       </div>
     </div>

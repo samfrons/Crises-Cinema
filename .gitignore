@@ -50,3 +50,6 @@ next-env.d.ts
 # Never commit — the EM-DAT drop-in it may hold is CC BY-NC-ND and must not
 # be redistributed from this repository.
 data/preparedness/raw/
+
+# terrain tile cache: refetched by npm run build:terrain (AWS Terrain Tiles, registry page, attribution file)
+data/terrain-raw/

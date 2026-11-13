@@ -6,11 +6,24 @@
  * say "gauge alert" or "flooding".
  */
 import type { InfoItem, Scenario } from './types';
+import vocabulary from './vocabulary.json';
 
 export type ZoneState = 'quiet' | 'watch' | 'signal' | 'impact';
 export const STATE_RANK: Record<ZoneState, number> = { quiet: 0, watch: 1, signal: 2, impact: 3 };
 
-export type HazardFamily = 'water' | 'fire';
+export type HazardFamily = 'water' | 'fire' | 'storm';
+
+/* The family patterns and the board's state words are shared with the
+   validator (vocabulary.json `hazards`), which refuses a playable scenario
+   whose hazard names no family. Order matters: the first match wins. */
+type FamilyDef = { match: string; states: Record<Exclude<ZoneState, 'quiet'>, string> };
+const FAMILIES = Object.entries(vocabulary.hazards)
+  .filter(([k]) => k !== '_comment')
+  .map(([k, v]) => [k as HazardFamily, v as FamilyDef] as const);
+const statesOf = (f: HazardFamily): Record<ZoneState, string> => ({
+  quiet: 'quiet',
+  ...(FAMILIES.find(([k]) => k === f)![1].states),
+});
 
 type Kind = InfoItem['kind'];
 
@@ -42,7 +55,7 @@ const KIND_LABEL: Record<Kind, string> = {
 const VOCAB: Record<HazardFamily, HazardVocab> = {
   water: {
     family: 'water',
-    states: { quiet: 'quiet', watch: 'red warning', signal: 'gauge alert', impact: 'flooding' },
+    states: statesOf('water'),
     kindState: { forecast: 'watch', gauge: 'signal', field_report: 'impact' },
     // River gauges and the one satellite pass share the instrument kind.
     kindLabel: { ...KIND_LABEL, gauge: 'Gauge · sensor' },
@@ -55,7 +68,7 @@ const VOCAB: Record<HazardFamily, HazardVocab> = {
     family: 'fire',
     // A field report of fire is a report, not proof the zone is alight: only
     // items that say so carry board_state "impact" ("burning") in the data.
-    states: { quiet: 'quiet', watch: 'red flag', signal: 'fire reported', impact: 'burning' },
+    states: statesOf('fire'),
     kindState: { forecast: 'watch', gauge: 'signal', field_report: 'signal' },
     kindLabel: { ...KIND_LABEL, gauge: 'Sensor' },
     feeds: 'forecasts, fire reports, satellite passes, messages',
@@ -63,11 +76,27 @@ const VOCAB: Record<HazardFamily, HazardVocab> = {
     desk: 'emergency-management desk',
     originNoun: 'the fire',
   },
+  storm: {
+    family: 'storm',
+    // Words both records print: a warning in force over the zone (NHC's
+    // Hurricane Warning, IMD's cyclone warning); winds measured by an
+    // instrument as the storm closes (a coastal station, a radar). "Storm
+    // ashore" is lit only by an item whose board_state says so — a forecast
+    // of landfall is not a landfall.
+    states: statesOf('storm'),
+    kindState: { forecast: 'watch', gauge: 'signal' },
+    kindLabel: { ...KIND_LABEL, gauge: 'Observation' },
+    feeds: 'advisories, observations, messages',
+    zoneNoun: 'zones',
+    desk: 'emergency-management desk',
+    originNoun: 'the storm',
+  },
 };
 
 export function hazardFamily(hazard: string): HazardFamily {
   const h = hazard.toLowerCase();
-  return /fire|bushfire|wildland/.test(h) ? 'fire' : 'water';
+  // Unmatched falls back to water in the UI; the build refuses it for a playable.
+  return FAMILIES.find(([, v]) => new RegExp(v.match, 'i').test(h))?.[0] ?? 'water';
 }
 
 export const vocabFor = (scenario: Pick<Scenario, 'hazard'>): HazardVocab => VOCAB[hazardFamily(scenario.hazard)];

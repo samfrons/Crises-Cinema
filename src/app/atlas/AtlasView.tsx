@@ -146,7 +146,7 @@ function Dossier({
           const inner = (
             <>
               {f.th
-                ? <img src={posterUrl(f.th, 'w92')} alt="" loading="lazy" />
+                ? <img src={posterUrl(f.th, 'w92')} alt="" loading="lazy" decoding="async" />
                 : <span className="at-noposter" aria-hidden>NO STILL</span>}
               <span className="at-film-body">
                 <b>{f.t}</b>
