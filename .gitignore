@@ -51,5 +51,5 @@ next-env.d.ts
 # be redistributed from this repository.
 data/preparedness/raw/
 
-# raw terrain tile cache: re-fetched by scripts/build-terrain.mjs
+# terrain tile cache: refetched by npm run build:terrain (AWS Terrain Tiles, registry page, attribution file)
 data/terrain-raw/

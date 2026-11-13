@@ -26,6 +26,7 @@ is the reference table; that one is the runbook.
 | World Bank population (SP.POP.TOTL) | World Bank | CC BY 4.0 | 2023 (falls back to 2022/2021 per country if 2023 is missing) | 2026-09-01 |
 | world-atlas countries-110m.json (Natural Earth admin-0, 1:110m) | Natural Earth, packaged as `world-atlas@2.0.2` | Public domain | — | 2026-08-31 |
 | world-countries@5.1.0 (ISO numeric ↔ alpha-3 mapping) | Compiled from ISO 3166 sources | ODbL | — | 2026-08-31 |
+| AWS Terrain Tiles (terrarium elevation; Control Room diorama ground) | Mapzen, a Linux Foundation project, on the Registry of Open Data on AWS | Registry licence field: `https://github.com/tilezen/joerd/blob/master/docs/attribution.md` (an attribution requirement, not a named licence; contents quoted below) | Update frequency per registry: "New data is added based on community feedback"; no dataset vintage stated | 2026-11-13 |
 
 ## INFORM Risk
 
@@ -273,6 +274,63 @@ still works without a separate network fetch.
 recency and methodology; the World Bank's own figure is itself often an
 interpolation between census years for countries that do not conduct
 regular censuses.
+
+## AWS Terrain Tiles (Control Room terrain)
+
+**What it is**: bare-earth elevation, tiled, from `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png`
+(registry page: https://registry.opendata.aws/terrain-tiles/, "Managed By: Mapzen, a Linux
+Foundation project"). `scripts/build-terrain.mjs` decodes the terrarium RGB
+(`(R*256 + G + B/256) - 32768`, metres), mosaics the tiles for each scenario
+frame and box-averages onto a 256-512 px grid, written to
+`public/control-room/terrain/<scenario-id>.{png,json}`. Raw tiles, the cached
+registry page and the cached attribution file live in the gitignored
+`data/terrain-raw/`.
+
+**Licence, verbatim**: the registry page's License field is the URL
+`https://github.com/tilezen/joerd/blob/master/docs/attribution.md`. The
+"Required attribution" block of that file (fetched 2026-11-13) reads:
+
+```
+* ArcticDEM terrain data DEM(s) were created from DigitalGlobe, Inc., imagery and
+  funded under National Science Foundation awards 1043681, 1559691, and 1542736;
+* Australia terrain data © Commonwealth of Australia (Geoscience Australia) 2017;
+* Austria terrain data © offene Daten Österreichs – Digitales Geländemodell (DGM)
+  Österreich;
+* Canada terrain data contains information licensed under the Open Government
+  Licence – Canada;
+* Europe terrain data produced using Copernicus data and information funded by the
+  European Union - EU-DEM layers;
+* Global ETOPO1 terrain data U.S. National Oceanic and Atmospheric Administration
+* Mexico terrain data source: INEGI, Continental relief, 2016;
+* New Zealand terrain data Copyright 2011 Crown copyright (c) Land Information New
+  Zealand and the New Zealand Government (All rights reserved);
+* Norway terrain data © Kartverket;
+* United Kingdom terrain data © Environment Agency copyright and/or database right
+  2015. All rights reserved;
+* United States 3DEP (formerly NED) and global GMTED2010 and SRTM terrain data
+  courtesy of the U.S. Geological Survey.
+```
+
+That file says example language is provided and "you are responsible for
+researching each project to follow their license terms". The data is an
+aggregate of the sources named above; which one fills a given frame is not
+recorded in the tiles. The same text is stored in each terrain meta JSON
+(`source.license`). Any page that shows the terrain must show this
+attribution (publisher · licence · as-of).
+
+**Known limitations**:
+- Elevations are rounded to roughly 1 m over most land and the tiles'
+  provenance varies by place (3DEP in the US, EU-DEM in Spain, SRTM/GMTED
+  elsewhere). New Orleans reads ~0 m across much of the bowl; the 1 m
+  resolution cannot show shallow subsidence, so below-sea-level shares there
+  are a floor, not a measurement of the city's true depth.
+- Terrarium tiles carry bathymetry below 0 m, so negative cells include sea and
+  river bed (the Mississippi reads to about -44 m). There is no water mask.
+- One z12 tile (1022/1688, over Lake Pontchartrain near 30.07 N, 90.15 W) holds
+  corrupt values; the Katrina frame stops at 30.06 N to avoid it. The build
+  fails if a frame ever contains elevations below -1000 m.
+- Grids are 256-512 px on the long edge (about 90-190 m per pixel): the shape
+  of the ground, not parcel-level topography.
 
 ## Map geometry (world-atlas / Natural Earth, world-countries)
 

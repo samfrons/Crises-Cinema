@@ -11,6 +11,7 @@
     "build:reel": "node scripts/build-reel.mjs",
     "build:dispatches": "node scripts/build-dispatches.mjs",
     "build:preparedness": "node scripts/build-preparedness-geometry.mjs && node scripts/build-preparedness.mjs",
+    "build:terrain": "node scripts/build-terrain.mjs",
     "start": "next start",
     "lint": "next lint",
     "lint-build": "npm run lint && npm run build",

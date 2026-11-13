@@ -432,3 +432,17 @@ session object (same shape, minus `player`), written append-only. Aggregations
 this schema supports: hesitation-time distributions per timestep,
 over-/under-warning rate (warningScope chosen vs. signal level), and divergence
 from the historical path per decision point.
+
+## Terrain (the diorama's ground)
+
+Each playable scenario ships real elevation: a 16-bit greyscale heightmap
+`public/control-room/terrain/<scenario-id>.png` plus a meta
+`<scenario-id>.json` (bbox, grid size, min/max elevation, metres per pixel,
+decode formula, and the source's publisher, URL, attribution and retrieval
+date). Lahaina has a second frame, `lahaina-2023-upcountry`, because West Maui
+and Upcountry will not fit one frame at useful resolution. The elevation is
+AWS Terrain Tiles (see `SOURCES.md`) resampled, never edited. Refresh with
+`npm run build:terrain` (network, run by hand, commit the output; the raw
+tile cache `data/terrain-raw/` is gitignored). Every playable scenario needs a
+frame entry in `scripts/build-terrain.mjs`; the script (and `npm test`) fails
+without one, so a scenario cannot ship without ground.
