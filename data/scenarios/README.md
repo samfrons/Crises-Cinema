@@ -245,6 +245,28 @@ discipline as the board. A link the record has not mentioned stays a faint
 hairline, meaning "not on the record yet", never "broken". Severed is drawn
 only where a cited item says the channel was cut or not used.
 
+### The headline (picture mode's lower third)
+
+Picture mode (the Control Room's LOG · PICTURE switch) prints each slip as a
+located beat on the board with one line under it: `HH:MM · <headline> [n]`.
+The full text is one press away, and the screen reader always hears the
+full text. The headline is the item's own words, never a summary:
+
+```jsonc
+"text": "Water is failing on the fire ground. At 16:10 a ladder company …",
+"headline": "Water is failing on the fire ground."
+```
+
+**Required on every info item of a playable scenario.** The build **fails**
+on a missing or empty headline; one that is not a contiguous fragment of the
+item's own `text`, character for character (case and punctuation exact, so
+no trimming a quote mark off one end and not the other, no capitalising a
+mid-sentence start); one longer than 90 characters (vocabulary.json
+`headline.max`); one with leading or trailing whitespace; and a "SOURCE
+NEEDED" placeholder. Choose the strongest fragment as the text has it,
+starting mid-sentence if need be. Each gate has a fault-injection case in
+`tests/scenarios-contract.test.mjs`.
+
 ## Warnings that came before the clock
 
 A scenario's clock is one day and cannot cross midnight, but some days' real

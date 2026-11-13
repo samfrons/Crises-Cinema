@@ -55,6 +55,7 @@
           "id": "t1-i1",
           "kind": "forecast",
           "text": "NHC Special Advisory 22, 07:00: Katrina is \"now a potentially catastrophic Category Five hurricane\", maximum sustained winds near 160 mph, about 250 miles south-southeast of the mouth of the Mississippi. A Hurricane Warning is in effect from Morgan City, Louisiana, to the Alabama/Florida border, \"including the city of New Orleans and Lake Pontchartrain\", and \"preparations to protect life and property should be rushed to completion\". Coastal storm surge flooding of 15 to 20 feet above normal tide, locally as high as 25 feet, is expected near and east of where the centre makes landfall.",
+          "headline": "Katrina is \"now a potentially catastrophic Category Five hurricane\"",
           "citation": {
             "sourceId": "nhc-adv",
             "detail": "Special Advisory 22, 7 AM CDT Sun 28 Aug 2005"
@@ -78,6 +79,7 @@
           "id": "t1-i2",
           "kind": "message",
           "text": "Saturday evening: at about 19:00 the National Weather Service advised the City of New Orleans Office of Emergency Preparedness that the New Orleans levees could be overtopped. From 19:25 to 20:00 NHC Director Max Mayfield briefed Governor Blanco, Governor Barbour and Mayor Nagin on Katrina's potential impact. At 22:00 NHC issued its first official storm-surge forecast, 15 to 20 feet above normal tides and locally as high as 25 feet.",
+          "headline": "the New Orleans levees could be overtopped",
           "citation": {
             "sourceId": "senate-2006",
             "detail": "Chapter 5, Timeline of Key Events, Saturday 27 August: 7 p.m. (NWS to the City OEP), 7:25-8 p.m. (Mayfield briefings), 10 p.m. (first storm-surge forecast)"
@@ -88,6 +90,7 @@
           "id": "t1-i3",
           "kind": "message",
           "text": "Where the city stands. At about 13:00 on Saturday the Mayor declared a state of emergency at a joint news conference with the Governor and announced a voluntary evacuation; he asked residents of Algiers, the Lower Ninth Ward and low-lying areas to start leaving, and said the Superdome would open at 08:00 Sunday as a special-needs shelter. Contraflow, the highways running outbound only, began at about 16:00 on Saturday.",
+          "headline": "the Mayor declared a state of emergency",
           "citation": {
             "sourceId": "senate-2006",
             "detail": "Chapter 5 timeline, Saturday 27 August: ~1 p.m. and 4 p.m.; Chapter 16 (Pre-Storm Evacuations) (Mayor's Saturday press conference)"
@@ -105,6 +108,7 @@
           "id": "t1-i4",
           "kind": "message",
           "text": "The mandatory evacuation order is still being drafted. The Mayor told staff at noon on Saturday to begin it. A draft sent round late Saturday night excepts essential personnel of the city, regulated utilities, hospitals and their patients, and operating hotels and their guests; staff have since added the media and nursing-home personnel, and Colonel Terry Ebbert, Director of Homeland Security and Public Safety, has recommended that nursing homes not be excepted. Still open: who is excepted, how the order would be enforced, and what transport the city has.",
+          "headline": "The mandatory evacuation order is still being drafted.",
           "citation": {
             "sourceId": "senate-2006",
             "detail": "Chapter 16 (Pre-Storm Evacuations), \"Mayor Nagin issued a mandatory-evacuation order ... on Sunday\" and notes 60-64"
@@ -115,6 +119,7 @@
           "id": "t1-i5",
           "kind": "message",
           "text": "The city's own emergency plan lets the Mayor \"direct and compel, by any necessary and reasonable force, the evacuation of all or part of the population from any stricken or threatened area within the City if he deems this action necessary for the preservation of life\". The same plan acknowledges that \"[a]pproximately 100,000 Citizens of New Orleans do not have means of personal transportation\".",
+          "headline": "100,000 Citizens of New Orleans do not have means of personal transportation",
           "citation": {
             "sourceId": "house-2006",
             "detail": "Chapter \"Evacuation\": quotations of the New Orleans plan under \"The declarations of a 'mandatory' evacuation were delayed ...\" and \"The shelter of last resort ... was inadequate\""
@@ -198,6 +203,7 @@
           "id": "t2-i1",
           "kind": "message",
           "text": "About 09:30 the city issues its first-ever mandatory evacuation order, at a joint news conference with the Governor. \"I wish I had better news for you,\" the Mayor says. \"But we are facing a storm that most of us have feared.\" The final order excepts essential personnel of federal, state and city government, regulated utilities and mass transit, hospitals and their patients, the media, the Orleans Parish Criminal Sheriff's Office and its inmates, and operating hotels and their patrons. \"We sent out a fax to all the churches that we could this morning,\" he says, asking them to \"buddy up\" and check on seniors who rely on public transport.",
+          "headline": "About 09:30 the city issues its first-ever mandatory evacuation order",
           "citation": {
             "sourceId": "senate-2006",
             "detail": "Chapter 16 (Pre-Storm Evacuations), text and note 57 (Mayor's statement; final exceptions list); Chapter 5 timeline, 9:30 a.m."
@@ -219,6 +225,7 @@
           "id": "t2-i2",
           "kind": "message",
           "text": "At the same news conference the Governor says President Bush telephoned her just before and \"asked me to please ensure that there would be a mandatory evacuation of New Orleans\". She says waters could be as high as 15 to 20 feet, which is what the National Hurricane Center \"has shared with us\". The Mayor says: \"The storm surge most likely will topple our levee system.\"",
+          "headline": "\"The storm surge most likely will topple our levee system.\"",
           "citation": {
             "sourceId": "house-2006",
             "detail": "Chapter \"Evacuation\": Nagin-Blanco news conference, 28 August 2005, as quoted under \"The declarations of a 'mandatory' evacuation were delayed or never made\""
@@ -229,6 +236,7 @@
           "id": "t2-i3",
           "kind": "message",
           "text": "The Mayor announces that the Superdome will open to the general public at 12:00 as a refuge of last resort, and names 12 pick-up points where Regional Transit Authority buses will collect people for it, among them the E.J. Morris Senior Center, Frantz in the Ninth Ward, Warren Easton and Augustine in Mid-City and O. Perry Walker High School on the West Bank. The city waited until Saturday to announce the Superdome, fearing that saying so earlier might dissuade people from leaving.",
+          "headline": "the Superdome will open to the general public at 12:00 as a refuge of last resort",
           "citation": {
             "sourceId": "senate-2006",
             "detail": "Chapter 16, note 57 (Superdome at 12 p.m.; 12 RTA pick-up points); Chapter 11 (\"The New Orleans Scenario\"), \"The City Prepares and Opens the Superdome as a Refuge of Last Resort\""
@@ -239,6 +247,7 @@
           "id": "t2-i4",
           "kind": "message",
           "text": "The Regional Transit Authority owns 372 buses and employs 650 drivers; it estimates each bus can take 40 people and their luggage out of the city, and about 100 drivers have volunteered for evacuation duty. The RTA has offered its buses and drivers; the director of the city's Office of Emergency Preparedness, Chief Matthews, has turned down the offers, citing a lack of identifiable shelters.",
+          "headline": "Chief Matthews, has turned down the offers, citing a lack of identifiable shelters",
           "citation": {
             "sourceId": "senate-2006",
             "detail": "Chapter 16, \"The Director of the City of New Orleans Office of Emergency Preparedness Turned Down Offers of Assistance ... From the Regional Transit Authority\""
@@ -321,6 +330,7 @@
           "id": "t3-i1",
           "kind": "forecast",
           "text": "NWS New Orleans/Baton Rouge, 10:11, an urgent message headed \"...DEVASTATING DAMAGE EXPECTED...\": Katrina is \"A MOST POWERFUL HURRICANE WITH UNPRECEDENTED STRENGTH...RIVALING THE INTENSITY OF HURRICANE CAMILLE OF 1969.\" \"MOST OF THE AREA WILL BE UNINHABITABLE FOR WEEKS...PERHAPS LONGER.\" \"WATER SHORTAGES WILL MAKE HUMAN SUFFERING INCREDIBLE BY MODERN STANDARDS.\" For Orleans and neighbouring parishes the inland hurricane wind warning says tropical-storm-force winds will begin around 3 PM, and hurricane-force winds around sunset in Lower Plaquemines, spreading north by 3 AM Monday: \"DO NOT VENTURE OUTSIDE!\"",
+          "headline": "\"MOST OF THE AREA WILL BE UNINHABITABLE FOR WEEKS...PERHAPS LONGER.\"",
           "citation": {
             "sourceId": "nws-lix",
             "detail": "Urgent - Weather Message, 1011 AM CDT Sun Aug 28 2005, opening statement and the zone block LAZ038-040-050-056>070 (including ORLEANS)"
@@ -360,6 +370,7 @@
           "id": "t3-i2",
           "kind": "forecast",
           "text": "NHC Advisory 23, 10:00: Katrina is \"even stronger\", maximum sustained winds near 175 mph, pressure 907 mb; hurricane-force winds extend 105 miles from the centre, tropical-storm-force winds 205 miles. The storm surge forecast is raised to 18 to 22 feet above normal tide, locally as high as 28 feet, \"along with large and dangerous battering waves\". The Hurricane Warning stays up for New Orleans and Lake Pontchartrain.",
+          "headline": "The storm surge forecast is raised to 18 to 22 feet above normal tide",
           "citation": {
             "sourceId": "nhc-adv",
             "detail": "Advisory 23, 10 AM CDT Sun 28 Aug 2005"
@@ -383,6 +394,7 @@
           "id": "t3-i3",
           "kind": "message",
           "text": "At 11:00 the daily federal video teleconference, linking the White House, DHS, FEMA and its regional offices with Louisiana and Mississippi, takes place. NHC's Max Mayfield: \"I don't think any model can tell you with any confidence right now whether the levees will be topped or not, but that's obviously a very, very grave concern.\" FEMA Director Michael Brown: \"Just keep jamming those lines full as much as you can with commodities.\" On this call and Saturday's, state officials report that contraflow is going well.",
+          "headline": "whether the levees will be topped or not, but that's obviously a very, very grave concern.",
           "citation": {
             "sourceId": "senate-2006",
             "detail": "Chapter 5 timeline, Sunday 28 August, 11 a.m. (note 31); Chapter 16, \"Governor Blanco Did Not Request Transportation Resources From the Federal Government\""
@@ -393,6 +405,7 @@
           "id": "t3-i4",
           "kind": "message",
           "text": "On Saturday the Governor asked the President for $9 million in Stafford Act assistance for emergency protective measures, of which $2.5 million was for evacuation needs; the request did not specify a need for transportation. The President granted the emergency declaration the same day.",
+          "headline": "the request did not specify a need for transportation",
           "citation": {
             "sourceId": "senate-2006",
             "detail": "Chapter 16, \"Governor Blanco Did Not Request Transportation Resources From the Federal Government\""
@@ -473,6 +486,7 @@
           "id": "t4-i1",
           "kind": "message",
           "text": "The Superdome opens to the general public at 12:00 as the refuge of last resort, and RTA bus service from the pick-up points begins. The special-needs shelter inside has been open since 08:00; it was set up for about 1,200 people, 600 special-needs patients and their caregivers. In earlier hurricanes the Superdome served as a refuge for those riding out a storm for a few hours before going home. Since Hurricane Ivan in 2004 the city's plan has been to use RTA buses to bring people without transportation to it.",
+          "headline": "The Superdome opens to the general public at 12:00 as the refuge of last resort",
           "citation": {
             "sourceId": "senate-2006",
             "detail": "Chapter 11 (\"The New Orleans Scenario\"), \"Preparing the Superdome as a Special-Needs Shelter\" and \"Preparing the Superdome as a Refuge of Last Resort\"; Chapter 5 timeline, Sunday 28 August, 8 a.m. and 12 p.m."
@@ -483,6 +497,7 @@
           "id": "t4-i2",
           "kind": "message",
           "text": "This morning city officials were drafting a plan to seize private facilities to create additional refuges of last resort. The city's Director of Homeland Security, Terry Ebbert, predicts \"nightmare\" conditions in the Superdome.",
+          "headline": "predicts \"nightmare\" conditions in the Superdome",
           "citation": {
             "sourceId": "house-2006",
             "detail": "Chapter \"Evacuation\": \"The shelter of last resort for those who could not or would not evacuate was inadequate\""
@@ -493,6 +508,7 @@
           "id": "t4-i3",
           "kind": "message",
           "text": "As of Sunday no one has made arrangements for portable toilets at the Superdome: on Saturday the city Health Director, Dr. Kevin Stephens, tried to contract with individual vendors but could not reach them. National Guard and FEMA food and water have been pre-positioned there.",
+          "headline": "As of Sunday no one has made arrangements for portable toilets at the Superdome",
           "citation": {
             "sourceId": "senate-2006",
             "detail": "Chapter 11 (\"The New Orleans Scenario\"), \"The City Prepares and Opens the Superdome as a Refuge of Last Resort\"; House, \"Those in shelters or on high ground suffered horrible conditions\" (pre-positioned food and water)"
@@ -571,6 +587,7 @@
           "id": "t5-i1",
           "kind": "gauge",
           "text": "NHC Advisory 24, 16:00: Katrina is a Category Five hurricane, maximum sustained winds near 165 mph, pressure 902 mb, about 150 miles south of the mouth of the Mississippi. \"Sustained tropical storm force winds are occurring over the southeast Louisiana coast\": Southwest Pass reports sustained winds of 48 mph with gusts to 53. \"Conditions are already beginning to deteriorate ... and will continue to worsen through the night.\" Surge of 18 to 22 feet, locally 28, with large and dangerous battering waves: \"Some levees in the greater New Orleans area could be overtopped.\" \"Preparations to protect life and property should be completed this evening.\"",
+          "headline": "\"Some levees in the greater New Orleans area could be overtopped.\"",
           "citation": {
             "sourceId": "nhc-adv",
             "detail": "Advisory 24, 4 PM CDT Sun 28 Aug 2005"
@@ -594,6 +611,7 @@
           "id": "t5-i2",
           "kind": "gauge",
           "text": "GOES-12 visible image, scan 17:45 UTC (12:45 CDT): Katrina's eye is clear in the central Gulf with the Louisiana coast across the top. NHC puts its peak intensity at 150 kt, near this time.",
+          "headline": "Katrina's eye is clear in the central Gulf with the Louisiana coast across the top",
           "citation": {
             "sourceId": "nhc-tcr",
             "detail": "Fig. 6, GOES-12 visible image at 1745 UTC 28 August 2005; Section a, Synoptic History (peak intensity of 150 kt at 1800 UTC 28 August)"
@@ -620,6 +638,7 @@
           "id": "t5-i3",
           "kind": "gauge",
           "text": "MODIS Terra true-colour composite for 28 August: the eye of Katrina in the central Gulf, and the broad cloud shield reaching the Louisiana and Mississippi coast.",
+          "headline": "the broad cloud shield reaching the Louisiana and Mississippi coast",
           "citation": {
             "sourceId": "nasa-gibs",
             "detail": "MODIS_Terra_CorrectedReflectance_TrueColor, UTC day 2005-08-28 (daily composite)"
@@ -646,6 +665,7 @@
           "id": "t5-i4",
           "kind": "field_report",
           "text": "Contraflow, all highway lanes outbound, has run since about 16:00 on Saturday, managed by the state transportation department and the State Police, with the Governor monitoring it personally. Louisiana's plan, coordinated with Mississippi and Texas, had the southernmost parishes leave first so that evacuees would not meet bottlenecks in New Orleans or Baton Rouge. RTA special service runs from 12 sites to the Superdome, and at least 10 paratransit vehicles are carrying special-needs residents to the Baton Rouge area.",
+          "headline": "Contraflow, all highway lanes outbound, has run since about 16:00 on Saturday",
           "citation": {
             "sourceId": "house-2006",
             "detail": "Chapter \"Pre-landfall Preparation and Katrina's Impact\", \"Evacuations in Louisiana\" (contraflow; RTA special service)"
@@ -728,6 +748,7 @@
           "id": "t6-i1",
           "kind": "forecast",
           "text": "NWS New Orleans/Baton Rouge, 16:13: \"EXTREMELY DANGEROUS HURRICANE KATRINA CONTINUES TO APPROACH THE MISSISSIPPI RIVER DELTA.\" \"DEVASTATING DAMAGE EXPECTED\" is repeated. \"HURRICANE FORCE WINDS WILL ONSET AROUND MIDNIGHT NEAR THE COAST AND BY 3 AM CLOSER TO THE NEW ORLEANS METRO AREA AND PERSIST FOR 9 TO 15 HOURS. MAXIMUM WIND GUSTS AROUND 175 MPH ARE LIKELY IN THE WARNED AREA BY DAYBREAK MONDAY.\" \"DO NOT VENTURE OUTDOORS ONCE TROPICAL STORM FORCE WINDS ONSET.\"",
+          "headline": "\"EXTREMELY DANGEROUS HURRICANE KATRINA CONTINUES TO APPROACH THE MISSISSIPPI RIVER DELTA.\"",
           "citation": {
             "sourceId": "nws-lix",
             "detail": "Urgent - Weather Message, 413 PM CDT Sun Aug 28 2005, zone block LAZ038-040-050-056>070-MSZ080>082 (including ORLEANS)"
@@ -751,6 +772,7 @@
           "id": "t6-i2",
           "kind": "gauge",
           "text": "NHC Intermediate Advisory 24A, 19:00: about 130 miles south of the mouth of the Mississippi, winds near 160 mph, pressure 904 mb, moving north-northwest at 11 mph. \"Sustained tropical storm force winds are already occurring over the southeast Louisiana coast.\" \"Some levees in the greater New Orleans area could be overtopped.\" \"Winds affecting the upper floors of high-rise buildings will be significantly stronger than those near ground level.\" Preparations \"should be completed this evening\".",
+          "headline": "tropical storm force winds are already occurring over the southeast Louisiana coast",
           "citation": {
             "sourceId": "nhc-adv",
             "detail": "Intermediate Advisory 24A, 7 PM CDT Sun 28 Aug 2005"
@@ -774,6 +796,7 @@
           "id": "t6-i3",
           "kind": "field_report",
           "text": "The downpour began at the Superdome around 18:00 and security screening moved inside the building, which made it harder for city police to ensure that no one entered with a weapon. Contraflow has been halted: traffic was light by about 18:00. Under the contraflow plan the roads are closed a few hours before landfall.",
+          "headline": "Contraflow has been halted: traffic was light by about 18:00.",
           "citation": {
             "sourceId": "senate-2006",
             "detail": "Chapter 11 (\"The New Orleans Scenario\"), \"The City Prepares and Opens the Superdome as a Refuge of Last Resort\" (security, 6 p.m. downpour); Chapter 16, RTA drivers (roads closed \"a few hours before landfall\", consistent with the contraflow plan)"
@@ -784,6 +807,7 @@
           "id": "t6-i4",
           "kind": "media",
           "text": "A FEMA photographer's picture from Sunday shows residents lining up with a few belongings to enter the Superdome. FEMA's caption says most residents have evacuated the city and that those left behind do not have transportation.",
+          "headline": "those left behind do not have transportation",
           "citation": {
             "sourceId": "fema-bahamonde",
             "detail": "FEMA Photo Library caption, Marty Bahamonde, 28 August 2005"

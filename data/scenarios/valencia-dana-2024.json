@@ -40,6 +40,7 @@
           "id": "t1-i1",
           "kind": "forecast",
           "text": "AEMET, the state meteorological agency, raises its warning for the coastal north of the province of Valencia to RED — the highest level, meaning torrential rain above roughly 90 mm in a single hour is expected. The warning is broadcast on morning radio and television.",
+          "headline": "raises its warning for the coastal north of the province of Valencia to RED",
           "citation": {
             "sourceId": "aemet-2024",
             "detail": "Red-level warning issued 07:36 CET, 29 Oct 2024, litoral norte de Valencia"
@@ -59,6 +60,7 @@
           "id": "t1-i2",
           "kind": "message",
           "text": "Some inland municipalities, acting on their own authority, begin suspending classes for the day. There is no province-wide instruction.",
+          "headline": "There is no province-wide instruction.",
           "citation": {
             "sourceId": "press-recon",
             "detail": "Timeline reconstructions of local school suspensions on the morning of 29 Oct"
@@ -135,6 +137,7 @@
           "id": "t2-i1",
           "kind": "gauge",
           "text": "12:20 — the Júcar basin authority (CHJ) notifies the regional emergency service that flow in the Rambla del Poyo, the normally dry ravine that runs above the dense towns south of Valencia city, has passed its alert threshold.",
+          "headline": "has passed its alert threshold.",
           "citation": {
             "sourceId": "chj-record",
             "detail": "CHJ hydrological alert for the Rambla del Poyo, 12:20 CET, as entered in the court record"
@@ -162,6 +165,7 @@
           "id": "t2-i2",
           "kind": "field_report",
           "text": "Inland, the Magro basin is already flooding. Utiel is under water by midday; the town asks for help for people trapped in their homes.",
+          "headline": "Inland, the Magro basin is already flooding.",
           "citation": {
             "sourceId": "press-recon",
             "detail": "Reconstructions of the flooding of Utiel around midday, 29 Oct"
@@ -176,6 +180,7 @@
           "id": "t2-i3",
           "kind": "forecast",
           "text": "AEMET's red warnings remain in force and are extended across further zones of the province during the day.",
+          "headline": "AEMET's red warnings remain in force and are extended across further zones of the province",
           "citation": {
             "sourceId": "aemet-2024",
             "detail": "Warning bulletins for the province of Valencia through 29 Oct"
@@ -257,6 +262,7 @@
           "id": "t3-i1",
           "kind": "media",
           "text": "The regional president posts a video message: the storm is expected to move away towards the Serranía de Cuenca, with intensity easing across the region from around 18:00. (The video was later deleted.)",
+          "headline": "intensity easing across the region from around 18:00",
           "citation": {
             "sourceId": "press-recon",
             "detail": "The early-afternoon video message of 29 Oct, later deleted; widely reproduced in press reconstructions"
@@ -267,6 +273,7 @@
           "id": "t3-i2",
           "kind": "field_report",
           "text": "Rain continues over the interior of the province. Emergency calls keep coming from the Magro and Utiel–Requena.",
+          "headline": "Emergency calls keep coming from the Magro and Utiel–Requena.",
           "citation": {
             "sourceId": "press-recon",
             "detail": "Afternoon situation in the interior comarcas, 29 Oct"
@@ -345,6 +352,7 @@
           "id": "t4-i1",
           "kind": "message",
           "text": "17:00 — CECOPI, the integrated emergency coordination committee, finally convenes, with the regional interior minister presiding.",
+          "headline": "CECOPI, the integrated emergency coordination committee, finally convenes",
           "citation": {
             "sourceId": "court-catarroja",
             "detail": "CECOPI convened at 17:00 on 29 Oct, per the court record and press reconstructions"
@@ -355,6 +363,7 @@
           "id": "t4-i2",
           "kind": "message",
           "text": "Discussion is dominated by the Forata dam on the river Magro, which is filling fast towards its limit and which the basin authority warns may fail.",
+          "headline": "the Forata dam on the river Magro, which is filling fast towards its limit",
           "citation": {
             "sourceId": "press-recon",
             "detail": "CECOPI's focus on the Forata dam during the evening session"
@@ -378,6 +387,7 @@
           "id": "t4-i3",
           "kind": "gauge",
           "text": "The most recent CHJ email on the Rambla del Poyo, from 16:13, showed the flow falling. No further update on the Poyo has arrived since.",
+          "headline": "No further update on the Poyo has arrived since.",
           "citation": {
             "sourceId": "chj-record",
             "detail": "Gap in CHJ notifications on the Poyo between 16:13 and 18:43, per the court record"
@@ -479,6 +489,7 @@
           "id": "t5-i1",
           "kind": "gauge",
           "text": "18:43 — after a silence of two and a half hours, the CHJ emails the emergency service: flow in the Rambla del Poyo has surged to 1,686 cubic metres per second — an extraordinary rise, and the water is heading for the towns of the Horta Sud.",
+          "headline": "flow in the Rambla del Poyo has surged to 1,686 cubic metres per second",
           "citation": {
             "sourceId": "chj-record",
             "detail": "CHJ email of 18:43 CET reporting the surge in the Poyo, as entered in the court record"
@@ -507,6 +518,7 @@
           "id": "t5-i2",
           "kind": "message",
           "text": "The basin authority maintains its warning that the Forata dam may break.",
+          "headline": "The basin authority maintains its warning that the Forata dam may break.",
           "citation": {
             "sourceId": "press-recon",
             "detail": "Evening warnings on the state of the Forata dam"
@@ -526,6 +538,7 @@
           "id": "t5-i3",
           "kind": "gauge",
           "text": "Satellite true colour (VIIRS, Suomi NPP) for 29 October, from the early-afternoon pass: a broad band of cloud lies across eastern and southern Iberia and the western Mediterranean, with the Valencia region under it.",
+          "headline": "a broad band of cloud lies across eastern and southern Iberia",
           "citation": {
             "sourceId": "nasa-gibs",
             "detail": "GIBS WMS, layer VIIRS_SNPP_CorrectedReflectance_TrueColor, time=2024-10-29, bbox -12,34,8,46"
@@ -617,6 +630,7 @@
           "id": "t6-i1",
           "kind": "field_report",
           "text": "Water is in the streets of the Horta Sud — Paiporta, Catarroja, Alfafar and their neighbours. The 112 line is overwhelmed with calls from people trapped in ground floors, garages and cars.",
+          "headline": "Water is in the streets of the Horta Sud",
           "citation": {
             "sourceId": "press-recon",
             "detail": "The flood's arrival in the Horta Sud towns during the 19:00–20:00 hour"
@@ -630,6 +644,7 @@
           "id": "t6-i2",
           "kind": "message",
           "text": "In the committee, a mobile alert message is being drafted; its wording and scope are still under discussion.",
+          "headline": "a mobile alert message is being drafted; its wording and scope are still under discussion.",
           "citation": {
             "sourceId": "court-catarroja",
             "detail": "Drafting of the ES-Alert message before 20:11, per the court record"

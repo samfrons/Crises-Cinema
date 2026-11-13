@@ -1,18 +1,21 @@
 'use client';
 
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Citation, GlossaryEntry, InfoItem, MediaAttachment, Option, Scenario, ScenarioBundle, Timestep } from './types';
 import { startSession, logChoice, completeSession, type ChoiceEvent } from './telemetry';
 import { scoreRun, historicalLeadTime, formatLead, alertBeforeClock, bestMarks, span, type Choice } from './scoring';
 import DayStrip from './DayStrip';
+import Sheet from './Sheet';
+import PictureStage, { type StageCoach } from './PictureStage';
 import OpsMap, { BoardMiniature, hasBoard } from './OpsMap';
-import { itemState, STATE_RANK, vocabFor, COMPASS_WORD, type ZoneState } from './hazards';
+import { vocabFor, COMPASS_WORD, type ZoneState } from './hazards';
+import { deriveBoard, stamp, warnedBy } from './board';
 import Reckoning from './Reckoning';
 import { KindGlyph, HazardGlyph, Pictogram, SilentGlyph, hasPictogram } from './glyphs';
 import Readings from './Readings';
 import WarningChain, { chainChanges, chainNews, deriveChain } from './WarningChain';
-import { loadLastRun, markBooted, markCoached, sameCalls, saveRun, wasBooted, wasCoached, type LastRun } from './memory';
+import { loadLastRun, loadMode, markBooted, markCoached, sameCalls, saveMode, saveRun, wasBooted, wasCoached, type DeskMode, type LastRun } from './memory';
 import * as sound from './sound';
 import {
   BEAT_CLEAR_MS, BEAT_MS, BOOT_MS, BOOT_QUICK_MS, BOOT_ROLL_AT, BOOT_ROLL_MS, BOOT_STILL_MS,
@@ -33,42 +36,6 @@ import { DAY_FOLDER, FILE_PATH, folderHref, folderWord, isFolder, type FolderId 
    is either cited, the player's own action, or a statement that the record
    is silent.
    ══════════════════════════════════════════════════════════════════════════ */
-
-/**
- * What the wall map shows: zone states lit only by cited information already
- * revealed and the zones the player's own choices have warned. Which state an
- * item lights is the hazard's default for its kind (flood: forecast → watch,
- * gauge → signal, field report → flooding; fire: forecast → red flag, sensor
- * and field report → fire reported) unless the item names its own
- * board_state — "burning" only where the cited text says so, "none" where a
- * zoned report is not about the hazard at all (a pole down is not a fire).
- * The board only ever escalates; it never invents a state.
- */
-function deriveBoard(scenario: Scenario, uptoIndex: number, choices: Choice[]) {
-  const vocab = vocabFor(scenario);
-  const zoneStates: Record<string, ZoneState> = {};
-  // The board's marks restate cited items too: where the record first places
-  // the hazard (`origin`, one per zone) and a wind direction a forecast states
-  // (`wind`, held from the first item that states it, as of the latest).
-  const origins: Record<string, string> = {};
-  let wind: { from: string; by: string } | null = null;
-  for (const t of scenario.timesteps.slice(0, uptoIndex + 1)) {
-    for (const info of t.info_available) {
-      if (info.origin && info.zones?.length === 1 && !origins[info.zones[0]]) {
-        origins[info.zones[0]] = info.origin === true ? `BY ${stamp(t)}` : info.origin;
-      }
-      if (info.wind) wind = { from: info.wind.from, by: stamp(t) };
-      const state = itemState(info, vocab);
-      if (!state) continue;
-      for (const z of info.zones ?? []) {
-        if (STATE_RANK[state] > STATE_RANK[zoneStates[z] ?? 'quiet']) zoneStates[z] = state;
-      }
-    }
-  }
-  const warnedZones = new Set<string>();
-  for (const c of choices) warnedBy(scenario, c.option).forEach((z) => warnedZones.add(z));
-  return { zoneStates, warnedZones: Array.from(warnedZones), origins, wind };
-}
 
 /** What decision `index`'s traffic changed on the board, so the plate can
  *  print just those changes in (and, for reduced motion, strike them twice). */
@@ -91,14 +58,6 @@ function stepIcons(t: Timestep, max = 3) {
   return Array.from(n.entries()).sort((a, b) => b[1] - a[1]).slice(0, max).map(([k]) => k);
 }
 
-function warnedBy(scenario: Scenario, option: Option): string[] {
-  const e = option.effects;
-  if (e.warning_scope === 'province') return scenario.scoring.at_risk_zones.map((z) => z.id);
-  if (e.warning_scope === 'targeted' || e.protective) return e.zones;
-  return [];
-}
-
-const stamp = (t: Timestep) => `${t.approx ? '≈' : ''}${t.time}`;
 const stepId = (t: Timestep) => `cr-step-${t.id}`;
 
 type Run = {
@@ -148,6 +107,11 @@ const COACH: { at: CoachAt; text: string }[] = [
   { at: 'clock', text: 'The clock is real; it will not wait. After each call it jumps to the next moment the record holds, and whatever happened in between happened without you.' },
   { at: 'call', text: 'Your call. No option is drawn as the right one. Afterwards the log says what officials did, and says so plainly where the record is silent.' },
 ];
+
+/* Picture mode has one desk note of its own (the stage is one place, not
+   four parts), shown instead of the four above when the desk is taken in
+   that mode. It says how to read the stage and that nothing is hidden. */
+const COACH_PICTURE = 'Picture mode plays each hour on the board: every slip stamps where it happened, the camera follows, and its line runs along the bottom with its citation. Press that line for the full slip. Pause, Next slip and Skip to the call are under it; a screen reader hears every slip in full, as in the log. Switch back to LOG in the bar above at any time.';
 
 type Coach = { at: CoachAt; index: number; onNext: () => void; onSkip: () => void } | null;
 const coached = (coach: Coach, at: CoachAt) => (coach?.at === at ? ' is-coached' : '');
@@ -257,6 +221,14 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
   const [boot, setBoot] = useState<Boot | null>(null);
   const [beat, setBeat] = useState<Beat | null>(null);
   const beatN = useRef(0);
+  // LOG · PICTURE. Read after mount (the server render is the select screen,
+  // so nothing depends on it before then); both modes draw the same run.
+  const [mode, setModeState] = useState<DeskMode>('log');
+  useEffect(() => setModeState(loadMode()), []);
+  // Picture mode's place in the hour: how many of decision `step`'s slips
+  // have played (n + 1 = the call is up). Any other step reads as 0, so the
+  // clock advancing — in either mode — starts the next hour from its top.
+  const [pic, setPic] = useState({ step: -1, at: 0 });
 
   // The overture runs to its end, or until any press or key (not a bare
   // modifier) cuts it short. Reduced motion holds only the still mark.
@@ -280,6 +252,7 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
   // press, a click anywhere or any key skips straight to the slips.
   const runRef = useRef(run);
   runRef.current = run;
+  const setPicAt = useCallback((at: number) => setPic({ step: runRef.current?.cursor ?? 0, at }), []);
   useEffect(() => {
     if (!beat) return;
     const timer = window.setTimeout(() => setBeat((b) => (b?.n === beat.n ? null : b)), beat.skipped ? BEAT_CLEAR_MS - BEAT_MS : BEAT_CLEAR_MS);
@@ -392,6 +365,7 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
   const lastIndex = steps.length - 1;
   const decided = choices.length > cursor;
 
+  const picture = mode === 'picture';
   const start = () => {
     const session = startSession(scenario.id);
     if (!wasCoached()) {
@@ -399,10 +373,11 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
       // seen at once, so leaving half-way never brings the notes back.
       markCoached();
       setCoachIndex(0);
-      pending.current = { focus: 'cr-coach-next', scroll: stepId(steps[0]) };
+      pending.current = { focus: 'cr-coach-next', scroll: picture ? 'cr-stage' : stepId(steps[0]) };
     } else {
-      pending.current = { focus: `${stepId(steps[0])}-h`, scroll: stepId(steps[0]) };
+      pending.current = picture ? { focus: 'cr-pic-h', scroll: 'cr-stage' } : { focus: `${stepId(steps[0])}-h`, scroll: stepId(steps[0]) };
     }
+    setPic({ step: 0, at: 0 });
     setRun({ ...run, sessionId: session.sessionId, cursor: 0, presentedAt: Date.now() });
     setBoot(null);
     stageBeat(scenario, 'start', scenario.clock.start, stamp(steps[0]), 0);
@@ -410,9 +385,11 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
 
   const endCoach = () => {
     setCoachIndex(null);
-    pending.current = { focus: `${stepId(steps[0])}-h`, scroll: `${stepId(steps[0])}-call`, block: 'center' };
+    pending.current = picture
+      ? { focus: 'cr-pic-h' }
+      : { focus: `${stepId(steps[0])}-h`, scroll: `${stepId(steps[0])}-call`, block: 'center' };
   };
-  const coach: Coach = coachIndex === null || !started || done ? null : {
+  const coach: Coach = coachIndex === null || !started || done || picture ? null : {
     at: COACH[coachIndex].at,
     index: coachIndex,
     onNext: () => {
@@ -437,7 +414,9 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
     };
     logChoice(sessionId, event);
     setCoachIndex(null);
-    pending.current = { focus: 'cr-advance-btn', scroll: `${stepId(current)}-record`, block: 'nearest' };
+    pending.current = picture
+      ? { focus: 'cr-advance-btn' }
+      : { focus: 'cr-advance-btn', scroll: `${stepId(current)}-record`, block: 'nearest' };
     setRun({ ...run, choices: [...choices, { timestep: current, option, event }] });
   };
 
@@ -451,14 +430,14 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
       stageBeat(scenario, 'close', stamp(current), scenario.clock.end, cursor);
     } else {
       const next = steps[cursor + 1];
-      pending.current = { focus: `${stepId(next)}-h`, scroll: stepId(next) };
+      pending.current = picture ? { focus: 'cr-pic-h', scroll: 'cr-stage' } : { focus: `${stepId(next)}-h`, scroll: stepId(next) };
       setRun({ ...run, cursor: cursor + 1, presentedAt: Date.now() });
       stageBeat(scenario, 'advance', stamp(current), stamp(next), cursor + 1);
     }
   };
 
   const replay = () => {
-    pending.current = { focus: 'cr-brief-title', scroll: 'desk' };
+    pending.current = picture ? { focus: 'cr-pic-h', scroll: 'desk' } : { focus: 'cr-brief-title', scroll: 'desk' };
     setBeat(null);
     setBoot('quick');
     setRun(newRun(scenario));
@@ -470,6 +449,18 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
     sound.hush();
     setRun(null);
   };
+
+  // Switching mode keeps focus on the switch (it lives in the console, which
+  // both modes share) and brings the same moment of the run into view.
+  const setMode = (m: DeskMode) => {
+    if (m === mode) return;
+    saveMode(m);
+    setModeState(m);
+    pending.current = { scroll: done ? 'cr-debrief' : m === 'picture' ? 'cr-stage' : started ? stepId(current) : 'cr-briefing' };
+  };
+  const picAt = pic.step === cursor ? pic.at : 0;
+  const pictureCoach: StageCoach = picture && coachIndex !== null && started && !done
+    ? { text: COACH_PICTURE, onDone: endCoach } : null;
 
   const board = deriveBoard(scenario, started ? cursor : -1, choices);
   const shownIndex = started ? cursor : -1;
@@ -483,8 +474,22 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
     <div className="cr-run" data-boot={boot ?? undefined} data-beat={staging?.kind}
       data-beat-p={staging ? staging.n % 2 : undefined} data-settle={beat ? '' : undefined}>
       <Console scenario={scenario} started={started} cursor={cursor} choices={choices} done={done}
-        live={live} showMapButton={!wide} coach={coach} boot={boot} beat={staging} />
+        live={live} showMapButton={!wide || picture} coach={coach} boot={boot} beat={staging}
+        mode={mode} onMode={setMode} />
 
+      {picture ? (
+        <div className="cr-play cr-play-picture wrap">
+          <PictureStage scenario={scenario} started={started} done={done} cursor={cursor} choices={choices}
+            at={picAt} setAt={setPicAt} clockLandsAt={staging && staging.kind !== 'close' ? staging.at + BEAT_MS : null} coach={pictureCoach}
+            onStart={start} onChoose={choose} onAdvance={advance}
+            onDebrief={() => { pending.current = { focus: 'cr-debrief-title', scroll: 'cr-debrief' }; setPic((x) => ({ ...x })); }}
+            renderSlip={(info, t) => <FullSlip scenario={scenario} t={t} info={info} />}
+            renderRecord={(t, c) => <RecordSheet scenario={scenario} t={t} choice={c} />}
+            renderBriefing={() => <Briefing scenario={scenario} started={started} inlineMap={false} onStart={start} last={run.last} filed={run.filed} />}
+            renderCredit={(m) => <FigureCredit m={m} />} />
+          <Transcript scenario={scenario} started={started} cursor={cursor} choices={choices} />
+        </div>
+      ) : (
       <div className="cr-play wrap">
         <div className="cr-log" role="log" aria-label="Dispatch log" aria-live="polite">
           <Briefing scenario={scenario} started={started} inlineMap={!wide} onStart={start} last={run.last} filed={run.filed} />
@@ -509,6 +514,7 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
 
         {wide && <SidePanel scenario={scenario} live={live} choices={choices} started={started} coach={coach} />}
       </div>
+      )}
 
       {done ? (
         <Debrief scenario={scenario} choices={choices} last={run.last} onReplay={replay} onLeave={leave} />
@@ -543,9 +549,10 @@ function LiveBoard({ scenario, live, note }: { scenario: Scenario; live: Live; n
   );
 }
 
-function Console({ scenario, started, cursor, choices, done, live, showMapButton, coach, boot, beat }: {
+function Console({ scenario, started, cursor, choices, done, live, showMapButton, coach, boot, beat, mode, onMode }: {
   scenario: Scenario; started: boolean; cursor: number; choices: Choice[]; done: boolean;
   live: Live; showMapButton: boolean; coach: Coach; boot: Boot | null; beat: Beat | null;
+  mode: DeskMode; onMode: (m: DeskMode) => void;
 }) {
   const { board } = live;
   const steps = scenario.timesteps;
@@ -575,7 +582,8 @@ function Console({ scenario, started, cursor, choices, done, live, showMapButton
           <span className="cr-console-time">
             {roll && roll.frames.length > 1 ? <Odometer key={roll.key} frames={roll.frames} at={roll.at} ms={roll.ms} /> : <ClockFace time={time} />}
           </span>
-          <span className="cr-console-status"><span className="cr-console-tz">{tzLabel(scenario)} · </span>{status}</span>
+          <span className="cr-console-status"><span className="cr-console-tz">{tzLabel(scenario)} · </span>{started && !done
+            ? <><span className="cr-console-dword">Decision </span>{cursor + 1} of {steps.length}</> : status}</span>
         </a>
         <span className="cr-console-title" aria-hidden>{scenario.title}</span>
         <span className="cr-pips" aria-hidden>
@@ -588,6 +596,7 @@ function Console({ scenario, started, cursor, choices, done, live, showMapButton
           })}
         </span>
         <SoundToggle />
+        <ModeToggle mode={mode} onMode={onMode} />
         {showMapButton && (
           <button type="button" className="cr-console-map" onClick={() => setSheetOpen(true)}
             aria-haspopup="dialog" aria-label={`Situation board${boardLit ? ' (zones lit)' : ''}`}>
@@ -637,6 +646,30 @@ function Odometer({ frames, at, ms }: { frames: string[]; at: number; ms: number
   );
 }
 
+/** LOG · PICTURE — how the desk is shown: the reading version, or the same
+ *  record played out on the board. A pressed pair; switching keeps the run
+ *  exactly where it is, and the choice is remembered on this browser. */
+function ModeToggle({ mode, onMode }: { mode: DeskMode; onMode: (m: DeskMode) => void }) {
+  return (
+    <span className="cr-console-mode" role="group" aria-label="Desk mode">
+      <button type="button" className="cr-mode-btn" aria-pressed={mode === 'log'} onClick={() => onMode('log')}>
+        <svg className="cr-mode-glyph" viewBox="0 0 16 16" width="14" height="14" aria-hidden focusable="false">
+          <path d="M2 3.5h12M2 7h12M2 10.5h8M2 14h10" fill="none" stroke="currentColor" strokeWidth="1.6" />
+        </svg>
+        <span className="cr-mode-word">Log</span>
+      </button>
+      <span className="cr-mode-sep" aria-hidden>·</span>
+      <button type="button" className="cr-mode-btn" aria-pressed={mode === 'picture'} onClick={() => onMode('picture')}>
+        <svg className="cr-mode-glyph" viewBox="0 0 16 16" width="14" height="14" aria-hidden focusable="false">
+          <path d="M1.5 2.5h13v11h-13z" fill="none" stroke="currentColor" strokeWidth="1.5" />
+          <path d="M3.5 11.5l3.2-4 2.3 2.6 1.6-1.8 2 3.2z" fill="currentColor" />
+        </svg>
+        <span className="cr-mode-word">Picture</span>
+      </button>
+    </span>
+  );
+}
+
 /** SOUND · OFF / ON — the one control for the desk's sound layer (sound.ts).
  *  Off by default; hidden where the browser has no Web Audio at all. */
 function SoundToggle() {
@@ -662,27 +695,9 @@ function SoundToggle() {
   );
 }
 
-/** Phone situation board: a native modal dialog styled as a bottom sheet —
- *  focus is held inside while open, Escape and the scrim close it, and focus
- *  returns to the MAP button. */
+/** Phone situation board, in the desk's sheet. */
 function BoardSheet({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const d = ref.current;
-    if (!d) return;
-    if (open && !d.open) d.showModal();
-    if (!open && d.open) d.close();
-  }, [open]);
-  return (
-    <dialog ref={ref} className="cr-sheet" aria-labelledby="cr-sheet-title" onClose={onClose}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="cr-sheet-head">
-        <h2 id="cr-sheet-title">Situation board</h2>
-        <button type="button" className="cr-sheet-close" onClick={onClose}>Close</button>
-      </div>
-      {open && children}
-    </dialog>
-  );
+  return <Sheet open={open} onClose={onClose} title="Situation board">{children}</Sheet>;
 }
 
 /** The board's state in words — what the map shows, never by colour alone. */
@@ -835,6 +850,9 @@ function SelectScreen({ cards, file, onPick, loading }: {
           </div>
         ))}
       </div>
+      <p className="cr-footnote cr-footnote-mode">Every desk plays two ways: <strong>Log</strong>, the reading version, and{' '}
+        <strong>Picture</strong>, the same record played out on the board, each slip stamped where it happened. Switch
+        with LOG · PICTURE in the console strip, at any time, without losing your place.</p>
       <p className="cr-footnote">Minutes are reading time: the words each day puts in front of you, at {WPM} a
         minute. Greyed scenarios exist only as schema: nothing appears here until every fact in
         them carries a source, and the build enforces it.</p>
@@ -1074,6 +1092,64 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain,
         </div>
       )}
     </article>
+  );
+}
+
+/* ── Picture mode's text: the full slip, the call, and the transcript ──────
+   The stage defers text, never hides it. A slip pressed on the stage opens
+   here exactly as the log prints it (pictogram, the text with its terms and
+   citation, its readings, its figure); a call opens as the log's record.
+   And the transcript keeps the log's aria story: every slip of every hour
+   reached, in full, in a polite live region, whatever the stage is showing. */
+
+function FullSlip({ scenario, t, info }: { scenario: Scenario; t: Timestep; info: InfoItem }) {
+  const sourceIndex = useSourceIndex(scenario);
+  const termMarks = useTermMarks(scenario);
+  const vocab = vocabFor(scenario);
+  const label = vocab.kindLabel[info.kind];
+  return (
+    <ul className="cr-dispatches cr-psheet-slip">
+      <li className={`cr-slip cr-slip-${info.kind}`}>
+        <p className="cr-slip-kind">
+          <KindGlyph kind={info.kind} className="cr-kind-glyph" />{' '}
+          <span className="cr-slip-leader">{label}<span className="cr-slip-leader-at"> · {stamp(t)}</span></span>
+          {hasPictogram(info.icon) && <Pictogram name={info.icon} size={22} className="cr-slip-pict" />}
+        </p>
+        <SlipText info={info} marks={termMarks.get(info.id)} idx={sourceIndex} />
+        {info.readings && <Readings scenario={scenario} itemId={info.id} readings={info.readings} />}
+        {info.media && <Figure scenario={scenario} m={info.media} />}
+      </li>
+    </ul>
+  );
+}
+
+function RecordSheet({ scenario, t, choice }: { scenario: Scenario; t: Timestep; choice: Choice }) {
+  const sourceIndex = useSourceIndex(scenario);
+  return <CallRecord scenario={scenario} t={t} choice={choice} sourceIndex={sourceIndex} />;
+}
+
+function Transcript({ scenario, started, cursor, choices }: { scenario: Scenario; started: boolean; cursor: number; choices: Choice[] }) {
+  const sourceIndex = useSourceIndex(scenario);
+  const vocab = vocabFor(scenario);
+  const n = (sourceId: string) => sourceIndex.get(sourceId);
+  return (
+    <div className="cr-sr" role="log" aria-label="Dispatch log, in words" aria-live="polite">
+      {started && scenario.timesteps.slice(0, cursor + 1).map((t, i) => {
+        const c = choices[i];
+        return (
+          <div key={t.id}>
+            <p>{stamp(t)} {tzLabel(scenario)}. Decision {i + 1} of {scenario.timesteps.length}. Incoming:</p>
+            {t.info_available.map((info) => (
+              <p key={info.id}>{vocab.kindLabel[info.kind]}: {info.text}{n(info.citation.sourceId) ? ` Source ${n(info.citation.sourceId)}.` : ''}</p>
+            ))}
+            {c && <p>Your call at {stamp(t)}: {c.option.label}.</p>}
+            {c && (c.option.consequence.known
+              ? <p>The record: {c.option.consequence.text}{n(c.option.consequence.citation.sourceId) ? ` Source ${n(c.option.consequence.citation.sourceId)}.` : ''}</p>
+              : <p>The record is silent. No one took this path on the day, so no source can say what it would have changed.</p>)}
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

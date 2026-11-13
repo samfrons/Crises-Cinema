@@ -28,6 +28,16 @@ type Props = {
   wind?: { from: string; by: string } | null;
   /** What this hour's traffic changed: zones, origin marks, the wind mark. */
   fresh?: { zones: string[]; origins: string[]; wind: boolean };
+  /** Picture mode's stage: the plate alone — no key under it, and hidden
+   *  from assistive technology (the stage's transcript says it in words). */
+  bare?: boolean;
+  /** Picture mode: the zones the option under the pointer or focus would
+   *  warn, outlined as a preview (the option's own effects, nothing more). */
+  preview?: string[];
+  /** Picture mode: the zones your call has just warned, so the mark inks in. */
+  freshWarned?: string[];
+  /** Picture mode: the zones the slip now on the stage concerns. */
+  spot?: string[];
 };
 
 const NO_FRESH = { zones: [] as string[], origins: [] as string[], wind: false };
@@ -64,7 +74,7 @@ const BOARDS: Record<string, (b: Board) => JSX.Element> = {
   'odisha-phailin-2013': PhailinBoard,
 };
 
-export default function OpsMap({ scenario, zoneStates, warnedZones, note, origins = {}, wind = null, fresh = NO_FRESH }: Props) {
+export default function OpsMap({ scenario, zoneStates, warnedZones, note, origins = {}, wind = null, fresh = NO_FRESH, bare = false, preview, freshWarned, spot }: Props) {
   // Pattern ids are per instance, so a board in the side panel and one in
   // the briefing or the phone sheet never resolve to each other's patterns.
   const uid = useId().replace(/:/g, '');
@@ -78,7 +88,8 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note, origin
   const board: Board = {
     st,
     warned,
-    zoneClass: (z) => `cr-zone is-${st(z)}${warned(z) ? ' is-warned' : ''}${fresh.zones.includes(z) ? ' is-fresh' : ''}`,
+    zoneClass: (z) => `cr-zone is-${st(z)}${warned(z) ? ' is-warned' : ''}${fresh.zones.includes(z) ? ' is-fresh' : ''}`
+      + `${preview?.includes(z) ? ' is-preview' : ''}${freshWarned?.includes(z) ? ' is-warned-fresh' : ''}${spot?.includes(z) ? ' is-spot' : ''}`,
     fill: (z) => (st(z) === 'impact' ? `url(#${impact})` : undefined),
     word: (z) => vocab.states[st(z)].toUpperCase(),
     sea,
@@ -87,7 +98,7 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note, origin
       const sweep = fresh.zones.includes(z) && (s === 'signal' || s === 'impact');
       return (
         <>
-          <path className="cr-zone-shape" style={{ fill: s === 'impact' && !sweep ? `url(#${impact})` : undefined }} d={d} />
+          <path className="cr-zone-shape" data-zone={z} style={{ fill: s === 'impact' && !sweep ? `url(#${impact})` : undefined }} d={d} />
           {sweep && (
             <path key={s} className={`cr-zone-sweep is-${s}`} d={d}
               style={{ fill: s === 'impact' ? `url(#${impact})` : undefined }} />
@@ -101,8 +112,8 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note, origin
   const showWind = !!(wind && marks?.wind && COMPASS_TOWARD[wind.from] !== undefined);
 
   return (
-    <figure className={`cr-map cr-map-${vocab.family}`}>
-      <svg viewBox="0 0 720 400" role="img" aria-label={ARIA[scenario.id]}>
+    <figure className={`cr-map cr-map-${vocab.family}${bare ? ' is-bare' : ''}`}>
+      <svg viewBox="0 0 720 400" {...(bare ? { 'aria-hidden': true, focusable: false } : { role: 'img', 'aria-label': ARIA[scenario.id] })}>
         <defs>
           <pattern id={sea} width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
             <line x1="0" y1="0" x2="0" y2="10" stroke="currentColor" strokeOpacity="0.14" strokeWidth="1" />
@@ -125,7 +136,7 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note, origin
           ever moves rightward along it, and may skip a step when the cited
           traffic does), then your own mark, set apart. Each swatch is drawn
           with the board's own strokes and pattern, so key and plate match. */}
-      <figcaption className="cr-map-legend">
+      {!bare && <figcaption className="cr-map-legend">
         <span className="cr-map-legend-scale">
           {(['quiet', 'watch', 'signal', 'impact'] as ZoneState[]).map((s, i) => (
             <span key={s} className="cr-leg">
@@ -155,10 +166,14 @@ export default function OpsMap({ scenario, zoneStates, warnedZones, note, origin
           </span>
         )}
         {note && <span className="cr-map-note">{note}</span>}
-      </figcaption>
+      </figcaption>}
     </figure>
   );
 }
+
+/** Where a board stamps a zone's origin mark, in plate units (picture mode
+ *  frames the camera on it the beat the record first places the hazard). */
+export const originPoint = (id: string, zone: string): [number, number] | null => MARKS[id]?.origin[zone] ?? null;
 
 /** True when a day has a hand-drawn board. */
 export const hasBoard = (id: string) => id in BOARDS;

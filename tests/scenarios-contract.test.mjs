@@ -171,6 +171,24 @@ rejects('minutes-matter caveat that adds a figure', (e) => e(L, (s) => { mm(s).c
 rejects('minutes-matter "about" line that carries a figure', (e) => e(L, (s) => { mm(s, 2).about = 'The Camp Fire: 85 dead in 14 minutes'; }), /minutes_matter\[2\]\.about — .*no figures of its own/);
 rejects('minutes-matter with too many quotes', (e) => e(V, (s) => { s.scoring.minutes_matter.push(mm(s), mm(s)); }), /minutes_matter — must be an array of 1–3/);
 
+// Picture mode's lower third: the item's own words, a fragment, never a summary.
+rejects('playable item without a headline', (e) => e(K, (s) => { delete item(s, 't2-i1').headline; }), /timesteps\[1\]\.info_available\[0\]\.headline — required on every item of a playable scenario/);
+rejects('headline that is not a verbatim fragment of its text', (e) => e(V, (s) => { item(s, 't5-i1').headline = 'The Poyo surges to 1,686 cubic metres per second'; }), /headline — must appear verbatim in the item's own text/);
+rejects('headline that changes case from its text', (e) => e(L, (s) => { item(s, 't1-i4').headline = 'west Maui is losing its grid.'; }), /headline — must appear verbatim/);
+rejects('headline that changes punctuation from its text', (e) => e(P, (s) => { item(s, 't4-i1').headline = "IMD's 20:30 cyclone warning is out!"; }), /headline — must appear verbatim/);
+rejects('headline over 90 characters', (e) => e(K, (s) => { const i = item(s, 't1-i1'); i.headline = i.text.slice(0, 91); }), /headline — a headline of at most 90 characters \(this one is 91\)/);
+rejects('headline with SOURCE NEEDED', (e) => e(L, (s) => { const i = item(s, 't2-i3'); i.text += ' SOURCE NEEDED'; i.headline = 'SOURCE NEEDED'; }), /headline — placeholder headline/);
+rejects('headline with padding whitespace', (e) => e(V, (s) => { item(s, 't1-i2').headline = ' There is no province-wide instruction.'; }), /headline — no leading or trailing whitespace/);
+
+test('every playable item carries a verbatim headline of at most 90 characters (positive control)', () => {
+  for (const name of [L, V, K, P]) {
+    const s = JSON.parse(readFileSync(join(repo, 'data', 'scenarios', name), 'utf8'));
+    for (const i of s.timesteps.flatMap((t) => t.info_available)) {
+      assert.ok(typeof i.headline === 'string' && i.headline.length <= 90 && i.text.includes(i.headline), `${name} ${i.id}`);
+    }
+  }
+});
+
 test('every playable benchmark rests on a slip at or before its own decision point (positive control)', () => {
   for (const name of [L, V, K, P]) {
     const s = JSON.parse(readFileSync(join(repo, 'data', 'scenarios', name), 'utf8'));

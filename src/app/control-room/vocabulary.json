@@ -54,6 +54,10 @@
       "states": { "watch": "red warning", "signal": "gauge alert", "impact": "flooding" }
     }
   },
+  "headline": {
+    "_comment": "Picture mode's lower third (ControlRoomGame PictureStage). Every item of a playable scenario carries a `headline`: a contiguous, character-exact fragment of its own `text`, at most `max` characters. The build refuses anything else.",
+    "max": 90
+  },
   "compass": {
     "N": "north",
     "NE": "north-?east",

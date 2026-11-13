@@ -2517,3 +2517,678 @@
   .cr-card:focus-visible { transform: none; }
   .cr-map .cr-zone.is-fresh .cr-zone-label { filter: drop-shadow(2px 2px 0 rgba(25, 20, 16, 0.5)); }
 }
+
+/* ══ Picture mode: the same record, played out on the board ═══════════════
+   PictureStage.tsx. The ops board becomes the viewport and a camera moves
+   over it (one transform on .cr-cam, the house arrival curve, 760ms =
+   PictureStage CAM_MS); slips stamp where they happened and print as an ink
+   lower third; the call is set as cards in the same band. Ink band, paper
+   type: the console's idiom carried down the stage, so ember appears here
+   only as interaction (the primary button, a previewed option, focus rings
+   on paper) and never as text on ink. Reduced motion: no travel, no
+   autoplay; every frame cuts in, and what is new is struck twice. */
+
+/* The camera's scale, animatable so the stamps can stay a constant size on
+   screen (each counter-scales by 1 / --s) while the board zooms under them.
+   Set and transitioned on the stamps' layer only, never on the camera. */
+@property --s { syntax: '<number>'; inherits: true; initial-value: 1; }
+
+/* The mode switch, in the console. A pressed pair, the console's own
+   outline buttons; the pressed one is filled paper. */
+.cr-console-mode { display: inline-flex; align-items: center; flex-shrink: 0; border: 1px solid rgba(241, 232, 213, 0.35); }
+.cr-mode-btn {
+  min-height: 42px;
+  min-width: 40px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.82);
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.cr-mode-btn[aria-pressed="true"] { background: var(--paper); color: var(--ink); }
+@media (hover: hover) { .cr-mode-btn[aria-pressed="false"]:hover { color: var(--paper); background: rgba(241, 232, 213, 0.12); } }
+.cr-mode-btn:active { transform: translate(1px, 1px); transition: transform var(--t-fast) var(--ease-press); }
+.cr-mode-glyph { display: block; flex: none; }
+.cr-mode-sep { display: none; }
+.cr-console .cr-mode-btn:focus-visible { outline-offset: -4px; }
+.cr-console .cr-mode-btn[aria-pressed="true"]:focus-visible { outline-color: var(--ember); }
+/* Phones: the glyphs alone ("Log" and "Picture" stay their names), and the
+   strip gives back the room: "Decision" drops from the clock's status (the
+   numbers stay, and the clock's own label says it in full), the pips close
+   up, and on the narrowest screens they give way to the day strip below. */
+@media (max-width: 479px) { .cr-mode-word { display: none; } .cr-mode-btn { padding: 0; } }
+@media (max-width: 429px) {
+  .cr-console-dword { display: none; }
+  .cr-console-row { gap: 6px; }
+  .cr-pips { gap: 4px; }
+  .cr-pips i { width: 7px; height: 7px; }
+  .cr-console-map { min-width: 44px; padding: 0 8px; }
+}
+@media (max-width: 359px) { .cr-pips { display: none; } .cr-console-sound { margin-left: auto; } }
+
+.cr-footnote-mode { margin-bottom: 8px; }
+.cr-footnote-mode strong { font-family: var(--data); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.9em; }
+
+/* ── The stage ─────────────────────────────────────────────────────────── */
+.cr-play.cr-play-picture { display: block; padding-top: 14px; }
+.cr-stage {
+  position: relative;
+  height: clamp(540px, calc(100svh - var(--cr-nav) - var(--cr-console-h) - 28px), 860px);
+  background: var(--paper-deep);
+  border: 1px solid var(--ink);
+  overflow: hidden;
+  isolation: isolate;
+  scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 14px);
+}
+@media (max-width: 599px) {
+  .cr-page .cr-play-picture { padding: 0; }
+  .cr-stage {
+    height: max(560px, calc(100svh - var(--cr-nav) - var(--cr-console-h)));
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h));
+  }
+}
+.cr-stage-view { position: absolute; inset: 0; overflow: hidden; }
+
+/* The camera: one transform (and its scale as --s), on the arrival curve. */
+.cr-cam {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 720px;
+  height: 400px;
+  transform-origin: 0 0;
+  transition: transform var(--cam-ms) var(--ease);
+}
+.cr-cam .cr-stamps { transition: --s var(--cam-ms) var(--ease); }
+.cr-stage.is-still .cr-cam .cr-stamps { transition: none; }
+.cr-cam.is-unmeasured { visibility: hidden; }
+.cr-stage.is-still .cr-cam { transition: none; }
+.cr-cam .cr-map > svg { width: 720px; height: 400px; }
+/* Dimmed for the call: the board stays readable under the options. */
+.cr-stage-view::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--t-slow) var(--ease);
+}
+.cr-stage.is-call .cr-stage-view::after { opacity: 0.18; }
+
+/* The slip's zone, while it is on the stage: its outline drawn heavier. */
+.cr-stage .cr-zone.is-spot .cr-zone-shape { stroke: var(--ink); stroke-width: 3.2; }
+.cr-stage .cr-zone.is-spot.is-impact .cr-zone-shape { stroke: var(--ember); }
+/* The option under the hand or the key: the zones it would warn, previewed. */
+.cr-stage .cr-zone.is-preview .cr-zone-shape { stroke: var(--ember); stroke-width: 3.4; stroke-dasharray: 2 5; stroke-linecap: round; }
+
+/* A slip's stamp on the board: its pictogram on a paper chit, counter-scaled
+   so it holds one size on screen whatever the camera does. */
+.cr-stamps { position: absolute; inset: 0; pointer-events: none; }
+/* Each stamp its own compositor layer: its counter-scale changes every frame
+   of a camera move, and must not repaint the board it sits on. */
+.cr-pmark { position: absolute; width: 0; height: 0; transform: scale(calc(1 / var(--s))); will-change: transform; }
+.cr-pmark-face {
+  position: absolute;
+  left: calc(-21px + var(--off, 0) * 48px);
+  top: -21px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: opacity var(--t-slow) var(--ease), box-shadow var(--t-slow) var(--ease);
+}
+.cr-pmark-face svg { display: block; }
+.cr-pmark.is-past .cr-pmark-face, .cr-pmark.is-set .cr-pmark-face { opacity: 0.5; box-shadow: none; }
+/* Once your call lands, the hour's stamps clear so the orders and the
+   zones' WARNED BY YOU read clean. */
+.cr-stage.is-record .cr-pmark-face { opacity: 0; }
+.cr-pmark.is-active { z-index: 2; }
+@keyframes cr-pmark-in {
+  0% { opacity: 0; transform: scale(1.8) rotate(-6deg); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes cr-pmark-ring { from { opacity: 0.7; transform: scale(1); } to { opacity: 0; transform: scale(2.1); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-pmark.is-active .cr-pmark-face { animation: cr-pmark-in var(--t-slow) var(--ease-press) calc(var(--cam-ms) * 0.55) both; }
+  .cr-pmark.is-active .cr-pmark-face::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border: 2px solid var(--ink);
+    animation: cr-pmark-ring 600ms var(--ease) calc(var(--cam-ms) * 0.55 + 200ms) both;
+  }
+}
+@media (max-width: 599px) {
+  .cr-pmark-face { left: calc(-14px + var(--off, 0) * 33px); top: -14px; width: 28px; height: 28px; border-width: 1.5px; box-shadow: 2px 2px 0 var(--ink); }
+  .cr-pmark-face svg { width: 18px; height: 18px; }
+}
+
+/* The order going out: a line from the desk to each zone you warned, drawn
+   once the camera has framed them, then a ring stamped where it lands. */
+.cr-dispatch { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
+.cr-dispatch-line { fill: none; stroke: var(--ink); stroke-linecap: round; stroke-dasharray: 1 1; }
+.cr-dispatch-hit { fill: var(--paper); stroke: var(--ink); }
+.cr-stage .cr-zone.is-warned-fresh .cr-zone-warned { --warn-at: calc(var(--cam-ms) + 560ms); }
+@keyframes cr-warn-in { from { stroke-width: 1.4; } to { stroke-width: 4; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-dispatch-line { animation: cr-draw 520ms var(--ease) calc(var(--cam-ms) + var(--i, 0) * 120ms) both; }
+  .cr-dispatch-hit {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cr-mark-down var(--t-mid) var(--ease-press) calc(var(--cam-ms) + 480ms + var(--i, 0) * 120ms) both;
+  }
+  .cr-stage .cr-zone.cr-zone.is-warned-fresh .cr-zone-shape { animation: cr-warn-in var(--t-slow) var(--ease-press) calc(var(--cam-ms) + 520ms) both; }
+  .cr-stage .cr-zone.is-warned-fresh .cr-zone-warned { animation: cr-fade var(--t-mid) var(--ease) calc(var(--cam-ms) + 600ms) both; }
+}
+
+/* A figure's moment: the plate fills the stage on ink, contained (never
+   cropped, the same file), and drifts once like the log's held plates. */
+.cr-pplate { position: absolute; background: var(--ink); overflow: hidden; }
+.cr-pplate img { position: absolute; inset: 10px; display: block; width: calc(100% - 20px); height: calc(100% - 20px); object-fit: contain; }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-pplate { animation: cr-fade var(--t-slow) var(--ease) both; }
+  .cr-pplate img { transform-origin: 58% 45%; animation: cr-drift 4800ms cubic-bezier(0.3, 0.1, 0.3, 1) both; }
+}
+
+/* An instrument's readings, set over the board for the slip that carries them. */
+.cr-preads {
+  position: absolute;
+  max-width: 440px;
+  background: var(--paper-lit);
+  border: 1.5px solid var(--ink);
+  box-shadow: 4px 4px 0 var(--ink);
+  padding: 8px 12px 10px;
+}
+.cr-preads .cr-reads { margin: 0; }
+@media (prefers-reduced-motion: no-preference) { .cr-preads { animation: cr-arrive var(--t-slow) var(--ease) 260ms both; } }
+
+/* The warning chain, as a corner inset; it pulses the beat a link changes. */
+.cr-pchain { position: absolute; width: 196px; z-index: 1; }
+.cr-pchain .cr-chain > svg { box-shadow: 3px 3px 0 var(--ink); }
+.cr-pchain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--ink);
+  opacity: 0;
+  pointer-events: none;
+}
+@keyframes cr-chain-pulse { 0% { opacity: 0.8; transform: scale(1); } 100% { opacity: 0; transform: scale(1.12); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-pchain.is-pulse::after { animation: cr-chain-pulse 700ms var(--ease) 2 both; }
+}
+@media (max-width: 599px) {
+  .cr-pchain { width: 124px; }
+  /* Phones: the inset gives the board its corner back for the call and the
+     record (the full chain is a press away, under MAP). */
+  .cr-stage:is(.is-call, .is-record) .cr-pchain { display: none; }
+}
+
+/* The desk margin: an ink rail (left on wide stages, along the top on
+   phones) where slips that name no zone land, and your orders leave from. */
+.cr-tray {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 14px;
+  background: var(--ink);
+  color: var(--paper);
+  z-index: 2;
+}
+.cr-tray-name { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(241, 232, 213, 0.82); white-space: nowrap; }
+.cr-tray-marks { display: flex; gap: 6px; align-items: center; overflow: hidden; }
+.cr-tray-mark {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--paper);
+  transition: opacity var(--t-slow) var(--ease);
+}
+.cr-tray-mark svg { display: block; width: 20px; height: 20px; }
+.cr-tray-mark.is-past, .cr-tray-mark.is-set { opacity: 0.45; }
+.cr-tray-mark.is-active { outline: 2px solid var(--paper); outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-tray-mark.is-active { animation: cr-pmark-in var(--t-slow) var(--ease-press) 120ms both; }
+}
+@media (min-width: 760px) {
+  .cr-tray { right: auto; bottom: 0; height: auto; width: 76px; flex-direction: column; padding: 16px 0; gap: 16px; }
+  .cr-tray-name { writing-mode: vertical-rl; transform: rotate(180deg); }
+  .cr-tray-marks { flex-direction: column; }
+  .cr-tray-mark { width: 40px; height: 40px; }
+  .cr-tray-mark svg { width: 24px; height: 24px; }
+}
+
+/* ── The foot: the lower third, the call, the record ───────────────────── */
+.cr-foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  max-height: 72%;
+  overflow-y: auto;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 12px 18px calc(14px + env(safe-area-inset-bottom));
+  border-top: 1px solid rgba(241, 232, 213, 0.3);
+}
+@media (min-width: 760px) { .cr-foot { padding: 14px 24px 18px; } }
+.cr-foot :focus-visible { outline: 3px solid var(--paper); outline-offset: 2px; }
+.cr-foot-slug {
+  margin: 0 0 8px;
+  font-family: var(--data);
+  font-weight: 400;
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.78);
+}
+/* The slug takes focus only so keyboard and screen-reader users land on the
+   hour (as the log's stamps do); it is not a control, so it draws no ring. */
+.cr-foot .cr-foot-slug:focus, .cr-foot .cr-foot-slug:focus-visible { outline: none; }
+.cr-foot-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin-top: 12px; }
+.cr-foot .cr-btn-primary { box-shadow: 3px 3px 0 rgba(241, 232, 213, 0.45); }
+@media (hover: hover) { .cr-foot .cr-btn-primary:hover { box-shadow: 5px 5px 0 rgba(241, 232, 213, 0.45); } }
+.cr-foot .cr-btn-primary:active { box-shadow: 0 0 0 transparent; }
+@media (max-width: 599px) { .cr-foot-actions .cr-btn-primary { flex: 1 1 100%; } }
+
+/* The lower third: what sort of slip and where, then the time, the slip's
+   headline (its own words) and its citation, wiped in a step at a time like
+   the leader of a teleprinter slip. The whole line is the button to the full slip. */
+.cr-third-main {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  min-height: 44px;
+  padding: 4px 0;
+  text-align: left;
+  font: inherit;
+  color: var(--paper);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.cr-third-kind {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.82);
+}
+.cr-third-kind svg { display: block; flex: none; }
+.cr-third-line { font-family: var(--read); font-size: 19px; line-height: 1.32; }
+@media (min-width: 760px) { .cr-third-line { font-size: 24px; line-height: 1.28; } }
+.cr-third-time { font-family: var(--data); font-weight: 700; font-size: 0.78em; letter-spacing: 0.04em; }
+.cr-third-sep { color: rgba(241, 232, 213, 0.6); }
+.cr-third-cite { font-family: var(--data); font-size: 0.6em; vertical-align: 0.35em; color: rgba(241, 232, 213, 0.82); }
+.cr-third-more {
+  justify-self: start;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.82);
+  border-bottom: 1px solid rgba(241, 232, 213, 0.45);
+  padding-bottom: 1px;
+  transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
+}
+.cr-third-plus { font-size: 13px; letter-spacing: 0; }
+@media (hover: hover) {
+  .cr-third-main:hover .cr-third-more, .cr-precord-rec:hover .cr-third-more { color: var(--paper); border-bottom-color: var(--paper); }
+}
+.cr-third.is-waiting .cr-third-line { font-family: var(--data); font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(241, 232, 213, 0.6); }
+.cr-third-cap { margin: 8px 0 0; display: grid; gap: 4px; font-size: 14px; line-height: 1.45; color: rgba(241, 232, 213, 0.9); }
+.cr-third-capt { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cr-third-cap .cr-figure-credit { color: rgba(241, 232, 213, 0.82); }
+.cr-third-cap .cr-figure-credit a { color: var(--paper); }
+@keyframes cr-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-third .cr-third-kind { animation: cr-fade var(--t-mid) var(--ease) 60ms both; }
+  .cr-third .cr-third-line { animation: cr-wipe var(--type, 400ms) steps(24, end) 140ms both; }
+  .cr-third .cr-third-more { animation: cr-fade var(--t-mid) var(--ease) calc(var(--type, 400ms) + 160ms) both; }
+  .cr-third-cap { animation: cr-arrive var(--t-slow) var(--ease) calc(var(--type, 400ms) + 120ms) both; }
+}
+
+/* Playback: pause, step, skip — and a tick per slip of the hour. */
+.cr-ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+.cr-pbtn {
+  min-height: 40px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: transparent;
+  border: 1px solid rgba(241, 232, 213, 0.5);
+  cursor: pointer;
+  transition: border-color var(--t-fast) var(--ease), background-color var(--t-fast) var(--ease);
+}
+.cr-pbtn svg { display: block; }
+.cr-pbtn[aria-pressed="true"] { background: rgba(241, 232, 213, 0.14); border-color: var(--paper); }
+@media (hover: hover) { .cr-pbtn:hover { border-color: var(--paper); background: rgba(241, 232, 213, 0.1); } }
+.cr-pbtn:active { transform: translate(1px, 1px); transition: transform var(--t-fast) var(--ease-press); }
+.cr-ptitle .cr-pbtn { min-height: 52px; padding: 0 18px; }
+.cr-ticks { display: inline-flex; gap: 5px; margin-left: auto; padding-left: 6px; }
+.cr-ticks i { width: 14px; height: 4px; background: rgba(241, 232, 213, 0.25); transition: background-color var(--t-mid) var(--ease); }
+.cr-ticks i.is-done { background: rgba(241, 232, 213, 0.6); }
+.cr-ticks i.is-now { background: var(--paper); }
+
+/* The call: the options as cards in the band, the board dimmed above them. */
+.cr-pcall-head { margin: 0 0 10px; font-family: var(--data); font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--paper); }
+.cr-pcards { display: grid; gap: 10px; }
+@media (min-width: 760px) {
+  .cr-pcards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 14px; }
+  .cr-pcards.is-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (min-width: 1100px) { .cr-pcards.is-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.cr-pcard { position: relative; display: grid; }
+.cr-pcard-btn.cr-option { height: 100%; min-height: 76px; align-content: start; box-shadow: 3px 3px 0 rgba(241, 232, 213, 0.4); }
+.cr-pcard-btn .cr-option-label { font-size: 15px; }
+.cr-pcard-more + .cr-pcard-btn, .cr-pcard:has(.cr-pcard-more) .cr-pcard-btn { padding-bottom: 46px; }
+.cr-pcard-more {
+  position: absolute;
+  left: 8px;
+  bottom: 6px;
+  min-height: 40px;
+  padding: 0 8px;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.cr-foot .cr-pcard-more:focus-visible { outline: 2px solid var(--ember); outline-offset: -2px; }
+.cr-foot .cr-option:focus-visible { outline: 3px solid var(--paper); outline-offset: 3px; border-color: var(--ember); box-shadow: 3px 3px 0 var(--ember); }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-pcall { animation: cr-arrive var(--t-slow) var(--ease) both; }
+  .cr-pcall-head { display: inline-block; transform-origin: left center; animation: cr-call-stamp var(--t-mid) var(--ease-press) 90ms both; }
+  .cr-pcard { animation: cr-arrive var(--t-slow) var(--ease) both; }
+  .cr-pcard:nth-child(2) { animation-delay: 60ms; }
+  .cr-pcard:nth-child(3) { animation-delay: 120ms; }
+  .cr-pcard:nth-child(4) { animation-delay: 180ms; }
+}
+
+/* The record: your call stamped, then what the record says followed. */
+.cr-precord-call { margin: 0; display: grid; gap: 3px; }
+.cr-precord-tag { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(241, 232, 213, 0.82); }
+.cr-precord-label { font-family: var(--data); font-size: 15px; letter-spacing: 0.05em; text-transform: uppercase; }
+.cr-precord-warned { font-family: var(--data); font-size: 11.5px; letter-spacing: 0.08em; color: var(--paper); }
+.cr-precord-warned::before { content: '▪ '; }
+.cr-precord-rec {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 6px 0 6px 12px;
+  text-align: left;
+  font: inherit;
+  color: var(--paper);
+  background: none;
+  border: 0;
+  border-left: 3px solid var(--paper);
+  cursor: pointer;
+}
+.cr-precord-text { font-size: 16px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.cr-precord-rec.is-silent { border-left-style: dashed; grid-template-columns: auto minmax(0, 1fr); column-gap: 12px; }
+.cr-precord-rec.is-silent .cr-silent-glyph { grid-row: span 2; color: var(--paper); }
+.cr-precord-note { font-family: var(--data); font-size: 11px; letter-spacing: 0.08em; color: rgba(241, 232, 213, 0.78); }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-precord-call { animation: cr-call-stamp var(--t-mid) var(--ease-press) both; transform-origin: left center; }
+  .cr-precord-rec { animation: cr-arrive var(--t-slow) var(--ease) calc(var(--cam-ms) + 700ms) both; }
+  .cr-precord .cr-foot-actions { animation: cr-arrive var(--t-slow) var(--ease) calc(var(--cam-ms) + 820ms) both; }
+}
+
+/* The briefing on the stage: the day's title card. */
+.cr-ptitle-name { margin: 0; font-family: var(--poster); font-size: clamp(30px, 6vw, 48px); line-height: 0.98; letter-spacing: 0.01em; text-transform: uppercase; }
+.cr-ptitle-loc { margin: 8px 0 0; font-size: 16px; line-height: 1.5; max-width: 62ch; color: rgba(241, 232, 213, 0.9); }
+
+/* The stage's one desk note sits over the board's top corner. */
+.cr-coach.cr-coach-stage { position: absolute; z-index: 4; left: 12px; right: 12px; top: 62px; margin: 0; max-width: 46ch; box-shadow: 3px 3px 0 var(--ember), 0 10px 30px rgba(25, 20, 16, 0.25); }
+@media (min-width: 760px) { .cr-coach.cr-coach-stage { left: 96px; top: 18px; right: auto; } }
+.cr-coach.cr-coach-stage::before { display: none; }
+
+/* The sheet, for a slip or a call in full: the phone board's dialog, kept to
+   a reading measure on wide screens. */
+.cr-psheet { left: 0; right: 0; margin: 0 auto; width: min(760px, 100%); }
+@media (min-width: 760px) { .cr-psheet { padding: 10px 28px 26px; border-left: 1px solid var(--ink); border-right: 1px solid var(--ink); } }
+.cr-psheet .cr-slip { animation: none; }
+.cr-psheet .cr-record { margin-top: 4px; animation: none; }
+
+/* Reduced motion, picture mode: frames cut in; what is new is struck twice. */
+@media (prefers-reduced-motion: reduce) {
+  .cr-stage-view::after, .cr-pmark-face, .cr-tray-mark, .cr-ticks i, .cr-mode-btn, .cr-pbtn { transition: none; }
+  .cr-stage .cr-zone.is-spot .cr-zone-shape { filter: drop-shadow(4px 4px 0 rgba(25, 20, 16, 0.55)); }
+  .cr-stage .cr-zone.is-spot.is-impact .cr-zone-shape { filter: drop-shadow(4px 4px 0 rgba(184, 50, 26, 0.6)); }
+  .cr-pmark.is-active .cr-pmark-face { box-shadow: 3px 3px 0 var(--ink), 6px 6px 0 rgba(25, 20, 16, 0.4); }
+  .cr-tray-mark.is-active { box-shadow: 3px 3px 0 rgba(241, 232, 213, 0.5); }
+  .cr-stage .cr-zone.is-warned-fresh .cr-zone-shape { filter: drop-shadow(3px 3px 0 rgba(25, 20, 16, 0.5)); }
+  .cr-dispatch-line { stroke-dasharray: none; }
+  .cr-pchain.is-pulse .cr-chain > svg { box-shadow: 3px 3px 0 var(--ink), 6px 6px 0 rgba(25, 20, 16, 0.4); }
+  .cr-third .cr-third-line { text-shadow: 1.5px 1.5px 0 rgba(241, 232, 213, 0.28); }
+}
+
+/* ── Picture mode, the game register: dialogue boxes, a choice list, the
+   level card and the end card. A classic game's grammar in the pressbook's
+   materials: a paper text box with a double ink frame, an ink nameplate
+   tab, a generic ink-line role portrait (never a likeness), the ▸ advance
+   mark. Grammar only: no lives, no score, no coin — the stakes on this desk
+   are the record's, and the debrief keeps them in words. */
+
+.cr-dbox {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0 14px;
+  align-items: start;
+  position: relative;
+  margin-top: 14px;
+  padding: 16px 16px 12px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 2px solid var(--paper);
+  box-shadow: inset 0 0 0 3px var(--ink), inset 0 0 0 4.5px var(--paper), inset 0 0 0 6px var(--ink);
+}
+.cr-dbox-body { position: relative; min-width: 0; padding-right: 40px; }
+.cr-portrait {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  margin-top: 4px;
+  color: var(--ink);
+  background: var(--paper-deep);
+  border: 1.5px solid var(--ink);
+}
+.cr-nameplate {
+  position: absolute;
+  top: -30px;
+  left: 0;
+  max-width: 100%;
+  padding: 4px 10px 3px;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1.5px solid var(--paper);
+  font-family: var(--data);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cr-dbox .cr-third-main, .cr-dbox .cr-precord-rec { color: var(--ink); }
+.cr-dbox .cr-third-kind, .cr-dbox .cr-third-cite, .cr-dbox .cr-third-sep { color: var(--ink-soft); }
+.cr-dbox .cr-third-more { color: var(--ink-soft); border-bottom-color: var(--rule); }
+@media (hover: hover) { .cr-dbox .cr-third-main:hover .cr-third-more { color: var(--ink); border-bottom-color: var(--ink); } }
+.cr-dbox .cr-third-cap { grid-column: 1 / -1; color: var(--ink); }
+.cr-dbox .cr-third-cap .cr-figure-credit { color: var(--ink-soft); }
+.cr-dbox .cr-third-cap .cr-figure-credit a { color: var(--ink); }
+.cr-dbox :focus-visible { outline: 3px solid var(--ember); outline-offset: 2px; }
+/* The ▸: the classic box's "more" mark, and a real button to the next slip. */
+.cr-dbox-next {
+  position: absolute;
+  right: -6px;
+  bottom: -4px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--ink);
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+@media (hover: hover) { .cr-dbox-next:hover { color: var(--ember); } }
+/* Four blinks once the line is typed, then it holds (WCAG 2.2.2). */
+@keyframes cr-caret-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-dbox-next span { animation: cr-caret-blink 1s steps(1, end) calc(var(--type, 400ms) + 300ms) 4; }
+}
+@media (max-width: 599px) {
+  .cr-dbox { grid-template-columns: minmax(0, 1fr); padding: 14px 12px 10px; }
+  .cr-dbox > .cr-portrait { display: none; }
+  .cr-nameplate { top: -27px; font-size: 10px; }
+  .cr-dbox .cr-third-line { font-size: 18px; }
+}
+.cr-third.is-waiting { margin-top: 14px; }
+
+/* The call as a dialogue choice list: one framed box, the options stacked,
+   a ▸ selector at the one under the hand or the key; ↑ ↓ move, Enter takes. */
+.cr-pcall.cr-dbox { margin-top: 26px; }
+.cr-pcall-head.cr-nameplate { margin: 0; }
+.cr-pcards, .cr-pcards[class] { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; }
+.cr-pcard-btn.cr-option {
+  min-height: 48px;
+  padding: 10px 12px 10px 34px;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px dashed var(--rule);
+  box-shadow: none;
+  transform: none;
+}
+.cr-pcard:last-child .cr-pcard-btn.cr-option { border-bottom: 0; }
+.cr-pcard-btn.cr-option::before {
+  content: '▸';
+  left: 10px;
+  top: 10px;
+  width: auto;
+  height: auto;
+  background: none;
+  color: var(--ember);
+  font-size: 17px;
+  line-height: 1.2;
+  transform: none;
+  opacity: 0;
+  transition: opacity var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+}
+@media (hover: hover) {
+  .cr-pcard-btn.cr-option:hover { background: var(--paper-deep); box-shadow: none; transform: none; border-color: var(--rule); }
+  .cr-pcard-btn.cr-option:hover::before { opacity: 1; transform: translateX(2px); }
+}
+.cr-foot .cr-pcard-btn.cr-option:focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; background: var(--paper-deep); border-color: var(--rule); box-shadow: none; }
+.cr-pcard-btn.cr-option:focus-visible::before { opacity: 1; }
+.cr-pcard-btn .cr-option-label { font-size: 14.5px; }
+.cr-pcard:has(.cr-pcard-more) .cr-pcard-btn { padding-bottom: 10px; padding-right: 96px; }
+.cr-pcard-more { left: auto; right: 4px; top: 4px; bottom: auto; }
+@media (max-width: 599px) {
+  .cr-pcard:has(.cr-pcard-more) .cr-pcard-btn { padding-right: 12px; padding-bottom: 40px; }
+  .cr-pcard-more { top: auto; bottom: 2px; left: 26px; right: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .cr-pcard-btn.cr-option::before { transition: none; } }
+
+/* The level card: the briefing's title as a stage's opening plate. */
+.cr-level {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 0;
+  margin: 0 0 10px;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--paper);
+}
+.cr-level span + span::before { content: '—'; margin: 0 10px; color: rgba(241, 232, 213, 0.6); }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-level { animation: cr-arrive var(--t-slow) var(--ease) both; }
+  .cr-ptitle-name { animation: cr-call-stamp var(--t-slow) var(--ease-press) 160ms both; transform-origin: left center; }
+}
+
+/* The end card: the day closes across the board before the debrief. */
+.cr-endcard { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 2; }
+.cr-endcard-band {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  width: 100%;
+  padding: 18px 16px;
+  background: var(--ink);
+  color: var(--paper);
+  border-top: 3px solid var(--paper);
+  border-bottom: 3px solid var(--paper);
+  text-align: center;
+}
+.cr-endcard-title { font-family: var(--poster); font-size: clamp(34px, 7vw, 64px); line-height: 0.95; text-transform: uppercase; }
+.cr-endcard-sub { font-family: var(--data); font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(241, 232, 213, 0.85); }
+@keyframes cr-band-in { from { transform: scaleY(0); } to { transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-endcard-band { animation: cr-band-in var(--t-slow) var(--ease-press) 200ms both; }
+  .cr-endcard-title { animation: cr-call-stamp var(--t-slow) var(--ease-press) 520ms both; }
+  .cr-endcard-sub { animation: cr-fade var(--t-mid) var(--ease) 760ms both; }
+}
+.cr-precord.cr-dbox { margin-top: 26px; }
+.cr-dbox :is(.cr-precord-tag, .cr-precord-note) { color: var(--ink-soft); }
+.cr-dbox :is(.cr-precord-label, .cr-precord-warned) { color: var(--ink); }
+.cr-dbox .cr-precord-rec { border-left-color: var(--ink); }
+.cr-dbox .cr-precord-rec.is-silent .cr-silent-glyph { color: var(--ink); }
+.cr-dbox .cr-btn-primary { box-shadow: 3px 3px 0 var(--ink); }
+@media (hover: hover) { .cr-dbox .cr-btn-primary:hover { box-shadow: 5px 5px 0 var(--ink); } }
+.cr-dbox .cr-btn-primary:focus-visible { outline-color: var(--ink); }
+/* On the stage the board is scaled up to 2.6x, and the log's live-zone pulse
+   (an opacity animation on the zone path) would repaint the whole enlarged
+   plate every frame: on the stage a live zone holds still (its state is
+   carried by stroke, hatch and word as everywhere), and the zone the slip
+   concerns is drawn heavier instead. */
+.cr-stage .cr-zone .cr-zone-shape { animation: none; }

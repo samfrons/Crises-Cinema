@@ -34,6 +34,7 @@ const CHAIN_LINKS = new Set(VOCAB.chain.links);
 const CHAIN_STATES = new Set(VOCAB.chain.states);
 const CHAIN_LABEL_KEYS = new Set(VOCAB.chain.label_keys);
 const READINGS = VOCAB.readings;
+const HEADLINE_MAX = VOCAB.headline?.max ?? 90;
 // Hazard families, in match order (the first whose pattern the hazard contains).
 const HAZARD_FAMILIES = Object.entries(VOCAB.hazards ?? {}).filter(([k]) => k !== '_comment');
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -166,6 +167,25 @@ function checkPresentation(chk, info, q, origins) {
         `the item's text does not say "${info.wind.from}" winds — the board may only restate a stated direction`);
     }
   }
+}
+
+/**
+ * The lower third: picture mode prints each slip as one located line, its
+ * `headline`, and defers the full text to a press. The headline is the
+ * item's own words, never a summary: it must be a contiguous fragment of the
+ * item's text, character for character (case and punctuation exact), no
+ * longer than vocabulary.json `headline.max`. Required on every item of a
+ * playable scenario, so no slip reaches the stage without one.
+ */
+function checkHeadline(chk, info, q) {
+  const h = info.headline;
+  if (!chk.require(typeof h === 'string' && h.trim().length > 0, `${q}.headline`,
+    'required on every item of a playable scenario — a verbatim fragment of the item\'s text (picture mode\'s lower third)')) return;
+  chk.require(!PLACEHOLDER.test(h), `${q}.headline`, 'placeholder headline in a playable scenario');
+  chk.require(h.length <= HEADLINE_MAX, `${q}.headline`, `a headline of at most ${HEADLINE_MAX} characters (this one is ${h.length})`);
+  chk.require(h === h.trim(), `${q}.headline`, 'no leading or trailing whitespace');
+  chk.require(typeof info.text === 'string' && info.text.includes(h), `${q}.headline`,
+    'must appear verbatim in the item\'s own text — a contiguous fragment, case and punctuation exact');
 }
 
 /**
@@ -567,6 +587,7 @@ function validate(file, s) {
       }
       if (info.media !== undefined) checkMedia(chk, info.media, `${q}.media`, s.id, s.date);
       checkPresentation(chk, info, q, origins);
+      checkHeadline(chk, info, q);
       checkReadings(chk, info, q, s, series);
       if (info.zones !== undefined) {
         const known = new Set((s.scoring?.at_risk_zones ?? []).map((z) => z.id));

@@ -56,6 +56,7 @@
           "id": "t1-i1",
           "kind": "forecast",
           "text": "NWS Honolulu has had a Red Flag Warning in force for the leeward side of every island since 06:00 on 7 August, and a High Wind Warning with it: east winds 30 to 45 mph, gusts to around 60, humidity 35 to 45 percent. The text says any fire that develops 'will likely spread rapidly'. The Red Flag Warning runs to 06:00 on Wednesday 9 August.",
+          "headline": "any fire that develops 'will likely spread rapidly'",
           "citation": {
             "sourceId": "nws-2023",
             "detail": "Red Flag Warning issued 03:15 HST 7 Aug (valid 06:00 7 Aug to 06:00 9 Aug); reissued 03:17 HST 8 Aug 'REMAINS IN EFFECT UNTIL 6 AM HST WEDNESDAY'; High Wind Warning text of 03:18 HST 8 Aug"
@@ -80,6 +81,7 @@
           "id": "t1-i2",
           "kind": "forecast",
           "text": "NWS's text names the cause: the gradient between high pressure north of the islands and Hurricane Dora, passing 'safely south of the islands'. It first flagged the danger on 6 August with a Fire Weather Watch and a High Wind Watch.",
+          "headline": "the gradient between high pressure north of the islands and Hurricane Dora",
           "citation": {
             "sourceId": "nws-2023",
             "detail": "High Wind Watch 03:33 HST 6 Aug names Hurricane Dora 'passing safely south of the islands'; Fire Weather Watch 03:33 HST 6 Aug"
@@ -110,6 +112,7 @@
           "id": "t1-i3",
           "kind": "message",
           "text": "Upcountry has been burning since overnight. The Olinda/Kula fire was first reported at 00:22. Your EOC has already sent Wireless Emergency Alerts for it: Kula 200 at 04:09, Hoʻopalua Drive at 05:00, Hanamu Road and Kealaloa Avenue at 05:21. A shelter is open at the Hannibal Tavares Community Center.",
+          "headline": "Upcountry has been burning since overnight.",
           "citation": {
             "sourceId": "mema-records",
             "detail": "MEMA WEA log, 8 Aug 04:09, 05:00 and 05:21; Phase Two reports the Olinda fire at 00:22"
@@ -135,6 +138,7 @@
           "id": "t1-i4",
           "kind": "field_report",
           "text": "West Maui is losing its grid. By 05:38 about 7,000 customers between Lahaina north to Kapalua are out. MPD reports poles leaning and down on Honoapiʻilani Highway at Keawe Street (05:42) and Hokiokio Place (05:51); the highway between Front Street and Hokiokio is closed at 06:21.",
+          "headline": "West Maui is losing its grid.",
           "citation": {
             "sourceId": "mema-records",
             "detail": "MEMA activity log 05:38 (7,000 customers); EOC Operations and Staffing Report 06:21 road closure; HECO statements for 05:42 and 05:51 reports from MPD"
@@ -150,6 +154,7 @@
           "id": "t1-i5",
           "kind": "message",
           "text": "Your EOC went to partial activation at 21:00 on 7 August 'for the wind warning'. Your own texts place you in Honolulu: at 22:11 on 7 August you wrote that you had just checked into a hotel, and the Guard's operations chief later learns you are at the Pacific Partnership 2023 meeting on Oʻahu. Mayor Bissen reaches the Maui EOC around 06:00 to 06:30.",
+          "headline": "Your own texts place you in Honolulu",
           "citation": {
             "sourceId": "mema-records",
             "detail": "MEMA log 7 Aug 21:33 'Activated the EOC at 2100 hrs, 8/7/23 for the wind warning'; Andaya texts 7 Aug 22:11 and 8 Aug 09:22-09:27; Phase Two §3.6.4 on the Mayor's arrival"
@@ -229,6 +234,7 @@
           "id": "t2-i1",
           "kind": "field_report",
           "text": "06:34 to 06:37: callers report a brush fire across from Lahaina Intermediate School, off Lahainaluna Road. A power line has just fallen into the bushes, about 50 feet from the nearest house. Officers report high winds.",
+          "headline": "callers report a brush fire across from Lahaina Intermediate School, off Lahainaluna Road",
           "citation": {
             "sourceId": "fsri-p1",
             "detail": "MPD event chronology 06:35:19 and 06:37:23; Event Chronology Report 06:34 and 06:37; Phase Two §3.6.4 (Lahaina AM fire reported 06:34)"
@@ -243,6 +249,7 @@
           "id": "t2-i2",
           "kind": "message",
           "text": "MFD sends Lahaina and Napili units. The county helicopter, Air 2, turns back to base because of the wind. MPD evacuates the Hoʻokahua/Kuʻialua streets; the county posts that evacuations were ordered at 06:40 around Lahaina Intermediate and closes Lahainaluna Road.",
+          "headline": "The county helicopter, Air 2, turns back to base because of the wind.",
           "citation": {
             "sourceId": "fsri-p1",
             "detail": "HI-EMA log 06:37 ('Air-2 return to base due to winds'); PD dispatch narrative 06:37; County of Maui Facebook post (evacuations ordered 6:40 am, Lahainaluna Road closed)"
@@ -265,6 +272,7 @@
           "id": "t2-i3",
           "kind": "field_report",
           "text": "Hawaiian Electric later states that at 06:40 it told MPD the downed line was not energized, because the last transmission line into West Maui had already tripped offline. Schools nearby, including Lahainaluna High and Princess Nāhiʻenaʻena Elementary, are closed; HI-EMA lists the reason as the power outage.",
+          "headline": "the downed line was not energized",
           "citation": {
             "sourceId": "fsri-p1",
             "detail": "HECO statement for the 06:40 MPD report; HI-EMA school-closure log 06:40"
@@ -278,6 +286,7 @@
           "id": "t2-i4",
           "kind": "message",
           "text": "The Upcountry fire is still your main fight. Shelters are open: Hannibal Tavares Community Center in Pukalani, and, from 06:52, the Lahaina Civic Center with the Red Cross.",
+          "headline": "The Upcountry fire is still your main fight.",
           "citation": {
             "sourceId": "mema-records",
             "detail": "EOC Operations and Staffing Report 06:52; HI-EMA shelter log 06:40"
@@ -359,6 +368,7 @@
           "id": "t3-i1",
           "kind": "field_report",
           "text": "At 08:19 the MFD battalion chief on Lahaina says: 'We'll call it 90% contained.' By shortly before 09:00 MFD declares it 100% contained. Your EOC's 08:30 shift-change brief says the same; it was passed to HI-EMA at 09:29.",
+          "headline": "By shortly before 09:00 MFD declares it 100% contained.",
           "citation": {
             "sourceId": "fsri-p1",
             "detail": "Dispatch audio FD1 08:19:48 (BC5); HI-EMA log 06:37 entry ('100% contained at 0904'); MEMA EM Director activity log 09:36; HI-EMA log 09:29 ('contained as of Maui EOC 0830 Shift Change Brief')"
@@ -387,6 +397,7 @@
           "id": "t3-i2",
           "kind": "field_report",
           "text": "Upcountry is not contained. At 08:23 the Kula fire stands at 675 acres with no containment. Helicopters could not launch at 07:48 because of wind; the Guard's aviation officer said so.",
+          "headline": "At 08:23 the Kula fire stands at 675 acres with no containment.",
           "citation": {
             "sourceId": "hiema-records",
             "detail": "HI-EMA log 08:23 (675 acres, no containment); HI-EMA Phase 1 timeline entry 07:48 ('helicopters are unable to launch due to wind speeds')"
@@ -400,6 +411,7 @@
           "id": "t3-i3",
           "kind": "message",
           "text": "At 09:22 the Hawaiʻi National Guard's joint operations chief, Col. Udani, texts you to ask for an update. The Guard is working a request for the Big Island. You have already spoken to Maj. Gen. Hara, who asked whether Maui needs state assistance.",
+          "headline": "Maj. Gen. Hara, who asked whether Maui needs state assistance",
           "citation": {
             "sourceId": "hiema-records",
             "detail": "Maj. Gen. Hara timeline notes 09:09 and 09:22; Andaya text 09:30 to HING/J3"
@@ -413,6 +425,7 @@
           "id": "t3-i4",
           "kind": "forecast",
           "text": "Nothing has changed in the sky. The Red Flag Warning and High Wind Warning still run to 06:00 on Wednesday. East winds are 30 to 45 mph with gusts to about 60. Power is out across West Maui and Upcountry, and a pole is down on Honoapiʻilani Highway between Front Street and Hokiokio Place.",
+          "headline": "Nothing has changed in the sky.",
           "citation": {
             "sourceId": "nws-2023",
             "detail": "NWS Red Flag Warning and High Wind Warning, 8 Aug 03:17-03:18 HST; HI-EMA situation notes 08:19 (road and power)"
@@ -497,6 +510,7 @@
           "id": "t4-i1",
           "kind": "field_report",
           "text": "Honoapiʻilani Highway has been closed in Lahaina between Papalaua Street and Lahainaluna Road since 14:03. At 14:19 a Hawaiian Electric employee cannot pass because of downed poles. At 14:51 an MPD officer reports five power lines down between Kapunakea and Keawe streets; MPD calls for units to block the road.",
+          "headline": "an MPD officer reports five power lines down between Kapunakea and Keawe streets",
           "citation": {
             "sourceId": "mema-records",
             "detail": "County road-closure text 14:03; HECO statement for 14:19; MPD event chronology 14:50:59-14:51:25"
@@ -512,6 +526,7 @@
           "id": "t4-i2",
           "kind": "field_report",
           "text": "14:55: numerous callers say the fire is flaring up again at the end of the Kuʻialua cul-de-sac, the same area as the morning fire, and 'spreading fast'. At 14:56 dispatch tells MFD engines it is getting multiple calls with flames visible. At 15:00 the first engine on scene reports a burn 20 by 100 feet on the north flank 'near the houses'.",
+          "headline": "numerous callers say the fire is flaring up again at the end of the Kuʻialua cul-de-sac",
           "citation": {
             "sourceId": "fsri-p1",
             "detail": "MPD event chronology 14:55:19-14:57:55; Event Chronology Report 14:55; dispatch audio FD1 14:56:07 and 15:00:37"
@@ -532,6 +547,7 @@
           "id": "t4-i3",
           "kind": "forecast",
           "text": "The wind has not eased. The Red Flag Warning and High Wind Warning are unchanged: east winds 30 to 45 mph, gusts to about 60.",
+          "headline": "The wind has not eased.",
           "citation": {
             "sourceId": "nws-2023",
             "detail": "NWS Red Flag and High Wind products, 8 Aug 03:17-03:18 HST"
@@ -549,6 +565,7 @@
           "id": "t4-i4",
           "kind": "message",
           "text": "The county IT log notes network problems at Lahaina locations, including the senior center and the fire station. A second Upcountry fire, in Kula, has been burning since 11:27; you wrote at 11:29 that aircraft cannot be used on it.",
+          "headline": "A second Upcountry fire, in Kula, has been burning since 11:27",
           "citation": {
             "sourceId": "mema-records",
             "detail": "MEMA EOC web log 12:50 (network issues at Lahaina locations); Phase Two §3.6.4 (Kula fire reported 11:27); Andaya text 11:29"
@@ -629,6 +646,7 @@
           "id": "t5-i1",
           "kind": "field_report",
           "text": "The fire jumped Lahainaluna Road and the Lahaina Bypass at about 15:21. The first homes on Lahainaluna Road began to ignite at 15:30. At 15:25 Command asks for police help evacuating south of Kelawea Mauka Park: 'extreme fire conditions.' At 15:32 Command says: 'I have no resources to spare.'",
+          "headline": "The fire jumped Lahainaluna Road and the Lahaina Bypass at about 15:21.",
           "citation": {
             "sourceId": "fsri-p2",
             "detail": "Section 3.8.10: 'ignited at 14:55, jumping the Lahaina Bypass at approximately 15:21. The first homes along Lahainaluna Road began to ignite at 15:30'; dispatch audio FD2 15:24:42, 15:25:36 and 15:32:33"
@@ -643,6 +661,7 @@
           "id": "t5-i2",
           "kind": "message",
           "text": "Your own texts: at 15:28 you tell the state's Col. Barros it is 'starting to heat up again. We now have to evacuate Olinda and a portion of Lahaina.' At 15:50 a county official texts you 'Pretty chaotic right now for mfd and mpd', and at 15:54 names two priorities: evacuate Kulalani in Kula, and work out West Side traffic access and exit.",
+          "headline": "'starting to heat up again. We now have to evacuate Olinda and a portion of Lahaina.'",
           "citation": {
             "sourceId": "mema-records",
             "detail": "Andaya texts 15:28, 15:30, 15:50 and 15:54"
@@ -656,6 +675,7 @@
           "id": "t5-i3",
           "kind": "message",
           "text": "The state emergency proclamation was signed at 15:24. Your logistics chief asks for help sending a Wireless Emergency Alert for Kulalani at 15:50; it goes out at 16:04. At 16:10 you text your acting EOC director: 'Are we doing a WEA alert for the evacuations?' The Maui EOC is still at partial activation.",
+          "headline": "'Are we doing a WEA alert for the evacuations?'",
           "citation": {
             "sourceId": "mema-records",
             "detail": "Andaya texts 15:24-15:25 and 16:10; MEMA log 15:50 and 16:04; Maui HI-EMA Phase 1 timeline"
@@ -680,6 +700,7 @@
           "id": "t5-i4",
           "kind": "field_report",
           "text": "Hawaiian Electric tells dispatch at 16:11 that all power off Lahainaluna above and below the Bypass is already dead. Honoapiʻilani Highway has been shut by downed poles since 14:03. The Maui outdoor warning sirens have never been used for a wildfire.",
+          "headline": "The Maui outdoor warning sirens have never been used for a wildfire.",
           "citation": {
             "sourceId": "fsri-p1",
             "detail": "HECO dispatch 16:11; county road-closure text 14:03; Phase Two §3.5.1.2 (sirens never used for WUI fire before 8 Aug)"
@@ -701,6 +722,7 @@
           "id": "t5-i5",
           "kind": "gauge",
           "text": "Satellite fire detections (VIIRS 375 m) for the 8 August UTC day, the night and early-afternoon passes: only the Upcountry fire shows. The passes predate the 14:55 flare-up; West Maui shows none.",
+          "headline": "The passes predate the 14:55 flare-up; West Maui shows none.",
           "citation": {
             "sourceId": "nasa-gibs",
             "detail": "GIBS WMS, layers VIIRS_SNPP_CorrectedReflectance_TrueColor + VIIRS_SNPP_Thermal_Anomalies_375m_All, time=2023-08-08, bbox -157.4,20.5,-156.0,21.2"
@@ -804,6 +826,7 @@
           "id": "t6-i1",
           "kind": "field_report",
           "text": "16:36: officers report the neighbourhood between Highway 30, Waineʻe Street and Dickenson Street 'completely engulfed'. At 16:41 the exits west via Komo Mai Street and Lahainaluna Road are cut off. By 16:46 police and residents are breaking locked gates to escape through a county water lot to the Bypass.",
+          "headline": "At 16:41 the exits west via Komo Mai Street and Lahainaluna Road are cut off.",
           "citation": {
             "sourceId": "fsri-p2",
             "detail": "PD dispatch narrative 16:36 (via Phase One dataset); Phase Two figures 4.3.3.1.7 (egress at 16:41) and 3.8.2.7 (BWC 16:46)"
@@ -818,6 +841,7 @@
           "id": "t6-i2",
           "kind": "field_report",
           "text": "17:02: a fire engine reports 'Front Street is impassable with traffic.' Police are opening South Front Street onto Honoapiʻilani Highway to bleed it off. At 17:44 police tell units to stop sending traffic down Front Street: it is 'on fire all the way down' to Market Street.",
+          "headline": "it is 'on fire all the way down' to Market Street",
           "citation": {
             "sourceId": "fsri-p1",
             "detail": "Dispatch audio FD2 17:02:00; PD dispatch audio D4 16:47:03, 17:02:24 and 17:44:24"
@@ -832,6 +856,7 @@
           "id": "t6-i3",
           "kind": "field_report",
           "text": "17:34: the Front Street Apartments are catching fire; 17:39: 'fully engulfed', with Kahoma Village homes also burning. At 17:58 a 911 caller says people are in the ocean in Lahaina: 'about 100 people right now.' At 18:01 the log reads: 'There is no beach.' At 18:07 the Coast Guard is sending a helicopter.",
+          "headline": "a 911 caller says people are in the ocean in Lahaina: 'about 100 people right now.'",
           "citation": {
             "sourceId": "fsri-p1",
             "detail": "PD dispatch audio D4 17:34:44 and 17:39:48; Maui Fire Dispatch (unredacted) 17:58:38; Event Chronology Report 18:01; MPD event chronology 18:07:45"
@@ -846,6 +871,7 @@
           "id": "t6-i4",
           "kind": "message",
           "text": "At 17:43 a 911 operator tells a caller: 'All phone service has been cut in the area.' The county posts at 17:50 that 'Multiple structures have burned and multiple evacuations are in place' and that the Maui EOC is fully activated. The only Wireless Emergency Alert for Lahaina so far is Kelawea Mauka at 16:16.",
+          "headline": "'All phone service has been cut in the area.'",
           "citation": {
             "sourceId": "fsri-p1",
             "detail": "Maui Fire Dispatch (unredacted) 17:43:57; County of Maui Facebook, combined update No. 1, 17:50; MEMA EAS-WEA log"
@@ -884,6 +910,7 @@
           "id": "t6-i5",
           "kind": "gauge",
           "text": "GOES-18 visible-band scan of Maui from 16:10 HST: a pale plume appears to stream southwest off West Maui across the channel toward Lānaʻi. In a single visible band, cloud and sun glint also read bright, so the scan alone cannot confirm smoke.",
+          "headline": "a pale plume appears to stream southwest off West Maui across the channel toward Lānaʻi",
           "citation": {
             "sourceId": "noaa-goes18",
             "detail": "ABI-L2-CMIPF band 2, scan start 2023-08-09T02:10:20Z"
@@ -975,6 +1002,7 @@
           "id": "t7-i1",
           "kind": "message",
           "text": "The 19:00 state situation report, built from what Maui sent, says Maui's EOC is partially activated and the fires in Kula and Lahaina are 'contained', with 'significant' losses in Kula and '2 structures' lost in Lahaina.",
+          "headline": "the fires in Kula and Lahaina are 'contained'",
           "citation": {
             "sourceId": "hiema-records",
             "detail": "HI-EMA situation report #3 as described in the Lt. Governor's Office technical discussion (19:00)"
@@ -988,6 +1016,7 @@
           "id": "t7-i2",
           "kind": "message",
           "text": "19:19: the State Disaster Management Advisor, Luke Meyers, asks you for the status of Lahaina. He relays social-media reports of apartments and structures burning.",
+          "headline": "He relays social-media reports of apartments and structures burning.",
           "citation": {
             "sourceId": "mema-records",
             "detail": "MEMA EOC Operations and Staffing Report, 19:19-19:52"
@@ -1002,6 +1031,7 @@
           "id": "t7-i3",
           "kind": "field_report",
           "text": "Police radio, 19:00: 'from Shaw and Front to Mala and Front is all engulfed in flames.' 19:06: Front Street Apartments 'fully involved'. Wind and fire are still driving. Hokiokio Place is cleared and cars are leaving Lahaina.",
+          "headline": "'from Shaw and Front to Mala and Front is all engulfed in flames.'",
           "citation": {
             "sourceId": "fsri-p1",
             "detail": "PD dispatch audio D4 19:00:11; dispatch audio FD2 19:06:24; County of Maui Facebook 17:20 and X post (Hokiokio cleared 17:05)"
@@ -1016,6 +1046,7 @@
           "id": "t7-i5",
           "kind": "field_report",
           "text": "Water is failing on the fire ground. At 16:10 a ladder company reported 'good water supply and good water pressure'. At 18:27 an engine officer tells Command: 'Hydrants are starting to get low on water, FYI.' At 18:57 one crew asks another about pressure: 'We pretty much got nothing over here.' The county had asked West Maui at 09:55 to conserve water because outages were hampering pumping.",
+          "headline": "Water is failing on the fire ground.",
           "citation": {
             "sourceId": "fsri-p1",
             "detail": "Dispatch audio FD2 16:10:25, 18:27:43 and 18:57:07; County of Maui Facebook, Lahaina Fire Update No. 2, 09:55"
@@ -1047,6 +1078,7 @@
           "id": "t7-i4",
           "kind": "forecast",
           "text": "NWS extended the Red Flag Warning at 15:39 to 18:00 on Wednesday 9 August. A Wind Advisory continues.",
+          "headline": "NWS extended the Red Flag Warning at 15:39 to 18:00 on Wednesday 9 August.",
           "citation": {
             "sourceId": "nws-2023",
             "detail": "NWS Red Flag Warning extended at 15:39 HST 8 Aug to 6 PM HST 9 Aug; Wind Advisory 15:39"

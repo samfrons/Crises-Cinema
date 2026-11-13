@@ -53,6 +53,9 @@ export type InfoItem = {
      the warning chain and the board marks"). */
   /** Slip pictogram (vocabulary.json `icons`). */
   icon?: string;
+  /** Picture mode's lower third: a contiguous, character-exact fragment of
+   *  `text`, at most 90 characters. Required on playable items (the build). */
+  headline?: string;
   /** Warning-chain links this item shows used / cut / unused / pending. */
   chain?: ChainEntry[];
   /** The record first places the hazard in this item's one zone: the HH:MM
