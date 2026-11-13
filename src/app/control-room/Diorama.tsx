@@ -70,10 +70,13 @@ export default function Diorama(p: ViewportProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const labelsRef = useRef<HTMLDivElement>(null);
   const glyphRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  const topLRef = useRef<HTMLDivElement>(null);
   const engineRef = useRef<Engine | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready'>('loading');
   const [metas, setMetas] = useState<GroundMeta[]>([]);
   const [about, setAbout] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
   const failRef = useRef(p.onFail);
   failRef.current = p.onFail;
   const phone = !!tray && tray.side === 'top';
@@ -143,7 +146,17 @@ export default function Diorama(p: ViewportProps) {
     const e = engineRef.current;
     if (status !== 'ready' || !e) return;
     e.relabel();
+    // The cards printed over the stage, in the model's own pixels.
+    const host = hostRef.current;
+    const hr = host?.getBoundingClientRect();
+    const avoid = hr && host?.parentElement
+      ? Array.from(host.parentElement.querySelectorAll<HTMLElement>('.cr-dio-plate, .cr-dio-wind, .cr-dio-impact, .cr-pchain, .cr-preads')).map((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.left - hr.left, y: r.top - hr.top, w: r.width, h: r.height };
+      }).filter((r) => r.w > 0 && r.h > 0)
+      : [];
     e.update({
+      avoid,
       phase, cursor, rm, playing: p.playing, phone,
       zoneStates: board.zoneStates, warned: board.warnedZones, warnedNow: p.warnedNow,
       spot: p.spot ?? [], preview: preview ?? [], fresh: p.fresh.zones, freshOrigins: p.fresh.origins,
@@ -171,6 +184,27 @@ export default function Diorama(p: ViewportProps) {
     const id = window.setTimeout(() => setImpact(false), rm ? 4200 : 3400);
     return () => window.clearTimeout(id);
   }, [cursor, phase, impactStep, rm, spec]);
+
+  // ── The stage's other cards keep clear of the top stack ────────────────
+  // An instrument's readings (placed by the controller at the safe area's top
+  // left) drop below whatever the stack prints in that column: the wind tag
+  // and band on a wide stage, the whole folded stack on a narrow one.
+  useEffect(() => {
+    const top = topRef.current;
+    const left = topLRef.current;
+    const view = top?.parentElement;
+    if (!top || !left || !view) return;
+    const set = () => {
+      const narrow = getComputedStyle(top).display === 'flex';
+      const h = narrow ? top.offsetHeight : left.offsetHeight;
+      view.style.setProperty('--cr-dio-reads-dy', h > 0 ? `${Math.round(h + 6)}px` : '0px');
+    };
+    set();
+    const ro = new ResizeObserver(set);
+    ro.observe(top);
+    ro.observe(left);
+    return () => { ro.disconnect(); view.style.removeProperty('--cr-dio-reads-dy'); };
+  }, [spec]);
 
   // ── View keys: [ ] turn, − = lean, 0 resets (on the stage, or the page) ─
   useEffect(() => {
@@ -259,48 +293,71 @@ export default function Diorama(p: ViewportProps) {
           {glyphKeys.map((k) => <span key={k} data-glyph={k}><GlyphFor glyph={k} size={48} /></span>)}
         </div>
         {status === 'loading' && <p className="cr-dio-loading" aria-hidden>Laying out the ground…</p>}
-        {board.wind && (
-          <p className="cr-dio-wind" aria-hidden style={safe ? { left: safe.x + 12, top: safe.y + 10 } : undefined}>
-            {COMPASS_WORD[board.wind.from]?.toUpperCase()} WINDS · AS OF {board.wind.by}
-          </p>
-        )}
-        {impact && (
-          <div className={`cr-dio-impact${rm ? ' is-still' : ''}`} aria-hidden style={safe ? { top: safe.y + Math.min(24, safe.h * 0.06) } : undefined}>
-            <span className="cr-dio-impact-band">
-              <span className="cr-dio-impact-time">{scenario.scoring.impact.time} {tzLabel(scenario)}</span>
-              <span className="cr-dio-impact-title">The record&apos;s impact time</span>
-              <span className="cr-dio-impact-sub">{impactName ? `${impactName} · ` : ''}the debrief sets every call against it</span>
-            </span>
-          </div>
-        )}
       </div>
 
-      <div className="cr-dio-plate" style={safe ? { top: safe.y + 10 } : undefined}>
-        <p className="cr-dio-plate-line">Relief exaggerated ×{spec.exaggeration} · contours every {spec.contour_m} m</p>
-        {src && (
-          <p className="cr-dio-plate-src">Ground: {publisher} · attribution terms, no named licence · retrieved {src.retrieved}</p>
-        )}
-        <div className="cr-dio-view" role="group" aria-label="Diorama view">
-          <button type="button" className="cr-dio-vbtn" onClick={() => engineRef.current?.nudge('left')} aria-label="Turn the table left" title="Turn left  [">
-            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden focusable="false"><path d="M12.5 9.5A5 5 0 1 1 10 3.6M10 1v3h3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </button>
-          <button type="button" className="cr-dio-vbtn" onClick={() => engineRef.current?.nudge('right')} aria-label="Turn the table right" title="Turn right  ]">
-            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden focusable="false"><path d="M3.5 9.5A5 5 0 1 0 6 3.6M6 1v3H3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </button>
-          <button type="button" className="cr-dio-vbtn" onClick={() => engineRef.current?.nudge('in')} aria-label="Lean in" title="Lean in  =">
-            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden focusable="false"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
-          </button>
-          <button type="button" className="cr-dio-vbtn" onClick={() => engineRef.current?.nudge('out')} aria-label="Lean out" title="Lean out  −">
-            <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden focusable="false"><path d="M3 8h10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
-          </button>
-          <button type="button" className="cr-dio-vbtn cr-dio-vbtn-word" onClick={() => engineRef.current?.nudge('reset')} title="Reset the view  0">Reset</button>
-          <button type="button" className="cr-dio-vbtn cr-dio-vbtn-word" onClick={() => setAbout(true)} aria-haspopup="dialog">The ground</button>
+      {/* The top of the stage, one grid so nothing printed there overlaps:
+          the wind and the impact band in the open column, the plate in its
+          own (wide); stacked plate-first on a narrow stage. */}
+      <div ref={topRef} className="cr-dio-top" style={safe ? { top: safe.y + 10, left: safe.x + 10 } : undefined}>
+        <div ref={topLRef} className="cr-dio-top-l">
+          {board.wind && (
+            <p className="cr-dio-wind" aria-hidden>
+              {COMPASS_WORD[board.wind.from]?.toUpperCase()} WINDS · AS OF {board.wind.by}
+            </p>
+          )}
+          {impact && (
+            <div className={`cr-dio-impact${rm ? ' is-still' : ''}`} aria-hidden>
+              <span className="cr-dio-impact-band">
+                <span className="cr-dio-impact-time">{scenario.scoring.impact.time} {tzLabel(scenario)}</span>
+                <span className="cr-dio-impact-title">The record&apos;s impact time</span>
+                <span className="cr-dio-impact-sub">{impactName ? `${impactName} · ` : ''}the debrief sets every call against it</span>
+              </span>
+            </div>
+          )}
         </div>
-        <p className="cr-dio-hint">
-          <span className="cr-dio-hint-touch">Drag to turn the table · pinch to lean in</span>
-          <span className="cr-dio-hint-keys">Drag to turn, scroll to lean · keys <kbd>[</kbd> <kbd>]</kbd> turn, <kbd>−</kbd> <kbd>=</kbd> lean, <kbd>0</kbd> resets</span>
-          <span> · each new slip sets the view back</span>
-        </p>
+
+        <div className={`cr-dio-plate${viewOpen ? ' is-open' : ''}`}>
+          <div className="cr-dio-plate-head">
+            <div className="cr-dio-plate-text">
+              <p className="cr-dio-plate-line">
+                <span className="cr-dio-long">Relief exaggerated ×{spec.exaggeration} · contours every {spec.contour_m} m</span>
+                <span className="cr-dio-short">Relief ×{spec.exaggeration} · contours {spec.contour_m} m</span>
+              </p>
+              {src && (
+                <p className="cr-dio-plate-src">
+                  <span className="cr-dio-long">Ground: </span>{publisher} · attribution terms, no named licence · retrieved {src.retrieved}
+                </p>
+              )}
+            </div>
+            {/* Narrow stages: the view controls fold away behind this. */}
+            <button type="button" className="cr-dio-vbtn cr-dio-plate-toggle" aria-expanded={viewOpen} aria-controls="cr-dio-view"
+              onClick={() => setViewOpen((v) => !v)}>
+              View
+              <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden focusable="false"><path d={viewOpen ? 'M2 6h8' : 'M6 2v8M2 6h8'} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
+            </button>
+          </div>
+          <div className="cr-dio-view" id="cr-dio-view" role="group" aria-label="Diorama view">
+            <button type="button" className="cr-dio-vbtn" onClick={() => engineRef.current?.nudge('left')} aria-label="Turn the table left" title="Turn left  [">
+              <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden focusable="false"><path d="M12.5 9.5A5 5 0 1 1 10 3.6M10 1v3h3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+            <button type="button" className="cr-dio-vbtn" onClick={() => engineRef.current?.nudge('right')} aria-label="Turn the table right" title="Turn right  ]">
+              <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden focusable="false"><path d="M3.5 9.5A5 5 0 1 0 6 3.6M6 1v3H3" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+            <button type="button" className="cr-dio-vbtn" onClick={() => engineRef.current?.nudge('in')} aria-label="Lean in" title="Lean in  =">
+              <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden focusable="false"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+            </button>
+            <button type="button" className="cr-dio-vbtn" onClick={() => engineRef.current?.nudge('out')} aria-label="Lean out" title="Lean out  −">
+              <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden focusable="false"><path d="M3 8h10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /></svg>
+            </button>
+            <button type="button" className="cr-dio-vbtn cr-dio-vbtn-word" onClick={() => engineRef.current?.nudge('reset')} title="Reset the view  0">Reset</button>
+            <button type="button" className="cr-dio-vbtn cr-dio-vbtn-word" onClick={() => setAbout(true)} aria-haspopup="dialog">The ground</button>
+          </div>
+          <p className="cr-dio-hint">
+            <span className="cr-dio-hint-touch">Drag to turn the table · pinch to lean in</span>
+            <span className="cr-dio-hint-keys">Drag to turn, scroll to lean · keys <kbd>[</kbd> <kbd>]</kbd> turn, <kbd>−</kbd> <kbd>=</kbd> lean, <kbd>0</kbd> resets</span>
+            <span> · each new slip sets the view back</span>
+          </p>
+        </div>
       </div>
 
       <Sheet open={about} onClose={() => setAbout(false)} title="The ground under the diorama" id="cr-dio-about-title" className="cr-psheet">

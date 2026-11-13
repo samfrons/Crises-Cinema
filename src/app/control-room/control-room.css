@@ -3283,9 +3283,8 @@
 
 /* The wind a cited forecast states, as on the board's title band. */
 .cr-dio-wind {
-  position: absolute;
+  justify-self: start;
   margin: 0;
-  z-index: 1;
   font-family: var(--data);
   font-size: 11px;
   font-weight: 700;
@@ -3296,13 +3295,29 @@
   padding: 3px 8px;
 }
 
+/* The top of the stage: one grid, so nothing printed there overlaps. The
+   wind tag and the impact band share the open column; the plate keeps its
+   own. On a narrow stage they stack, the plate first, folded to a strip. */
+.cr-dio-top {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) min(372px, 62%);
+  column-gap: 14px;
+  align-items: start;
+  pointer-events: none;
+}
+.cr-dio-top-l { display: grid; gap: 8px; min-width: 0; }
+/* A slip's readings card drops below the stack (Diorama.tsx measures it). */
+.cr-stage.is-diorama .cr-preads { margin-top: var(--cr-dio-reads-dy, 0px); }
+
 /* The ground's plate: what the model is, whose data, and the view controls. */
 .cr-dio-plate {
-  position: absolute;
-  right: 10px;
-  top: 10px;
-  z-index: 2;
-  width: min(372px, calc(100% - 20px));
+  pointer-events: auto;
+  min-width: 0;
   padding: 8px 10px 8px;
   background: var(--paper-lit);
   border: 1px solid var(--ink);
@@ -3311,6 +3326,9 @@
   color: var(--ink);
 }
 .cr-dio-plate p { margin: 0; }
+.cr-dio-plate-head { display: flex; align-items: flex-start; gap: 8px; }
+.cr-dio-plate-text { flex: 1 1 auto; min-width: 0; }
+.cr-dio-short { display: none; }
 .cr-dio-plate-line { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 .cr-dio-plate-src { margin-top: 3px !important; font-size: 10.5px; line-height: 1.4; color: var(--ink-faint); }
 .cr-dio-view { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
@@ -3334,6 +3352,7 @@
 @media (hover: hover) { .cr-dio-vbtn:hover { background: var(--ink); color: var(--paper); } }
 .cr-dio-vbtn:active { transform: translate(1px, 1px); transition: transform var(--t-fast) var(--ease-press); }
 .cr-dio-vbtn:focus-visible { outline: 3px solid var(--ember); outline-offset: 2px; }
+.cr-dio-plate-toggle { display: none; }
 .cr-dio-hint { margin-top: 6px !important; font-size: 10px; line-height: 1.45; color: var(--ink-faint); }
 .cr-dio-hint kbd {
   font-family: var(--data);
@@ -3346,16 +3365,29 @@
 .cr-dio-hint-touch { display: none; }
 @media (pointer: coarse) { .cr-dio-hint-touch { display: inline; } .cr-dio-hint-keys { display: none; } }
 @media (max-width: 599px) {
-  .cr-dio-plate { right: 8px; width: auto; max-width: calc(100% - 16px); padding: 6px 8px; box-shadow: 2px 2px 0 var(--ink); }
+  .cr-dio-top { left: 8px; right: 8px; display: flex; flex-direction: column; align-items: stretch; gap: 6px; }
+  .cr-dio-top-l { order: 2; gap: 6px; }
+  .cr-dio-plate { padding: 4px 4px 4px 8px; box-shadow: 2px 2px 0 var(--ink); }
+  .cr-dio-plate-head { align-items: center; }
+  .cr-dio-long { display: none; }
+  .cr-dio-short { display: inline; }
+  .cr-dio-plate-line { font-size: 10px; }
+  .cr-dio-plate-src { margin-top: 1px !important; font-size: 9.5px; line-height: 1.35; }
+  .cr-dio-plate-toggle { display: inline-flex; flex: 0 0 auto; gap: 6px; align-items: center; }
   .cr-dio-hint { display: none; }
-  .cr-dio-plate-src { font-size: 9.5px; }
-  .cr-dio-view { margin-top: 5px; }
+  /* Folded: one strip (what the model is, whose ground); the view opens below. */
+  .cr-dio-plate:not(.is-open) .cr-dio-view { display: none; }
+  .cr-dio-view { margin-top: 4px; padding-right: 4px; }
   .cr-dio-vbtn { min-width: 40px; padding: 0 6px; }
+  .cr-dio-wind { font-size: 10px; padding: 2px 6px; }
+}
+@media (max-width: 599px) and (prefers-reduced-motion: no-preference) {
+  .cr-dio-plate.is-open .cr-dio-view { animation: cr-fade var(--t-mid) var(--ease) both; }
 }
 
 /* The impact beat: a band across the model with the cited time, the zone's
    drape swept under it. Presentation of a time the record already holds. */
-.cr-dio-impact { position: absolute; left: 0; right: 0; z-index: 2; display: grid; pointer-events: none; }
+.cr-dio-impact { display: grid; pointer-events: none; }
 .cr-dio-impact-band {
   display: grid;
   gap: 4px;
@@ -3368,7 +3400,7 @@
   text-align: center;
 }
 .cr-dio-impact-time { font-family: var(--data); font-size: 12px; font-weight: 700; letter-spacing: 0.2em; }
-.cr-dio-impact-title { font-family: var(--poster); font-size: clamp(26px, 5vw, 44px); line-height: 0.95; text-transform: uppercase; }
+.cr-dio-impact-title { font-family: var(--poster); font-size: clamp(24px, 3.4vw, 44px); line-height: 0.95; text-transform: uppercase; text-wrap: balance; }
 .cr-dio-impact-sub { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: color-mix(in srgb, var(--paper) 85%, transparent); }
 @keyframes cr-dio-band { 0% { transform: scaleY(0); opacity: 1; } 10% { transform: none; } 82% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: no-preference) {

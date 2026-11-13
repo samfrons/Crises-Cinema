@@ -216,13 +216,38 @@ void main() {
   gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0);
 }`;
 
+/* The ground's fragment shader, section by section (the notes live here, not
+   in the GLSL string, so they do not ship):
+   - Derivatives are taken once, up front, in uniform control flow; the line
+     functions take them as arguments, so the branches can skip work a pixel
+     does not need without leaving a quad's derivatives undefined.
+   - lodLines: lines a fixed number of pixels apart at any zoom, two
+     power-of-two spacings blended, so the hatch neither swims nor fills in.
+   - Cut edge: laminated card stock, each ply its own breath of tone, every
+     fourth ply ruled a little heavier, the terrain's profile inked on top.
+   - Sea: the board's paper sea engraved in a printer's blue (TINT.seaInk):
+     waterlines along the coast, a fine level hatch further out, soundings.
+   - Land: a cartographer's north-west light, tone and hachure, never a
+     gradient. Under the tone, the plate's tints: a hypsometric wash by real
+     height (lowland green-grey, upland tan, paler summits; the same metres
+     the same tint on every day), warm on lit faces and cool in shade. The
+     steepest ground takes a finer engraving between the hachures. No 0 m
+     contour on land: the coast is the water mask's line, and on ground at
+     sea level a 0 m line would only trace the noise.
+   - The coast: one hard ink line where the water mask turns.
+   - Zones, draped in the board's state vocabulary, by stroke and pattern.
+     All eight fields' derivatives are taken at once (two vec4 fwidths); a
+     pixel more than 7 px from every drape skips the zone loop whole (most of
+     the model, most frames) unless a pulse or a preview reaches past an edge
+     (uZLive). Reduced motion: the slip's zone is struck twice, out of register.
+   - Paper stock: a still screen grain, printed, not animated, and the sheet's
+     slow mottle (a breath warmer here, cooler there), fixed to the ground. */
 const GROUND_FRAG = /* glsl */ `
 precision highp float;
 uniform sampler2D uH;
 uniform sampler2D uZ0;
 uniform sampler2D uZ1;
-uniform vec2 uTexel;
-uniform vec2 uMpp;
+uniform vec2 uGrain;
 uniform float uSlope;
 uniform float uContour;
 uniform float uRipple;
@@ -236,7 +261,15 @@ uniform vec3 cInk;
 uniform vec3 cInkSoft;
 uniform vec3 cRule;
 uniform vec3 cEmber;
+uniform vec3 cSea;
+uniform vec3 cSeaInk;
+uniform vec3 tLow;
+uniform vec3 tHigh;
+uniform vec3 tTop;
+uniform vec3 tLit;
+uniform vec3 tShade;
 uniform int uZN;
+uniform float uZLive;
 uniform float uZState[${MAXZ}];
 uniform float uZWarn[${MAXZ}];
 uniform float uZSpot[${MAXZ}];
@@ -250,22 +283,25 @@ varying vec3 vW;
 varying float vSide;
 varying float vTop;
 
-float aaLine(float c, float w) {
-  float fw = max(fwidth(c), 1e-6);
+float aaLine(float c, float fw, float w) {
+  fw = max(fw, 1e-6);
   float d = abs(fract(c + 0.5) - 0.5) / fw;
   return (1.0 - smoothstep(w * 0.5 - 0.5, w * 0.5 + 0.5, d)) * (1.0 - smoothstep(0.22, 0.45, fw));
 }
-// Lines a fixed number of pixels apart at any zoom: two power-of-two
-// spacings blended, so the hatch neither swims nor fills in.
-float lodLines(float c, float px, float w) {
-  float f = max(fwidth(c), 1e-7);
+float lodLines(float c, float fw, float px, float w) {
+  float f = max(fw, 1e-7);
   float L = log2(f * px);
   float s0 = exp2(floor(L));
   float t = fract(L);
-  return mix(aaLine(c / s0, w), aaLine(c / (2.0 * s0), w), t);
+  return mix(aaLine(c / s0, f / s0, w), aaLine(c / (2.0 * s0), f / (2.0 * s0), w), t);
 }
 float hash(vec2 p) { return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
-float eAt(vec2 t) { vec4 h = texture2D(uH, t); return h.g > 0.5 ? 0.0 : h.r; }
+float vnoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + 1.0), f.x), f.y);
+}
 float zd(vec4 a, vec4 b, int k) {
   if (k == 0) return a.x; if (k == 1) return a.y; if (k == 2) return a.z; if (k == 3) return a.w;
   if (k == 4) return b.x; if (k == 5) return b.y; if (k == 6) return b.z; return b.w;
@@ -285,67 +321,80 @@ float pattern(vec2 q) {
 void main() {
   vec4 h = texture2D(uH, vT);
   float elev = h.r;
-  float wm = h.g;
+  float wm = min(h.g, 1.0);
   vec3 col;
   if (vSide > 0.5) {
-    // The model's cut edge: card stock, the terrain's profile inked along its top.
     vec3 n = normalize(cross(dFdx(vW), dFdy(vW)));
     float lit = clamp(dot(n, normalize(vec3(-1.0, 1.2, -1.0))) * 0.5 + 0.5, 0.0, 1.0);
-    col = mix(cRule, cPaperDeep, lit);
-    col = mix(col, cInkSoft, lodLines(vW.y, 6.0, 0.8) * 0.16);
+    col = mix(cRule * tShade, cPaperDeep * tLit, lit);
+    float fy = max(fwidth(vW.y), 1e-7);
+    float s0 = exp2(floor(log2(fy * 6.0)));
+    col *= 1.0 + (hash(vec2(floor(vW.y / s0), 3.7)) - 0.5) * 0.04;
+    col = mix(col, cInkSoft, lodLines(vW.y, fy, 6.0, 0.8) * 0.16 + lodLines(vW.y, fy, 24.0, 1.1) * 0.1);
     float top = 1.0 - smoothstep(1.0, 2.2, (1.0 - vTop) / max(fwidth(vTop), 1e-6));
     col = mix(col, cInk, top);
     gl_FragColor = vec4(col, 1.0);
     return;
   }
   bool water = wm > 0.5;
+  float fwm = max(fwidth(wm), 1e-5);
+  float fe = fwidth(elev);
+  float fz = fwidth(vW.z);
+  float da = dot(vW.xz, vec2(0.7071, 0.7071));
+  float db = dot(vW.xz, vec2(0.7071, -0.7071));
+  float fa = fwidth(da);
+  float fb = fwidth(db);
+  float cd = max(h.g - 1.0, 0.0);
+  float fcd = fwidth(cd);
   if (water) {
-    // The board's paper sea: lit stock, a fine level hatch, faint soundings.
-    // The board's paper sea, engraved: waterlines along the coast, then a
-    // fine level hatch further out, and faint soundings where the tiles have them.
-    float cd = h.b;
-    col = mix(cPaperLit, cPaper, 0.25);
-    col = mix(col, cInkSoft, lodLines(vW.z, 5.0, 0.7) * 0.26);
-    float ripple = aaLine(cd / uRipple, 1.1) * step(uRipple * 0.5, cd) * (1.0 - smoothstep(uRipple * 2.5, uRipple * 4.5, cd));
-    col = mix(col, cInk, ripple * 0.55);
-    if (elev < -1.0) col = mix(col, cInkSoft, aaLine(-elev / (uContour * 2.0), 0.8) * 0.14);
+    col = mix(cPaperLit, cPaper, 0.25) * cSea;
+    col = mix(col, cSeaInk, lodLines(vW.z, fz, 5.0, 0.7) * 0.3);
+    float ripple = aaLine(cd / uRipple, fcd / uRipple, 1.1) * step(uRipple * 0.5, cd) * (1.0 - smoothstep(uRipple * 2.5, uRipple * 4.5, cd));
+    col = mix(col, cSeaInk, ripple * 0.7);
+    if (elev < -1.0) col = mix(col, cSeaInk, aaLine(-elev / (uContour * 2.0), fe / (uContour * 2.0), 0.8) * 0.16);
   } else {
-    // A cartographer's north-west light: tone and hachure, never a gradient.
-    vec2 g = vec2(eAt(vT + vec2(uTexel.x, 0.0)) - eAt(vT - vec2(uTexel.x, 0.0)),
-                  eAt(vT + vec2(0.0, uTexel.y)) - eAt(vT - vec2(0.0, uTexel.y)));
-    g = g / (2.0 * uMpp) * uSlope;
+    vec2 g = h.ba * uSlope;
     vec3 n = normalize(vec3(-g.x, 1.0, -g.y));
     vec3 L = normalize(vec3(-1.0, 1.25, -1.0));
     float lit = dot(n, L);
     float flat0 = L.y;
     float sh = clamp((flat0 - lit) / flat0 * 1.7, 0.0, 1.0);
     float hi = clamp((lit - flat0) / (1.0 - flat0) * 1.5, 0.0, 1.0);
-    col = mix(cPaper, cPaperLit, hi * 0.85);
-    col = mix(col, cPaperDeep, smoothstep(0.0, 0.55, sh) * 0.95);
-    float h1 = lodLines(dot(vW.xz, vec2(0.7071, 0.7071)), 5.0, mix(0.6, 1.25, sh)) * smoothstep(0.22, 0.5, sh);
-    float h2 = lodLines(dot(vW.xz, vec2(0.7071, -0.7071)), 6.0, 0.9) * smoothstep(0.62, 0.9, sh);
-    col = mix(col, cInkSoft, clamp(h1 + h2, 0.0, 1.0) * 0.38);
-    // No 0 m contour on land: the coast is the water mask's line, and on
-    // ground that sits at sea level a 0 m line would only trace the noise.
+    float u = clamp(elev / 1500.0, 0.0, 1.0);
+    vec3 tint = mix(tLow, tHigh, smoothstep(0.04, 0.5, u));
+    tint = mix(tint, tTop, smoothstep(0.62, 1.0, u));
+    col = mix(cPaper, cPaperLit, hi * 0.85) * tint;
+    float shade = smoothstep(0.0, 0.55, sh);
+    col = mix(col, cPaperDeep * tint, shade * 0.95);
+    col *= mix(mix(vec3(1.0), tLit, hi), tShade, shade);
+    vec3 hatchInk = cInkSoft * mix(vec3(1.0), tShade, shade);
+    float hh = 0.0;
+    if (sh > 0.22) hh = lodLines(da, fa, 5.0, mix(0.6, 1.25, sh)) * smoothstep(0.22, 0.5, sh);
+    if (sh > 0.62) hh += lodLines(db, fb, 6.0, 0.9) * smoothstep(0.62, 0.9, sh);
+    float steep = smoothstep(0.55, 1.1, length(g));
+    if (steep > 0.0) hh += lodLines(da, fa, 2.5, 0.6) * steep * 0.45;
+    col = mix(col, hatchInk, clamp(hh, 0.0, 1.0) * 0.38);
     float off0 = smoothstep(uContour * 0.4, uContour * 0.6, abs(elev));
-    float c1 = aaLine(elev / uContour, 1.0) * off0;
-    float c5 = aaLine(elev / (uContour * 5.0), 1.9) * off0;
+    float c1 = aaLine(elev / uContour, fe / uContour, 1.0) * off0;
+    float c5 = aaLine(elev / (uContour * 5.0), fe / (uContour * 5.0), 1.9) * off0;
     col = mix(col, cInkSoft, max(c1 * 0.42, c5 * 0.75));
   }
-  // The coast: one hard ink line where the water mask turns.
-  float coast = 1.0 - smoothstep(0.6, 1.6, abs(wm - 0.5) / max(fwidth(wm), 1e-5));
+  float coast = 1.0 - smoothstep(0.6, 1.6, abs(wm - 0.5) / fwm);
   col = mix(col, cInk, coast * 0.85);
 
-  // Zones, draped: the board's state vocabulary, by stroke and pattern.
   vec4 za = texture2D(uZ0, vT);
   vec4 zb = texture2D(uZ1, vT);
+  vec4 fza = max(fwidth(za), vec4(1e-6));
+  vec4 fzb = max(fwidth(zb), vec4(1e-6));
+  vec4 pa = za / fza;
+  vec4 pb = zb / fzb;
+  float pmin = min(min(min(pa.x, pa.y), min(pa.z, pa.w)), min(min(pb.x, pb.y), min(pb.z, pb.w)));
   vec2 o = (dFdx(vT) - dFdy(vT)) * 4.0;
-  for (int k = 0; k < ${MAXZ}; k++) {
+  if (pmin <= 7.0 || uZLive > 0.5) for (int k = 0; k < ${MAXZ}; k++) {
     if (k >= uZN) break;
     float d = zd(za, zb, k);
-    float fw = max(fwidth(d), 1e-6);
+    float fw = zd(fza, fzb, k);
     float px = d / fw;
-    // Far outside a quiet drape: nothing to draw (most of the model, most frames).
     if (px > 7.0 && uZPrev[k] < 0.5 && uZPulse[k] < 0.01) continue;
     float st = uZState[k];
     float warn = uZWarn[k];
@@ -374,10 +423,9 @@ void main() {
     float ea = st < 0.5 ? 0.4 : 0.95;
     if (uRM < 0.5 && st > 1.5) ea *= 0.8 + 0.2 * cos(uTime * 6.2832 / 2.4);
     col = mix(col, ec, edge * ea);
-    // Reduced motion: the zone on the stage is struck twice, out of register.
     if (uRM > 0.5 && uZSpot[k] > 0.5) {
       float d2 = zd(texture2D(uZ0, vT - o), texture2D(uZ1, vT - o), k);
-      float e2 = 1.0 - smoothstep(width * 0.5 - 0.6, width * 0.5 + 0.6, abs(d2 / max(fwidth(d2), 1e-6)));
+      float e2 = 1.0 - smoothstep(width * 0.5 - 0.6, width * 0.5 + 0.6, abs(d2 / fw));
       col = mix(col, ec, e2 * 0.55);
     }
     if (uZPrev[k] > 0.5) {
@@ -386,7 +434,7 @@ void main() {
       col = mix(col, cEmber, pe);
     }
   }
-  // Paper stock: a still grain, printed, not animated.
+  col *= 1.0 + (vnoise(vT * uGrain) - 0.5) * vec3(0.034, 0.028, 0.02);
   col += (hash(floor(gl_FragCoord.xy)) - 0.5) * 0.03;
   gl_FragColor = vec4(col, 1.0);
 }`;
@@ -468,6 +516,22 @@ void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(
 
 export type Palette = Record<'paper' | 'paperLit' | 'paperDeep' | 'ink' | 'inkSoft' | 'rule' | 'ember', [number, number, number]>;
 
+/** The plate's printed tints, as multipliers on the house tokens. A shader
+ *  cannot read CSS custom properties, so the tokens arrive as uniforms
+ *  (Diorama.tsx reads them from globals.css :root) and these turn them: kept
+ *  within a few percent of 1 so the paper stays dominant and every tint
+ *  sits well behind the ink. Retune here if --paper or --ink-soft change. */
+type Mul = [number, number, number];
+const TINT: Record<'low' | 'high' | 'top' | 'lit' | 'shade' | 'sea', Mul> & { seaInk: Mul } = {
+  low: [0.962, 0.988, 0.952], // lowland: a pale green-grey
+  high: [1.0, 0.962, 0.893], // upland: a warm tan
+  top: [1.008, 1.004, 0.992], // the summits: paler again
+  lit: [1.012, 1.0, 0.972], // faces to the light: warm
+  shade: [0.966, 0.984, 1.03], // faces away: cool
+  sea: [0.95, 0.975, 1.0], // the sea's stock: a breath cool
+  seaInk: [0.8, 1.16, 1.68], // --ink-soft turned to a printer's blue (water hatch and waterlines only)
+};
+
 /** What the controller hands the engine on every render (it diffs). */
 export type EngineState = {
   phase: Phase;
@@ -489,6 +553,8 @@ export type EngineState = {
   safe: Rect | null;
   tray: Tray | null;
   phone: boolean;
+  /** the cards printed over the stage (host px): labels never sit under one */
+  avoid: Rect[];
 };
 
 export type Engine = {
@@ -621,11 +687,16 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
   const camera = new THREE.PerspectiveCamera(30, 1, 0.05, tableR * 20);
 
   const v3 = (c: [number, number, number]) => new THREE.Vector3(c[0], c[1], c[2]);
+  const mul = (c: [number, number, number], m: Mul) => new THREE.Vector3(c[0] * m[0], c[1] * m[1], c[2] * m[2]);
   const shared = {
+    cSea: { value: v3(TINT.sea) }, cSeaInk: { value: mul(palette.inkSoft, TINT.seaInk) },
+    tLow: { value: v3(TINT.low) }, tHigh: { value: v3(TINT.high) }, tTop: { value: v3(TINT.top) },
+    tLit: { value: v3(TINT.lit) }, tShade: { value: v3(TINT.shade) },
     cPaper: { value: v3(palette.paper) }, cPaperLit: { value: v3(palette.paperLit) }, cPaperDeep: { value: v3(palette.paperDeep) },
     cInk: { value: v3(palette.ink) }, cInkSoft: { value: v3(palette.inkSoft) }, cRule: { value: v3(palette.rule) }, cEmber: { value: v3(palette.ember) },
     uTime: { value: 0 }, uRM: { value: 0 },
     uZN: { value: draped.length },
+    uZLive: { value: 0 },
     uZState: { value: new Array(MAXZ).fill(0) }, uZWarn: { value: new Array(MAXZ).fill(0) },
     uZSpot: { value: new Array(MAXZ).fill(0) }, uZPrev: { value: new Array(MAXZ).fill(0) },
     uZPulse: { value: new Array(MAXZ).fill(0) }, uZSweep: { value: new Array(MAXZ).fill(-1) },
@@ -652,13 +723,24 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
     const toH = THREE.DataUtils.toHalfFloat;
     const coast = coastDistance(f.water, w, h, f.meta.metresPerPixelX, f.meta.metresPerPixelY);
     const big = toH(999);
+    // The ground as the shader reads it, one fetch a pixel:
+    //   r  elevation, m (the sea bed too, for the soundings)
+    //   g  0 on land; on open water 1 + the distance to the coast, km
+    //   ba the slope (m per m, east and south), the sea read as 0 m: the
+    //      hillshade's gradient, worked once here instead of per pixel.
+    const eL = (i: number, j: number) => {
+      const c = clamp(j, 0, h - 1) * w + clamp(i, 0, w - 1);
+      return f.water[c] ? 0 : f.elev[c];
+    };
+    const gx = 2 * f.meta.metresPerPixelX;
+    const gy = 2 * f.meta.metresPerPixelY;
     for (let j = 0; j < h; j++) {
       for (let i = 0; i < w; i++) {
         const c = j * w + i;
         hd[c * 4] = toH(f.elev[c]);
-        hd[c * 4 + 1] = toH(f.water[c]);
-        hd[c * 4 + 2] = toH(coast[c]);
-        hd[c * 4 + 3] = toH(1);
+        hd[c * 4 + 1] = toH(f.water[c] ? 1 + coast[c] : 0);
+        hd[c * 4 + 2] = toH((eL(i + 1, j) - eL(i - 1, j)) / gx);
+        hd[c * 4 + 3] = toH((eL(i, j + 1) - eL(i, j - 1)) / gy);
         const p: V2 = [f.x0 + ((i + 0.5) / w) * (f.x1 - f.x0), f.z0 + ((j + 0.5) / h) * (f.z1 - f.z0)];
         for (let k = 0; k < 8; k++) {
           const z = draped[k];
@@ -734,8 +816,7 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
       uniforms: {
         ...shared,
         uH: { value: tH }, uZ0: { value: tZ0 }, uZ1: { value: tZ1 },
-        uTexel: { value: new THREE.Vector2(1 / w, 1 / h) },
-        uMpp: { value: new THREE.Vector2(f.meta.metresPerPixelX, f.meta.metresPerPixelY) },
+        uGrain: { value: new THREE.Vector2(w / 22, h / 22) },
         uContour: { value: spec.contour_m },
         uRipple: { value: Math.max(0.12, tableR * 0.011) },
       },
@@ -958,12 +1039,13 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
     // 800–1200 ms by how far the table moves under the lens (longer shots keep their own).
     const moved = Math.hypot(to.tx - cur.tx, to.tz - cur.tz) / tableR + Math.abs(Math.log(to.dist / cur.dist));
     const d = ms > 1200 ? ms : clamp(800 + moved * 500, 800, Math.max(800, Math.min(1200, ms + 200)));
-    tween = { from: cur, to, t0: now, ms: d };
+    tween = { from: { ...cur }, to, t0: now, ms: d };
   };
-  const applyCam = (c: Cam) => {
+  const applyCam = (c: Cam, azOff = 0) => {
     const p = clamp(c.pitch, 0.3, 1.42);
-    const x = c.tx + c.dist * Math.cos(p) * Math.sin(c.az);
-    const z = c.tz + c.dist * Math.cos(p) * Math.cos(c.az);
+    const az = c.az + azOff;
+    const x = c.tx + c.dist * Math.cos(p) * Math.sin(az);
+    const z = c.tz + c.dist * Math.cos(p) * Math.cos(az);
     let y = c.ty + c.dist * Math.sin(p);
     // Never underground: hold the lens above the model wherever it is.
     y = Math.max(y, yAt(x, z) + base * 2);
@@ -972,7 +1054,9 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
   };
 
   // ── Labels: DOM, placed from the model each frame ───────────────────────
-  type Lab = { el: HTMLElement; x: number; z: number; lift: number; ground: boolean; w: number; h: number; zone: boolean };
+  /** dx dy: the body's box from the anchor point; w h its size (px) */
+  type Lab = { el: HTMLElement; x: number; z: number; lift: number; ground: boolean; dx: number; dy: number; w: number; h: number; zone: boolean; tf: string; vis: boolean | null };
+  let avoid: Rect[] = [];
   let labs: Lab[] = [];
   const relabel = () => {
     labs = Array.from(o.labels.querySelectorAll<HTMLElement>('[data-lon]')).map((el) => {
@@ -981,34 +1065,80 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
       const zone = el.dataset.zone ? zoneById.get(el.dataset.zone) : null;
       const [x, z] = zone ? zone.anchor : toW(lon, lat);
       const body = el.firstElementChild as HTMLElement | null;
-      const isZone = el.classList.contains('cr-dio-zone');
-      return { el, x, z, lift: Number(el.dataset.lift ?? 0), ground: el.dataset.ground === '0', w: isZone ? body?.offsetWidth ?? 0 : 0, h: isZone ? body?.offsetHeight ?? 0 : 0, zone: isZone };
+      // One read of each body's box against its anchor (reads only; the
+      // frame loop then only writes).
+      const a = el.getBoundingClientRect();
+      const r = body?.getBoundingClientRect();
+      return {
+        el, x, z, lift: Number(el.dataset.lift ?? 0), ground: el.dataset.ground === '0',
+        dx: r ? r.left - a.left : 0, dy: r ? r.top - a.top : 0, w: r?.width ?? 0, h: r?.height ?? 0,
+        zone: el.classList.contains('cr-dio-zone'), tf: '', vis: null,
+      };
     });
   };
   relabel();
   const pv = new THREE.Vector3();
-  const placed: [number, number, number, number][] = [];
-  const placeLabels = () => {
-    placed.length = 0;
-    for (const l of labs) {
-      pv.set(l.x, l.ground ? 0 : yAt(l.x, l.z), l.z).project(camera);
-      const vis = pv.z < 1 && Math.abs(pv.x) < 1.15 && Math.abs(pv.y) < 1.15;
-      const sx = (pv.x * 0.5 + 0.5) * view.w;
-      let sy = (-pv.y * 0.5 + 0.5) * view.h - l.lift;
-      if (l.zone && vis && l.w) {
-        // Two zones' names never print over each other: the later one steps down.
-        const x0 = sx - l.w / 2 - 4;
-        const x1 = sx + l.w / 2 + 4;
-        for (let pass = 0; pass < 4; pass++) {
-          const hit = placed.find(([a, b, c, d]) => x0 < b && x1 > a && sy < d && sy + l.h + 4 > c);
-          if (!hit) break;
-          sy = hit[3] + 2;
-        }
-        placed.push([x0, x1, sy, sy + l.h + 4]);
+  // Placed zone-name boxes, x0 x1 y0 y1 flat (no per-frame arrays).
+  const placed = new Float32Array(4 * 64);
+  let nPlaced = 0;
+  const hitPlaced = (x0: number, x1: number, y0: number, y1: number) => {
+    for (let q = 0; q < nPlaced * 4; q += 4) if (x0 < placed[q + 1] && x1 > placed[q] && y0 < placed[q + 3] && y1 > placed[q + 2]) return q;
+    return -1;
+  };
+  const placeOne = (l: Lab) => {
+    pv.set(l.x, l.ground ? 0 : yAt(l.x, l.z), l.z).project(camera);
+    let vis = pv.z < 1 && Math.abs(pv.x) < 1.15 && Math.abs(pv.y) < 1.15;
+    let sx = (pv.x * 0.5 + 0.5) * view.w;
+    let sy = (-pv.y * 0.5 + 0.5) * view.h - l.lift;
+    if (vis && l.w) {
+      // Never under a card printed over the stage (the plate, the chain, a
+      // reading): a name steps clear sideways if it can stay by its place,
+      // else it yields. Zone names and frame captions keep inside the safe
+      // area (clear of the desk rail and the stage's edge).
+      if (l.ground || l.zone) {
+        const lo = (safe ? safe.x : 0) + 6;
+        const hi = (safe ? safe.x + safe.w : view.w) - 6;
+        if (hi - lo > l.w) sx = clamp(sx, lo - l.dx, hi - l.dx - l.w);
       }
-      l.el.style.transform = `translate3d(${sx.toFixed(1)}px, ${sy.toFixed(1)}px, 0)`;
-      l.el.style.visibility = vis ? '' : 'hidden';
+      for (const r of avoid) {
+        const bx = sx + l.dx;
+        const by = sy + l.dy;
+        if (bx >= r.x + r.w + 4 || bx + l.w <= r.x - 4 || by >= r.y + r.h + 2 || by + l.h <= r.y - 2) continue;
+        const left = r.x - 4 - (bx + l.w);
+        const right = r.x + r.w + 4 - bx;
+        const step = Math.abs(left) <= Math.abs(right) ? left : right;
+        const reach = l.ground ? view.w : l.w * 0.6 + 24;
+        const nx = bx + step;
+        if (Math.abs(step) > reach || nx < 4 || nx + l.w > view.w - 4) { vis = false; break; }
+        sx += step;
+      }
     }
+    if (vis && l.w && (l.zone || l.ground)) {
+      // Names never print over each other: zones' first, the later stepping
+      // down; then the frames' captions, clear of every name, or not at all.
+      const x0 = sx + l.dx - 4;
+      const x1 = x0 + l.w + 8;
+      for (let pass = 0; pass < 4; pass++) {
+        const hit = hitPlaced(x0, x1, sy + l.dy, sy + l.dy + l.h + 4);
+        if (hit < 0) break;
+        sy = placed[hit + 3] + 2 - l.dy;
+      }
+      if (l.ground && (sy + l.dy + l.h > view.h - 4 || hitPlaced(x0, x1, sy + l.dy, sy + l.dy + l.h + 4) >= 0)) vis = false;
+      if (vis && nPlaced < 64) {
+        const q = nPlaced++ * 4;
+        placed[q] = x0; placed[q + 1] = x1; placed[q + 2] = sy + l.dy; placed[q + 3] = sy + l.dy + l.h + 4;
+      }
+    }
+    // Write only what moved: an unchanged label costs the page nothing.
+    if (vis !== l.vis) { l.vis = vis; l.el.style.visibility = vis ? '' : 'hidden'; }
+    if (!vis) return;
+    const tf = `translate3d(${sx.toFixed(1)}px, ${sy.toFixed(1)}px, 0)`;
+    if (tf !== l.tf) { l.tf = tf; l.el.style.transform = tf; }
+  };
+  const placeLabels = () => {
+    nPlaced = 0;
+    for (const l of labs) if (!l.ground) placeOne(l);
+    for (const l of labs) if (l.ground) placeOne(l);
   };
 
   // ── Interaction: drag to turn, wheel/pinch to lean, clamped ─────────────
@@ -1039,6 +1169,7 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
     if (Math.abs(dx) + Math.abs(dy) < 0.5) return;
     grab();
     cur = { ...cur, az: cur.az - dx * 0.006, pitch: e.pointerType === 'touch' ? cur.pitch : clamp(cur.pitch + dy * 0.005, 0.3, 1.42) };
+    wake();
   };
   const onUp = (e: PointerEvent) => { pointers.delete(e.pointerId); if (pointers.size < 2) pinch0 = 0; };
   const grab = () => {
@@ -1049,6 +1180,7 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
   const lean = (k: number) => {
     grab();
     cur = { ...cur, dist: clamp(cur.dist * k, wideDist * 0.12, wideDist * 1.7) };
+    wake();
   };
   const onWheel = (e: WheelEvent) => {
     e.preventDefault();
@@ -1178,6 +1310,7 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
     rmode = s.rm;
     shared.uRM.value = s.rm ? 1 : 0;
     safe = s.safe;
+    avoid = s.avoid;
     applyViewOffset();
     // Zone states and the marks the controller derived.
     draped.forEach((z, i) => {
@@ -1253,15 +1386,26 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
     wake();
   };
 
-  // ── The loop: only while visible on screen and in a visible tab ─────────
+  // ── The loop: on demand, and only while visible and in a visible tab ────
+  // A frame is drawn when something moves: a camera travel, the rise, the
+  // user's hand, a drape's pulse or sweep, an order's arc, a chit's pop.
+  // The slow ambient motion (the idle drift, a signal drape's breathing) is
+  // drawn at a quarter rate; with nothing moving the loop sleeps until the
+  // next update, nudge or resize wakes it. Reduced motion: no drift and no
+  // breathing, so a settled table draws nothing at all.
   let raf = 0;
   let onScreen = true;
   let fpsEma = 0;
-  let lastT = 0;
+  let lastRender = 0;
+  let lastBusy = false;
+  let dirty = true;
+  let quiet = 0;
   let fpsShown = 0;
   let frameMs = 0;
   let nFrames = 0;
   let tier = 0;
+  const AMBIENT_MS = 50;
+  const tw: Cam = { ...cur };
   // Dev/test hook: hold full quality (for reference captures on a software rasterizer).
   const pinned = (() => { try { return localStorage.getItem('cr-dio-quality') === 'full'; } catch { return false; } })();
   const stepDown = () => {
@@ -1276,17 +1420,49 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
     markMat.uniforms.uDpr.value = pr;
     o.host.dataset.tier = String(tier);
   };
+  /** Anything on a clock still running at time t (s)? */
+  const busyAt = (t: number) => {
+    if (riseMs > 0 || tween) return true;
+    for (let i = 0; i < draped.length; i++) {
+      const pk = t - pulseAt[i];
+      if (pk > -30 && pk < 1.4) return true;
+      const sk = t - sweepAt[i];
+      if (sk > -30 && sk < 1.1) return true;
+      if (warnAt[i] >= 0 && t - warnAt[i] < 0.35) return true;
+    }
+    for (const a of arcList) if (a.start >= 0 && t < a.ringAt + 0.24) return true;
+    for (const m of markList) if (m.born >= 0 && t < m.born + 0.6) return true;
+    return false;
+  };
+  const ambientNow = () => {
+    if (rmode) return false;
+    if (driftAmp > 0.002 || (!!st && !user && st.playing && st.phase !== 'record')) return true;
+    for (let i = 0; i < draped.length; i++) if (shared.uZState.value[i] > 1.5) return true;
+    return false;
+  };
   const tick = (ms: number) => {
     raf = 0;
-    if (!onScreen || document.hidden) return;
-    const dt = lastT ? Math.min(0.1, (ms - lastT) / 1000) : 0.016;
-    if (lastT) {
+    if (!onScreen || document.hidden) { lastRender = 0; return; }
+    const t = ms / 1000;
+    const busy = busyAt(t);
+    if (busy || dirty) quiet = 0;
+    else if (ambientNow()) {
+      if (lastRender && ms - lastRender < AMBIENT_MS) { raf = requestAnimationFrame(tick); return; }
+    } else if (quiet >= 2) {
+      // Settled (and drawn settled twice): sleep until woken.
+      lastRender = 0;
+      return;
+    } else quiet += 1;
+    dirty = false;
+    const dt = lastRender ? Math.min(0.1, (ms - lastRender) / 1000) : 0.016;
+    // Frame time is measured only across back-to-back busy frames.
+    if (busy && lastBusy && lastRender) {
       frameMs = frameMs ? frameMs * 0.94 + dt * 1000 * 0.06 : dt * 1000;
       fpsEma = 1000 / frameMs;
       if (++nFrames > 40 && frameMs > 26 && tier < 3 && !pinned) stepDown();
     }
-    lastT = ms;
-    const t = ms / 1000;
+    lastBusy = busy;
+    lastRender = ms;
     shared.uTime.value = t;
     // The ground rises from the paper.
     if (riseMs > 0) {
@@ -1299,17 +1475,27 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
     // The camera: travel, the user's hand, the idle drift.
     if (tween) {
       const k = (ms - tween.t0) / tween.ms;
-      cur = lerpCam(tween.from, tween.to, ease(k));
-      if (k >= 1) { cur = tween.to; tween = null; }
+      if (k >= 1) { cur = tween.to; tween = null; } else {
+        const e = ease(k);
+        const a = tween.from;
+        const b = tween.to;
+        tw.tx = a.tx + (b.tx - a.tx) * e; tw.ty = a.ty + (b.ty - a.ty) * e; tw.tz = a.tz + (b.tz - a.tz) * e;
+        tw.dist = Math.exp(Math.log(a.dist) + (Math.log(b.dist) - Math.log(a.dist)) * e);
+        tw.az = a.az + (b.az - a.az) * e; tw.pitch = a.pitch + (b.pitch - a.pitch) * e;
+        cur = tw; // the scratch camera (a new travel copies it as its start)
+      }
     }
     const idle = !!st && !rmode && !user && !tween && st.playing && st.phase !== 'record';
     driftAmp += ((idle ? 1 : 0) - driftAmp) * Math.min(1, dt * 0.6);
+    if (driftAmp < 0.002 && !idle) driftAmp = 0;
     driftAz = Math.sin(t * ((2 * Math.PI) / 26)) * 0.07 * driftAmp;
-    applyCam(user ? cur : { ...cur, az: cur.az + driftAz });
-    // Zone animation scalars.
-    draped.forEach((_, i) => {
+    applyCam(cur, user ? 0 : driftAz);
+    // Zone animation scalars (and whether any drape reaches past its edge).
+    let live = 0;
+    for (let i = 0; i < draped.length; i++) {
       const pk = t - pulseAt[i];
       shared.uZPulse.value[i] = pk >= 0 && pk < 1.4 ? Math.exp(-pk * 3.2) * smooth(pk / 0.08) : 0;
+      if (shared.uZPulse.value[i] >= 0.01 || shared.uZPrev.value[i] > 0.5) live = 1;
       // The impact sweep: hidden until it starts, then wiped out from the anchor.
       const sk = t - sweepAt[i];
       shared.uZSweep.value[i] = sk < 0 ? 0.0001 : sk < 1.1 ? ease(sk) * reach[i] * 1.15 : -1;
@@ -1317,7 +1503,8 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
         const wk = t - warnAt[i];
         shared.uZWarn.value[i] = warnAt[i] < 0 ? 1 : clamp(wk / 0.35, 0, 1);
       }
-    });
+    }
+    shared.uZLive.value = live;
     // Arcs draw out, then the landing ring is stamped.
     for (const a of arcList) {
       if (a.start < 0) continue;
@@ -1329,10 +1516,15 @@ export async function createEngine(o: EngineOpts): Promise<Engine> {
     if (riseMs > 0 || rise < 1) placeMarks();
     renderer.render(scene, camera);
     placeLabels();
-    if (ms - fpsShown > 500) { fpsShown = ms; o.host.dataset.fps = fpsEma.toFixed(1); o.labels.dataset.near = cur.dist < wideDist * 0.55 ? '1' : '0'; }
+    if (ms - fpsShown > 500) {
+      fpsShown = ms;
+      o.host.dataset.fps = fpsEma.toFixed(1);
+      const near = cur.dist < wideDist * 0.55 ? '1' : '0';
+      if (o.labels.dataset.near !== near) o.labels.dataset.near = near;
+    }
     raf = requestAnimationFrame(tick);
   };
-  const wake = () => { if (!raf && onScreen && !document.hidden) { lastT = 0; raf = requestAnimationFrame(tick); } };
+  const wake = () => { dirty = true; if (!raf && onScreen && !document.hidden) raf = requestAnimationFrame(tick); };
   const ro = new ResizeObserver(resize);
   ro.observe(o.host);
   resize();
