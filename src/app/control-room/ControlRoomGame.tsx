@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { Citation, GlossaryEntry, InfoItem, MediaAttachment, Option, Scenario, ScenarioBundle, Timestep } from './types';
 import { startSession, logChoice, completeSession, type ChoiceEvent } from './telemetry';
 import { scoreRun, historicalLeadTime, formatLead, alertBeforeClock, bestMarks, span, type Choice } from './scoring';
@@ -11,7 +12,12 @@ import Reckoning from './Reckoning';
 import { KindGlyph, HazardGlyph, Pictogram, SilentGlyph, hasPictogram } from './glyphs';
 import Readings from './Readings';
 import WarningChain, { chainChanges, chainNews, deriveChain } from './WarningChain';
-import { loadLastRun, markCoached, sameCalls, saveRun, wasCoached, type LastRun } from './memory';
+import { loadLastRun, markBooted, markCoached, sameCalls, saveRun, wasBooted, wasCoached, type LastRun } from './memory';
+import * as sound from './sound';
+import {
+  BEAT_CLEAR_MS, BEAT_MS, BOOT_MS, BOOT_QUICK_MS, BOOT_ROLL_AT, BOOT_ROLL_MS, BOOT_STILL_MS,
+  ROLL_AT, ROLL_MS, TICK_SPACING, TOLL_LAND_MS, leaderAt, leaderMs, reelFrames,
+} from './stage';
 import prepMeta from '../../data/preparedness-meta.json';
 import { inWords, tzLabel, WPM, type CardBundle, type ScenarioCard } from './summary';
 import { DAY_FOLDER, FILE_PATH, folderHref, folderWord, isFolder, type FolderId } from './file/folders';
@@ -184,8 +190,57 @@ function useMedia(query: string) {
   return match;
 }
 
+const MODIFIERS = new Set(['Shift', 'Control', 'Alt', 'Meta', 'CapsLock']);
+
 const reducedMotion = () =>
   typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ── Staging: the overture and the beat ───────────────────────────────────
+   Presentation only. The state of the run (cursor, choices) commits at the
+   press, exactly as before; what is staged is how the commit is shown. The
+   run's root carries data attributes the CSS choreographs from (see
+   "Staging" in control-room.css), and the timings come from stage.ts:
+
+   boot  — the first desk taken this session: the console band darkens out
+           of the paper, the clock powers on and rolls up to the day's
+           opening time, the pips and rail come on, the board inks across,
+           and the briefing prints. ~2.4s; any press or key cuts to the end.
+           Later desks this session get a half-second quick cut.
+   beat  — every press of the game's verb (take the desk, advance the clock,
+           close the log): the log dims a breath, the needle sweeps and the
+           console's odometer rolls through the hours between, the new
+           timecode stamps at 720ms, then the slips print. A second press,
+           a click or any key cuts to the slips at once.
+
+   Reduced motion: neither moves. The boot is an immediate cut with the
+   console time and the day's title struck twice out of register for a
+   moment; the beat is instant, the new times struck twice until it clears.
+   Neither ever takes focus: focus goes exactly where it went before. */
+
+type Boot = 'full' | 'quick';
+type BeatKind = 'start' | 'advance' | 'close';
+type Beat = { n: number; kind: BeatKind; from: string; to: string; step: number; at: number; skipped: boolean };
+
+/** A slip's leader line: what sort of slip, and the hour it came in at. */
+const leaderText = (label: string, t: Timestep) => `${label} · ${stamp(t)}`;
+
+/** The type-bar ticks for an hour's slips, `offset` ms from now (a skipped
+ *  beat passes a negative offset: what has already printed stays silent). */
+function slipSounds(scenario: Scenario, t: Timestep, offset: number) {
+  const vocab = vocabFor(scenario);
+  t.info_available.forEach((info, i) => {
+    const ms = leaderMs(leaderText(vocab.kindLabel[info.kind], t).length);
+    sound.teletype(offset + leaderAt(i), Math.ceil(ms / TICK_SPACING), TICK_SPACING);
+  });
+}
+
+/** The odometer's detents as it rolls through `frames`. */
+function rollSounds(frames: string[], at: number, ms: number, offset = 0) {
+  for (let k = 1; k < frames.length; k++) {
+    const d = offset + at + (ms * k) / (frames.length - 1) * 0.8;
+    if (d >= 0) sound.detent(d);
+  }
+}
 
 /** The full scenarios load only once a day is picked: the select screen
  *  ships card summaries (summary.ts), and this chunk follows on demand. */
@@ -199,6 +254,70 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
   const [run, setRun] = useState<Run | null>(null);
   const [coachIndex, setCoachIndex] = useState<number | null>(null);
   const wide = useMedia('(min-width: 1024px)');
+  const [boot, setBoot] = useState<Boot | null>(null);
+  const [beat, setBeat] = useState<Beat | null>(null);
+  const beatN = useRef(0);
+
+  // The overture runs to its end, or until any press or key (not a bare
+  // modifier) cuts it short. Reduced motion holds only the still mark.
+  useEffect(() => {
+    if (!boot) return;
+    const rm = reducedMotion();
+    const ms = boot === 'full' ? (rm ? BOOT_STILL_MS : BOOT_MS) : rm ? 0 : BOOT_QUICK_MS;
+    const end = () => { setBoot(null); sound.hush(); };
+    const onKey = (e: KeyboardEvent) => { if (!MODIFIERS.has(e.key)) end(); };
+    const timer = window.setTimeout(end, ms);
+    window.addEventListener('pointerdown', end, true);
+    window.addEventListener('keydown', onKey, true);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('pointerdown', end, true);
+      window.removeEventListener('keydown', onKey, true);
+    };
+  }, [boot]);
+
+  // The beat clears itself once every arrival is down; until then a second
+  // press, a click anywhere or any key skips straight to the slips.
+  const runRef = useRef(run);
+  runRef.current = run;
+  useEffect(() => {
+    if (!beat) return;
+    const timer = window.setTimeout(() => setBeat((b) => (b?.n === beat.n ? null : b)), beat.skipped ? BEAT_CLEAR_MS - BEAT_MS : BEAT_CLEAR_MS);
+    if (beat.skipped || reducedMotion()) return () => window.clearTimeout(timer);
+    const skip = () => {
+      const elapsed = performance.now() - beat.at;
+      if (elapsed >= BEAT_MS) return; // already stamped: nothing left to skip
+      setBeat((b) => (b?.n === beat.n ? { ...b, skipped: true } : b));
+      // The ticks were scheduled for the staged timing; re-time what is left.
+      sound.hush();
+      const r = runRef.current;
+      if (!r) return;
+      if (beat.kind === 'close') sound.thud(Math.max(0, TOLL_LAND_MS - elapsed));
+      else slipSounds(r.scenario, r.scenario.timesteps[beat.step], -elapsed);
+    };
+    const onKey = (e: KeyboardEvent) => { if (!MODIFIERS.has(e.key)) skip(); };
+    window.addEventListener('pointerdown', skip, true);
+    window.addEventListener('keydown', onKey, true);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('pointerdown', skip, true);
+      window.removeEventListener('keydown', onKey, true);
+    };
+  }, [beat]);
+
+  /** Stage the verb: the clunk, the roll, then (on the staged timing) the
+   *  slips' ticks or the toll's thud. The state has already committed. */
+  const stageBeat = (scenario: Scenario, kind: BeatKind, from: string, to: string, step: number) => {
+    const rm = reducedMotion();
+    const n = ++beatN.current;
+    setBeat({ n, kind, from, to, step, at: performance.now(), skipped: false });
+    sound.hush();
+    sound.clunk();
+    const lead = rm ? 0 : BEAT_MS;
+    if (!rm) rollSounds(reelFrames(from, to), ROLL_AT, ROLL_MS);
+    if (kind === 'close') sound.thud(rm ? 80 : lead + TOLL_LAND_MS);
+    else if (!rm) slipSounds(scenario, scenario.timesteps[step], lead);
+  };
 
   const pending = useRef<Pending | null>(null);
   useEffect(() => {
@@ -229,6 +348,16 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
       // A decision the day does not hold is dropped, not guessed at.
       const at = filed?.at && scenario.timesteps.some((t) => t.id === filed.at) ? filed.at : null;
       pending.current = { focus: 'cr-brief-title', scroll: 'desk' };
+      // The overture plays in full on the session's first desk; after that,
+      // a quick cut, so a returning player is never held at the door.
+      const kind: Boot = wasBooted() ? 'quick' : 'full';
+      markBooted();
+      setBoot(kind);
+      setBeat(null);
+      if (kind === 'full' && !reducedMotion()) {
+        sound.clunk();
+        rollSounds(reelFrames('00:00', scenario.clock.start), BOOT_ROLL_AT, BOOT_ROLL_MS);
+      }
       setRun(newRun(scenario, filed ? { ...filed, at } : null));
     }, () => setLoading(null));
   };
@@ -275,6 +404,8 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
       pending.current = { focus: `${stepId(steps[0])}-h`, scroll: stepId(steps[0]) };
     }
     setRun({ ...run, sessionId: session.sessionId, cursor: 0, presentedAt: Date.now() });
+    setBoot(null);
+    stageBeat(scenario, 'start', scenario.clock.start, stamp(steps[0]), 0);
   };
 
   const endCoach = () => {
@@ -317,19 +448,26 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
       saveRun(scenario, Object.fromEntries(choices.map((c) => [c.timestep.id, c.option.id])));
       pending.current = { focus: 'cr-debrief-title', scroll: 'cr-debrief' };
       setRun({ ...run, done: true });
+      stageBeat(scenario, 'close', stamp(current), scenario.clock.end, cursor);
     } else {
       const next = steps[cursor + 1];
       pending.current = { focus: `${stepId(next)}-h`, scroll: stepId(next) };
       setRun({ ...run, cursor: cursor + 1, presentedAt: Date.now() });
+      stageBeat(scenario, 'advance', stamp(current), stamp(next), cursor + 1);
     }
   };
 
   const replay = () => {
     pending.current = { focus: 'cr-brief-title', scroll: 'desk' };
+    setBeat(null);
+    setBoot('quick');
     setRun(newRun(scenario));
   };
   const leave = () => {
     pending.current = { scroll: 'desk' };
+    setBeat(null);
+    setBoot(null);
+    sound.hush();
     setRun(null);
   };
 
@@ -340,10 +478,12 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
   const chainFresh = done || !started ? new Set<string>() : chainChanges(scenario, shownIndex);
   const live = { board, fresh, chain, chainFresh };
 
+  const staging = beat && !beat.skipped ? beat : null;
   return (
-    <div className="cr-run">
+    <div className="cr-run" data-boot={boot ?? undefined} data-beat={staging?.kind}
+      data-beat-p={staging ? staging.n % 2 : undefined} data-settle={beat ? '' : undefined}>
       <Console scenario={scenario} started={started} cursor={cursor} choices={choices} done={done}
-        live={live} showMapButton={!wide} coach={coach} />
+        live={live} showMapButton={!wide} coach={coach} boot={boot} beat={staging} />
 
       <div className="cr-play wrap">
         <div className="cr-log" role="log" aria-label="Dispatch log" aria-live="polite">
@@ -403,9 +543,9 @@ function LiveBoard({ scenario, live, note }: { scenario: Scenario; live: Live; n
   );
 }
 
-function Console({ scenario, started, cursor, choices, done, live, showMapButton, coach }: {
+function Console({ scenario, started, cursor, choices, done, live, showMapButton, coach, boot, beat }: {
   scenario: Scenario; started: boolean; cursor: number; choices: Choice[]; done: boolean;
-  live: Live; showMapButton: boolean; coach: Coach;
+  live: Live; showMapButton: boolean; coach: Coach; boot: Boot | null; beat: Beat | null;
 }) {
   const { board } = live;
   const steps = scenario.timesteps;
@@ -419,13 +559,22 @@ function Console({ scenario, started, cursor, choices, done, live, showMapButton
   const target = done ? 'cr-debrief' : started ? stepId(t) : 'cr-briefing';
   const boardLit = board.warnedZones.length > 0 || Object.values(board.zoneStates).some((s) => s !== 'quiet');
   const [sheetOpen, setSheetOpen] = useState(false);
+  // The odometer rolls only while something is being staged, and never for
+  // reduced motion; otherwise the face is the plain time with a live colon.
+  const rm = reducedMotion();
+  const roll = rm ? null
+    : beat ? { key: `b${beat.n}`, frames: reelFrames(beat.from, beat.to), at: ROLL_AT, ms: ROLL_MS }
+      : boot === 'full' && !started ? { key: 'boot', frames: reelFrames('00:00', scenario.clock.start), at: BOOT_ROLL_AT, ms: BOOT_ROLL_MS }
+        : null;
 
   return (
     <div className="cr-console">
       <div className="cr-console-row wrap">
         <a className={`cr-console-clock${coached(coach, 'clock')}`} href={`#${target}`}
           aria-label={`${time} ${tzLabel(scenario)}, ${status}. Jump to the desk.`}>
-          <span className="cr-console-time">{time}</span>
+          <span className="cr-console-time">
+            {roll && roll.frames.length > 1 ? <Odometer key={roll.key} frames={roll.frames} at={roll.at} ms={roll.ms} /> : <ClockFace time={time} />}
+          </span>
           <span className="cr-console-status"><span className="cr-console-tz">{tzLabel(scenario)} · </span>{status}</span>
         </a>
         <span className="cr-console-title" aria-hidden>{scenario.title}</span>
@@ -435,9 +584,10 @@ function Console({ scenario, started, cursor, choices, done, live, showMapButton
             const cls = c
               ? c.event.divergedFromHistory ? 'is-diverged' : 'is-kept'
               : started && i === cursor && !done ? 'is-now' : '';
-            return <i key={s.id} className={cls} />;
+            return <i key={s.id} className={cls} style={{ '--i': i } as React.CSSProperties} />;
           })}
         </span>
+        <SoundToggle />
         {showMapButton && (
           <button type="button" className="cr-console-map" onClick={() => setSheetOpen(true)}
             aria-haspopup="dialog" aria-label={`Situation board${boardLit ? ' (zones lit)' : ''}`}>
@@ -458,6 +608,57 @@ function Console({ scenario, started, cursor, choices, done, live, showMapButton
         </BoardSheet>
       )}
     </div>
+  );
+}
+
+/** The console time at rest: the colon is live, blinking for a few seconds
+ *  after each change of time (keyed on it), then holding steady — so the
+ *  strip reads as a running clock without anything blinking indefinitely. */
+function ClockFace({ time }: { time: string }) {
+  const at = time.lastIndexOf(':');
+  if (at < 0) return <>{time}</>;
+  return (
+    <>{time.slice(0, at)}<span key={time} className="cr-colon">:</span>{time.slice(at + 1)}</>
+  );
+}
+
+/** The console time while the clock moves: a strip of frames (the time it
+ *  leaves, the hours it passes, the time it lands on) rolled up through a
+ *  one-line window, transform only, then stamped. Decorative: the clock's
+ *  link carries the time in words, and only the landing time is the record's. */
+function Odometer({ frames, at, ms }: { frames: string[]; at: number; ms: number }) {
+  const n = frames.length;
+  return (
+    <span className="cr-reel" aria-hidden style={{ '--reel-at': `${at}ms`, '--reel-ms': `${ms}ms` } as React.CSSProperties}>
+      <span className="cr-reel-strip" style={{ '--roll-to': `${(-(n - 1) / n) * 100}%` } as React.CSSProperties}>
+        {frames.map((f, i) => <span key={i} className="cr-reel-frame">{f}</span>)}
+      </span>
+    </span>
+  );
+}
+
+/** SOUND · OFF / ON — the one control for the desk's sound layer (sound.ts).
+ *  Off by default; hidden where the browser has no Web Audio at all. */
+function SoundToggle() {
+  const [avail, setAvail] = useState(false);
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    setAvail(sound.soundAvailable());
+    setOn(sound.soundOn());
+    return sound.onSoundChange(setOn);
+  }, []);
+  if (!avail) return null;
+  return (
+    <button type="button" className={`cr-console-sound${on ? ' is-on' : ''}`} aria-pressed={on} aria-label="Sound"
+      onClick={() => sound.setSound(!on)}>
+      <svg className="cr-sound-glyph" viewBox="0 0 16 16" width="14" height="14" aria-hidden focusable="false">
+        <path d="M2 6h3l4-3v10l-4-3H2z" fill="currentColor" />
+        {on ? <path d="M11 5.5c1 .7 1.5 1.6 1.5 2.5s-.5 1.8-1.5 2.5M12.6 3.6c1.6 1.1 2.4 2.7 2.4 4.4s-.8 3.3-2.4 4.4" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          : <path d="M11.5 6l3 4M14.5 6l-3 4" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />}
+      </svg>
+      <span className="cr-sound-word" aria-hidden>Sound<span className="cr-sound-sep"> · </span></span>
+      <span className="cr-sound-state" aria-hidden>{on ? 'On' : 'Off'}</span>
+    </button>
   );
 }
 
@@ -781,19 +982,26 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain,
       )}
 
       <ul className="cr-dispatches" aria-label={`Incoming at ${stamp(t)}`}>
-        {t.info_available.map((info, i) => (
-          <li key={info.id} className={`cr-slip cr-slip-${info.kind}${i === 0 ? coached(coach, 'slip') : ''}`}
-            style={{ '--i': i } as React.CSSProperties}>
-            <p className="cr-slip-kind">
-              <KindGlyph kind={info.kind} className="cr-kind-glyph" /> {vocab.kindLabel[info.kind]}
-              {hasPictogram(info.icon) && <Pictogram name={info.icon} size={22} className="cr-slip-pict" />}
-            </p>
-            <SlipText info={info} marks={termMarks.get(info.id)} idx={sourceIndex} />
-            {info.readings && <Readings scenario={scenario} itemId={info.id} readings={info.readings} />}
-            {i === 0 && <CoachMark coach={coach} at="slip" />}
-            {info.media && <Figure scenario={scenario} m={info.media} />}
-          </li>
-        ))}
+        {t.info_available.map((info, i) => {
+          // The leader prints a character a step (CSS steps() on a cover
+          // drawn back across it); its length sets the steps and the time.
+          const label = vocab.kindLabel[info.kind];
+          const ch = leaderText(label, t).length;
+          return (
+            <li key={info.id} className={`cr-slip cr-slip-${info.kind}${i === 0 ? coached(coach, 'slip') : ''}`}
+              style={{ '--i': i, '--ch': ch } as React.CSSProperties}>
+              <p className="cr-slip-kind">
+                <KindGlyph kind={info.kind} className="cr-kind-glyph" />{' '}
+                <span className="cr-slip-leader">{label}<span className="cr-slip-leader-at" aria-hidden> · {stamp(t)}</span></span>
+                {hasPictogram(info.icon) && <Pictogram name={info.icon} size={22} className="cr-slip-pict" />}
+              </p>
+              <SlipText info={info} marks={termMarks.get(info.id)} idx={sourceIndex} />
+              {info.readings && <Readings scenario={scenario} itemId={info.id} readings={info.readings} />}
+              {i === 0 && <CoachMark coach={coach} at="slip" />}
+              {info.media && <Figure scenario={scenario} m={info.media} hold />}
+            </li>
+          );
+        })}
       </ul>
       {inlineChain && !chainAt && (
         <CoachMark coach={coach} at="chain" alt={`${COACH[1].text} On this screen the chain is on the situation board: press MAP in the bar above.`} />
@@ -842,7 +1050,7 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain,
           <CoachMark coach={coach} at="call" point="down" />
           <div className={`cr-options${coached(coach, 'call')}`}>
             {t.options.map((o) => (
-              <button type="button" key={o.id} className="cr-option" onClick={() => onChoose(o)}>
+              <button type="button" key={o.id} className="cr-option" onClick={() => onChoose(o)} onFocus={() => sound.keyTick()}>
                 <span className="cr-option-label">{o.label}</span>
                 {o.detail && <span className="cr-option-detail">{o.detail}</span>}
               </button>
@@ -1337,19 +1545,57 @@ function shortCredit(credit: string) {
   return s;
 }
 
-function Figure({ scenario, m }: { scenario: Scenario; m: MediaAttachment }) {
-  const base = `/control-room/${scenario.id}/`;
-  const ratio = { aspectRatio: `${m.width} / ${m.height}` };
+function FigureCredit({ m }: { m: MediaAttachment }) {
   const credit = shortCredit(m.credit);
   const license = shortLicense(m.license);
   const folded = credit !== m.credit || license !== m.license;
   return (
-    <figure className={`cr-figure cr-figure-${m.type}`}>
+    <span className="cr-figure-credit">
+      <span className={`cr-figure-by${credit.includes('©') ? ' is-notice' : ''}`} title={m.credit}>{credit}</span>
+      <span className="cr-figure-sep" aria-hidden> · </span>
+      <a href={m.licenseUrl ?? m.sourcePage} title={m.license}>{license}</a>
+      {m.licenseUrl ? <><span className="cr-figure-sep" aria-hidden> · </span><a href={m.sourcePage}>Source</a></> : null}
+      {folded && (
+        <details className="cr-figure-terms">
+          <summary><span className="cr-figure-sep" aria-hidden> · </span><span className="cr-figure-terms-label">Terms</span></summary>
+          <span className="cr-figure-terms-body">
+            <span><b>Credit</b> {m.credit}</span>
+            <span><b>Licence</b> {m.license}</span>
+          </span>
+        </details>
+      )}
+    </span>
+  );
+}
+
+/** `hold`: a plate printed on a slip is held like a cutscene — a slow drift
+ *  (transform only, under 3% scale, one pass that settles on the whole
+ *  frame) that runs only while the plate is on screen and never for reduced
+ *  motion. Any still plate opens full-bleed on a press. */
+function Figure({ scenario, m, hold = false }: { scenario: Scenario; m: MediaAttachment; hold?: boolean }) {
+  const base = `/control-room/${scenario.id}/`;
+  const ratio = { aspectRatio: `${m.width} / ${m.height}` };
+  const ref = useRef<HTMLElement>(null);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!hold || !el || typeof IntersectionObserver === 'undefined') return;
+    // A data attribute React does not manage, so a re-render never clears it.
+    const io = new IntersectionObserver(([e]) => { el.dataset.onscreen = e.isIntersecting ? '1' : ''; }, { threshold: 0.25 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hold]);
+  return (
+    <figure ref={ref} className={`cr-figure cr-figure-${m.type}${hold ? ' is-held' : ''}`}>
       <div className="cr-figure-frame">
         {m.type === 'image' ? (
-          // eslint-disable-next-line @next/next/no-img-element -- served byte-for-byte as licence-vetted, not re-encoded
-          <img src={base + m.file} alt={m.caption} width={m.width} height={m.height} style={ratio}
-            loading="lazy" decoding="async" />
+          <button type="button" className="cr-figure-hold" onClick={() => setOpen(true)} aria-haspopup="dialog">
+            {/* eslint-disable-next-line @next/next/no-img-element -- served byte-for-byte as licence-vetted, not re-encoded */}
+            <img src={base + m.file} alt={m.caption} width={m.width} height={m.height} style={ratio}
+              loading="lazy" decoding="async" />
+            <span className="cr-figure-zoom" aria-hidden>Full plate <span className="cr-figure-zoom-mark">+</span></span>
+            <span className="cr-sr"> — open full screen</span>
+          </button>
         ) : (
           <video src={base + m.file} poster={m.poster ? base + m.poster : undefined} width={m.width} height={m.height} style={ratio}
             controls preload="none" playsInline aria-label={m.caption} />
@@ -1357,23 +1603,56 @@ function Figure({ scenario, m }: { scenario: Scenario; m: MediaAttachment }) {
       </div>
       <figcaption>
         <span className="cr-figure-caption">{m.caption}</span>
-        <span className="cr-figure-credit">
-          <span className={`cr-figure-by${credit.includes('©') ? ' is-notice' : ''}`} title={m.credit}>{credit}</span>
-          <span className="cr-figure-sep" aria-hidden> · </span>
-          <a href={m.licenseUrl ?? m.sourcePage} title={m.license}>{license}</a>
-          {m.licenseUrl ? <><span className="cr-figure-sep" aria-hidden> · </span><a href={m.sourcePage}>Source</a></> : null}
-          {folded && (
-            <details className="cr-figure-terms">
-              <summary><span className="cr-figure-sep" aria-hidden> · </span><span className="cr-figure-terms-label">Terms</span></summary>
-              <span className="cr-figure-terms-body">
-                <span><b>Credit</b> {m.credit}</span>
-                <span><b>Licence</b> {m.license}</span>
-              </span>
-            </details>
-          )}
-        </span>
+        <FigureCredit m={m} />
       </figcaption>
+      {m.type === 'image' && <PlateSheet open={open} onClose={() => setOpen(false)} src={base + m.file} m={m} />}
     </figure>
+  );
+}
+
+/** A plate full-bleed: the map sheet's native modal dialog, opened to the
+ *  whole viewport on ink, the image contained (never cropped, the same file
+ *  byte for byte) and its caption and credit set as a lower third. Escape,
+ *  the scrim and Close all close it; focus returns to the plate. Portalled
+ *  to the body so opening it never adds text to the log's live region. */
+function PlateSheet({ open, onClose, src, m }: { open: boolean; onClose: () => void; src: string; m: MediaAttachment }) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  useEffect(() => setHost(document.body), []);
+  useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (open && !d.open) {
+      d.showModal();
+      // Close takes focus (React's autoFocus sets no attribute for the
+      // dialog to honour, so the first credit link would take it instead).
+      d.querySelector<HTMLButtonElement>('.cr-ps-close')?.focus();
+    }
+    if (!open && d.open) d.close();
+  }, [open, host]);
+  if (!host) return null;
+  const titleId = `cr-ps-${m.file.replace(/[^a-z0-9]/gi, '-')}`;
+  return createPortal(
+    <dialog ref={ref} className="cr-plate-sheet" aria-labelledby={titleId} onClose={onClose}
+      onClick={(e) => { if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('cr-ps-stage')) onClose(); }}>
+      {open && (
+        <>
+          <div className="cr-ps-stage">
+            {/* eslint-disable-next-line @next/next/no-img-element -- the same vetted file, not re-encoded */}
+            <img src={src} alt={m.caption} width={m.width} height={m.height} />
+          </div>
+          <div className="cr-ps-third">
+            <div className="cr-ps-text">
+              <p className="cr-ps-tag">Full plate</p>
+              <p id={titleId} className="cr-ps-caption">{m.caption}</p>
+              <FigureCredit m={m} />
+            </div>
+            <button type="button" className="cr-ps-close" onClick={onClose}>Close</button>
+          </div>
+        </>
+      )}
+    </dialog>,
+    host,
   );
 }
 

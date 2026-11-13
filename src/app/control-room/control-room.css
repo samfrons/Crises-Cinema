@@ -136,7 +136,9 @@
   box-shadow: 4px 4px 0 var(--ink);
   transition: box-shadow var(--t-mid) var(--ease), transform var(--t-mid) var(--ease), border-color var(--t-fast) var(--ease);
 }
-@media (hover: hover) { .cr-card:hover { border-color: var(--ember); box-shadow: 6px 6px 0 var(--ember); transform: translate(-2px, -2px); } }
+/* Hover draws the card up out of its drawer, like a folder pulled from a
+   cabinet: it rises clear and its block shadow lengthens beneath it. */
+@media (hover: hover) { .cr-card:hover { border-color: var(--ember); box-shadow: 4px 11px 0 var(--ember); transform: translateY(-7px); } }
 .cr-card:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 var(--ink); transition-duration: var(--t-fast); transition-timing-function: var(--ease-press); }
 .cr-card-date, .cr-card-meta {
   font-family: var(--data);
@@ -165,7 +167,7 @@
 .cr-card-arrow { display: inline-block; transition: transform var(--t-mid) var(--ease); }
 @media (hover: hover) { .cr-card:hover .cr-card-arrow { transform: translateX(4px); } }
 .cr-card:focus-visible .cr-card-arrow { transform: translateX(4px); }
-.cr-card:focus-visible { border-color: var(--ember); box-shadow: 4px 4px 0 var(--ember); }
+.cr-card:focus-visible { border-color: var(--ember); box-shadow: 4px 11px 0 var(--ember); transform: translateY(-7px); }
 .cr-card-glyph { color: var(--ember); flex-shrink: 0; }
 .cr-card-stub {
   cursor: default;
@@ -302,39 +304,32 @@
   background: rgba(241, 232, 213, 0.1);
   overflow: hidden;
 }
+/* Marks ride full-width carriers translated along the rail (transform only);
+   the bar itself is the carrier's ::before at its left edge. The sweep is the
+   advance beat's needle: 600ms, a breath after the press. */
 .cr-daystrip-elapsed {
   position: absolute;
-  inset: 0 auto 0 0;
+  inset: 0;
   background: rgba(241, 232, 213, 0.26);
-  transition: width 0.6s ease;
+  transform-origin: left center;
+  transition: transform 600ms var(--ease) 100ms;
 }
-.cr-daystrip-hour {
+.cr-daystrip-hour, .cr-daystrip-tick, .cr-daystrip-needle {
+  position: absolute;
+  inset: 0;
+  transition: transform 600ms var(--ease) 100ms;
+}
+.cr-daystrip-hour::before, .cr-daystrip-tick::before, .cr-daystrip-needle::before {
+  content: '';
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 1px;
-  background: rgba(241, 232, 213, 0.28);
-  transition: left 0.6s ease;
+  left: 0;
 }
-.cr-daystrip-tick {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  margin-left: -1px;
-  background: var(--paper);
-  transition: left 0.6s ease;
-}
-.cr-daystrip-tick.is-diverged { width: 4px; margin-left: -2px; background: var(--ember); box-shadow: 0 0 0 1px var(--paper); }
-.cr-daystrip-needle {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  margin-left: -2px;
-  background: var(--ember);
-  transition: left 0.6s ease;
-}
+.cr-daystrip-hour::before { width: 1px; background: rgba(241, 232, 213, 0.28); }
+.cr-daystrip-tick::before { width: 2px; margin-left: -1px; background: var(--paper); }
+.cr-daystrip-tick.is-diverged::before { width: 4px; margin-left: -2px; background: var(--ember); box-shadow: 0 0 0 1px var(--paper); }
+.cr-daystrip-needle::before { width: 4px; margin-left: -2px; background: var(--ember); }
 .cr-daystrip-fog {
   position: absolute;
   inset: 0 0 0 auto;
@@ -365,7 +360,7 @@
   padding: 0 0 var(--s5) 18px;
   border-left: 2px solid var(--ink);
   scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 14px);
-  animation: cr-arrive var(--t-slow) var(--ease) both;
+  animation: cr-arrive var(--t-slow) var(--ease) var(--beat, 0ms) both;
 }
 .cr-entry::before {
   content: '';
@@ -406,7 +401,7 @@
   margin: 0 0 var(--s3);
   padding-bottom: var(--s1);
   background: linear-gradient(var(--ink), var(--ink)) left bottom / 100% 1px no-repeat;
-  animation: cr-rule var(--t-slow) var(--ease) 60ms both;
+  animation: cr-rule var(--t-slow) var(--ease) calc(60ms + var(--beat, 0ms)) both;
 }
 /* Stamps and titles take focus only so keyboard and screen-reader users land
    on the new entry; they are not controls, so no focus ring. */
@@ -452,8 +447,11 @@
   border: 1px solid var(--rule);
   border-left: 3px solid var(--ink-soft);
   padding: 12px 16px 14px 14px;
-  animation: cr-arrive var(--t-slow) var(--ease) both;
-  animation-delay: calc(var(--i, 0) * 90ms + 120ms);
+  /* The staging clock (stage.ts: leaderAt, leaderMs): when this slip's
+     leader starts printing, and how long it takes, a character a step. */
+  --at: calc(var(--beat, 0ms) + 80ms + min(var(--i, 0) * 110ms, 440ms));
+  --type: min(calc(var(--ch, 14) * 16ms), 300ms);
+  animation: cr-slip-in var(--t-fast) var(--ease) var(--at) both;
 }
 .cr-slip-forecast, .cr-slip-gauge { border-left-color: var(--ink); }
 .cr-slip-field_report { border-left: 6px solid var(--ink); }
@@ -487,7 +485,7 @@
   margin: var(--s2) 0 0;
   color: var(--ink);
   animation: cr-arrive var(--t-slow) var(--ease) both;
-  animation-delay: calc(var(--i, 0) * 90ms + 120ms);
+  animation-delay: calc(var(--beat, 0ms) + min(var(--i, 0) * 110ms, 550ms) + 300ms);
 }
 .cr-boardline strong { font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; }
 .cr-boardline-tag {
@@ -507,7 +505,11 @@
 .cr-boardline-you .cr-boardline-item::before { content: '▪'; display: inline-block; width: 1.3em; text-indent: 0; color: var(--ink); }
 
 /* Your call */
-.cr-call { margin-top: var(--s4); animation: cr-arrive var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 90ms + 180ms); }
+.cr-call {
+  margin-top: var(--s4);
+  --call-at: calc(var(--beat, 0ms) + min(var(--i, 0) * 110ms, 660ms) + 420ms);
+  animation: cr-arrive var(--t-slow) var(--ease) var(--call-at) both;
+}
 .cr-call-head {
   font-family: var(--data);
   font-size: 12px;
@@ -824,7 +826,7 @@
   fill: transparent;
   stroke: rgba(25, 20, 16, 0.3);
   stroke-width: 1.4;
-  transition: fill var(--t-slow) var(--ease), stroke var(--t-slow) var(--ease);
+  transition: fill var(--t-slow) var(--ease) var(--beat, 0ms), stroke var(--t-slow) var(--ease) var(--beat, 0ms);
 }
 .cr-zone .cr-zone-label { font-family: var(--data); font-size: 14px; font-weight: 700; letter-spacing: 0.05em; fill: var(--ink); }
 .cr-zone .cr-zone-state { font-family: var(--data); font-size: 12.5px; letter-spacing: 0.06em; fill: var(--ink-soft); }
@@ -1067,7 +1069,7 @@
    mounts, and any rise would leave it short of its scroll margin — tucking
    the band's ember head-rule under the console. */
 @keyframes cr-fade { from { opacity: 0; } to { opacity: 1; } }
-.cr-debrief { padding: 0; scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h)); animation: cr-fade var(--t-slow) var(--ease) both; }
+.cr-debrief { padding: 0; scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h)); animation: cr-fade var(--t-slow) var(--ease) var(--beat, 0ms) both; }
 
 .cr-endband {
   background-color: var(--ink);
@@ -1087,7 +1089,7 @@
   height: 6px;
   background: var(--ember);
   transform-origin: left center;
-  animation: rule-draw var(--t-slow) var(--ease) 280ms both;
+  animation: rule-draw var(--t-slow) var(--ease) calc(280ms + var(--beat, 0ms)) both;
 }
 @keyframes cr-toll-set {
   0% { opacity: 0; transform: scale(1.06); }
@@ -1146,7 +1148,7 @@
   color: var(--paper);
   font-variant-numeric: tabular-nums;
   transform-origin: left bottom;
-  animation: cr-toll-set var(--t-slow) var(--ease-press) 640ms both;
+  animation: cr-toll-set var(--t-slow) var(--ease-press) calc(640ms + var(--beat, 0ms)) both;
 }
 .cr-toll-label {
   font-family: var(--data);
@@ -1156,7 +1158,7 @@
   background: var(--ember);
   color: #fff;
   padding: 4px 10px;
-  animation: cr-label-in var(--t-mid) var(--ease) 940ms both;
+  animation: cr-label-in var(--t-mid) var(--ease) calc(940ms + var(--beat, 0ms)) both;
 }
 .cr-toll-label .cr-cite a { color: #fff; }
 .cr-toll-note {
@@ -1291,9 +1293,9 @@
 
 .cr-rk-figs { display: grid; grid-template-columns: 1fr; gap: var(--s3) 28px; margin: 0 0 var(--s3); }
 @media (min-width: 640px) { .cr-rk-figs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.cr-rk-fig { border-top: 2px solid var(--ink); padding: 10px 0 0; position: relative; animation: cr-arrive var(--t-slow) var(--ease) both; }
-.cr-rk-fig.is-record { animation-delay: 90ms; }
-.cr-rk-fig.is-bench { animation-delay: 180ms; border-top-style: dashed; }
+.cr-rk-fig { border-top: 2px solid var(--ink); padding: 10px 0 0; position: relative; animation: cr-arrive var(--t-slow) var(--ease) var(--beat, 0ms) both; }
+.cr-rk-fig.is-record { animation-delay: calc(90ms + var(--beat, 0ms)); }
+.cr-rk-fig.is-bench { animation-delay: calc(180ms + var(--beat, 0ms)); border-top-style: dashed; }
 .cr-rk-fig dt {
   display: flex; align-items: center; gap: 7px;
   font-family: var(--data); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-soft);
@@ -1313,7 +1315,7 @@
   border: 2px solid currentColor;
   font-family: var(--data); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
   transform: rotate(-3deg);
-  animation: cr-stamp-down var(--t-mid) var(--ease-press) 520ms both;
+  animation: cr-stamp-down var(--t-mid) var(--ease-press) calc(520ms + var(--beat, 0ms)) both;
 }
 .cr-rk-verdict { font-size: 16px; line-height: 1.6; max-width: 66ch; margin: 0 0 var(--s4); }
 
@@ -1327,14 +1329,14 @@
 .cr-rk-rail { stroke: var(--rule); stroke-width: 1; }
 .cr-rk-lane.is-bench .cr-rk-rail { stroke: var(--ink-soft); stroke-dasharray: 5 4; }
 .cr-rk-step { fill: var(--paper); stroke: var(--ink-soft); stroke-width: 1; }
-.cr-rk-bar { stroke: none; transform-box: fill-box; transform-origin: right center; animation: cr-rk-grow var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 120ms + 220ms); }
+.cr-rk-bar { stroke: none; transform-box: fill-box; transform-origin: right center; animation: cr-rk-grow var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 120ms + 220ms + var(--beat, 0ms)); }
 .cr-rk-bar.is-after { transform-origin: left center; }
 .cr-rk-lane.is-you .cr-rk-bar { fill: var(--ink); }
 .cr-rk-lane.is-record .cr-rk-bar { fill: var(--ink-soft); }
 .cr-rk-lane.is-bench .cr-rk-bar { stroke: var(--ink); stroke-width: 1; }
 .cr-rk-hatch-line { stroke: var(--ink); stroke-width: 1.3; }
 .cr-rk-bar-label { font-family: var(--data); font-size: 10px; letter-spacing: 0.08em; fill: var(--ink); font-variant-numeric: tabular-nums; }
-.cr-rk-mark { animation: cr-fade var(--t-mid) var(--ease) both; animation-delay: calc(var(--i, 0) * 120ms + 440ms); }
+.cr-rk-mark { animation: cr-fade var(--t-mid) var(--ease) both; animation-delay: calc(var(--i, 0) * 120ms + 440ms + var(--beat, 0ms)); }
 .cr-rk-ring { fill: var(--paper); }
 .cr-rk-lane.is-you .cr-rk-dot { fill: var(--ink); }
 .cr-rk-lane.is-record .cr-rk-dot { fill: var(--ink-soft); }
@@ -1526,7 +1528,7 @@
 .cr-zone .cr-zone-sweep {
   stroke: none;
   pointer-events: none;
-  animation: cr-sweep var(--t-slow) var(--ease) 120ms both;
+  animation: cr-sweep var(--t-slow) var(--ease) calc(120ms + var(--beat, 0ms)) both;
 }
 .cr-zone .cr-zone-sweep.is-signal { fill: rgba(25, 20, 16, 0.06); }
 
@@ -1541,9 +1543,9 @@
 .cr-map-origin.is-fresh .cr-map-origin-star {
   transform-box: fill-box;
   transform-origin: center;
-  animation: cr-mark-down var(--t-mid) var(--ease-press) 200ms both;
+  animation: cr-mark-down var(--t-mid) var(--ease-press) calc(200ms + var(--beat, 0ms)) both;
 }
-.cr-map-origin.is-fresh text { animation: cr-fade var(--t-mid) var(--ease) 300ms both; }
+.cr-map-origin.is-fresh text { animation: cr-fade var(--t-mid) var(--ease) calc(300ms + var(--beat, 0ms)) both; }
 .cr-leg-mark { color: var(--ink); }
 .cr-leg-mark .cr-leg-swatch { width: 14px; height: 14px; }
 .cr-leg-mark .cr-map-origin-star { stroke-width: 1.8; }
@@ -1556,7 +1558,7 @@
 .cr-map-wind-label { font-family: var(--data); font-size: 14px; font-weight: 700; letter-spacing: 0.1em; fill: var(--ink); }
 .cr-map-wind.is-fresh .cr-map-wind-arrow, .cr-map-wind.is-fresh .cr-map-wind-streak {
   stroke-dasharray: 1 1;
-  animation: cr-draw var(--t-slow) var(--ease) 200ms both;
+  animation: cr-draw var(--t-slow) var(--ease) calc(200ms + var(--beat, 0ms)) both;
 }
 .cr-boardlist-wind { border-left: 4px solid var(--rule); }
 .cr-boardlist-origin { display: block; color: var(--ink); text-transform: none; letter-spacing: 0.02em; font-weight: 400; }
@@ -1597,15 +1599,15 @@
 
 /* This hour's changes. A link now in use is drawn down the line; a cut
    link's two halves are laid, then the break is stamped across. */
-.cr-chain-edge.is-solid.is-fresh { stroke-dasharray: 1 1; animation: cr-draw var(--t-slow) var(--ease) 160ms both; }
-.cr-chain-edge.is-fresh .cr-chain-half { animation: cr-fade var(--t-mid) var(--ease) 120ms both; }
+.cr-chain-edge.is-solid.is-fresh { stroke-dasharray: 1 1; animation: cr-draw var(--t-slow) var(--ease) calc(160ms + var(--beat, 0ms)) both; }
+.cr-chain-edge.is-fresh .cr-chain-half { animation: cr-fade var(--t-mid) var(--ease) calc(120ms + var(--beat, 0ms)) both; }
 .cr-chain-edge.is-fresh .cr-chain-slash {
   transform-box: fill-box;
   transform-origin: center;
-  animation: cr-mark-down var(--t-mid) var(--ease-press) 300ms both;
+  animation: cr-mark-down var(--t-mid) var(--ease-press) calc(300ms + var(--beat, 0ms)) both;
 }
-.cr-chain-edge.is-pending.is-fresh { animation: cr-fade var(--t-slow) var(--ease) 160ms both; }
-.cr-chain-node.is-fresh rect { animation: cr-stamp-down var(--t-mid) var(--ease-press) 220ms both; transform-box: fill-box; transform-origin: center; }
+.cr-chain-edge.is-pending.is-fresh { animation: cr-fade var(--t-slow) var(--ease) calc(160ms + var(--beat, 0ms)) both; }
+.cr-chain-node.is-fresh rect { animation: cr-stamp-down var(--t-mid) var(--ease-press) calc(220ms + var(--beat, 0ms)) both; transform-box: fill-box; transform-origin: center; }
 
 /* The diagram in words, under it. */
 .cr-chainlist { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
@@ -1624,7 +1626,7 @@
 .cr-chainlist-what { color: var(--ink); text-transform: uppercase; letter-spacing: 0.06em; }
 
 /* In the log: the chain line, and on phones the chain at this hour. */
-.cr-chainline { animation: cr-arrive var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 90ms + 120ms); }
+.cr-chainline { animation: cr-arrive var(--t-slow) var(--ease) both; animation-delay: calc(var(--beat, 0ms) + min(var(--i, 0) * 110ms, 550ms) + 300ms); }
 .cr-chainline .cr-boardline { animation: none; }
 .cr-chainline .cr-chain { margin-top: var(--s2); max-width: 420px; }
 
@@ -1701,7 +1703,7 @@
   margin: 14px 0 6px;
   max-width: 46ch;
   box-shadow: 3px 3px 0 var(--ember);
-  animation: cr-arrive var(--t-slow) var(--ease) 420ms both;
+  animation: cr-arrive var(--t-slow) var(--ease) calc(420ms + var(--beat, 0ms)) both;
   scroll-margin-top: calc(var(--cr-nav) + var(--cr-console-h) + 24px);
   scroll-margin-bottom: 120px;
 }
@@ -1772,11 +1774,10 @@
   to { box-shadow: 0 0 0 10px rgba(184, 50, 26, 0); }
 }
 .is-coached { outline: 2px dashed var(--ember); outline-offset: 4px; }
-.cr-slip.is-coached, .cr-coach-target.is-coached, .cr-options.is-coached {
-  animation: cr-arrive var(--t-slow) var(--ease) both, cr-coach-ring var(--t-slow) var(--ease) 2 alternate 480ms;
+.cr-slip.is-coached {
+  animation: cr-slip-in var(--t-fast) var(--ease) var(--at) both, cr-coach-ring var(--t-slow) var(--ease) calc(var(--at) + 600ms) 2 alternate both;
 }
-.cr-slip.is-coached { animation-delay: calc(var(--i, 0) * 90ms + 120ms), 480ms; }
-.cr-coach-target.is-coached, .cr-options.is-coached { animation: cr-coach-ring var(--t-slow) var(--ease) 2 alternate 480ms; }
+.cr-coach-target.is-coached, .cr-options.is-coached { animation: cr-coach-ring var(--t-slow) var(--ease) calc(480ms + var(--beat, 0ms)) 2 alternate; }
 .cr-console-clock.is-coached { outline-color: var(--paper); outline-offset: -2px; padding: 0 6px; }
 
 /* Between calls: how far through the record the player is. */
@@ -1970,7 +1971,7 @@
   border: 1px solid var(--rule);
   border-left: 6px double var(--ink);
 }
-.cr-filed-step { margin: 0 0 var(--s3); animation: cr-arrive var(--t-slow) var(--ease) 120ms both; }
+.cr-filed-step { margin: 0 0 var(--s3); animation: cr-arrive var(--t-slow) var(--ease) calc(120ms + var(--beat, 0ms)) both; }
 .cr-filed-tag {
   font-family: var(--data);
   font-size: 11px;
@@ -2126,9 +2127,9 @@
    prints, the leader is inked down to the rail, the node is set. (Faded,
    not drawn: a non-scaling stroke ignores pathLength, so a dash draw would
    break up on a stretched axis.) */
-.cr-reads .is-now .cr-reads-glyph { animation: cr-arrive var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 90ms + 360ms); }
-.cr-reads-leaders path.is-now { animation: cr-fade var(--t-slow) var(--ease) both; animation-delay: calc(var(--i, 0) * 90ms + 480ms); }
-.cr-reads-node.is-now { animation: cr-fade var(--t-mid) var(--ease-press) both; animation-delay: calc(var(--i, 0) * 90ms + 700ms); }
+.cr-reads .is-now .cr-reads-glyph { animation: cr-arrive var(--t-slow) var(--ease) both; animation-delay: calc(var(--at, 0ms) + var(--type, 0ms) + 120ms); }
+.cr-reads-leaders path.is-now { animation: cr-fade var(--t-slow) var(--ease) both; animation-delay: calc(var(--at, 0ms) + var(--type, 0ms) + 240ms); }
+.cr-reads-node.is-now { animation: cr-fade var(--t-mid) var(--ease-press) both; animation-delay: calc(var(--at, 0ms) + var(--type, 0ms) + 420ms); }
 @media (prefers-reduced-motion: reduce) {
   .cr-reads .is-now .cr-reads-glyph, .cr-reads-leaders path.is-now, .cr-reads-node.is-now { animation: none !important; }
   /* The house second impression stands in for the ink arriving. */
@@ -2138,3 +2139,381 @@
 /* ── The silent record: an empty ledger page ───────────────────────────── */
 .cr-consequence-silent { display: flow-root; }
 .cr-silent-glyph { float: right; margin: 0 0 6px 12px; color: var(--ink-soft); }
+
+
+/* ══ Staging: the overture, the beat, the teleprinter ══════════════════════
+   Presentation only; the run's state commits at the press and this is how
+   the commit is shown. The root of a run carries data attributes set by
+   ControlRoomGame — data-boot (full | quick) for the opening overture,
+   data-beat (start | advance | close) and data-beat-p (its parity, so two
+   beats in a row restart) for the clock's verb — and every timing here has
+   a twin in stage.ts. All motion is transform or opacity on the house
+   curves; the one exception is that nothing here touches layout at all.
+   Reduced motion: none of it moves (every rule below that moves sits in a
+   no-preference query); the still equivalents are at the end. */
+
+/* The beat's offset, inherited by everything that arrives with it: the new
+   entry (stamp at 720ms, then the slips), the side board's fresh marks, and
+   the debrief for the log's close. 720 = stage.ts BEAT_MS. */
+@media (prefers-reduced-motion: no-preference) {
+  .cr-run[data-beat="start"] .cr-log > .cr-entry:last-child,
+  .cr-run[data-beat="advance"] .cr-log > .cr-entry:last-child,
+  .cr-run[data-beat="start"] .cr-side,
+  .cr-run[data-beat="advance"] .cr-side { --beat: 720ms; }
+  .cr-run[data-beat="close"] .cr-debrief { --beat: 720ms; }
+}
+
+/* ── The console clock: odometer, stamp, live colon ────────────────────── */
+
+.cr-reel {
+  display: inline-block;
+  vertical-align: top;
+  height: 1.1em;
+  line-height: 1.1;
+  overflow: hidden;
+}
+.cr-reel-strip { display: block; }
+.cr-reel-frame { display: block; height: 1.1em; white-space: nowrap; }
+@keyframes cr-roll { from { transform: translateY(0); } to { transform: translateY(var(--roll-to)); } }
+/* The landing time is struck: a kick a touch larger, then flush. */
+@keyframes cr-kick { 0%, 100% { transform: none; } 35% { transform: scale(1.12); } }
+@keyframes cr-colon { 50% { opacity: 0.25; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-reel { transform-origin: left 70%; animation: cr-kick var(--t-mid) var(--ease-press) calc(var(--reel-at) + var(--reel-ms) - 40ms) both; }
+  .cr-reel-strip { animation: cr-roll var(--reel-ms) var(--ease) var(--reel-at) both; }
+  /* Four blinks (4s, under WCAG 2.2.2's five) after each change of time,
+     then the colon holds: a running clock, never an endless blink. */
+  .cr-colon { animation: cr-colon 1s steps(1, end) 900ms 4; }
+  /* The pips and the strip move with the stamp, not the press. */
+  .cr-run[data-beat] .cr-pips i { transition-delay: 600ms; }
+}
+
+/* ── The beat: the log dims a breath while the clock moves ─────────────── */
+
+@keyframes cr-dim-0 { 0%, 100% { opacity: 1; } 18%, 70% { opacity: 0.5; } }
+@keyframes cr-dim-1 { 0%, 100% { opacity: 1; } 18%, 70% { opacity: 0.5; } }
+/* The new timecode in the log is stamped down as the console's lands. */
+@keyframes cr-stamp-tc {
+  0% { opacity: 0; transform: scale(1.14); }
+  55% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cr-run[data-beat][data-beat-p="0"] .cr-log { animation: cr-dim-0 820ms var(--ease) both; }
+  .cr-run[data-beat][data-beat-p="1"] .cr-log { animation: cr-dim-1 820ms var(--ease) both; }
+  .cr-entry:not(.cr-entry-brief) .cr-stamp-time {
+    display: inline-block;
+    transform-origin: left 80%;
+    animation: cr-stamp-tc var(--t-mid) var(--ease-press) var(--beat, 0ms) both;
+  }
+}
+
+/* ── Slips as teleprinter traffic ──────────────────────────────────────── */
+/* The slip lands (150ms), its leader — kind · time — prints a character a
+   step as a paper cover with an ink print-head is drawn back across it
+   (steps() over the leader's own length), the pictogram is stamped in the
+   margin, then the body feeds out under it. Per slip: at most 80 + 300 +
+   240ms; the stagger caps at 440ms, so five slips are down in about 1.1s. */
+
+.cr-slip-leader { position: relative; display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: bottom; }
+.cr-slip-leader-at { color: var(--ink-faint); }
+@keyframes cr-slip-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes cr-type { from { transform: none; } to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-slip-leader::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--paper);
+    border-left: 0.62em solid var(--ink);
+    animation: cr-type var(--type) steps(var(--ch, 14), end) var(--at) both;
+  }
+  .cr-slip .cr-slip-pict {
+    transform-origin: center;
+    animation: cr-mark-down var(--t-mid) var(--ease-press) calc(var(--at) + var(--type)) both;
+  }
+  .cr-slip > :is(.cr-slip-text, .cr-reads, .cr-figure) {
+    animation: cr-arrive var(--t-mid) var(--ease) calc(var(--at) + var(--type) - 40ms) both;
+  }
+}
+
+/* ── YOUR CALL is stamped, the options arm ─────────────────────────────── */
+
+@keyframes cr-call-stamp {
+  0% { opacity: 0; transform: scale(1.22); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+.cr-option { position: relative; }
+/* The lead-in rule: drawn in from the left edge as a hand hovers or a key
+   lands on an option — armed, not chosen. Every option arms alike. */
+.cr-option::before {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 23px;
+  width: 9px;
+  height: 2px;
+  background: var(--ember);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--t-mid) var(--ease);
+}
+@media (hover: hover) { .cr-option:hover::before { transform: scaleX(1); } }
+.cr-option:focus-visible::before { transform: scaleX(1); }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-call .cr-call-head {
+    display: inline-block;
+    transform-origin: left center;
+    animation: cr-call-stamp var(--t-mid) var(--ease-press) calc(var(--call-at) + 90ms) both;
+  }
+}
+
+/* ── The board answers the hour: a changed zone's label flashes once ───── */
+
+@keyframes cr-flash { 0% { opacity: 1; } 30% { opacity: 0.15; } 62% { opacity: 1; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-map .cr-zone.is-fresh .cr-zone-label,
+  .cr-map .cr-zone.is-fresh .cr-zone-state { animation: cr-flash 520ms steps(1, end) calc(var(--beat, 0ms) + 260ms) both; }
+}
+
+/* ── Plates held like cutscenes ────────────────────────────────────────── */
+
+.cr-figure-hold {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: zoom-in;
+  overflow: hidden;
+}
+.cr-figure-zoom {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 3px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--data);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: background-color var(--t-fast) var(--ease);
+}
+.cr-figure-zoom-mark { font-size: 13px; line-height: 1; letter-spacing: 0; }
+@media (hover: hover) { .cr-figure-hold:hover .cr-figure-zoom { background: var(--ember); color: #fff; } }
+.cr-figure-hold:focus-visible .cr-figure-zoom { background: var(--ember); color: #fff; }
+/* The drift: one slow pass, a 3% push settling back onto the whole frame,
+   transform only. It waits while the plate is off screen (the observer in
+   Figure sets data-onscreen) and is 4.8s so it ends inside WCAG's five. */
+@keyframes cr-drift { from { transform: scale(1.03) translate(-0.8%, 0.5%); } to { transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-figure.is-held .cr-figure-hold img {
+    transform-origin: 58% 45%;
+    animation: cr-drift 4800ms cubic-bezier(0.3, 0.1, 0.3, 1) calc(var(--at, 0ms) + var(--type, 0ms)) both;
+    animation-play-state: paused;
+  }
+  .cr-figure.is-held[data-onscreen="1"] .cr-figure-hold img { animation-play-state: running; }
+}
+
+/* The full plate: the map sheet's dialog, opened to the whole viewport. */
+.cr-plate-sheet {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--ink);
+  color: var(--paper);
+  overflow: hidden;
+}
+.cr-plate-sheet[open] { display: grid; grid-template-rows: minmax(0, 1fr) auto; }
+.cr-plate-sheet::backdrop { background: rgba(25, 20, 16, 0.85); }
+.cr-ps-stage { min-height: 0; display: grid; place-items: center; padding: 18px; cursor: zoom-out; }
+.cr-ps-stage img { display: block; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; cursor: default; }
+.cr-ps-third {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 14px 20px calc(16px + env(safe-area-inset-bottom));
+  border-top: 3px solid var(--ember);
+  background: var(--ink);
+}
+@media (max-width: 599px) { .cr-ps-third { flex-direction: column; align-items: stretch; padding: 12px 18px calc(14px + env(safe-area-inset-bottom)); gap: 10px; } }
+.cr-ps-text { display: grid; gap: 6px; min-width: 0; max-width: 78ch; }
+.cr-ps-tag { margin: 0; font-family: var(--data); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(241, 232, 213, 0.75); }
+.cr-ps-caption { margin: 0; font-family: var(--read); font-size: 15.5px; line-height: 1.5; color: var(--paper); }
+@media (max-width: 599px) { .cr-ps-caption { font-size: 14px; max-height: 7.5em; overflow-y: auto; } }
+.cr-plate-sheet .cr-figure-credit { color: rgba(241, 232, 213, 0.8); }
+.cr-plate-sheet .cr-figure-credit a { color: var(--paper); text-decoration-color: rgba(241, 232, 213, 0.45); text-underline-offset: 2px; }
+.cr-plate-sheet .cr-figure-credit a:hover { color: #fff; text-decoration-color: var(--ember); }
+.cr-plate-sheet .cr-figure-terms-body { border-left-color: rgba(241, 232, 213, 0.3); background: rgba(241, 232, 213, 0.05); }
+.cr-plate-sheet .cr-figure-terms-body b { color: var(--paper); }
+.cr-plate-sheet :focus-visible { outline: 3px solid var(--paper); outline-offset: 2px; }
+.cr-ps-close {
+  flex: none;
+  min-height: 44px;
+  min-width: 88px;
+  padding: 0 16px;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: transparent;
+  border: 1.5px solid var(--paper);
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+@media (hover: hover) { .cr-ps-close:hover { background: var(--paper); color: var(--ink); } }
+@keyframes cr-ps-in { from { opacity: 0; transform: scale(0.975); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-plate-sheet[open] .cr-ps-stage img { animation: cr-ps-in var(--t-slow) var(--ease) both; }
+  .cr-plate-sheet[open] .cr-ps-third { animation: cr-arrive var(--t-slow) var(--ease) 120ms both; }
+}
+
+/* ── The sound toggle, in the console strip ────────────────────────────── */
+
+.cr-console-sound {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex-shrink: 0;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(241, 232, 213, 0.82);
+  background: transparent;
+  border: 1px solid rgba(241, 232, 213, 0.35);
+  cursor: pointer;
+  transition: border-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+.cr-console-sound.is-on { color: var(--paper); border-color: rgba(241, 232, 213, 0.75); }
+.cr-console-sound.is-on .cr-sound-state { text-decoration: underline; text-decoration-color: var(--ember); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+@media (hover: hover) { .cr-console-sound:hover { border-color: var(--paper); color: var(--paper); } }
+.cr-console-sound:active { background: rgba(241, 232, 213, 0.12); }
+.cr-sound-glyph { display: block; flex: none; }
+/* Phones: the glyph and the state, then the glyph alone (its waves or its
+   cross say on or off; "Sound" and aria-pressed are its name and state), so
+   the clock's "Decision n of N" is never truncated beside it. */
+@media (max-width: 479px) { .cr-sound-word { display: none; } .cr-console-sound { padding: 0 8px; gap: 5px; } }
+@media (max-width: 429px) {
+  .cr-sound-state { display: none; }
+  .cr-console-sound { min-width: 40px; padding: 0; }
+  /* The room the toggle takes is given back by the strip's spacing. */
+  .cr-console-row { gap: 8px; }
+  .cr-pips { gap: 5px; }
+  .cr-pips i { width: 9px; height: 9px; }
+  .cr-console-map { min-width: 48px; padding: 0 10px; }
+  .cr-console-status { letter-spacing: 0.1em; }
+}
+
+/* ── The overture: the first desk of the session ───────────────────────── */
+/* 0      the console band darkens out of the paper (420ms)
+   360    the clock powers on, flickering up like a lamp
+   420    the odometer rolls from midnight up to the day's opening (680ms)
+   700    the rail runs out; 760 the status line types; 820 the pips come on
+   1000   the title; 1050 the board inks across, left to right (640ms)
+   1350   the chain prints; the board's rows; the briefing lands
+   1500   the day's title is stamped; 1650 the briefing's body
+   ~2.1s  all down; at 2.4s (stage.ts BOOT_MS) the attribute clears.
+   Repeat desks this session: the band alone, in 300ms. */
+
+.cr-map, .cr-chain { position: relative; }
+@keyframes cr-band { from { opacity: 1; } to { opacity: 0; } }
+@keyframes cr-power { 0% { opacity: 0; } 30% { opacity: 0.85; } 46% { opacity: 0.3; } 100% { opacity: 1; } }
+@keyframes cr-rail-on { from { transform: scaleX(0); } to { transform: none; } }
+@keyframes cr-pip-on { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: none; } }
+@keyframes cr-ink-across { from { transform: none; } to { transform: translateX(101%); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-run[data-boot] .cr-console::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+    background: var(--cr-sheet);
+    animation: cr-band 420ms var(--ease) both;
+  }
+  .cr-run[data-boot="quick"] .cr-console::after { animation-duration: 300ms; }
+
+  .cr-run[data-boot="full"] .cr-console-clock { animation: cr-power 320ms linear 360ms both; }
+  .cr-run[data-boot="full"] .cr-daystrip-rail { transform-origin: left center; animation: cr-rail-on var(--t-slow) var(--ease) 700ms both; }
+  .cr-run[data-boot="full"] .cr-console-status { position: relative; }
+  .cr-run[data-boot="full"] .cr-console-status::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--ink);
+    border-left: 0.7em solid var(--paper);
+    animation: cr-type 360ms steps(22, end) 760ms both;
+  }
+  .cr-run[data-boot="full"] .cr-pips i { animation: cr-pip-on var(--t-fast) var(--ease-press) calc(820ms + var(--i, 0) * 50ms) both; }
+  .cr-run[data-boot="full"] .cr-console-title { animation: cr-fade var(--t-slow) var(--ease) 1000ms both; }
+  .cr-run[data-boot="full"] :is(.cr-console-map, .cr-console-sound) { animation: cr-fade var(--t-slow) var(--ease) 1000ms both; }
+
+  /* The board inks in: a paper cover with an ink edge drawn off it. */
+  .cr-run[data-boot="full"] :is(.cr-side, .cr-entry-brief) :is(.cr-map, .cr-chain) { overflow: clip; }
+  .cr-run[data-boot="full"] :is(.cr-side, .cr-entry-brief) :is(.cr-map, .cr-chain)::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: var(--cr-sheet);
+    border-left: 3px solid var(--ink);
+    animation: cr-ink-across 640ms cubic-bezier(0.5, 0, 0.3, 1) 1050ms both;
+  }
+  .cr-run[data-boot="full"] .cr-side .cr-chain::after { animation-delay: 1350ms; animation-duration: 480ms; }
+  .cr-run[data-boot="full"] .cr-side-head { animation: cr-fade var(--t-slow) var(--ease) 950ms both; }
+  .cr-run[data-boot="full"] .cr-boardlist li { animation: cr-arrive var(--t-slow) var(--ease) 1400ms both; }
+  .cr-run[data-boot="full"] .cr-boardlist li:nth-child(2) { animation-delay: 1460ms; }
+  .cr-run[data-boot="full"] .cr-boardlist li:nth-child(3) { animation-delay: 1520ms; }
+  .cr-run[data-boot="full"] .cr-boardlist li:nth-child(n+4) { animation-delay: 1580ms; }
+  .cr-run[data-boot="full"] :is(.cr-chainlist, .cr-side-empty, .cr-trace) { animation: cr-fade var(--t-slow) var(--ease) 1700ms both; }
+
+  /* Then the first slip of the log: the briefing. */
+  .cr-run[data-boot="full"] .cr-entry-brief { animation-delay: 1350ms; }
+  .cr-run[data-boot="full"] .cr-entry-brief .cr-stamp { animation-delay: 1400ms; }
+  .cr-run[data-boot="full"] .cr-brief-title { transform-origin: left center; animation: cr-call-stamp var(--t-mid) var(--ease-press) 1500ms both; }
+  .cr-run[data-boot="full"] .cr-entry-brief > :is(.cr-brief, .cr-brief-count, .cr-filed, .cr-terms, .cr-figure, .cr-dock) {
+    animation: cr-arrive var(--t-slow) var(--ease) 1650ms both;
+  }
+  .cr-run[data-boot="full"] .cr-entry-brief > .cr-map { animation: cr-fade var(--t-fast) var(--ease) 1000ms both; }
+}
+
+/* ── Reduced motion: the still equivalents ─────────────────────────────── */
+/* Nothing above moves. The overture is an immediate cut: the console's time
+   and the day's title arrive struck twice out of register — the house mark
+   for "this is new" — and the strike lifts after 0.9s (stage.ts
+   BOOT_STILL_MS). The beat is instant: the console's time and the new
+   timecode in the log are struck the same way until the beat clears.
+   Plates do not drift; the lead-in rule is simply there on hover. */
+@media (prefers-reduced-motion: reduce) {
+  .cr-run[data-boot="full"] .cr-console-time,
+  .cr-run[data-settle] .cr-console-time { filter: drop-shadow(2px 2px 0 rgba(241, 232, 213, 0.45)); }
+  .cr-run[data-boot="full"] .cr-brief-title,
+  .cr-run[data-settle] .cr-log > .cr-entry:last-child .cr-stamp-time { filter: drop-shadow(3px 3px 0 color-mix(in srgb, var(--ink) 35%, transparent)); }
+  .cr-run[data-settle] .cr-log > .cr-entry:last-child .cr-stamp-time { display: inline-block; }
+  .cr-option::before, .cr-console-sound, .cr-figure-zoom, .cr-ps-close { transition: none; }
+  .cr-card:focus-visible { transform: none; }
+  .cr-map .cr-zone.is-fresh .cr-zone-label { filter: drop-shadow(2px 2px 0 rgba(25, 20, 16, 0.5)); }
+}

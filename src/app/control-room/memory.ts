@@ -35,6 +35,30 @@ export function markCoached() {
   }
 }
 
+/* The desk's opening overture (the boot sequence) plays in full once a
+   session, on the first desk taken; later desks open with a quick cut.
+   Same storage rules as the desk notes. */
+const BOOT_KEY = 'cr-booted';
+let bootedInMemory = false;
+
+export function wasBooted(): boolean {
+  if (bootedInMemory) return true;
+  try {
+    return window.sessionStorage.getItem(BOOT_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+export function markBooted() {
+  bootedInMemory = true;
+  try {
+    window.sessionStorage.setItem(BOOT_KEY, '1');
+  } catch {
+    /* storage refused: the in-memory flag holds for this page's life */
+  }
+}
+
 /** One completed run: timestep id → option id, and when it closed. */
 export type LastRun = { at: string; picks: Record<string, string> };
 
