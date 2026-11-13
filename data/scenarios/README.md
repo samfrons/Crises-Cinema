@@ -446,3 +446,67 @@ AWS Terrain Tiles (see `SOURCES.md`) resampled, never edited. Refresh with
 tile cache `data/terrain-raw/` is gitignored). Every playable scenario needs a
 frame entry in `scripts/build-terrain.mjs`; the script (and `npm test`) fails
 without one, so a scenario cannot ship without ground.
+
+## The diorama (anchors on real ground)
+
+Diorama mode (LOG · PICTURE · DIORAMA) plays the same run on a paper model of
+that terrain. The hand-drawn boards are schematic and carry no coordinates, so
+each playable scenario adds a presentational `diorama` block that puts every
+at-risk zone on the real ground:
+
+```jsonc
+"diorama": {
+  "frames": ["lahaina-2023", "lahaina-2023-upcountry"], // terrain frame ids (meta must name this scenario)
+  "exaggeration": 1.5,        // relief ×, 1–3; printed on the stage ("relief exaggerated ×1.5")
+  "contour_m": 100,           // contour interval drawn on the model, metres
+  "impact_zone": "lahaina-lahainaluna", // optional: the zone the cited impact label names
+  "zones": {
+    "upcountry-kula": {
+      "anchor": "Kula",       // one of the places below: where the camera goes, where stamps sit
+      "radius_km": 1.2,       // the drape = the places' hull, widened by this much
+      "places": [{ "name": "Kula", "lat": 20.79, "lon": -156.325 },
+                 { "name": "Olinda", "lat": 20.8125, "lon": -156.285 }]
+    },
+    "jagatsinghpur": { "anchor": "Jagatsinghpur", "beyond_frame": true, … }
+  }
+}
+```
+
+**What these are.** Cartographic anchors for the places each zone *names* —
+WGS84 decimal degrees to about 100 m, verifiable geography in the same sense
+as the atlas gazetteer (any map gives the same point for Paiporta or the
+Superdome). They are not record facts, they are not boundaries, and the stage
+says so: the drape is "drawn around the named places, not an official
+boundary". The origin mark (✳, `origin` on a slip) stands at its zone's
+anchor — it names the zone, not a street corner, as on the board.
+
+**What the build checks** (`scripts/build-scenarios.mjs`, `checkDiorama`; each
+gate has a fault-injection case in `tests/scenarios-contract.test.mjs`):
+
+- every playable scenario has the block; every frame exists under
+  `public/control-room/terrain/` and its meta says it belongs to this scenario;
+- every at-risk zone has an entry, and nothing else does;
+- every place `name` is printed somewhere in the scenario's own text (a zone
+  label, the location, a slip, a chain label) — the model never names a place
+  the record does not;
+- the anchor is one of the zone's places and lies **inside a terrain frame**,
+  as do all its places — unless the zone is flagged `beyond_frame`, which is
+  accepted only when every one of its places lies outside every frame (Odisha's
+  Jagatsinghpur and Paradip, north-east of the Ganjam–Chilika frame: the model
+  points to them from the table's edge and drapes nothing);
+- no two zones' footprints overlap;
+- `exaggeration` is 1–3 and `impact_zone`, when set, is named by the cited
+  `scoring.impact.label` (by one of its places or its chain label).
+
+**Water** is not a field here: it is read from the heightmap. A cell is drawn
+as water when it is at or below 0 m (to within the frame's vertical quantum)
+*and* is connected to the frame's edge through such cells — the open sea or a
+lake the tiles flatten to 0 m. Land below sea level that is enclosed (New
+Orleans behind its levees, which the tiles read as 0 m or lower) stays land;
+the model never draws a city under water.
+
+**The impact beat.** When the clock first lands at or past
+`scoring.impact.time`, the stage prints "the record's impact time" with that
+time and sweeps `impact_zone`'s drape (a low thud if sound is on). It restates
+the cited time and the zone the label names; it shows no hindsight content and
+simulates nothing.

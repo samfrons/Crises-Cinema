@@ -111,6 +111,9 @@ const COACH: { at: CoachAt; text: string }[] = [
 /* Picture mode has one desk note of its own (the stage is one place, not
    four parts), shown instead of the four above when the desk is taken in
    that mode. It says how to read the stage and that nothing is hidden. */
+/* Diorama mode's one desk note: the same stage on a model of the real
+   ground, so it also says what the model is (and is not). */
+const COACH_DIORAMA = 'Diorama mode plays each hour on a paper model of the real ground: public elevation data, the relief exaggerated as marked, each zone drawn around the places it names. Every slip stamps where it happened and its line runs along the bottom with its citation; press it for the full slip. Drag to turn the table (or use the view keys); the next slip sets it back. A screen reader hears every slip in full, as in the log.';
 const COACH_PICTURE = 'Picture mode plays each hour on the board: every slip stamps where it happened, the camera follows, and its line runs along the bottom with its citation. Press that line for the full slip. Pause, Next slip and Skip to the call are under it; a screen reader hears every slip in full, as in the log. Switch back to LOG in the bar above at any time.';
 
 type Coach = { at: CoachAt; index: number; onNext: () => void; onSkip: () => void } | null;
@@ -221,10 +224,19 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
   const [boot, setBoot] = useState<Boot | null>(null);
   const [beat, setBeat] = useState<Beat | null>(null);
   const beatN = useRef(0);
-  // LOG · PICTURE. Read after mount (the server render is the select screen,
+  // LOG · PICTURE · DIORAMA. Read after mount (the server render is the select screen,
   // so nothing depends on it before then); both modes draw the same run.
   const [mode, setModeState] = useState<DeskMode>('log');
   useEffect(() => setModeState(loadMode()), []);
+  // The diorama could not start here (no WebGL, or the context was lost):
+  // the run carries on in picture mode, with one line saying why. Not saved,
+  // so a later visit (another browser, a restored GPU) tries again.
+  const [notice, setNotice] = useState<string | null>(null);
+  useEffect(() => {
+    if (!notice) return;
+    const id = window.setTimeout(() => setNotice(null), 9000);
+    return () => window.clearTimeout(id);
+  }, [notice]);
   // Picture mode's place in the hour: how many of decision `step`'s slips
   // have played (n + 1 = the call is up). Any other step reads as 0, so the
   // clock advancing — in either mode — starts the next hour from its top.
@@ -365,7 +377,8 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
   const lastIndex = steps.length - 1;
   const decided = choices.length > cursor;
 
-  const picture = mode === 'picture';
+  // Picture and diorama are one stage (PictureStage) with two viewports.
+  const picture = mode !== 'log';
   const start = () => {
     const session = startSession(scenario.id);
     if (!wasCoached()) {
@@ -456,11 +469,19 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
     if (m === mode) return;
     saveMode(m);
     setModeState(m);
-    pending.current = { scroll: done ? 'cr-debrief' : m === 'picture' ? 'cr-stage' : started ? stepId(current) : 'cr-briefing' };
+    setNotice(null);
+    pending.current = { scroll: done ? 'cr-debrief' : m !== 'log' ? 'cr-stage' : started ? stepId(current) : 'cr-briefing' };
   };
   const picAt = pic.step === cursor ? pic.at : 0;
   const pictureCoach: StageCoach = picture && coachIndex !== null && started && !done
-    ? { text: COACH_PICTURE, onDone: endCoach } : null;
+    ? mode === 'diorama'
+      ? { text: COACH_DIORAMA, head: 'Desk note · diorama', onDone: endCoach }
+      : { text: COACH_PICTURE, head: 'Desk note · picture mode', onDone: endCoach }
+    : null;
+  const dioramaFailed = (why: string) => {
+    setModeState('picture');
+    setNotice(`The diorama could not start here (${why}), so the day plays on the board instead. Your place is kept.`);
+  };
 
   const board = deriveBoard(scenario, started ? cursor : -1, choices);
   const shownIndex = started ? cursor : -1;
@@ -486,7 +507,8 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
             renderSlip={(info, t) => <FullSlip scenario={scenario} t={t} info={info} />}
             renderRecord={(t, c) => <RecordSheet scenario={scenario} t={t} choice={c} />}
             renderBriefing={() => <Briefing scenario={scenario} started={started} inlineMap={false} onStart={start} last={run.last} filed={run.filed} />}
-            renderCredit={(m) => <FigureCredit m={m} />} />
+            renderCredit={(m) => <FigureCredit m={m} />}
+            renderer={mode === 'diorama' ? 'diorama' : 'board'} boot={boot} onRendererFail={dioramaFailed} notice={notice} />
           <Transcript scenario={scenario} started={started} cursor={cursor} choices={choices} />
         </div>
       ) : (
@@ -646,9 +668,10 @@ function Odometer({ frames, at, ms }: { frames: string[]; at: number; ms: number
   );
 }
 
-/** LOG · PICTURE — how the desk is shown: the reading version, or the same
- *  record played out on the board. A pressed pair; switching keeps the run
- *  exactly where it is, and the choice is remembered on this browser. */
+/** LOG · PICTURE · DIORAMA — how the desk is shown: the reading version, the
+ *  same record played out on the board, or on a model of the real ground. A
+ *  pressed set; switching keeps the run exactly where it is, and the choice
+ *  is remembered on this browser. */
 function ModeToggle({ mode, onMode }: { mode: DeskMode; onMode: (m: DeskMode) => void }) {
   return (
     <span className="cr-console-mode" role="group" aria-label="Desk mode">
@@ -665,6 +688,14 @@ function ModeToggle({ mode, onMode }: { mode: DeskMode; onMode: (m: DeskMode) =>
           <path d="M3.5 11.5l3.2-4 2.3 2.6 1.6-1.8 2 3.2z" fill="currentColor" />
         </svg>
         <span className="cr-mode-word">Picture</span>
+      </button>
+      <span className="cr-mode-sep" aria-hidden>·</span>
+      <button type="button" className="cr-mode-btn" aria-pressed={mode === 'diorama'} onClick={() => onMode('diorama')}>
+        <svg className="cr-mode-glyph" viewBox="0 0 16 16" width="14" height="14" aria-hidden focusable="false">
+          <path d="M1 11.5l7 3.5 7-3.5M1 11.5l7-3.5 7 3.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+          <path d="M3.4 10.3l2.6-4.6 1.8 2.4 1.6-3.6 3.2 5.8" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+        </svg>
+        <span className="cr-mode-word">Diorama</span>
       </button>
     </span>
   );
@@ -850,9 +881,11 @@ function SelectScreen({ cards, file, onPick, loading }: {
           </div>
         ))}
       </div>
-      <p className="cr-footnote cr-footnote-mode">Every desk plays two ways: <strong>Log</strong>, the reading version, and{' '}
-        <strong>Picture</strong>, the same record played out on the board, each slip stamped where it happened. Switch
-        with LOG · PICTURE in the console strip, at any time, without losing your place.</p>
+      <p className="cr-footnote cr-footnote-mode">Every desk plays three ways: <strong>Log</strong>, the reading version;{' '}
+        <strong>Picture</strong>, the same record played out on the board, each slip stamped where it happened; and{' '}
+        <strong>Diorama</strong>, the board&apos;s marks on a paper model of the real ground (public elevation data,
+        relief exaggerated as marked; it needs WebGL). Switch with LOG · PICTURE · DIORAMA in the console strip, at
+        any time, without losing your place.</p>
       <p className="cr-footnote">Minutes are reading time: the words each day puts in front of you, at {WPM} a
         minute. Greyed scenarios exist only as schema: nothing appears here until every fact in
         them carries a source, and the build enforces it.</p>

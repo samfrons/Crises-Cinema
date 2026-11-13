@@ -25,6 +25,16 @@
               warning you just issued, nothing more), and what the record says
               followed — or that it is silent — sits in the lower third.
 
+   Two renderers, one controller. Everything above — the beats, the timing,
+   the lower third, the call, the record, the sheet, the transcript — lives
+   here, once. What the camera should look at is decided here too, as an
+   intent (establish · a slip's zones · where the record first places the
+   hazard · the call · your warned zones · the end), and handed to a
+   viewport that draws it: the hand-drawn board (BoardViewport, below), or
+   the diorama (Diorama.tsx: the same marks on a WebGL model of the real
+   ground, loaded only when that mode is chosen). Either viewport draws only
+   what the controller derived; neither adds a state, a mark or a word.
+
    Accessibility: the stage is a picture of the log, so its story is the
    log's. Everything drawn is aria-hidden; the transcript beside it (in
    ControlRoomGame) carries every slip's full text through a live region;
@@ -35,13 +45,15 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import Diorama from './Diorama';
+import { GlyphFor, glyphKey, type Phase, type Rect, type Stamp, type StageIntent, type Tray, type ViewportProps } from './viewport';
 import type { InfoItem, MediaAttachment, Option, Scenario, Timestep } from './types';
 import type { Choice } from './scoring';
 import OpsMap, { originPoint } from './OpsMap';
 import WarningChain, { chainChangesAt, deriveChain } from './WarningChain';
 import Readings from './Readings';
 import Sheet from './Sheet';
-import { KindGlyph, Pictogram, SilentGlyph, hasPictogram } from './glyphs';
+import { KindGlyph, SilentGlyph } from './glyphs';
 import { vocabFor } from './hazards';
 import { deriveBoard, stamp, warnedBy } from './board';
 import { inWords, tzLabel } from './summary';
@@ -62,7 +74,6 @@ const typeMs = (chars: number) => Math.min(chars * 9, 640);
 
 type Box = { x: number; y: number; w: number; h: number };
 type Frame = { s: number; x: number; y: number };
-type Rect = { x: number; y: number; w: number; h: number };
 const NO_FRESH = { zones: [] as string[], origins: [] as string[], wind: false };
 const NONE = new Set<string>();
 
@@ -106,9 +117,7 @@ function useReducedMotion() {
   return rm;
 }
 
-export type StageCoach = { text: string; onDone: () => void } | null;
-
-type Phase = 'brief' | 'beats' | 'call' | 'record' | 'done';
+export type StageCoach = { text: string; head: string; onDone: () => void } | null;
 
 type Props = {
   scenario: Scenario;
@@ -132,6 +141,12 @@ type Props = {
   renderRecord: (t: Timestep, choice: Choice) => React.ReactNode;
   renderBriefing: () => React.ReactNode;
   renderCredit: (m: MediaAttachment) => React.ReactNode;
+  /** Which viewport draws the stage: the hand-drawn board or the diorama. */
+  renderer: 'board' | 'diorama';
+  boot: 'full' | 'quick' | null;
+  onRendererFail: (why: string) => void;
+  /** A one-line status over the stage (the diorama's fallback notice). */
+  notice: string | null;
 };
 
 export default function PictureStage(p: Props) {
@@ -175,9 +190,8 @@ export default function PictureStage(p: Props) {
   const viewRef = useRef<HTMLDivElement>(null);
   const trayRef = useRef<HTMLDivElement>(null);
   const footRef = useRef<HTMLDivElement>(null);
-  const camRef = useRef<HTMLDivElement>(null);
   const [safe, setSafe] = useState<Rect | null>(null);
-  const [tray, setTray] = useState<{ side: 'left' | 'top'; edge: number } | null>(null);
+  const [tray, setTray] = useState<Tray | null>(null);
   useLayoutEffect(() => {
     const v = viewRef.current;
     if (!v) return;
@@ -206,48 +220,31 @@ export default function PictureStage(p: Props) {
     return () => ro.disconnect();
   }, [phase]);
 
-  const [boxes, setBoxes] = useState<Record<string, Box>>({});
-  useLayoutEffect(() => {
-    const out: Record<string, Box> = {};
-    camRef.current?.querySelectorAll<SVGGraphicsElement>('.cr-zone-shape[data-zone]').forEach((el) => {
-      const b = el.getBBox();
-      out[el.dataset.zone as string] = { x: b.x, y: b.y, w: b.width, h: b.height };
-    });
-    setBoxes(out);
-  }, [scenario.id]);
-  const center = (z: string): [number, number] | null => {
-    const b = boxes[z];
-    return b ? [b.x + b.w / 2, b.y + b.h / 2] : null;
-  };
-  // Stamps sit low in their zone, clear of the zone's name and state at its head.
-  const seat = (z: string): [number, number] | null => {
-    const b = boxes[z];
-    return b ? [b.x + b.w / 2, b.y + b.h * 0.7] : null;
-  };
-  const zonesBox = (zs: string[]) => union(zs.map((z) => boxes[z]).filter(Boolean));
-
-  // ── Where the camera looks ──────────────────────────────────────────────
+  // ── Where the camera looks: an intent, in zones ─────────────────────────
   const strict = (zs: string[]) => zs.length > 0 && zs.length < allZones.length;
-  const target: Box | null = (() => {
+  const intent: StageIntent = (() => {
+    if (phase === 'brief') return { shot: 'establish', zones: [] };
+    if (phase === 'done') return { shot: 'end', zones: [] };
     if (phase === 'beats' && active && !active.media) {
-      const o = fresh.origins[0];
-      const pt = o ? originPoint(scenario.id, o) : null;
       // The beat the record first places the hazard: the mark, in its zone.
-      if (pt) return union([{ x: pt[0] - 70, y: pt[1] - 50, w: 140, h: 100 }, ...(boxes[o] ? [boxes[o]] : [])]);
-      if (active.zones && strict(active.zones)) return zonesBox(active.zones);
-      return null;
+      const o = fresh.origins[0];
+      if (o) return { shot: 'origin', zones: [o] };
+      if (active.zones && strict(active.zones)) return { shot: 'slip', zones: active.zones };
+      return { shot: 'wide', zones: [] };
     }
     if (phase === 'call') {
       const sets = t.options.map((o) => warnedBy(scenario, o));
       const all = Array.from(new Set(sets.flat()));
-      if (sets.some((s) => s.length === allZones.length) || !strict(all)) return null;
-      return zonesBox(all);
+      return { shot: 'call', zones: sets.some((x) => x.length === allZones.length) || !strict(all) ? [] : all };
     }
-    if (phase === 'record' && strict(warnedNow)) return zonesBox(warnedNow);
-    return null;
+    if (phase === 'record') return { shot: 'record', zones: strict(warnedNow) ? warnedNow : [] };
+    return { shot: 'wide', zones: [] };
   })();
-  const phone = !!tray && tray.side === 'top';
-  const frame = safe ? frameFor(target, safe, phone ? 2.6 : 2.2) : null;
+  // Keep the object stable while the shot is the same, so a viewport can
+  // treat a new intent as a new camera move.
+  const intentKey = `${intent.shot}:${intent.zones.join(',')}`;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableIntent = useMemo(() => intent, [intentKey]);
 
   // ── Time: the hour's beats, on their own or a press at a time ───────────
   const [playing, setPlaying] = useState(true);
@@ -300,17 +297,18 @@ export default function PictureStage(p: Props) {
       }
     } else unzoned.push({ info, idx });
   });
-  const glyph = (info: InfoItem, size: number) => (hasPictogram(info.icon)
-    ? <Pictogram name={info.icon} size={size} /> : <KindGlyph kind={info.kind} size={size} />);
-  const mark = (idx: number) => (idx === activeIdx ? ' is-active' : phase === 'beats' ? ' is-past' : ' is-set');
-
-  // The desk's anchor for the dispatch lines, in plate units (the tray's
-  // inner edge, where the order leaves from), under the camera's target.
-  const anchor: [number, number] | null = frame && tray && safe
-    ? tray.side === 'left'
-      ? [(tray.edge - frame.x) / frame.s, (safe.y + safe.h / 2 - frame.y) / frame.s]
-      : [(safe.x + safe.w * 0.18 - frame.x) / frame.s, (tray.edge - frame.y) / frame.s]
-    : null;
+  const glyph = (info: InfoItem, size: number) => <GlyphFor glyph={glyphKey(info)} size={size} />;
+  const markOf = (idx: number): Stamp['state'] => (idx === activeIdx ? 'active' : phase === 'beats' ? 'past' : 'set');
+  const mark = (idx: number) => ` is-${markOf(idx)}`;
+  const stamps: Stamp[] = useMemo(() => zoned.map(({ info, idx, z, k }) => ({
+    key: `${info.id}-${z}`, z, k, n: perZone[z], glyph: glyphKey(info), state: markOf(idx),
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  })), [zoned.map((x) => `${x.info.id}${x.z}${markOf(x.idx)}`).join('|')]);
+  const spot = active?.zones ?? undefined;
+  const viewport: ViewportProps = {
+    scenario, phase, cursor, beat: `${phase}:${cursor}:${at}`, rm, playing, board, fresh, preview, warnedNow, spot,
+    intent: stableIntent, stamps, safe, tray, boot: p.boot, onFail: p.onRendererFail,
+  };
 
   const deskName = scenario.warning_chain?.labels?.desk ?? 'Your desk';
   const slug = phase === 'brief'
@@ -322,66 +320,30 @@ export default function PictureStage(p: Props) {
   const figure = active?.media && active.media.type === 'image' ? active.media : null;
 
   return (
-    <section id="cr-stage" className={`cr-stage is-${phase}${rm ? ' is-still' : ''}`} aria-labelledby="cr-pic-h"
+    <section id="cr-stage" className={`cr-stage is-${phase}${rm ? ' is-still' : ''} is-${p.renderer}`} aria-labelledby="cr-pic-h"
       style={{ '--cam-ms': `${CAM_MS}ms` } as React.CSSProperties}>
-      <div ref={viewRef} className="cr-stage-view" aria-hidden>
-        <div ref={camRef} className={`cr-cam${frame ? '' : ' is-unmeasured'}`}
-          style={frame ? { transform: `translate(${frame.x}px, ${frame.y}px) scale(${frame.s})` } : undefined}>
-          <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones}
-            origins={board.origins} wind={board.wind} fresh={fresh} bare
-            preview={preview ?? undefined}
-            freshWarned={phase === 'record' ? warnedNow : undefined}
-            spot={active?.zones ?? undefined} />
-          {/* The camera's scale rides here, on the stamps' own layer, so its
-              per-frame restyle touches a handful of chits, not the board. */}
-          <div className="cr-stamps" style={frame ? { '--s': frame.s } as React.CSSProperties : undefined}>
-            {zoned.map(({ info, idx, z, k }) => {
-              const c = seat(z);
-              if (!c) return null;
-              return (
-                <span key={`${info.id}-${z}`} className={`cr-pmark${mark(idx)}`}
-                  style={{ left: `${c[0]}px`, top: `${c[1]}px`, '--off': k - (perZone[z] - 1) / 2 } as React.CSSProperties}>
-                  <span className="cr-pmark-face">{glyph(info, 26)}</span>
-                </span>
-              );
-            })}
-          </div>
-          {phase === 'record' && anchor && warnedNow.length > 0 && (
-            <svg className="cr-dispatch" viewBox="0 0 720 400" width="720" height="400">
-              {warnedNow.map((z, i) => {
-                const c = center(z);
-                if (!c) return null;
-                const [ax, ay] = anchor;
-                const mx = (ax + c[0]) / 2;
-                const my = Math.min(ay, c[1]) - 40;
-                const sw = 2.6 / (frame?.s ?? 1);
-                return (
-                  <g key={z} style={{ '--i': i } as React.CSSProperties}>
-                    <path className="cr-dispatch-line" d={`M${ax} ${ay}Q${mx} ${my} ${c[0]} ${c[1]}`} pathLength={1} style={{ strokeWidth: sw }} />
-                    <circle className="cr-dispatch-hit" cx={c[0]} cy={c[1]} r={9 / (frame?.s ?? 1)} style={{ strokeWidth: sw }} />
-                  </g>
-                );
-              })}
-            </svg>
-          )}
-        </div>
+      {p.notice && <p className="cr-stage-notice" role="status">{p.notice}</p>}
+      {/* Every picture in here is aria-hidden on its own (the transcript tells
+          the story); only a viewport's own controls, if it has any, are not. */}
+      <div ref={viewRef} className="cr-stage-view">
+        {p.renderer === 'diorama' ? <Diorama {...viewport} /> : <BoardViewport {...viewport} />}
 
         {figure && (
-          <div key={active!.id} className="cr-pplate" style={safe ? { left: safe.x, top: safe.y, width: safe.w, height: safe.h } : undefined}>
+          <div key={active!.id} className="cr-pplate" aria-hidden style={safe ? { left: safe.x, top: safe.y, width: safe.w, height: safe.h } : undefined}>
             {/* eslint-disable-next-line @next/next/no-img-element -- served byte-for-byte as licence-vetted, not re-encoded */}
             <img src={`/control-room/${scenario.id}/${figure.file}`} alt="" width={figure.width} height={figure.height} />
           </div>
         )}
 
         {active?.readings && !figure && (
-          <div key={active.id} className="cr-preads"
+          <div key={active.id} className="cr-preads" aria-hidden
             style={safe ? { left: safe.x + 12, top: safe.y + 12, maxWidth: Math.min(440, safe.w - 24) } : undefined}>
             <Readings scenario={scenario} itemId={active.id} readings={active.readings} />
           </div>
         )}
 
         {phase === 'done' && (
-          <div className="cr-endcard">
+          <div className="cr-endcard" aria-hidden>
             <span className="cr-endcard-band">
               <span className="cr-endcard-title">End of record</span>
               <span className="cr-endcard-sub">{scenario.clock.end} {tzLabel(scenario)} · {inWords(choices.length).toLowerCase()} calls logged · the debrief follows</span>
@@ -389,7 +351,7 @@ export default function PictureStage(p: Props) {
           </div>
         )}
 
-        <div key={`chain-${cursor}-${at}`} className={`cr-pchain${chainFresh.size ? ' is-pulse' : ''}`}
+        <div key={`chain-${cursor}-${at}`} aria-hidden className={`cr-pchain${chainFresh.size ? ' is-pulse' : ''}`}
           style={safe ? { right: 12, bottom: `calc(100% - ${safe.y + safe.h - 12}px)` } : undefined}>
           <WarningChain scenario={scenario} snapshot={chain} fresh={chainFresh} compact />
         </div>
@@ -407,7 +369,7 @@ export default function PictureStage(p: Props) {
 
       {coach && (
         <aside id="cr-coach" className="cr-coach cr-coach-stage is-up" aria-labelledby="cr-coach-h">
-          <p id="cr-coach-h" className="cr-coach-head">Desk note · picture mode</p>
+          <p id="cr-coach-h" className="cr-coach-head">{coach.head}</p>
           <p className="cr-coach-text">{coach.text}</p>
           <div className="cr-coach-actions">
             <button type="button" id="cr-coach-next" className="cr-coach-next" onClick={coach.onDone}>
@@ -575,6 +537,91 @@ export default function PictureStage(p: Props) {
         {sheet?.kind === 'brief' && p.renderBriefing()}
       </Sheet>
     </section>
+  );
+}
+
+/* ── The board viewport: the hand-drawn plate under a 2D camera ─────────── */
+
+function BoardViewport({ scenario, phase, board, fresh, preview, warnedNow, spot, intent, stamps, safe, tray }: ViewportProps) {
+  const camRef = useRef<HTMLDivElement>(null);
+  const [boxes, setBoxes] = useState<Record<string, Box>>({});
+  useLayoutEffect(() => {
+    const out: Record<string, Box> = {};
+    camRef.current?.querySelectorAll<SVGGraphicsElement>('.cr-zone-shape[data-zone]').forEach((el) => {
+      const b = el.getBBox();
+      out[el.dataset.zone as string] = { x: b.x, y: b.y, w: b.width, h: b.height };
+    });
+    setBoxes(out);
+  }, [scenario.id]);
+  const center = (z: string): [number, number] | null => {
+    const b = boxes[z];
+    return b ? [b.x + b.w / 2, b.y + b.h / 2] : null;
+  };
+  // Stamps sit low in their zone, clear of the zone's name and state at its head.
+  const seat = (z: string): [number, number] | null => {
+    const b = boxes[z];
+    return b ? [b.x + b.w / 2, b.y + b.h * 0.7] : null;
+  };
+  const zonesBox = (zs: string[]) => union(zs.map((z) => boxes[z]).filter(Boolean));
+  const target: Box | null = (() => {
+    if (intent.shot === 'origin') {
+      const o = intent.zones[0];
+      const pt = originPoint(scenario.id, o);
+      if (pt) return union([{ x: pt[0] - 70, y: pt[1] - 50, w: 140, h: 100 }, ...(boxes[o] ? [boxes[o]] : [])]);
+      return zonesBox(intent.zones);
+    }
+    return intent.zones.length ? zonesBox(intent.zones) : null;
+  })();
+  const phone = !!tray && tray.side === 'top';
+  const frame = safe ? frameFor(target, safe, phone ? 2.6 : 2.2) : null;
+  // The desk's anchor for the dispatch lines, in plate units (the tray's
+  // inner edge, where the order leaves from), under the camera's target.
+  const anchor: [number, number] | null = frame && tray && safe
+    ? tray.side === 'left'
+      ? [(tray.edge - frame.x) / frame.s, (safe.y + safe.h / 2 - frame.y) / frame.s]
+      : [(safe.x + safe.w * 0.18 - frame.x) / frame.s, (tray.edge - frame.y) / frame.s]
+    : null;
+  return (
+    <div ref={camRef} className={`cr-cam${frame ? '' : ' is-unmeasured'}`} aria-hidden
+      style={frame ? { transform: `translate(${frame.x}px, ${frame.y}px) scale(${frame.s})` } : undefined}>
+      <OpsMap scenario={scenario} zoneStates={board.zoneStates} warnedZones={board.warnedZones}
+        origins={board.origins} wind={board.wind} fresh={fresh} bare
+        preview={preview ?? undefined}
+        freshWarned={phase === 'record' ? warnedNow : undefined}
+        spot={spot} />
+      {/* The camera's scale rides here, on the stamps' own layer, so its
+          per-frame restyle touches a handful of chits, not the board. */}
+      <div className="cr-stamps" style={frame ? { '--s': frame.s } as React.CSSProperties : undefined}>
+        {stamps.map((m) => {
+          const c = seat(m.z);
+          if (!c) return null;
+          return (
+            <span key={m.key} className={`cr-pmark is-${m.state}`}
+              style={{ left: `${c[0]}px`, top: `${c[1]}px`, '--off': m.k - (m.n - 1) / 2 } as React.CSSProperties}>
+              <span className="cr-pmark-face"><GlyphFor glyph={m.glyph} size={26} /></span>
+            </span>
+          );
+        })}
+      </div>
+      {phase === 'record' && anchor && warnedNow.length > 0 && (
+        <svg className="cr-dispatch" viewBox="0 0 720 400" width="720" height="400">
+          {warnedNow.map((z, i) => {
+            const c = center(z);
+            if (!c) return null;
+            const [ax, ay] = anchor;
+            const mx = (ax + c[0]) / 2;
+            const my = Math.min(ay, c[1]) - 40;
+            const sw = 2.6 / (frame?.s ?? 1);
+            return (
+              <g key={z} style={{ '--i': i } as React.CSSProperties}>
+                <path className="cr-dispatch-line" d={`M${ax} ${ay}Q${mx} ${my} ${c[0]} ${c[1]}`} pathLength={1} style={{ strokeWidth: sw }} />
+                <circle className="cr-dispatch-hit" cx={c[0]} cy={c[1]} r={9 / (frame?.s ?? 1)} style={{ strokeWidth: sw }} />
+              </g>
+            );
+          })}
+        </svg>
+      )}
+    </div>
   );
 }
 

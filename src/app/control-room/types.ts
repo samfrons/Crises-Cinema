@@ -202,7 +202,20 @@ export type Scenario = {
    *  day's first-alert HH:MM is not the officials' lead time. Drawn from one
    *  info item (`from`) that names the earlier date; the build checks it. */
   alert_predates_clock?: AlertPredatesClock;
+  /** Diorama mode's ground: terrain frames and a cartographic anchor per
+   *  at-risk zone (presentational; README, "The diorama"). */
+  diorama?: DioramaSpec;
   sources: Source[];
+};
+
+export type DioramaPlace = { name: string; lat: number; lon: number };
+export type DioramaZone = { anchor: string; radius_km: number; places: DioramaPlace[]; beyond_frame?: true };
+export type DioramaSpec = {
+  frames: string[];
+  exaggeration: number;
+  contour_m: number;
+  impact_zone?: string;
+  zones: Record<string, DioramaZone>;
 };
 
 export type ScenarioStub = {

@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-13T13:28:47.347Z",
+  "generated": "2026-11-13T15:12:11.203Z",
   "playable": [
     {
       "id": "katrina-2005",
@@ -1254,6 +1254,81 @@
         "citation": {
           "sourceId": "senate-2006",
           "detail": "Chapter 5 timeline, Saturday 27 August: ~1 p.m.; Chapter 16 (Pre-Storm Evacuations) (Mayor's Saturday press conference)"
+        }
+      },
+      "diorama": {
+        "_note": "Presentational (diorama mode): a cartographic anchor for each named place a zone covers, WGS84 decimal degrees to about 100 m — verifiable geography like the atlas gazetteer, not a record fact and not a boundary. The drape is the places' hull widened by radius_km.",
+        "frames": [
+          "katrina-2005"
+        ],
+        "exaggeration": 2.5,
+        "contour_m": 5,
+        "zones": {
+          "lower-ninth": {
+            "anchor": "Lower Ninth",
+            "radius_km": 1,
+            "places": [
+              {
+                "name": "Lower Ninth",
+                "lat": 29.965,
+                "lon": -90.005
+              }
+            ]
+          },
+          "new-orleans-east": {
+            "anchor": "New Orleans East",
+            "radius_km": 2,
+            "places": [
+              {
+                "name": "New Orleans East",
+                "lat": 30.03,
+                "lon": -89.96
+              }
+            ]
+          },
+          "lakeview-gentilly": {
+            "anchor": "Lakeview",
+            "radius_km": 1,
+            "places": [
+              {
+                "name": "Lakeview",
+                "lat": 30.005,
+                "lon": -90.115
+              },
+              {
+                "name": "Gentilly",
+                "lat": 30,
+                "lon": -90.055
+              }
+            ]
+          },
+          "algiers": {
+            "anchor": "Algiers",
+            "radius_km": 1.2,
+            "places": [
+              {
+                "name": "Algiers",
+                "lat": 29.928,
+                "lon": -90.03
+              }
+            ]
+          },
+          "cbd-superdome": {
+            "anchor": "Superdome",
+            "radius_km": 0.6,
+            "places": [
+              {
+                "name": "Superdome",
+                "lat": 29.9511,
+                "lon": -90.0812
+              },
+              {
+                "name": "Central Business District",
+                "lat": 29.95,
+                "lon": -90.07
+              }
+            ]
+          }
         }
       },
       "sources": [
@@ -2932,6 +3007,66 @@
           }
         ]
       },
+      "diorama": {
+        "_note": "Presentational (diorama mode): a cartographic anchor for each named place a zone covers, WGS84 decimal degrees to about 100 m — verifiable geography like the atlas gazetteer, not a record fact and not a boundary. The drape is the places' hull widened by radius_km.",
+        "frames": [
+          "lahaina-2023",
+          "lahaina-2023-upcountry"
+        ],
+        "exaggeration": 1.5,
+        "contour_m": 100,
+        "impact_zone": "lahaina-lahainaluna",
+        "zones": {
+          "lahaina-lahainaluna": {
+            "anchor": "Lahainaluna",
+            "radius_km": 0.35,
+            "places": [
+              {
+                "name": "Lahainaluna",
+                "lat": 20.886,
+                "lon": -156.661
+              },
+              {
+                "name": "Kelawea",
+                "lat": 20.879,
+                "lon": -156.665
+              }
+            ]
+          },
+          "lahaina-front-street": {
+            "anchor": "Front Street",
+            "radius_km": 0.35,
+            "places": [
+              {
+                "name": "Front Street",
+                "lat": 20.8735,
+                "lon": -156.678
+              },
+              {
+                "name": "Kahoma",
+                "lat": 20.8825,
+                "lon": -156.6765
+              }
+            ]
+          },
+          "upcountry-kula": {
+            "anchor": "Kula",
+            "radius_km": 1.2,
+            "places": [
+              {
+                "name": "Kula",
+                "lat": 20.79,
+                "lon": -156.325
+              },
+              {
+                "name": "Olinda",
+                "lat": 20.8125,
+                "lon": -156.285
+              }
+            ]
+          }
+        }
+      },
       "sources": [
         {
           "id": "fsri-p1",
@@ -3779,6 +3914,61 @@
         "citation": {
           "sourceId": "imd-report",
           "detail": "Section 8.2 (Cyclone Warning Centre Bhubaneswar): watch, alert, warning and fishermen-warning lists"
+        }
+      },
+      "diorama": {
+        "_note": "Presentational (diorama mode): a cartographic anchor for each named place a zone covers, WGS84 decimal degrees to about 100 m — verifiable geography like the atlas gazetteer, not a record fact and not a boundary. The drape is the places' hull widened by radius_km.",
+        "frames": [
+          "odisha-phailin-2013"
+        ],
+        "exaggeration": 2.5,
+        "contour_m": 50,
+        "impact_zone": "ganjam-coast",
+        "zones": {
+          "ganjam-coast": {
+            "anchor": "Gopalpur",
+            "radius_km": 3,
+            "places": [
+              {
+                "name": "Gopalpur",
+                "lat": 19.263,
+                "lon": 84.905
+              },
+              {
+                "name": "Ganjam",
+                "lat": 19.387,
+                "lon": 85.051
+              }
+            ]
+          },
+          "puri-khurda": {
+            "anchor": "Chilika",
+            "radius_km": 5,
+            "places": [
+              {
+                "name": "Chilika",
+                "lat": 19.72,
+                "lon": 85.3
+              }
+            ]
+          },
+          "jagatsinghpur": {
+            "anchor": "Jagatsinghpur",
+            "beyond_frame": true,
+            "radius_km": 3,
+            "places": [
+              {
+                "name": "Jagatsinghpur",
+                "lat": 20.26,
+                "lon": 86.17
+              },
+              {
+                "name": "Paradip",
+                "lat": 20.316,
+                "lon": 86.61
+              }
+            ]
+          }
         }
       },
       "sources": [
@@ -4884,6 +5074,59 @@
             }
           }
         ]
+      },
+      "diorama": {
+        "_note": "Presentational (diorama mode): a cartographic anchor for each named place a zone covers, WGS84 decimal degrees to about 100 m — verifiable geography like the atlas gazetteer, not a record fact and not a boundary. The drape is the places' hull widened by radius_km.",
+        "frames": [
+          "valencia-dana-2024"
+        ],
+        "exaggeration": 2.5,
+        "contour_m": 100,
+        "impact_zone": "poyo-horta-sud",
+        "zones": {
+          "poyo-horta-sud": {
+            "anchor": "Paiporta",
+            "radius_km": 1.4,
+            "places": [
+              {
+                "name": "Paiporta",
+                "lat": 39.428,
+                "lon": -0.417
+              },
+              {
+                "name": "Catarroja",
+                "lat": 39.403,
+                "lon": -0.404
+              },
+              {
+                "name": "Alfafar",
+                "lat": 39.422,
+                "lon": -0.39
+              }
+            ]
+          },
+          "magro-utiel": {
+            "anchor": "Requena",
+            "radius_km": 3,
+            "places": [
+              {
+                "name": "Utiel",
+                "lat": 39.567,
+                "lon": -1.205
+              },
+              {
+                "name": "Requena",
+                "lat": 39.488,
+                "lon": -1.101
+              },
+              {
+                "name": "Forata",
+                "lat": 39.383,
+                "lon": -0.817
+              }
+            ]
+          }
+        }
       },
       "sources": [
         {

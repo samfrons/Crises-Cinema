@@ -1045,6 +1045,59 @@
       }
     ]
   },
+  "diorama": {
+    "_note": "Presentational (diorama mode): a cartographic anchor for each named place a zone covers, WGS84 decimal degrees to about 100 m — verifiable geography like the atlas gazetteer, not a record fact and not a boundary. The drape is the places' hull widened by radius_km.",
+    "frames": [
+      "valencia-dana-2024"
+    ],
+    "exaggeration": 2.5,
+    "contour_m": 100,
+    "impact_zone": "poyo-horta-sud",
+    "zones": {
+      "poyo-horta-sud": {
+        "anchor": "Paiporta",
+        "radius_km": 1.4,
+        "places": [
+          {
+            "name": "Paiporta",
+            "lat": 39.428,
+            "lon": -0.417
+          },
+          {
+            "name": "Catarroja",
+            "lat": 39.403,
+            "lon": -0.404
+          },
+          {
+            "name": "Alfafar",
+            "lat": 39.422,
+            "lon": -0.39
+          }
+        ]
+      },
+      "magro-utiel": {
+        "anchor": "Requena",
+        "radius_km": 3,
+        "places": [
+          {
+            "name": "Utiel",
+            "lat": 39.567,
+            "lon": -1.205
+          },
+          {
+            "name": "Requena",
+            "lat": 39.488,
+            "lon": -1.101
+          },
+          {
+            "name": "Forata",
+            "lat": 39.383,
+            "lon": -0.817
+          }
+        ]
+      }
+    }
+  },
   "sources": [
     {
       "id": "aemet-2024",

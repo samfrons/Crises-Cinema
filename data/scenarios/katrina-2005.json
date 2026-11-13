@@ -1253,6 +1253,81 @@
       "detail": "Chapter 5 timeline, Saturday 27 August: ~1 p.m.; Chapter 16 (Pre-Storm Evacuations) (Mayor's Saturday press conference)"
     }
   },
+  "diorama": {
+    "_note": "Presentational (diorama mode): a cartographic anchor for each named place a zone covers, WGS84 decimal degrees to about 100 m — verifiable geography like the atlas gazetteer, not a record fact and not a boundary. The drape is the places' hull widened by radius_km.",
+    "frames": [
+      "katrina-2005"
+    ],
+    "exaggeration": 2.5,
+    "contour_m": 5,
+    "zones": {
+      "lower-ninth": {
+        "anchor": "Lower Ninth",
+        "radius_km": 1,
+        "places": [
+          {
+            "name": "Lower Ninth",
+            "lat": 29.965,
+            "lon": -90.005
+          }
+        ]
+      },
+      "new-orleans-east": {
+        "anchor": "New Orleans East",
+        "radius_km": 2,
+        "places": [
+          {
+            "name": "New Orleans East",
+            "lat": 30.03,
+            "lon": -89.96
+          }
+        ]
+      },
+      "lakeview-gentilly": {
+        "anchor": "Lakeview",
+        "radius_km": 1,
+        "places": [
+          {
+            "name": "Lakeview",
+            "lat": 30.005,
+            "lon": -90.115
+          },
+          {
+            "name": "Gentilly",
+            "lat": 30,
+            "lon": -90.055
+          }
+        ]
+      },
+      "algiers": {
+        "anchor": "Algiers",
+        "radius_km": 1.2,
+        "places": [
+          {
+            "name": "Algiers",
+            "lat": 29.928,
+            "lon": -90.03
+          }
+        ]
+      },
+      "cbd-superdome": {
+        "anchor": "Superdome",
+        "radius_km": 0.6,
+        "places": [
+          {
+            "name": "Superdome",
+            "lat": 29.9511,
+            "lon": -90.0812
+          },
+          {
+            "name": "Central Business District",
+            "lat": 29.95,
+            "lon": -90.07
+          }
+        ]
+      }
+    }
+  },
   "sources": [
     {
       "id": "nhc-adv",

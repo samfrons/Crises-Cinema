@@ -1599,6 +1599,66 @@
       }
     ]
   },
+  "diorama": {
+    "_note": "Presentational (diorama mode): a cartographic anchor for each named place a zone covers, WGS84 decimal degrees to about 100 m — verifiable geography like the atlas gazetteer, not a record fact and not a boundary. The drape is the places' hull widened by radius_km.",
+    "frames": [
+      "lahaina-2023",
+      "lahaina-2023-upcountry"
+    ],
+    "exaggeration": 1.5,
+    "contour_m": 100,
+    "impact_zone": "lahaina-lahainaluna",
+    "zones": {
+      "lahaina-lahainaluna": {
+        "anchor": "Lahainaluna",
+        "radius_km": 0.35,
+        "places": [
+          {
+            "name": "Lahainaluna",
+            "lat": 20.886,
+            "lon": -156.661
+          },
+          {
+            "name": "Kelawea",
+            "lat": 20.879,
+            "lon": -156.665
+          }
+        ]
+      },
+      "lahaina-front-street": {
+        "anchor": "Front Street",
+        "radius_km": 0.35,
+        "places": [
+          {
+            "name": "Front Street",
+            "lat": 20.8735,
+            "lon": -156.678
+          },
+          {
+            "name": "Kahoma",
+            "lat": 20.8825,
+            "lon": -156.6765
+          }
+        ]
+      },
+      "upcountry-kula": {
+        "anchor": "Kula",
+        "radius_km": 1.2,
+        "places": [
+          {
+            "name": "Kula",
+            "lat": 20.79,
+            "lon": -156.325
+          },
+          {
+            "name": "Olinda",
+            "lat": 20.8125,
+            "lon": -156.285
+          }
+        ]
+      }
+    }
+  },
   "sources": [
     {
       "id": "fsri-p1",

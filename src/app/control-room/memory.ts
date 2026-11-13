@@ -7,7 +7,7 @@
  *               skipped this session: sessionStorage, plus an in-memory flag
  *               so a browser that refuses storage still never repeats them
  *               within the page's life.
- *   mode      — LOG or PICTURE, the player's last choice: localStorage.
+ *   mode      — LOG, PICTURE or DIORAMA, the player's last choice: localStorage.
  *   last run  — per scenario, the option the player took at each decision
  *               on their last completed run: localStorage. Read back only
  *               against the scenario as it now stands; a run that no longer
@@ -60,15 +60,17 @@ export function markBooted() {
   }
 }
 
-/* LOG · PICTURE: how the desk is shown, the reading version or the board
-   played out. A presentation choice only (both render the same run), kept
-   in localStorage; anything unreadable means the default, the log. */
-export type DeskMode = 'log' | 'picture';
+/* LOG · PICTURE · DIORAMA: how the desk is shown, the reading version, the
+   board played out, or the same played on a model of the real ground. A
+   presentation choice only (all three render the same run), kept in
+   localStorage; anything unreadable means the default, the log. */
+export type DeskMode = 'log' | 'picture' | 'diorama';
 const MODE_KEY = 'cr-mode';
 
 export function loadMode(): DeskMode {
   try {
-    return window.localStorage.getItem(MODE_KEY) === 'picture' ? 'picture' : 'log';
+    const m = window.localStorage.getItem(MODE_KEY);
+    return m === 'picture' || m === 'diorama' ? m : 'log';
   } catch {
     return 'log';
   }

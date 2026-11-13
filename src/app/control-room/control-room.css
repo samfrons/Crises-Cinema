@@ -3192,3 +3192,214 @@
    carried by stroke, hatch and word as everywhere), and the zone the slip
    concerns is drawn heavier instead. */
 .cr-stage .cr-zone .cr-zone-shape { animation: none; }
+
+/* ══ The diorama: the same stage on a paper model of the real ground ════════
+   Diorama.tsx + diorama-engine.ts (WebGL, loaded only in this mode). The
+   canvas draws the ground, the zones' drapes, the chits and the dispatch
+   arcs; everything worded is DOM laid over it (placed from the model each
+   frame), in the board's own type: the mono labels on a paper halo, ember
+   only where the board uses it (the impact state). The stage's table is
+   the deep paper stock, darkened a breath at its edges like a lit plate.
+   Reduced motion: no travel, no drift, no rise; the band and the labels
+   cut in, and the slip's zone is struck twice (in the shader). */
+
+.cr-stage.is-diorama { background: var(--paper-deep); }
+.cr-dio { position: absolute; inset: 0; touch-action: pan-y; cursor: grab; }
+.cr-dio:active { cursor: grabbing; }
+.cr-dio::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 45%, transparent 55%, color-mix(in srgb, var(--ink) 16%, transparent) 100%);
+}
+.cr-dio-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.cr-dio-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* Labels: zero-size anchors moved by the engine; their bodies hang off them. */
+.cr-dio-labels { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.cr-dio-lab { position: absolute; left: 0; top: 0; width: 0; height: 0; will-change: transform; }
+.cr-dio-lab > span {
+  position: absolute;
+  white-space: nowrap;
+  font-family: var(--data);
+  text-shadow: 0 0 2px var(--paper), 0 0 3px var(--paper), 1px 1px 0 var(--paper), -1px -1px 0 var(--paper), 1px -1px 0 var(--paper), -1px 1px 0 var(--paper);
+}
+.cr-dio-zone-body { display: grid; justify-items: center; gap: 1px; transform: translate(-50%, 9px); text-transform: uppercase; }
+.cr-dio-zone-name { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink); }
+.cr-dio-zone-state { font-size: 11px; letter-spacing: 0.08em; color: var(--ink-soft); }
+.cr-dio-zone:is(.is-watch, .is-signal) .cr-dio-zone-state { color: var(--ink); }
+.cr-dio-zone.is-signal .cr-dio-zone-state { font-weight: 700; }
+.cr-dio-zone.is-impact .cr-dio-zone-state { color: var(--ember); font-weight: 700; }
+.cr-dio-zone-warned { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--ink); }
+.cr-dio-zone-beyond { font-size: 10px; letter-spacing: 0.08em; color: var(--ink-faint); }
+.cr-dio-zone.is-spot .cr-dio-zone-name { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.cr-dio-place { transition: opacity var(--t-mid) var(--ease); }
+.cr-dio-labels[data-near="0"] .cr-dio-place { opacity: 0; }
+.cr-dio-place-body { transform: translate(-3px, -50%); font-size: 10px; letter-spacing: 0.04em; color: var(--ink-soft); padding-left: 10px; }
+.cr-dio-place-body::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+}
+.cr-dio-origin-body { transform: translate(16px, -50%); font-size: 12px; font-weight: 700; letter-spacing: 0.06em; color: var(--ink); }
+.cr-dio-frame-body {
+  transform: translate(-50%, 6px);
+  padding: 2px 8px;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper-lit);
+  border: 1px solid var(--ink);
+  text-shadow: none !important;
+}
+@media (max-width: 599px) {
+  .cr-dio-frame-body { font-size: 9px; letter-spacing: 0.08em; white-space: normal !important; width: 220px; text-align: center; }
+  .cr-dio-zone-name { font-size: 11px; }
+  .cr-dio-zone-state, .cr-dio-zone-warned { font-size: 10px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .cr-dio-origin.is-fresh .cr-dio-origin-body { animation: cr-fade var(--t-mid) var(--ease) 700ms both; }
+}
+
+/* The wind a cited forecast states, as on the board's title band. */
+.cr-dio-wind {
+  position: absolute;
+  margin: 0;
+  z-index: 1;
+  font-family: var(--data);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+  background: var(--paper-lit);
+  border: 1px solid var(--ink);
+  padding: 3px 8px;
+}
+
+/* The ground's plate: what the model is, whose data, and the view controls. */
+.cr-dio-plate {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 2;
+  width: min(372px, calc(100% - 20px));
+  padding: 8px 10px 8px;
+  background: var(--paper-lit);
+  border: 1px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  font-family: var(--data);
+  color: var(--ink);
+}
+.cr-dio-plate p { margin: 0; }
+.cr-dio-plate-line { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.cr-dio-plate-src { margin-top: 3px !important; font-size: 10.5px; line-height: 1.4; color: var(--ink-faint); }
+.cr-dio-view { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+.cr-dio-vbtn-word { flex: 1 1 auto; }
+.cr-dio-vbtn {
+  min-width: 40px;
+  min-height: 40px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 8px;
+  font-family: var(--data);
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
+}
+@media (hover: hover) { .cr-dio-vbtn:hover { background: var(--ink); color: var(--paper); } }
+.cr-dio-vbtn:active { transform: translate(1px, 1px); transition: transform var(--t-fast) var(--ease-press); }
+.cr-dio-vbtn:focus-visible { outline: 3px solid var(--ember); outline-offset: 2px; }
+.cr-dio-hint { margin-top: 6px !important; font-size: 10px; line-height: 1.45; color: var(--ink-faint); }
+.cr-dio-hint kbd {
+  font-family: var(--data);
+  font-size: 10px;
+  padding: 0 4px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+}
+.cr-dio-hint-touch { display: none; }
+@media (pointer: coarse) { .cr-dio-hint-touch { display: inline; } .cr-dio-hint-keys { display: none; } }
+@media (max-width: 599px) {
+  .cr-dio-plate { right: 8px; width: auto; max-width: calc(100% - 16px); padding: 6px 8px; box-shadow: 2px 2px 0 var(--ink); }
+  .cr-dio-hint { display: none; }
+  .cr-dio-plate-src { font-size: 9.5px; }
+  .cr-dio-view { margin-top: 5px; }
+  .cr-dio-vbtn { min-width: 40px; padding: 0 6px; }
+}
+
+/* The impact beat: a band across the model with the cited time, the zone's
+   drape swept under it. Presentation of a time the record already holds. */
+.cr-dio-impact { position: absolute; left: 0; right: 0; z-index: 2; display: grid; pointer-events: none; }
+.cr-dio-impact-band {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  padding: 12px 16px;
+  background: var(--ink);
+  color: var(--paper);
+  border-top: 2px solid var(--paper);
+  border-bottom: 2px solid var(--paper);
+  text-align: center;
+}
+.cr-dio-impact-time { font-family: var(--data); font-size: 12px; font-weight: 700; letter-spacing: 0.2em; }
+.cr-dio-impact-title { font-family: var(--poster); font-size: clamp(26px, 5vw, 44px); line-height: 0.95; text-transform: uppercase; }
+.cr-dio-impact-sub { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: color-mix(in srgb, var(--paper) 85%, transparent); }
+@keyframes cr-dio-band { 0% { transform: scaleY(0); opacity: 1; } 10% { transform: none; } 82% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-dio-impact-band { animation: cr-dio-band 3400ms var(--ease-press) both; }
+  .cr-dio-impact-title { animation: cr-call-stamp var(--t-slow) var(--ease-press) 260ms both; }
+}
+/* Still: the band is printed twice out of register, and holds. */
+.cr-dio-impact.is-still .cr-dio-impact-band { box-shadow: 5px 5px 0 color-mix(in srgb, var(--ink) 55%, transparent); }
+
+/* The fallback's one line, over the stage. */
+.cr-stage-notice {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 5;
+  margin: 0;
+  padding: 8px 14px;
+  font-family: var(--data);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--paper);
+  background: var(--ink);
+  border-bottom: 2px solid var(--ember);
+}
+
+/* The ground sheet. */
+.cr-dio-about { font-family: var(--read); font-size: 16px; line-height: 1.55; }
+.cr-dio-about p { margin: 0 0 10px; }
+.cr-dio-about-zones { margin: 0 0 12px; padding-left: 20px; }
+.cr-dio-about-src { border-top: 1px solid var(--rule); padding-top: 10px; margin-top: 10px; font-size: 14px; }
+.cr-dio-about-name { font-family: var(--data); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
+.cr-dio-about-lic { font-family: var(--data); font-size: 11.5px; white-space: pre-wrap; color: var(--ink-soft); }
+.cr-dio-about a { color: var(--ink); text-decoration-color: var(--ember); }

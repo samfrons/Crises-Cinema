@@ -489,6 +489,61 @@
     "clock_alert": "this day's first listed IMD bulletin",
     "citation": { "sourceId": "imd-report", "detail": "Section 8.2 (Cyclone Warning Centre Bhubaneswar): watch, alert, warning and fishermen-warning lists" }
   },
+  "diorama": {
+    "_note": "Presentational (diorama mode): a cartographic anchor for each named place a zone covers, WGS84 decimal degrees to about 100 m — verifiable geography like the atlas gazetteer, not a record fact and not a boundary. The drape is the places' hull widened by radius_km.",
+    "frames": [
+      "odisha-phailin-2013"
+    ],
+    "exaggeration": 2.5,
+    "contour_m": 50,
+    "impact_zone": "ganjam-coast",
+    "zones": {
+      "ganjam-coast": {
+        "anchor": "Gopalpur",
+        "radius_km": 3,
+        "places": [
+          {
+            "name": "Gopalpur",
+            "lat": 19.263,
+            "lon": 84.905
+          },
+          {
+            "name": "Ganjam",
+            "lat": 19.387,
+            "lon": 85.051
+          }
+        ]
+      },
+      "puri-khurda": {
+        "anchor": "Chilika",
+        "radius_km": 5,
+        "places": [
+          {
+            "name": "Chilika",
+            "lat": 19.72,
+            "lon": 85.3
+          }
+        ]
+      },
+      "jagatsinghpur": {
+        "anchor": "Jagatsinghpur",
+        "beyond_frame": true,
+        "radius_km": 3,
+        "places": [
+          {
+            "name": "Jagatsinghpur",
+            "lat": 20.26,
+            "lon": 86.17
+          },
+          {
+            "name": "Paradip",
+            "lat": 20.316,
+            "lon": 86.61
+          }
+        ]
+      }
+    }
+  },
   "sources": [
     {
       "id": "imd-report",

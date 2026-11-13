@@ -215,3 +215,36 @@ test('debrief media taken after the day is allowed (positive control)', () => {
   const r = run((e) => e(L, (s) => { s.debrief_media[0].takenOn = '2024-01-01'; }));
   assert.equal(r.code, 0, r.out);
 });
+
+// The diorama's ground (README, "The diorama"): each zone's cartographic anchor
+// is a named place the record prints, inside the scenario's terrain, and drapes
+// never overlap. Every gate below proves the build fails on the bad input.
+const P2 = 'odisha-phailin-2013.json';
+rejects('playable scenario without a diorama block', (e) => e(V, (s) => { delete s.diorama; }), /needs a diorama block/);
+rejects('at-risk zone without a diorama anchor', (e) => e(L, (s) => { delete s.diorama.zones['upcountry-kula']; }), /diorama\.zones\.upcountry-kula — every at-risk zone needs a diorama anchor/);
+rejects('diorama zone that is not an at-risk zone', (e) => e(V, (s) => { s.diorama.zones.atlantis = { anchor: 'Paiporta', radius_km: 1, places: [{ name: 'Paiporta', lat: 39.428, lon: -0.417 }] }; }), /diorama\.zones\.atlantis — must be a scoring\.at_risk_zones id/);
+rejects('anchor outside every terrain frame', (e) => e(V, (s) => { const z = s.diorama.zones['poyo-horta-sud']; z.places[0].lon = 2.5; }), /anchor "Paiporta" lies outside every terrain frame/);
+rejects('a draped zone place outside the frame', (e) => e(L, (s) => { s.diorama.zones['upcountry-kula'].places[1].lat = 21.5; }), /"Olinda" lies outside every terrain frame/);
+rejects('beyond_frame flag on a zone inside the frame', (e) => e(V, (s) => { s.diorama.zones['magro-utiel'].beyond_frame = true; }), /flagged beyond the frame, but a place lies inside/);
+rejects('place name the record never prints', (e) => e(K, (s) => { s.diorama.zones.algiers.places[0].name = 'Gretna'; s.diorama.zones.algiers.anchor = 'Gretna'; }), /"Gretna" is not a name the scenario's own text prints/);
+rejects('anchor that is not one of the zone\'s places', (e) => e(K, (s) => { s.diorama.zones.algiers.anchor = 'Superdome'; }), /diorama\.zones\.algiers\.anchor — must name one of the zone's places/);
+rejects('overlapping zone footprints', (e) => e(L, (s) => { s.diorama.zones['lahaina-front-street'].radius_km = 1.2; }), /footprint overlaps lahaina-(lahainaluna|front-street)/);
+rejects('relief exaggeration out of range', (e) => e(P2, (s) => { s.diorama.exaggeration = 8; }), /relief exaggeration must be a number from 1 to 3/);
+rejects('terrain frame that does not exist', (e) => e(V, (s) => { s.diorama.frames = ['valencia-dana-2024-nowhere']; }), /no terrain at public\/control-room\/terrain/);
+rejects('terrain frame of another scenario', (e) => e(V, (s) => { s.diorama.frames = ['katrina-2005']; }), /say it belongs to scenario "valencia-dana-2024"/);
+rejects('impact zone the impact label does not name', (e) => e(V, (s) => { s.diorama.impact_zone = 'magro-utiel'; }), /diorama\.impact_zone — must be an at-risk zone that the cited scoring\.impact\.label names/);
+
+test('every playable at-risk zone has a diorama anchor inside its terrain, or is honestly beyond it (positive control)', () => {
+  for (const name of [L, V, K, P]) {
+    const s = JSON.parse(readFileSync(join(repo, 'data', 'scenarios', name), 'utf8'));
+    const boxes = s.diorama.frames.map((f) => JSON.parse(readFileSync(join(repo, 'public', 'control-room', 'terrain', `${f}.json`), 'utf8')).bbox);
+    const inAny = (p) => boxes.some((b) => p.lon >= b[0] && p.lon <= b[2] && p.lat >= b[1] && p.lat <= b[3]);
+    for (const z of s.scoring.at_risk_zones) {
+      const e = s.diorama.zones[z.id];
+      assert.ok(e, `${name} ${z.id} has an entry`);
+      const a = e.places.find((p) => p.name === e.anchor);
+      assert.ok(a, `${name} ${z.id} anchor is a place`);
+      assert.equal(inAny(a), e.beyond_frame !== true, `${name} ${z.id} anchor in frame unless beyond_frame`);
+    }
+  }
+});

@@ -260,6 +260,150 @@ function checkChainLabels(chk, wc, s) {
   }
 }
 
+/* ── The diorama's ground: cartographic anchors ──────────────────────────────
+   Diorama mode plays the day on a model of the real ground (the committed
+   heightmaps in public/control-room/terrain/). The hand-drawn boards are
+   schematic, so each zone gets real coordinates here: the named places it
+   covers, as WGS84 points. Presentational, like the atlas gazetteer — but
+   held to the same discipline as everything else on the desk:
+     · every playable scenario names its terrain frames, and each frame's meta
+       exists and says it belongs to this scenario;
+     · every at-risk zone has an entry, and nothing else does;
+     · every place is a name the scenario's own text prints (a zone label, the
+       location, a slip, a chain label), so the model never names a place the
+       record does not;
+     · the anchor is one of those places, and it lies inside a frame — unless
+       the zone is flagged `beyond_frame`, which is honest only when every one
+       of its places lies outside every frame (the model then points to it
+       from the table's edge instead of draping it);
+     · two zones' footprints (the places' hull widened by radius_km) do not
+       overlap, so a drape never reads as two states at once;
+     · `impact_zone`, when set, is a zone the cited impact label names (by one
+       of its places or its chain label) — the stage's impact beat restates
+       where the record puts the impact, nothing more;
+     · relief exaggeration is bounded (1–3×) and is printed on the stage.   */
+const terrainRoot = join(root, 'public', 'control-room', 'terrain');
+const KM_PER_DEG_LAT = 110.574;
+const toKm = (lat0) => (p) => [p.lon * 111.32 * Math.cos((lat0 * Math.PI) / 180), p.lat * KM_PER_DEG_LAT];
+const inBox = (b, p) => p.lon >= b[0] && p.lon <= b[2] && p.lat >= b[1] && p.lat <= b[3];
+function segDist(p, a, b) {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const l2 = dx * dx + dy * dy;
+  const t = l2 ? Math.max(0, Math.min(1, ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / l2)) : 0;
+  return Math.hypot(p[0] - a[0] - t * dx, p[1] - a[1] - t * dy);
+}
+/** Least distance between two point sets' hulls (vertex-to-edge both ways;
+ *  0 if a vertex of one lies inside the other's hull). Convex hulls of at
+ *  most a handful of points: exact enough for a no-overlap gate. */
+function hullOf(pts) {
+  if (pts.length < 3) return pts;
+  const s = [...pts].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lo = [];
+  const hi = [];
+  for (const p of s) { while (lo.length >= 2 && cross(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop(); lo.push(p); }
+  for (const p of s.reverse()) { while (hi.length >= 2 && cross(hi[hi.length - 2], hi[hi.length - 1], p) <= 0) hi.pop(); hi.push(p); }
+  return lo.slice(0, -1).concat(hi.slice(0, -1));
+}
+function insideHull(h, p) {
+  if (h.length < 3) return false;
+  let sign = 0;
+  for (let i = 0; i < h.length; i++) {
+    const a = h[i];
+    const b = h[(i + 1) % h.length];
+    const c = (b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]);
+    if (c !== 0) { if (sign && Math.sign(c) !== sign) return false; sign = Math.sign(c); }
+  }
+  return true;
+}
+function hullGap(A, B) {
+  const ha = hullOf(A);
+  const hb = hullOf(B);
+  if (ha.some((p) => insideHull(hb, p)) || hb.some((p) => insideHull(ha, p))) return 0;
+  const edges = (h) => (h.length === 1 ? [[h[0], h[0]]] : h.map((p, i) => [p, h[(i + 1) % h.length]]));
+  let d = Infinity;
+  for (const p of ha) for (const [a, b] of edges(hb)) d = Math.min(d, segDist(p, a, b));
+  for (const p of hb) for (const [a, b] of edges(ha)) d = Math.min(d, segDist(p, a, b));
+  return d;
+}
+
+function checkDiorama(chk, s) {
+  const d = s.diorama;
+  if (!chk.require(d && typeof d === 'object' && !Array.isArray(d), 'diorama',
+    'a playable scenario needs a diorama block (terrain frames + a cartographic anchor per at-risk zone)')) return;
+  chk.require(typeof d.exaggeration === 'number' && d.exaggeration >= 1 && d.exaggeration <= 3, 'diorama.exaggeration',
+    'relief exaggeration must be a number from 1 to 3 (it is printed on the stage)');
+  chk.require(typeof d.contour_m === 'number' && d.contour_m > 0 && d.contour_m <= 500, 'diorama.contour_m', 'a contour interval in metres, 0–500');
+  const frames = [];
+  if (chk.require(Array.isArray(d.frames) && d.frames.length >= 1 && d.frames.length <= 3, 'diorama.frames', 'list 1–3 terrain frame ids')) {
+    for (const f of d.frames) {
+      const p = join(terrainRoot, `${f}.json`);
+      if (!chk.require(typeof f === 'string' && SAFE_FILE.test(f) && existsSync(p) && existsSync(join(terrainRoot, `${f}.png`)),
+        `diorama.frames.${f}`, 'no terrain at public/control-room/terrain/<frame>.{json,png} (npm run build:terrain)')) continue;
+      const m = JSON.parse(readFileSync(p, 'utf8'));
+      if (chk.require(m.scenario === s.id && Array.isArray(m.bbox) && m.bbox.length === 4, `diorama.frames.${f}`,
+        `terrain meta must carry a bbox and say it belongs to scenario "${s.id}"`)) frames.push(m);
+    }
+  }
+  const zones = d.zones && typeof d.zones === 'object' ? d.zones : {};
+  const known = new Set((s.scoring?.at_risk_zones ?? []).map((z) => z.id));
+  for (const z of known) chk.require(z in zones, `diorama.zones.${z}`, 'every at-risk zone needs a diorama anchor');
+  // The names the record prints: zone labels, the location, every slip, the chain's short labels.
+  const said = [
+    s.location,
+    ...(s.scoring?.at_risk_zones ?? []).map((z) => z.label),
+    ...Object.values(s.warning_chain?.zones ?? {}),
+    ...(s.timesteps ?? []).flatMap((t) => (t.info_available ?? []).map((i) => i.text)),
+  ].filter((x) => typeof x === 'string').join('\n');
+  const lat0 = frames.length ? (frames[0].bbox[1] + frames[0].bbox[3]) / 2 : 0;
+  const km = toKm(lat0);
+  const draped = [];
+  for (const [z, e] of Object.entries(zones)) {
+    const q = `diorama.zones.${z}`;
+    if (!chk.require(known.has(z), q, 'must be a scoring.at_risk_zones id')) continue;
+    if (!chk.require(e && Array.isArray(e.places) && e.places.length >= 1 && e.places.length <= 6, `${q}.places`, '1–6 named places')) continue;
+    chk.require(typeof e.radius_km === 'number' && e.radius_km >= 0.1 && e.radius_km <= 15, `${q}.radius_km`, 'a footprint radius of 0.1–15 km');
+    let ok = true;
+    for (const [i, p] of e.places.entries()) {
+      const pq = `${q}.places[${i}]`;
+      ok = chk.require(p && typeof p.name === 'string' && p.name.length > 0 && Number.isFinite(p.lat) && Number.isFinite(p.lon)
+        && Math.abs(p.lat) <= 90 && Math.abs(p.lon) <= 180, pq, 'needs { name, lat, lon } in decimal degrees') && ok;
+      if (p && typeof p.name === 'string') {
+        chk.require(said.includes(p.name), pq, `"${p.name}" is not a name the scenario's own text prints (zone labels, location, slips) — the model names only places the record names`);
+      }
+    }
+    chk.require(e.places.some((p) => p?.name === e.anchor), `${q}.anchor`, 'must name one of the zone\'s places');
+    if (!ok) continue;
+    const inside = e.places.map((p) => frames.some((f) => inBox(f.bbox, p)));
+    const anchor = e.places.find((p) => p.name === e.anchor);
+    if (e.beyond_frame === true) {
+      chk.require(inside.every((x) => !x), `${q}.beyond_frame`, 'flagged beyond the frame, but a place lies inside a terrain frame — drape it instead');
+    } else {
+      chk.require(e.beyond_frame === undefined, `${q}.beyond_frame`, 'is true or absent');
+      chk.require(!anchor || frames.some((f) => inBox(f.bbox, anchor)), `${q}.anchor`,
+        `anchor "${e.anchor}" lies outside every terrain frame (${frames.map((f) => f.id).join(', ')}): move it to a place in the frame, or flag the zone beyond_frame`);
+      e.places.forEach((p, i) => chk.require(inside[i], `${q}.places[${i}]`, `"${p.name}" lies outside every terrain frame`));
+      draped.push({ z, r: e.radius_km, pts: e.places.map(km) });
+    }
+  }
+  for (let i = 0; i < draped.length; i++) {
+    for (let j = i + 1; j < draped.length; j++) {
+      const a = draped[i];
+      const b = draped[j];
+      const gap = hullGap(a.pts, b.pts) - a.r - b.r;
+      chk.require(gap > 0, `diorama.zones.${a.z}`, `footprint overlaps ${b.z} by ${(-gap).toFixed(2)} km — shrink radius_km so each drape reads as one zone`);
+    }
+  }
+  if (d.impact_zone !== undefined) {
+    const e = zones[d.impact_zone];
+    const names = [...(e?.places ?? []).map((p) => p?.name), s.warning_chain?.zones?.[d.impact_zone]].filter(Boolean);
+    const label = s.scoring?.impact?.label ?? '';
+    chk.require(known.has(d.impact_zone) && names.some((n) => label.includes(n)), 'diorama.impact_zone',
+      'must be an at-risk zone that the cited scoring.impact.label names (by one of its places or its chain label)');
+  }
+}
+
 /** Every number a sentence prints ("16:30", "1,686", "9"), as written. */
 const numbersIn = (text) => (typeof text === 'string' ? text.match(/\d+(?:[.,:]\d+)*/g) ?? [] : []);
 
@@ -660,6 +804,7 @@ function validate(file, s) {
   chk.require(HHMM.test(s.scoring?.historical_first_public_alert ?? ''), 'scoring.historical_first_public_alert', 'must be HH:MM');
   if (s.scoring) checkBenchmark(chk, s, sourceIds);
   if (s.scoring?.minutes_matter !== undefined) checkMinutesMatter(chk, s, sourceIds);
+  checkDiorama(chk, s);
 
   return chk.errors;
 }
