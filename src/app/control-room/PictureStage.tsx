@@ -59,6 +59,7 @@ import { deriveBoard, stamp, warnedBy } from './board';
 import { inWords, tzLabel } from './summary';
 import { Portrait, speakerFor } from './speakers';
 import { TICK_SPACING } from './stage';
+import Ledger from './Ledger';
 import * as sound from './sound';
 
 /** Camera travel (CSS: .cr-cam transition, --cam-ms). */
@@ -273,12 +274,9 @@ export default function PictureStage(p: Props) {
     const chars = (active.headline ?? '').length;
     sound.teletype(0, Math.ceil(typeMs(chars) / TICK_SPACING), TICK_SPACING);
   }, [active, rm]);
-  // The call going out: one relay clunk as the dispatch lines leave the desk.
-  const lastChoice = useRef(choice);
-  useEffect(() => {
-    if (choice && choice !== lastChoice.current && !rm) sound.clunk();
-    lastChoice.current = choice;
-  }, [choice, rm]);
+  // The call going out is heard from the game's own commit (ControlRoomGame
+  // choose(): the type-bar strike, then a relay per zone the warning reaches),
+  // so the stage adds no sound of its own here.
 
   const skipToCall = () => { sound.hush(); setAt(n + 1); };
   const nextBeat = () => { sound.hush(); setAt(Math.min(n + 1, at + 1)); };
@@ -497,6 +495,7 @@ export default function PictureStage(p: Props) {
                 <span className="cr-precord-warned">Marked warned by you · {warnedNow.length === allZones.length ? 'every zone' : warnedNow.map(zoneLabel).join(' · ')}</span>
               )}
             </p>
+            <Ledger scenario={scenario} choices={choices} index={cursor} compact />
             {choice.option.consequence.known ? (
               <button type="button" className="cr-precord-rec" onClick={() => setSheet({ kind: 'record' })} aria-haspopup="dialog">
                 <span className="cr-precord-tag">The record</span>

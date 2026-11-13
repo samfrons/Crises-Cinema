@@ -26,6 +26,8 @@
 import type { ReactNode } from 'react';
 import type { Citation, Option, Scenario } from './types';
 import { alertBeforeClock, reckon, reached, scopeRank, span, type Choice, type LaneMark } from './scoring';
+import { useSeen } from './seen';
+import * as sound from './sound';
 
 const minutes = (hhmm: string) => {
   const [h, m] = hhmm.split(':').map(Number);
@@ -55,34 +57,53 @@ export default function Reckoning({ scenario, choices, compact, cite }: {
   const rec = leadWords(r.record);
   const ben = leadWords(r.bench);
 
-  // The verdict, in words: two comparisons against the benchmark.
-  const youLine = r.you.time === null
-    ? 'You sent no warning on this clock.'
-    : r.youVsBench === null ? ''
-      : r.youVsBench > 0
-        ? `Your first warning went out ${span(r.youVsBench)} before the benchmark: earlier than this reading of the desk's record can justify, which is what the false-alarm score weighs.`
-        : r.youVsBench === 0
-          ? 'Your first warning landed on the benchmark.'
-          : `Your first warning came ${span(r.youVsBench)} after the benchmark.`;
+  // The three gaps, each the difference of two leads already on this panel:
+  // you against the benchmark, the record against it, and you against the
+  // record. Signed so that positive is earlier.
+  const youVsRecord = r.you.lead === null || r.record.lead === null ? null : r.you.lead - r.record.lead;
+  const rel = (g: number | null, of: string) => (g === null ? null
+    : g === 0 ? `warned level with ${of}` : `warned ${span(g)} ${g > 0 ? 'earlier than' : 'later than'} ${of}`);
+  const gaps = [
+    { k: 'you-bench', a: 'you', b: 'bench', text: r.you.time === null ? 'sent no warning on this clock' : rel(r.youVsBench, 'the benchmark') },
+    { k: 'record-bench', a: 'record', b: 'bench', text: rel(r.recordVsBench, 'the benchmark') },
+    { k: 'you-record', a: 'you', b: 'record', text: r.you.time === null ? null : rel(youVsRecord, 'the record') },
+  ] as const;
+  // What the benchmark comparison means, said once and plainly.
+  const youLine = r.you.time === null || r.youVsBench === null ? ''
+    : r.youVsBench > 0
+      ? 'Earlier than the benchmark is earlier than this reading of the desk’s record can justify: the scorecard weighs that as false-alarm cost, not as a better call.'
+      : r.youVsBench === 0 ? 'You warned at the first moment this reading of the record allows.' : '';
   const recordLine = r.recordMetMark
-    ? `The record met the benchmark${r.recordVsBench ? `, ${span(r.recordVsBench)} ahead of it` : ''}${early ? `, and its public warnings had begun ${early.span} this clock opened` : ''}. Here the officials were early.`
-    : r.recordVsBench === null ? '' : `The record's first warning came ${span(r.recordVsBench)} after it.`;
+    ? `The record met the benchmark${early ? `, and its public warnings had begun ${early.span} this clock opened` : ''}. Here the officials were early.`
+    : '';
+  const stampWord = r.you.time === null ? 'No warning sent'
+    : r.youVsBench === null ? null
+      : r.youVsBench > 0 ? 'Ahead of the benchmark' : r.youVsBench === 0 ? 'On the benchmark' : 'After the benchmark';
+
+  // The lanes lay out when the player reaches them; the sound follows the
+  // CSS's stagger (lane i lands at 300 + i × 260 + 280 ms).
+  const seen = useSeen<HTMLDivElement>(() => {
+    const rm = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    sound.reveal(rm ? [0] : [0, 1, 2].map((i) => 580 + i * 260));
+  }, 0.2);
 
   return (
     <div className={`cr-dsec cr-rk${r.recordMetMark ? ' is-met' : ''}`} aria-labelledby="cr-rk-title">
       <h3 id="cr-rk-title" className="cr-dsec-title">The reckoning</h3>
       <p className="cr-rk-dek">
-        Minutes and scope on the day&apos;s own clock: when you first warned, when the record first warned, and the
-        earliest call this desk&apos;s own record could justify, each measured to the documented impact at{' '}
-        {r.impact} ({scenario.scoring.impact.label} {cite(scenario.scoring.impact.citation)}). Arithmetic on cited
-        times. No figure here counts lives.
+        Your calls against the record, on the day&apos;s own clock. Three first warnings — yours, the
+        officials&apos;, and the earliest this desk&apos;s own record could justify — each measured to the documented
+        impact at {r.impact} ({scenario.scoring.impact.label} {cite(scenario.scoring.impact.citation)}). Arithmetic on
+        cited times. No figure here counts lives.
       </p>
 
+      <div ref={seen} className="cr-rk-stage">
       <dl className="cr-rk-figs">
         <div className="cr-rk-fig is-you">
           <dt><Glyph kind="you" /> Your first warning</dt>
           <dd className="cr-rk-big">{you.big}</dd>
           <dd className="cr-rk-sub">{you.sub}{r.you.time ? ` · at ${at(r.you.time)} · ${r.you.scope}` : ''}</dd>
+          {stampWord && <dd className="cr-rk-stamp is-you">{stampWord}</dd>}
         </div>
         <div className="cr-rk-fig is-record">
           <dt><Glyph kind="record" /> The record&apos;s first warning</dt>
@@ -96,12 +117,23 @@ export default function Reckoning({ scenario, choices, compact, cite }: {
         <div className="cr-rk-fig is-bench">
           <dt><Glyph kind="bench" /> The earliest defensible</dt>
           <dd className="cr-rk-big">{ben.big}</dd>
-          <dd className="cr-rk-sub">{ben.sub} · at {at(r.bench.time)} · game-design benchmark</dd>
+          <dd className="cr-rk-sub">{ben.sub} · at {at(r.bench.time)} · a game-design hypothesis</dd>
         </div>
       </dl>
-      <p className="cr-rk-verdict">{youLine} {recordLine}</p>
-
       <Lanes scenario={scenario} choices={choices} compact={compact} r={r} early={early} at={at} />
+      <ul className="cr-rk-gaps">
+        {gaps.filter((g) => g.text).map((g, i) => (
+          <li key={g.k} style={{ '--i': i } as React.CSSProperties}>
+            <span className="cr-rk-gap-who" aria-hidden><Glyph kind={g.a} /><span className="cr-rk-gap-to">→</span><Glyph kind={g.b} /></span>
+            <span className="cr-rk-gap-text">
+              <span className="cr-rk-gap-name">{g.a === 'you' ? 'You' : 'The record'}</span>{' '}
+              {g.text}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {(youLine || recordLine) && <p className="cr-rk-verdict">{youLine} {recordLine}</p>}
+      </div>
 
       <div className="cr-rk-pair">
         <div className="cr-rk-bench">
@@ -151,7 +183,7 @@ export default function Reckoning({ scenario, choices, compact, cite }: {
   );
 }
 
-function Glyph({ kind, size = 12 }: { kind: 'you' | 'record' | 'bench'; size?: number }) {
+export function Glyph({ kind, size = 12 }: { kind: 'you' | 'record' | 'bench'; size?: number }) {
   return (
     <svg className={`cr-rk-glyph is-${kind}`} viewBox="0 0 12 12" width={size} height={size} aria-hidden>
       {kind === 'you' && <circle cx="6" cy="6" r="4.6" />}
@@ -344,7 +376,7 @@ function ZoneTable({ r, at, zoneLabel }: { r: R; at: (t: string | null) => strin
 
 const SCOPES = ['none', 'targeted', 'province'] as const;
 
-function Meter({ kind, o, total }: { kind: 'scope' | 'zones' | 'weight'; o: Option | null; total: number }) {
+export function Meter({ kind, o, total }: { kind: 'scope' | 'zones' | 'weight'; o: Option | null; total: number }) {
   if (kind === 'scope') {
     const n = scopeRank(o);
     return <span className="cr-rk-meter is-scope">{[1, 2].map((k) => <i key={k} className={k <= n ? 'on' : ''} />)}</span>;
@@ -362,31 +394,52 @@ function describe(o: Option | null, total: number) {
   return `${o.effects.warning_scope} warning, ${reached(o)} of ${total} zones reached, false-alarm weight ${o.effects.false_alarm_weight}`;
 }
 
+const val = (k: 'scope' | 'zones' | 'weight', o: Option | null, total: number) => {
+  if (!o) return '—';
+  if (k === 'scope') return o.effects.warning_scope === 'province' ? 'prov.' : o.effects.warning_scope === 'targeted' ? 'targ.' : 'none';
+  if (k === 'zones') return `${reached(o)}/${total}`;
+  const w = o.effects.false_alarm_weight;
+  return Number.isInteger(w) ? String(w) : w.toFixed(1);
+};
+
 function Ladder({ ladder, total, scenario }: { ladder: R['ladder']; total: number; scenario: Scenario }) {
   const same = ladder.filter((s) => s.same).length;
   const stamp = (time: string) => `${scenario.timesteps.find((t) => t.time === time)?.approx ? '≈' : ''}${time}`;
+  const warnsO = (o: Option | null) => !!o && o.effects.warning_scope !== 'none';
+  const youFirst = ladder.find((s) => warnsO(s.you))?.id;
+  const recFirst = ladder.find((s) => warnsO(s.record))?.id;
+  const seen = useSeen<HTMLDivElement>(undefined, 0.15);
   return (
-    <div className="cr-rk-ladder">
-      <p className="cr-rk-tag">Decision by decision · your call beside the record&apos;s</p>
+    <div ref={seen} className="cr-rk-ladder">
+      <p className="cr-rk-tag">Decision by decision · why your marks are what they are</p>
       <p className="cr-rk-note">
-        On the three things each option codes: its warning scope (none, targeted, province-wide), the at-risk zones
-        it reaches by warning or protective action, and its false-alarm weight (0 to 2, game design). Where you made
-        the record&apos;s call, the pair fuses: {same} of {ladder.length} here.
+        Each call, as the scorecard read it the moment you made it, beside the record&apos;s: its warning scope (none,
+        targeted, province-wide), the at-risk zones it reaches by warning or protective action, and its false-alarm
+        weight (0 to 2, game design). Where you made the record&apos;s call, the pair fuses: {same} of {ladder.length} here.
       </p>
       <div className="cr-rk-rung cr-rk-rung-head" aria-hidden>
         <span>Time</span><span>Scope</span><span>Zones</span><span>False alarm</span>
       </div>
       <ol className="cr-rk-rungs">
-        {ladder.map((s) => (
-          <li key={s.id} className={`cr-rk-rung${s.same ? ' is-same' : ' is-apart'}`}>
-            <span className="cr-rk-rung-time">{stamp(s.time)}</span>
+        {ladder.map((s, i) => (
+          <li key={s.id} className={`cr-rk-rung${s.same ? ' is-same' : ' is-apart'}`} style={{ '--i': i } as React.CSSProperties}>
+            <span className="cr-rk-rung-time">
+              {stamp(s.time)}
+              {(s.id === youFirst || s.id === recFirst) && (
+                <span className="cr-rk-rung-flag">
+                  {s.id === youFirst && <span><Glyph kind="you" size={8} /> 1st<span className="cr-rk-flag-x"> warning</span></span>}
+                  {s.id === recFirst && <span><Glyph kind="record" size={8} /> 1st<span className="cr-rk-flag-x"> warning</span></span>}
+                </span>
+              )}
+            </span>
             <span className="cr-sr">
               {s.same ? `You made the record's call: ${describe(s.you, total)}.` : `You: ${describe(s.you, total)}. The record: ${describe(s.record, total)}.`}
+              {s.id === youFirst ? ' Your first warning.' : ''}{s.id === recFirst ? " The record's first warning at a decision point." : ''}
             </span>
             {(['scope', 'zones', 'weight'] as const).map((k) => (
               <span key={k} className={`cr-rk-pair-cell is-${k}`} aria-hidden>
-                <span className="cr-rk-pair-row is-you"><Glyph kind="you" size={9} /><Meter kind={k} o={s.you} total={total} /></span>
-                {!s.same && <span className="cr-rk-pair-row is-record"><Glyph kind="record" size={9} /><Meter kind={k} o={s.record} total={total} /></span>}
+                <span className="cr-rk-pair-row is-you"><Glyph kind="you" size={9} /><Meter kind={k} o={s.you} total={total} /><span className="cr-rk-val">{val(k, s.you, total)}</span></span>
+                {!s.same && <span className="cr-rk-pair-row is-record"><Glyph kind="record" size={9} /><Meter kind={k} o={s.record} total={total} /><span className="cr-rk-val">{val(k, s.record, total)}</span></span>}
                 {s.same && <span className="cr-rk-fused">same call</span>}
               </span>
             ))}

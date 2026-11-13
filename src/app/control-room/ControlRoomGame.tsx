@@ -4,7 +4,9 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import { createPortal } from 'react-dom';
 import type { Citation, GlossaryEntry, InfoItem, MediaAttachment, Option, Scenario, ScenarioBundle, Timestep } from './types';
 import { startSession, logChoice, completeSession, type ChoiceEvent } from './telemetry';
-import { scoreRun, historicalLeadTime, formatLead, alertBeforeClock, bestMarks, span, type Choice } from './scoring';
+import { scoreRun, historicalLeadTime, formatLead, alertBeforeClock, bestMarks, reckon, span, type Choice } from './scoring';
+import Ledger, { RunLine } from './Ledger';
+import { useSeen } from './seen';
 import DayStrip from './DayStrip';
 import Sheet from './Sheet';
 import PictureStage, { type StageCoach } from './PictureStage';
@@ -427,6 +429,13 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
     };
     logChoice(sessionId, event);
     setCoachIndex(null);
+    // The commit, heard: the type bar strikes; a warning crosses the chain
+    // (one relay per zone it reaches, at most four); the record is laid down
+    // as it arrives (CSS: .cr-record > .cr-consequence, 300ms).
+    sound.commit();
+    const reach = warnedBy(scenario, option).length;
+    if (reach) sound.chainSend(150, reach);
+    sound.recordIn(reach ? 340 + reach * 70 : 300);
     pending.current = picture
       ? { focus: 'cr-advance-btn' }
       : { focus: 'cr-advance-btn', scroll: `${stepId(current)}-record`, block: 'nearest' };
@@ -449,11 +458,19 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
     }
   };
 
-  const replay = () => {
-    pending.current = picture ? { focus: 'cr-pic-h', scroll: 'desk' } : { focus: 'cr-brief-title', scroll: 'desk' };
+  const replay = (m?: DeskMode) => {
+    const next = m ?? mode;
+    if (next !== mode) { saveMode(next); setModeState(next); setNotice(null); }
+    pending.current = next !== 'log' ? { focus: 'cr-pic-h', scroll: 'desk' } : { focus: 'cr-brief-title', scroll: 'desk' };
     setBeat(null);
     setBoot('quick');
     setRun(newRun(scenario));
+  };
+  /** Straight from the end card to another day's briefing. */
+  const another = (id: string) => {
+    setBeat(null);
+    sound.hush();
+    pick(id);
   };
   const leave = () => {
     pending.current = { scroll: 'desk' };
@@ -505,7 +522,7 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
             onStart={start} onChoose={choose} onAdvance={advance}
             onDebrief={() => { pending.current = { focus: 'cr-debrief-title', scroll: 'cr-debrief' }; setPic((x) => ({ ...x })); }}
             renderSlip={(info, t) => <FullSlip scenario={scenario} t={t} info={info} />}
-            renderRecord={(t, c) => <RecordSheet scenario={scenario} t={t} choice={c} />}
+            renderRecord={(t, c) => <RecordSheet scenario={scenario} t={t} choice={c} choices={choices} />}
             renderBriefing={() => <Briefing scenario={scenario} started={started} inlineMap={false} onStart={start} last={run.last} filed={run.filed} />}
             renderCredit={(m) => <FigureCredit m={m} />}
             renderer={mode === 'diorama' ? 'diorama' : 'board'} boot={boot} onRendererFail={dioramaFailed} notice={notice} />
@@ -523,6 +540,7 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
               t={t}
               index={i}
               choice={choices[i]}
+              choices={choices}
               isCurrent={i === cursor && !done}
               isLast={i === lastIndex}
               inlineChain={!wide}
@@ -539,7 +557,8 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
       )}
 
       {done ? (
-        <Debrief scenario={scenario} choices={choices} last={run.last} onReplay={replay} onLeave={leave} />
+        <Debrief scenario={scenario} choices={choices} last={run.last} onReplay={replay} onLeave={leave}
+          cards={cards} mode={mode} onPick={another} loading={loading} />
       ) : (
         <div className="wrap cr-play-sources">
           <Sources scenario={scenario} title="Sources for this day" />
@@ -612,7 +631,7 @@ function Console({ scenario, started, cursor, choices, done, live, showMapButton
           {steps.map((s, i) => {
             const c = choices[i];
             const cls = c
-              ? c.event.divergedFromHistory ? 'is-diverged' : 'is-kept'
+              ? `${c.event.divergedFromHistory ? 'is-diverged' : 'is-kept'}${i === choices.length - 1 ? ' is-last' : ''}`
               : started && i === cursor && !done ? 'is-now' : '';
             return <i key={s.id} className={cls} style={{ '--i': i } as React.CSSProperties} />;
           })}
@@ -789,6 +808,8 @@ function SidePanel({ scenario, live, choices, started, coach }: {
       </div>
       <p className="cr-side-head">Your run so far</p>
       {started && choices.length ? (
+        <>
+        <RunLine scenario={scenario} made={choices} className="is-side" />
         <ol className="cr-trace">
           {choices.map((c) => (
             <li key={c.timestep.id} className={c.event.divergedFromHistory ? 'is-diverged' : ''}>
@@ -802,8 +823,9 @@ function SidePanel({ scenario, live, choices, started, coach }: {
             </li>
           ))}
         </ol>
+        </>
       ) : (
-        <p className="cr-side-empty">No calls made yet. Each one will be listed here as you make it.</p>
+        <p className="cr-side-empty">No calls yet. Each one is entered here as you make it, with where the scorecard stands.</p>
       )}
     </aside>
   );
@@ -916,6 +938,7 @@ function Briefing({ scenario, started, inlineMap, onStart, last, filed }: {
   const vocab = vocabFor(scenario);
   const sourceIndex = useSourceIndex(scenario);
   const lastSame = last ? sameCalls(scenario, last.picks) : null;
+  const lastFirst = last ? scenario.timesteps.find((t) => t.options.find((o) => o.id === last.picks[t.id])?.effects.warning_scope !== 'none' && last.picks[t.id] !== undefined) : undefined;
   return (
     <article id="cr-briefing" className="cr-entry cr-entry-brief" aria-labelledby="cr-brief-title">
       <p className="cr-stamp">
@@ -943,9 +966,12 @@ function Briefing({ scenario, started, inlineMap, onStart, last, filed }: {
           </span>
         </p>
       )}
-      {lastSame && (
-        <p className="cr-brief-count cr-brief-again">You have held this desk before: your last run took the officials&apos;
-          call at {lastSame.same} of {lastSame.of} decisions. The debrief will set this run beside it.</p>
+      {lastSame && last && (
+        <p className="cr-brief-count cr-brief-again">
+          <span className="cr-brief-again-tag">Held before</span>
+          Last time your first warning {lastFirst ? <>went out at <b>{stamp(lastFirst)}</b></> : <>never went out</>}, and you
+          took the officials&apos; call at {lastSame.same} of {lastSame.of} decisions. You know the day now; the debrief
+          will set this run beside that one, call by call.</p>
       )}
       {scenario.glossary && scenario.glossary.length > 0 && (
         <details className="cr-terms">
@@ -985,8 +1011,8 @@ function Briefing({ scenario, started, inlineMap, onStart, last, filed }: {
 
 /* ── Log entries 1…n: one decision point each ────────────────────────────── */
 
-function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain, coach, filed, onChoose, onAdvance }: {
-  scenario: Scenario; t: Timestep; index: number; choice?: Choice;
+function StepEntry({ scenario, t, index, choice, choices, isCurrent, isLast, inlineChain, coach, filed, onChoose, onAdvance }: {
+  scenario: Scenario; t: Timestep; index: number; choice?: Choice; choices: Choice[];
   isCurrent: boolean; isLast: boolean; inlineChain: boolean; coach: Coach; filed: FolderId | null;
   onChoose: (o: Option) => void; onAdvance: () => void;
 }) {
@@ -1093,7 +1119,8 @@ function StepEntry({ scenario, t, index, choice, isCurrent, isLast, inlineChain,
       )}
 
       {choice ? (
-        <CallRecord scenario={scenario} t={t} choice={choice} sourceIndex={sourceIndex} />
+        <CallRecord scenario={scenario} t={t} choice={choice} sourceIndex={sourceIndex}
+          ledger={<Ledger scenario={scenario} choices={choices} index={index} />} />
       ) : (
         <div className="cr-call" role="group" aria-labelledby={`${id}-call`}
           style={{ '--i': slips + 2 } as React.CSSProperties}>
@@ -1156,9 +1183,11 @@ function FullSlip({ scenario, t, info }: { scenario: Scenario; t: Timestep; info
   );
 }
 
-function RecordSheet({ scenario, t, choice }: { scenario: Scenario; t: Timestep; choice: Choice }) {
+function RecordSheet({ scenario, t, choice, choices }: { scenario: Scenario; t: Timestep; choice: Choice; choices: Choice[] }) {
   const sourceIndex = useSourceIndex(scenario);
-  return <CallRecord scenario={scenario} t={t} choice={choice} sourceIndex={sourceIndex} />;
+  const index = choices.findIndex((c) => c.timestep.id === t.id);
+  return <CallRecord scenario={scenario} t={t} choice={choice} sourceIndex={sourceIndex}
+    ledger={index >= 0 ? <Ledger scenario={scenario} choices={choices} index={index} /> : null} />;
 }
 
 function Transcript({ scenario, started, cursor, choices }: { scenario: Scenario; started: boolean; cursor: number; choices: Choice[] }) {
@@ -1267,8 +1296,8 @@ function SlipText({ info, marks, idx }: { info: InfoItem; marks?: TermMark[]; id
 
 /** A decision once made: your call stamped, the others left as not taken,
  *  and what the record says — or that it is silent. Stays in the log. */
-function CallRecord({ scenario, t, choice, sourceIndex }: {
-  scenario: Scenario; t: Timestep; choice: Choice; sourceIndex: Map<string, number>;
+function CallRecord({ scenario, t, choice, sourceIndex, ledger }: {
+  scenario: Scenario; t: Timestep; choice: Choice; sourceIndex: Map<string, number>; ledger?: React.ReactNode;
 }) {
   const c = choice.option.consequence;
   const warned = warnedBy(scenario, choice.option);
@@ -1306,16 +1335,21 @@ function CallRecord({ scenario, t, choice, sourceIndex }: {
             logged and scored; the clock moves on along the real timeline.</p>
         </div>
       )}
+      {ledger}
     </div>
   );
 }
 
 /* ── The last entry: the debrief ─────────────────────────────────────────── */
 
-function Debrief({ scenario, choices, last, onReplay, onLeave }: {
-  scenario: Scenario; choices: Choice[]; last: LastRun | null; onReplay: () => void; onLeave: () => void;
+function Debrief({ scenario, choices, last, onReplay, onLeave, cards, mode, onPick, loading }: {
+  scenario: Scenario; choices: Choice[]; last: LastRun | null; onReplay: (m?: DeskMode) => void; onLeave: () => void;
+  cards: CardBundle; mode: DeskMode; onPick: (id: string) => void; loading: string | null;
 }) {
   const sourceIndex = useSourceIndex(scenario);
+  // The scorecard's figures settle when it is reached, not while the player
+  // is still reading the band above it.
+  const cardRef = useSeen<HTMLDivElement>(undefined, 0.2);
   const score = useMemo(() => scoreRun(scenario, choices), [scenario, choices]);
   const histLead = historicalLeadTime(scenario);
   // Where the real public warnings came before this clock opened, the day's
@@ -1357,6 +1391,65 @@ function Debrief({ scenario, choices, last, onReplay, onLeave }: {
       <div className="wrap cr-debrief-body">
         <Reckoning scenario={scenario} choices={choices} compact={compact}
           cite={(c) => <Cite c={c} idx={sourceIndex} />} />
+
+        <div ref={cardRef} className="cr-dsec cr-scorecard">
+          <h3 className="cr-dsec-title">The scorecard</h3>
+          <p className="cr-dsec-note cr-scorecard-dek"><span className="cr-scorecard-tag">Game design</span> Four marks,
+            kept apart and never added up into one verdict: the game&apos;s rules, set beside the record, not the
+            record&apos;s judgement of you. The ladder above shows where each one came from, call by call.</p>
+          {early && (
+            <div className="cr-early" id="cr-early">
+              <p className="cr-early-tag">Warnings before the clock</p>
+              <p className="cr-early-body">
+                <strong>Public warning came {early.span} this clock opened</strong>, on {early.weekday} {early.longDate}
+                {early.time ? `, at ${early.time}` : ''}. {early.note} <Cite c={early.citation} idx={sourceIndex} />
+              </p>
+              <p className="cr-early-body">The {firstAlert} on this clock is {early.clock_alert}. A lead time measured
+                from it is this day&apos;s figure only: it neither credits the officials with the warnings that came
+                before the clock opened nor counts them against you, who could not issue them.</p>
+            </div>
+          )}
+          <dl className="cr-score-grid">
+            <div>
+              <dt>Warning lead time</dt>
+              <dd className="big">{formatLead(score.leadTimeMinutes)}</dd>
+              {early ? (
+                <dd className="sub">officials, on this clock only: {formatLead(histLead)} ({firstAlert} is {early.clock_alert}).
+                  Their public warnings came earlier — <a href="#cr-early">{early.span} this clock</a>.</dd>
+              ) : (
+                <dd className="sub">officials: {formatLead(histLead)} (first alert {firstAlert})</dd>
+              )}
+            </div>
+            <div>
+              <dt>Coverage of at-risk {vocab.zoneNoun}</dt>
+              <dd className="big">{Math.round(score.coverage * 100)}%</dd>
+              <dd className="cr-meter"><span style={{ width: `${Math.round(score.coverage * 100)}%` }} /></dd>
+              <dd className="sub">{scenario.scoring.at_risk_zones.map((z) => z.label).join(' · ')}</dd>
+            </div>
+            <div>
+              <dt>False-alarm cost</dt>
+              <dd className="big">{score.falseAlarmWeight}</dd>
+              <dd className="sub">weight of warnings issued before the signals warranted them</dd>
+            </div>
+            <div>
+              <dt>Divergence from history</dt>
+              <dd className="big">{score.divergence} / {choices.length}</dd>
+              <dd className="cr-meter">
+                {choices.map((c) => (
+                  <i key={c.timestep.id} className={c.event.divergedFromHistory ? 'is-diverged' : ''} />
+                ))}
+              </dd>
+              <dd className="sub">decision points where you left the historical path</dd>
+            </div>
+          </dl>
+          <ScoreRules scenario={scenario} />
+          <p className="cr-score-caveat">A scoring layer, not history: it measures your choices against the real
+            clock and the documented impact at {scenario.scoring.impact.time} ({scenario.scoring.impact.label}{' '}
+            <Cite c={scenario.scoring.impact.citation} idx={sourceIndex} />). The four are never added up or ranked
+            into one verdict. It makes no claim about lives a different decision would have saved — the record is
+            silent on paths not taken.</p>
+        </div>
+
 
         <div className="cr-dsec">
           <h3 className="cr-dsec-title">Your day beside theirs</h3>
@@ -1468,61 +1561,6 @@ function Debrief({ scenario, choices, last, onReplay, onLeave }: {
         )}
 
         <div className="cr-dsec">
-          <h3 className="cr-dsec-title">The game&apos;s four scores</h3>
-          {early && (
-            <div className="cr-early" id="cr-early">
-              <p className="cr-early-tag">Warnings before the clock</p>
-              <p className="cr-early-body">
-                <strong>Public warning came {early.span} this clock opened</strong>, on {early.weekday} {early.longDate}
-                {early.time ? `, at ${early.time}` : ''}. {early.note} <Cite c={early.citation} idx={sourceIndex} />
-              </p>
-              <p className="cr-early-body">The {firstAlert} on this clock is {early.clock_alert}. A lead time measured
-                from it is this day&apos;s figure only: it neither credits the officials with the warnings that came
-                before the clock opened nor counts them against you, who could not issue them.</p>
-            </div>
-          )}
-          <dl className="cr-score-grid">
-            <div>
-              <dt>Warning lead time</dt>
-              <dd className="big">{formatLead(score.leadTimeMinutes)}</dd>
-              {early ? (
-                <dd className="sub">officials, on this clock only: {formatLead(histLead)} ({firstAlert} is {early.clock_alert}).
-                  Their public warnings came earlier — <a href="#cr-early">{early.span} this clock</a>.</dd>
-              ) : (
-                <dd className="sub">officials: {formatLead(histLead)} (first alert {firstAlert})</dd>
-              )}
-            </div>
-            <div>
-              <dt>Coverage of at-risk {vocab.zoneNoun}</dt>
-              <dd className="big">{Math.round(score.coverage * 100)}%</dd>
-              <dd className="cr-meter"><span style={{ width: `${Math.round(score.coverage * 100)}%` }} /></dd>
-              <dd className="sub">{scenario.scoring.at_risk_zones.map((z) => z.label).join(' · ')}</dd>
-            </div>
-            <div>
-              <dt>False-alarm cost</dt>
-              <dd className="big">{score.falseAlarmWeight}</dd>
-              <dd className="sub">weight of warnings issued before the signals warranted them</dd>
-            </div>
-            <div>
-              <dt>Divergence from history</dt>
-              <dd className="big">{score.divergence} / {choices.length}</dd>
-              <dd className="cr-meter">
-                {choices.map((c) => (
-                  <i key={c.timestep.id} className={c.event.divergedFromHistory ? 'is-diverged' : ''} />
-                ))}
-              </dd>
-              <dd className="sub">decision points where you left the historical path</dd>
-            </div>
-          </dl>
-          <ScoreRules scenario={scenario} />
-          <p className="cr-score-caveat">A scoring layer, not history: it measures your choices against the real
-            clock and the documented impact at {scenario.scoring.impact.time} ({scenario.scoring.impact.label}{' '}
-            <Cite c={scenario.scoring.impact.citation} idx={sourceIndex} />). The four are never added up or ranked
-            into one verdict. It makes no claim about lives a different decision would have saved — the record is
-            silent on paths not taken.</p>
-        </div>
-
-        <div className="cr-dsec">
           <h3 className="cr-dsec-title">The inquiry said</h3>
           <ol className="cr-findings">
             {scenario.inquiry_findings.map((f, i) => (
@@ -1543,11 +1581,8 @@ function Debrief({ scenario, choices, last, onReplay, onLeave }: {
 
         <Sources scenario={scenario} title="Sources" />
 
-        <div className="cr-end-actions">
-          <button type="button" className="cr-btn-primary" onClick={onReplay}>Replay this day</button>
-          <button type="button" className="cr-btn-quiet" onClick={onLeave}>Choose another day</button>
-        </div>
-        <p className="cr-replay-note">A replay keeps this run, in this browser only, and sets the next one beside it.</p>
+        <EndCard scenario={scenario} choices={choices} cards={cards} mode={mode} onReplay={onReplay}
+          onLeave={onLeave} onPick={onPick} loading={loading} />
 
         <nav className="cr-bridge" aria-labelledby="cr-bridge-h">
           <p id="cr-bridge-h" className="cr-bridge-line">One day, one desk. The rest of the site widens the frame.</p>
@@ -1579,6 +1614,71 @@ function Debrief({ scenario, choices, last, onReplay, onLeave }: {
         </nav>
       </div>
     </section>
+  );
+}
+
+/** The end card: the invitation to hold the desk again, with what this run
+ *  now knows set in front of the player (three cited clock times, nothing
+ *  more), the same day in the other presentation, and the other days on
+ *  the desk as cards that take you straight there. */
+function EndCard({ scenario, choices, cards, mode, onReplay, onLeave, onPick, loading }: {
+  scenario: Scenario; choices: Choice[]; cards: CardBundle; mode: DeskMode;
+  onReplay: (m?: DeskMode) => void; onLeave: () => void; onPick: (id: string) => void; loading: string | null;
+}) {
+  const r = reckon(scenario, choices);
+  const ref = useSeen<HTMLDivElement>(() => sound.endCard(reducedMotion() ? 0 : 260), 0.35);
+  const [memory, setMemory] = useState<Record<string, LastRun | null> | null>(null);
+  useEffect(() => {
+    setMemory(Object.fromEntries(cards.playable.map((c) => [c.id, loadLastRun(c)])));
+  }, [cards]);
+  const others = cards.playable.filter((c) => c.id !== scenario.id);
+  const alt: { m: DeskMode; word: string } = mode === 'log' ? { m: 'picture', word: 'in Picture' } : { m: 'log', word: 'in the Log' };
+  return (
+    <div ref={ref} className="cr-again" aria-labelledby="cr-again-h">
+      <p className="cr-again-tag">The desk is open again</p>
+      <h3 id="cr-again-h" className="cr-again-title">Hold it again, knowing what you know</h3>
+      <p className="cr-again-body">
+        {r.you.time
+          ? <>Your first warning went out at <b>{r.you.time}</b>. </>
+          : <>You sent no warning this time. </>}
+        The record&apos;s first came at <b>{r.record.time}</b>
+        {r.bench.time ? <>; the benchmark sits at <b>{r.bench.time}</b></> : null}.
+        Same slips, same clock, same silence where the record is silent. What moves is you.
+      </p>
+      <div className="cr-end-actions">
+        <button type="button" className="cr-btn-primary" onClick={() => onReplay()}>
+          Take this desk again — {scenario.clock.start}
+        </button>
+        <button type="button" className="cr-btn-quiet" onClick={() => onReplay(alt.m)}>Again, {alt.word}</button>
+      </div>
+      <p className="cr-replay-note">This run stays in this browser only; the next is set beside it, call by call.</p>
+
+      {others.length > 0 && (
+        <>
+          <p className="cr-again-tag cr-again-tag-days">Or another day on the desk</p>
+          <ul className="cr-again-days">
+            {others.map((c, i) => (
+              <li key={c.id} style={{ '--i': i } as React.CSSProperties}>
+                <button type="button" className="cr-again-day" onClick={() => onPick(c.id)}
+                  aria-busy={loading === c.id} disabled={loading !== null && loading !== c.id}>
+                  <span className="cr-again-day-head">
+                    <HazardGlyph hazard={c.hazard} size={18} />
+                    <span>{c.date} · {c.hazard}</span>
+                  </span>
+                  <span className="cr-again-day-title">{c.title}</span>
+                  <span className="cr-again-day-meta">
+                    {inWords(c.timesteps.length)} decisions · about {c.minutes} min
+                    {memory?.[c.id] ? ' · held before on this browser' : memory ? ' · not yet held' : ''}
+                  </span>
+                  <span className="cr-again-day-cta">{loading === c.id ? 'Opening the desk…' : 'Take this desk'} <span aria-hidden>→</span></span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      <button type="button" className="cr-again-all" onClick={onLeave}>All days, with their boards <span aria-hidden>↑</span></button>
+    </div>
   );
 }
 

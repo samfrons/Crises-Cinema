@@ -1,10 +1,13 @@
 /**
  * The desk's sound layer — off by default, synthesized, no asset files.
  *
- * Four voices, all short, all quiet, all mechanical: the teleprinter's
- * type-bar tick as a slip's leader prints, a relay clunk when the clock is
- * advanced, one low page-thud as the debrief's toll is set down, and a
- * faint key tick when an option takes focus. Nothing is sustained, nothing
+ * Every voice short, quiet and mechanical: the teleprinter's type-bar tick
+ * as a slip's leader prints, a relay clunk when the clock is advanced, one
+ * low page-thud as the debrief's toll is set down, a faint key tick when an
+ * option takes focus — and, for the desk's verbs, a type-bar strike as a
+ * call commits, relay clicks as a warning crosses the chain, a paper brush
+ * as the record is set down, a knock per lane as the reckoning lays out,
+ * and a carriage ratchet (no bell) at the end card. Nothing is sustained, nothing
  * sweeps upward, nothing resembles a siren or an emergency-alert tone: those
  * are regulated signals and this is a history desk, not an alarm.
  *
@@ -209,6 +212,90 @@ export function keyTick() {
   if (!c) return;
   mark('key');
   burst(c, c.currentTime + 0.002, { gain: 0.2, decay: 0.01, type: 'bandpass', freq: 1800, q: 2 });
+}
+
+/* ── The desk's verbs, given a sound each ───────────────────────────────
+   Same rules as above: noise and falling sines only, every envelope under
+   a third of a second, every peak at or below 1.0 into the −22 dBFS
+   master. Mechanical, not musical: a type bar, a relay, paper, a ratchet.
+   No bell (the carriage return here is the ratchet and the stop, never
+   the ding), nothing that rises, nothing sustained. */
+
+/** Your call committed: the type bar strikes the platen. A hard, bright
+ *  strike over a short, dull body — one keystroke, heavier than a tick. */
+export function commit() {
+  const c = live();
+  if (!c) return;
+  mark('commit');
+  const at = c.currentTime + 0.004;
+  burst(c, at, { gain: 0.85, decay: 0.03, type: 'bandpass', freq: 2100, q: 1.6 });
+  body(c, at, { gain: 0.55, from: 190, to: 90, decay: 0.09 });
+}
+
+/** The warning leaves the desk: one relay pulling in per link it crosses
+ *  (at most four), each a pair of dry clicks, `delay` ms from now. */
+export function chainSend(delay = 0, links = 1) {
+  const c = live();
+  if (!c) return;
+  mark('chain');
+  const n = Math.max(1, Math.min(4, links));
+  for (let i = 0; i < n; i++) {
+    const at = c.currentTime + (delay + i * 70) / 1000;
+    scheduled.push(burst(c, at, { gain: 0.5, decay: 0.012, type: 'highpass', freq: 2400 }));
+    scheduled.push(burst(c, at + 0.018, { gain: 0.3, decay: 0.01, type: 'highpass', freq: 3000 }));
+  }
+}
+
+/** The record set down on the desk: a slip of paper laid flat, a soft
+ *  low-passed brush with no attack to speak of. */
+export function recordIn(delay = 0) {
+  const c = live();
+  if (!c) return;
+  mark('record');
+  const at = c.currentTime + delay / 1000;
+  const src = c.createBufferSource();
+  src.buffer = noise;
+  const f = c.createBiquadFilter();
+  f.type = 'lowpass';
+  f.frequency.setValueAtTime(1400, at);
+  f.frequency.exponentialRampToValueAtTime(500, at + 0.14);
+  const g = c.createGain();
+  g.gain.setValueAtTime(0.0001, at);
+  g.gain.exponentialRampToValueAtTime(0.38, at + 0.035);
+  g.gain.exponentialRampToValueAtTime(0.0001, at + 0.16);
+  src.connect(f).connect(g).connect(master!);
+  src.start(at, Math.random() * 0.3);
+  src.stop(at + 0.18);
+  scheduled.push(src);
+}
+
+/** The reckoning's lanes set down one by one: a detent and a small knock
+ *  per lane, on the same stagger the CSS lays them down on (`at` ms each). */
+export function reveal(at: number[]) {
+  const c = live();
+  if (!c) return;
+  mark('reveal');
+  for (const ms of at) {
+    const t = c.currentTime + Math.max(0, ms) / 1000;
+    scheduled.push(burst(c, t, { gain: 0.35, decay: 0.014, type: 'highpass', freq: 2800 }));
+    scheduled.push(body(c, t + 0.01, { gain: 0.42, from: 140, to: 80, decay: 0.08 }));
+  }
+}
+
+/** The end card: the carriage drawn back on its ratchet, then the stop.
+ *  Ticks close up as the carriage runs; no bell. */
+export function endCard(delay = 0) {
+  const c = live();
+  if (!c) return;
+  mark('end');
+  const t0 = c.currentTime + delay / 1000;
+  let t = t0;
+  for (let i = 0; i < 7; i++) {
+    scheduled.push(burst(c, t, { gain: 0.22 + i * 0.03, decay: 0.01, type: 'bandpass', freq: 3200 - i * 120, q: 2.5 }));
+    t += 0.034 - i * 0.003;
+  }
+  scheduled.push(body(c, t + 0.02, { gain: 0.6, from: 110, to: 60, decay: 0.12 }));
+  scheduled.push(burst(c, t + 0.02, { gain: 0.4, decay: 0.04, type: 'lowpass', freq: 700 }));
 }
 
 /** Stop anything scheduled ahead (a skipped beat leaves nothing ticking). */

@@ -257,9 +257,10 @@
   .cr-console-title { display: block; flex: 1; padding-left: 14px; border-left: 1px solid rgba(241, 232, 213, 0.25); }
 }
 
-/* One pip per decision point: hollow ahead, ringed now, filled square once
-   called on the historical path, an ember diamond where you left it. Shape
-   carries the meaning as well as tone. */
+/* One pip per decision point: hollow ahead, ringed now, a filled square once
+   called on the historical path, a filled diamond where you left it. Shape
+   alone carries the meaning: leaving the path is not drawn as an error, and
+   ember (interaction only) marks just the decision on the desk now. */
 .cr-pips { display: flex; align-items: center; gap: 7px; margin-left: auto; }
 .cr-pips i {
   width: 10px;
@@ -270,7 +271,7 @@
 .cr-pips i.is-kept { background: var(--paper); border-color: var(--paper); }
 /* A diamond is a square turned 45°: scaled so its diagonal matches the
    squares' side, the row reads as evenly spaced marks, not a jitter. */
-.cr-pips i.is-diverged { background: var(--ember); border-color: var(--paper); transform: rotate(45deg) scale(0.78); }
+.cr-pips i.is-diverged { background: var(--paper); border-color: var(--paper); transform: rotate(45deg) scale(0.78); }
 .cr-pips i.is-now { border: 2px solid var(--paper); border-radius: 50%; box-shadow: 0 0 0 2.5px var(--ember); }
 @media (min-width: 720px) { .cr-pips { gap: 9px; } .cr-pips i { width: 12px; height: 12px; } }
 
@@ -1278,7 +1279,7 @@
 }
 .cr-meter span { display: block; height: 100%; background: var(--ink); }
 .cr-meter i { flex: 1; height: 100%; background: var(--paper-deep); }
-.cr-meter i.is-diverged { background: var(--ember); }
+.cr-meter i.is-diverged { background: var(--ink); }
 
 /* ── The reckoning ─────────────────────────────────────────────────────────
    The debrief's centerpiece: three lanes on the day's clock, measured to the
@@ -1314,7 +1315,7 @@
   display: inline-block; margin-top: 10px !important; padding: 4px 9px 3px;
   border: 2px solid currentColor;
   font-family: var(--data); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
-  transform: rotate(-3deg);
+  rotate: -3deg; /* its own property, so the stamp's arrival keeps the tilt */
   animation: cr-stamp-down var(--t-mid) var(--ease-press) calc(520ms + var(--beat, 0ms)) both;
 }
 .cr-rk-verdict { font-size: 16px; line-height: 1.6; max-width: 66ch; margin: 0 0 var(--s4); }
@@ -3435,3 +3436,218 @@
 .cr-dio-about-name { font-family: var(--data); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; }
 .cr-dio-about-lic { font-family: var(--data); font-size: 11.5px; white-space: pre-wrap; color: var(--ink-soft); }
 .cr-dio-about a { color: var(--ink); text-decoration-color: var(--ember); }
+
+
+/* ══ The feel pass: commitment, the scorecard, the payoff ═════════════════
+   Presentation only, on the house tokens (150 / 240 / 350 ms; one arrival
+   curve, one press curve). Every moving rule sits in a no-preference query;
+   the still equivalents follow it — set at once, and what is new is struck
+   twice out of register, the Control Room's mark for "this just landed". */
+
+/* ── The pip punches in as the call commits ─────────────────────────────
+   `scale` is its own property, so it composes with the diamond's rotation. */
+@keyframes cr-pip-punch { 0% { scale: 1.9; } 60% { scale: 0.92; } 100% { scale: 1; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-pips i.is-last { animation: cr-pip-punch var(--t-slow) var(--ease-press) both; }
+  .cr-pips i.is-now { animation: cr-pip-now var(--t-slow) var(--ease) both; }
+}
+@keyframes cr-pip-now { from { box-shadow: 0 0 0 7px transparent; } }
+@media (prefers-reduced-motion: reduce) {
+  .cr-pips i.is-last { filter: drop-shadow(2px 2px 0 rgba(241, 232, 213, 0.5)); }
+}
+
+/* ── Commitment: the record is laid down in order ───────────────────────
+   The call you took stamps (from a touch larger, with a press), the calls
+   you did not take are struck through as it lands, the zones you warned
+   are marked, the record is set down beneath, and the scorecard last. */
+@keyframes cr-commit {
+  0% { opacity: 0; transform: scale(1.06) rotate(-0.6deg); }
+  55% { opacity: 1; transform: scale(0.99); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes cr-strike { from { text-decoration-color: transparent; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-record .cr-taken .is-chosen { transform-origin: left center; animation: cr-commit var(--t-slow) var(--ease-press) 40ms both; }
+  .cr-record .cr-taken .is-not .cr-taken-label { animation: cr-strike var(--t-mid) var(--ease) 200ms both; }
+  .cr-record > .cr-boardline-you { animation: cr-arrive var(--t-mid) var(--ease) 180ms both; }
+  .cr-record > .cr-consequence { animation: cr-arrive var(--t-slow) var(--ease) 300ms both; }
+  .cr-record > .cr-ledger { animation: cr-arrive var(--t-slow) var(--ease) 460ms both; }
+  .cr-record .cr-ledger-flag { animation: cr-stamp-down var(--t-mid) var(--ease-press) 640ms both; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-record .cr-taken .is-chosen { animation: none !important; box-shadow: 4px 4px 0 color-mix(in srgb, var(--ink) 40%, transparent); }
+  .cr-record .cr-ledger-flag { box-shadow: 3px 3px 0 color-mix(in srgb, var(--ink) 35%, transparent); }
+}
+
+/* ── The scorecard, kept as you go (Ledger.tsx) ─────────────────────────
+   Game design, set apart from the record: a dashed rule, the data face,
+   ink only. */
+.cr-ledger { margin-top: var(--s3); border-top: 1.5px dashed var(--ink-soft); padding-top: 10px; max-width: 640px; }
+.cr-ledger-tag { font-family: var(--data); font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink); margin: 0 0 8px; }
+.cr-ledger-tag-sub { color: var(--ink-faint); letter-spacing: 0.1em; }
+.cr-ledger-grid { display: grid; grid-template-columns: repeat(3, minmax(0, auto)); justify-content: start; gap: 6px 26px; margin: 0; }
+.cr-ledger-grid dt { font-family: var(--data); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint); margin: 0 0 4px; }
+.cr-ledger-grid dd { margin: 0; display: flex; align-items: center; gap: 7px; }
+.cr-ledger-v { font-family: var(--data); font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 479px) {
+  .cr-ledger-grid { grid-template-columns: 1fr; gap: 6px; }
+  .cr-ledger-grid > div { display: grid; grid-template-columns: 9.5em 1fr; align-items: center; }
+  .cr-ledger-grid dt { margin: 0; }
+}
+.cr-ledger-flag {
+  display: inline-block; margin: 10px 0 0; padding: 4px 9px 3px;
+  border: 1.5px solid var(--ink);
+  font-family: var(--data); font-size: 11px; letter-spacing: 0.08em; line-height: 1.45;
+}
+.cr-ledger-note { font-family: var(--data); font-size: 11.5px; line-height: 1.5; color: var(--ink-soft); margin: 8px 0 0; max-width: 62ch; }
+.cr-ledger-run {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px;
+  margin: 10px 0 0; padding-top: 8px; border-top: 1px solid var(--rule);
+  font-family: var(--data); font-size: 11.5px; line-height: 1.5; color: var(--ink-soft);
+}
+.cr-ledger-run b { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+.cr-ledger-run-k { flex-basis: 100%; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-faint); }
+.cr-ledger-run > span { display: inline-flex; align-items: center; gap: 6px; }
+.cr-ledger-pips { display: inline-flex; gap: 2px; }
+.cr-ledger-pips i { width: 9px; height: 9px; border: 1px solid var(--ink); }
+.cr-ledger-pips i.on { background: var(--ink); }
+/* Beside the log on wide screens: the same line, stacked, over the trace. */
+.cr-ledger-run.is-side { flex-direction: column; align-items: flex-start; gap: 3px; border-top: 0; padding-top: 0; margin: 0 0 12px; }
+.cr-ledger-run.is-side .cr-ledger-run-k { display: none; }
+/* Picture mode: one line inside the dialogue box, paper on ink. */
+.cr-ledger.is-compact { border-top: 1px dashed rgba(241, 232, 213, 0.45); padding-top: 6px; margin: 8px 0 0; display: grid; gap: 2px; }
+.cr-ledger.is-compact .cr-ledger-tag { color: rgba(241, 232, 213, 0.7); margin: 0; font-size: 9.5px; }
+.cr-ledger-line { font-family: var(--data); font-size: 11.5px; letter-spacing: 0.04em; line-height: 1.45; }
+
+/* ── The reckoning lays itself out when reached ─────────────────────────
+   The figures arrive, then lane by lane (you, the record, the benchmark):
+   the name, the bar growing out of the impact line, the mark stamped down;
+   then the gaps between them, then your stamp. Held until the stage is a
+   fifth on screen (seen.ts). */
+.cr-rk-gaps { list-style: none; margin: 0 0 var(--s3); padding: 0; display: grid; gap: 6px; max-width: 66ch; }
+.cr-rk-gaps li { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: baseline; font-size: 16px; line-height: 1.45; }
+.cr-rk-gap-who { display: inline-flex; align-items: center; gap: 4px; }
+.cr-rk-gap-to { font-family: var(--data); font-size: 11px; color: var(--ink-soft); }
+.cr-rk-gap-name { font-family: var(--data); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; }
+.cr-rk-stamp.is-you { color: var(--ink); background: var(--paper-lit); }
+.cr-rk-verdict { font-size: 14.5px; color: var(--ink-soft); }
+.cr-rk-rung-flag { display: grid; gap: 1px; margin-top: 3px; font-family: var(--data); font-size: 9px; font-weight: 400; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); white-space: nowrap; }
+.cr-rk-rung-flag > span { display: inline-flex; align-items: center; gap: 3px; }
+.cr-rk-val { font-family: var(--data); font-size: 10.5px; font-variant-numeric: tabular-nums; color: var(--ink-soft); white-space: nowrap; }
+.cr-rk-pair-row.is-you .cr-rk-val { color: var(--ink); }
+.cr-rk-rung.is-same .cr-rk-val { display: none; }
+@media (min-width: 480px) { .cr-rk-rung { grid-template-columns: 84px repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 479px) { .cr-rk-val, .cr-rk-flag-x { display: none; } .cr-rk-rung-flag { font-size: 9px; } }
+.cr-rk-gap-to { font-size: 13px; }
+
+@keyframes cr-rk-set { 0% { opacity: 0; transform: scale(1.7); } 60% { opacity: 1; transform: scale(0.94); } 100% { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-rk-lane .cr-rk-lane-name { animation: cr-fade var(--t-mid) var(--ease) calc(var(--i, 0) * 260ms + 200ms + var(--beat, 0ms)) both; }
+  .cr-rk-bar { animation-delay: calc(var(--i, 0) * 260ms + 300ms + var(--beat, 0ms)); }
+  .cr-rk-bar-label { animation: cr-fade var(--t-mid) var(--ease) calc(var(--i, 0) * 260ms + 560ms + var(--beat, 0ms)) both; }
+  .cr-rk-mark { transform-box: fill-box; transform-origin: center; animation: cr-rk-set var(--t-mid) var(--ease-press) calc(var(--i, 0) * 260ms + 580ms + var(--beat, 0ms)) both; }
+  .cr-rk-mark-time, .cr-rk-never { animation: cr-fade var(--t-fast) var(--ease) calc(var(--i, 0) * 260ms + 700ms + var(--beat, 0ms)) both; }
+  .cr-rk-gaps li { animation: cr-arrive var(--t-slow) var(--ease) calc(var(--i, 0) * 120ms + 1120ms + var(--beat, 0ms)) both; }
+  .cr-rk-stamp.is-you { animation: cr-stamp-down var(--t-mid) var(--ease-press) calc(1420ms + var(--beat, 0ms)) both; }
+  .cr-rk-stage:not([data-seen]) :is(.cr-rk-fig, .cr-rk-lane-name, .cr-rk-bar, .cr-rk-bar-label, .cr-rk-mark, .cr-rk-mark-time, .cr-rk-never, .cr-rk-gaps li, .cr-rk-stamp) { animation-play-state: paused; }
+  /* The ladder: rung by rung, a quick count down the day. */
+  .cr-rk-ladder .cr-rk-rung:not(.cr-rk-rung-head) { animation: cr-arrive var(--t-mid) var(--ease) calc(min(var(--i, 0) * 70ms, 560ms) + 80ms) both; }
+  .cr-rk-ladder:not([data-seen]) .cr-rk-rung { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-rk-lane-name, .cr-rk-bar-label, .cr-rk-mark-time, .cr-rk-never, .cr-rk-gaps li, .cr-rk-rung { animation: none !important; }
+  .cr-rk-mark { filter: drop-shadow(2px 2px 0 color-mix(in srgb, var(--ink) 40%, transparent)); }
+  .cr-rk-stamp.is-you { box-shadow: 3px 3px 0 color-mix(in srgb, var(--ink) 45%, transparent); }
+}
+
+/* ── The scorecard: four marks settle when reached ──────────────────────── */
+.cr-scorecard-tag {
+  display: inline-block; margin-right: 6px; padding: 2px 6px 1px;
+  border: 1px dashed var(--ink-soft);
+  font-family: var(--data); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink);
+  vertical-align: 1px;
+}
+.cr-scorecard-dek { max-width: 66ch; }
+@keyframes cr-settle { 0% { opacity: 0; transform: translateY(-8px) scale(1.08); } 70% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+@keyframes cr-fill { from { transform: scaleX(0); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-score-grid .big { transform-origin: left bottom; animation: cr-settle var(--t-slow) var(--ease-press) both; }
+  .cr-score-grid > div:nth-child(2) .big { animation-delay: 110ms; }
+  .cr-score-grid > div:nth-child(3) .big { animation-delay: 220ms; }
+  .cr-score-grid > div:nth-child(4) .big { animation-delay: 330ms; }
+  .cr-score-grid .cr-meter span { transform-origin: left; animation: cr-fill var(--t-slow) var(--ease) 260ms both; }
+  .cr-score-grid .cr-meter i { animation: cr-fade var(--t-fast) var(--ease) both; animation-delay: calc(400ms + 40ms * var(--k, 0)); }
+  .cr-scorecard:not([data-seen]) :is(.big, .cr-meter span, .cr-meter i) { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-score-grid .big { filter: drop-shadow(2px 2px 0 color-mix(in srgb, var(--ink) 30%, transparent)); }
+}
+
+/* ── The briefing remembers you ─────────────────────────────────────────── */
+.cr-brief-again-tag {
+  display: inline-block; margin-right: 8px; padding: 1px 6px;
+  background: var(--ink); color: var(--paper);
+  font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+}
+
+/* ── The end card: the desk open again ──────────────────────────────────── */
+.cr-again { margin-top: var(--s5); border-top: 3px double var(--ink); padding-top: var(--s3); }
+.cr-again-tag { font-family: var(--data); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 8px; }
+.cr-again-title { font-family: var(--poster); font-size: clamp(32px, 5.4vw, 52px); line-height: 0.95; text-transform: uppercase; margin: 0 0 12px; text-wrap: balance; }
+.cr-again-body { font-size: 16.5px; line-height: 1.6; max-width: 60ch; margin: 0; }
+.cr-again-body b { font-family: var(--data); font-size: 0.92em; font-variant-numeric: tabular-nums; }
+.cr-again .cr-end-actions { margin-top: var(--s3); }
+.cr-again-tag-days { margin-top: var(--s4); }
+.cr-again-days { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+@media (min-width: 640px) { .cr-again-days { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); } }
+.cr-again-day {
+  width: 100%; height: 100%; display: flex; flex-direction: column; gap: 6px; text-align: left; cursor: pointer;
+  padding: 14px 16px 12px; min-height: 44px;
+  background: var(--paper); color: var(--ink); border: 1.5px solid var(--ink); box-shadow: 3px 3px 0 var(--ink);
+  font: inherit;
+  transition: box-shadow var(--t-mid) var(--ease), transform var(--t-mid) var(--ease), border-color var(--t-fast) var(--ease);
+}
+.cr-again-day:disabled { opacity: 0.55; cursor: default; }
+@media (hover: hover) { .cr-again-day:not(:disabled):hover { border-color: var(--ember); box-shadow: 3px 8px 0 var(--ember); transform: translateY(-5px); } }
+.cr-again-day:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); transition-duration: var(--t-fast); transition-timing-function: var(--ease-press); }
+.cr-again-day:focus-visible { outline: 2px solid var(--ember); outline-offset: 3px; }
+.cr-again-day-head { display: flex; align-items: center; gap: 8px; font-family: var(--data); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft); }
+.cr-again-day-title { font-family: var(--poster); font-size: 24px; line-height: 1; text-transform: uppercase; text-wrap: balance; }
+.cr-again-day-meta { font-family: var(--data); font-size: 11px; line-height: 1.5; color: var(--ink-soft); }
+.cr-again-day-cta { margin-top: auto; padding-top: 6px; font-family: var(--data); font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ember); }
+.cr-again-all {
+  margin-top: var(--s3); min-height: 44px; padding: 0; background: none; border: 0; cursor: pointer;
+  font-family: var(--data); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink);
+  text-decoration: underline; text-decoration-color: var(--ember); text-underline-offset: 4px;
+}
+@media (hover: hover) { .cr-again-all:hover { color: var(--ember); } }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-again-title { transform-origin: left bottom; animation: cr-settle var(--t-slow) var(--ease-press) 80ms both; }
+  .cr-again-days li { animation: cr-arrive var(--t-slow) var(--ease) calc(320ms + var(--i, 0) * 90ms) both; }
+  .cr-again:not([data-seen]) :is(.cr-again-title, .cr-again-days li) { animation-play-state: paused; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cr-again-day { transition: none; }
+  .cr-again-day:hover, .cr-again-day:active { transform: none !important; }
+  .cr-again-title { text-shadow: 3px 3px 0 color-mix(in srgb, var(--ink) 22%, transparent); }
+}
+
+/* Narrow phones: the clock keeps its own width (the pips used to slide in
+   over its digits), and the strip gives back the room from the pips' spacing
+   and a size step on the time. */
+@media (max-width: 429px) {
+  .cr-console-clock { flex-shrink: 0; width: 66px; }
+  .cr-console-time { font-size: 18px; white-space: nowrap; }
+  .cr-console-row { gap: 4px; }
+  .cr-pips { gap: 3px; flex-shrink: 0; }
+  .cr-pips i { width: 6px; height: 6px; }
+  .cr-pips i.is-now { border-width: 1.5px; box-shadow: 0 0 0 1.5px var(--ember); }
+}
+
+/* The scorecard line in picture mode's dialogue box (paper), between the
+   call's stamp and the record: it reads the call before the record answers. */
+.cr-dbox .cr-ledger.is-compact { border-top-color: var(--rule); color: var(--ink); }
+.cr-dbox .cr-ledger.is-compact .cr-ledger-tag { color: var(--ink-faint); }
+@media (prefers-reduced-motion: no-preference) {
+  .cr-precord .cr-ledger.is-compact { animation: cr-arrive var(--t-slow) var(--ease) calc(var(--cam-ms) + 520ms) both; }
+}
