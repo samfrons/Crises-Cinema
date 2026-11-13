@@ -50,3 +50,6 @@ next-env.d.ts
 # Never commit — the EM-DAT drop-in it may hold is CC BY-NC-ND and must not
 # be redistributed from this repository.
 data/preparedness/raw/
+
+# raw terrain tile cache: re-fetched by scripts/build-terrain.mjs
+data/terrain-raw/
