@@ -21,7 +21,7 @@ async function poster() {
   }
 }
 
-export async function sheet({ title, line, phase }: { title: string; line: string; phase: string }) {
+export async function sheet({ title, line, phase, credit = 'CONTROL ROOM · DISASTERS BY THE DECADE' }: { title: string; line: string; phase: string; credit?: string }) {
   const font = await poster();
   const mono = 'ui-monospace, "Courier New", monospace';
   const long = title.length > 28;
@@ -50,7 +50,7 @@ export async function sheet({ title, line, phase }: { title: string; line: strin
             <div style={{ display: 'flex', fontFamily: mono, fontSize: 30, color: INK, letterSpacing: 2 }}>{line}</div>
             <div style={{ display: 'flex', height: 3, background: INK, marginTop: 20, marginBottom: 16 }} />
             <div style={{ display: 'flex', fontFamily: mono, fontSize: 24, letterSpacing: 3, color: INK_SOFT, background: PAPER_DEEP, padding: '8px 14px', borderTop: `1px solid ${RULE}` }}>
-              CONTROL ROOM · DISASTERS BY THE DECADE
+              {credit}
             </div>
           </div>
         </div>

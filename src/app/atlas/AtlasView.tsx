@@ -16,7 +16,7 @@
  * directly beneath that plate. One selection at a time across both.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { family, posterUrl, tmdbUrl } from '@/lib/taxonomy';
 
 export interface AtlasFilm {
@@ -55,7 +55,7 @@ export interface Atlas {
   land: { cols: number; rows: number; lon0: number; lat0: number; step: number; cells: number[] };
 }
 
-type Selection = { kind: 'place' | 'realm'; id: string } | null;
+export type Selection = { kind: 'place' | 'realm'; id: string } | null;
 
 /* ── Plate 1 geometry ─────────────────────────────────────────────────── */
 
@@ -489,8 +489,14 @@ function SpacePlate({
 
 /* ── The view ─────────────────────────────────────────────────────────── */
 
-export default function AtlasView({ atlas }: { atlas: Atlas }) {
-  const [selection, setSelection] = useState<Selection>(null);
+export default function AtlasView({ atlas, initial = null }: { atlas: Atlas; initial?: Selection }) {
+  const [selection, setSelection] = useState<Selection>(initial);
+  // Keep the address shareable: /atlas, /atlas/place/<id> or /atlas/realm/<id>
+  // (replaceState: no remount, no history entry per click).
+  useEffect(() => {
+    const path = selection ? `/atlas/${selection.kind}/${selection.id}` : '/atlas';
+    if (window.location.pathname !== path) window.history.replaceState(null, '', path + window.location.search);
+  }, [selection]);
   return (
     <main id="main">
       <WorldPlate atlas={atlas} selection={selection} onSelect={setSelection} />

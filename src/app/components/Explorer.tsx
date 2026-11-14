@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   family, decadeLabel, votes,
   type DecadeRow, type FamilyId, type Film,
@@ -25,6 +25,33 @@ export default function Explorer({
 }: Props) {
   const [open, setOpen] = useState<Film | null>(null);
   const [limit, setLimit] = useState(PAGE);
+
+  // Deep link: #film-<tmdb id>. Set on open, cleared on close, read once when films arrive.
+  const hashTried = useRef(false);
+  const setHash = (h: string) => {
+    try {
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search + h);
+    } catch { /* convenience only */ }
+  };
+  const openFilm = useCallback((f: Film) => {
+    setOpen(f);
+    if (f.id) setHash(`#film-${f.id}`);
+  }, []);
+  const closeFilm = () => {
+    setOpen(null);
+    try {
+      if (window.location.hash.startsWith('#film-')) setHash('');
+    } catch { /* convenience only */ }
+  };
+  useEffect(() => {
+    if (hashTried.current || !films) return;
+    hashTried.current = true;
+    const m = /^#film-(.+)$/.exec(window.location.hash);
+    if (!m) return;
+    const id = decodeURIComponent(m[1]);
+    const f = films.find((x) => x.id === id);
+    if (f) setOpen(f);
+  }, [films]);
 
   const searching = query.trim().length > 0;
   const row = decades.find((d) => d.decade === selected) ?? decades[decades.length - 1];
@@ -94,7 +121,7 @@ export default function Explorer({
         <>
           <div className="films">
             {visible.map((f) => (
-              <FilmCard key={`${f.t}-${f.y}`} film={f} onOpen={setOpen} />
+              <FilmCard key={`${f.t}-${f.y}`} film={f} onOpen={openFilm} />
             ))}
           </div>
           {results && results.length > visible.length && (
@@ -109,7 +136,7 @@ export default function Explorer({
         </>
       )}
 
-      {open && <FilmSheet film={open} onClose={() => setOpen(null)} />}
+      {open && <FilmSheet film={open} onClose={closeFilm} />}
     </>
   );
 }

@@ -228,6 +228,21 @@ function WitnessCard({ post, dark }: { post: DisPost; dark?: boolean }) {
   );
 }
 
+/* ── URL state: ?month=YYYY-MM&family=<id>&item=<id> ──────────────────── */
+
+const readParam = (k: string): string | null => {
+  try { return new URLSearchParams(window.location.search).get(k); } catch { return null; }
+};
+const writeParams = (vals: Record<string, string | null>) => {
+  try {
+    const u = new URL(window.location.href);
+    for (const [k, v] of Object.entries(vals)) {
+      if (v) u.searchParams.set(k, v); else u.searchParams.delete(k);
+    }
+    window.history.replaceState(window.history.state, '', u.pathname + u.search + u.hash);
+  } catch { /* URL state is a convenience */ }
+};
+
 /* ── Plate 1: the witness map ─────────────────────────────────────────── */
 
 function WitnessMap({ data }: { data: Dispatches }) {
@@ -241,6 +256,21 @@ function WitnessMap({ data }: { data: Dispatches }) {
   const currentMonth = monthIx === null ? null : months[monthIx];
 
   const postById = useMemo(() => new Map(data.posts.map((p) => [p.id, p])), [data.posts]);
+
+  // Read the URL once after mount (keeps SSR/static output identical), then mirror state back.
+  const [urlReady, setUrlReady] = useState(false);
+  useEffect(() => {
+    const m = readParam('month');
+    const ix = m ? months.indexOf(m) : -1;
+    if (ix >= 0) setMonthIx(ix);
+    const it = readParam('item');
+    if (it && postById.has(it)) setSelected(it);
+    setUrlReady(true);
+  }, [months, postById]);
+  useEffect(() => {
+    if (!urlReady) return;
+    writeParams({ month: currentMonth, item: selected });
+  }, [urlReady, currentMonth, selected]);
 
   // Cumulative counts per place up to the shown month; the map accumulates
   // like a long exposure, and this month's activity flares on top.
@@ -472,6 +502,15 @@ const WALL_SIZE = 60;
 
 function EvidenceWall({ data }: { data: Dispatches }) {
   const [filter, setFilter] = useState<FamilyId | null>(null);
+  const [urlReady, setUrlReady] = useState(false);
+  useEffect(() => {
+    const f = readParam('family');
+    if (f && FAMILIES.some((x) => x.id === f)) setFilter(f as FamilyId);
+    setUrlReady(true);
+  }, []);
+  useEffect(() => {
+    if (urlReady) writeParams({ family: filter });
+  }, [urlReady, filter]);
 
   const withMedia = useMemo(
     () => data.posts.filter((p) => p.thumb),
