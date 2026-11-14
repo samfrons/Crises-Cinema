@@ -25,6 +25,7 @@ import {
 } from './stage';
 import prepMeta from '../../data/preparedness-meta.json';
 import { inWords, tzLabel, WPM, type CardBundle, type ScenarioCard } from './summary';
+import type { Phase } from './phases';
 import { DAY_FOLDER, FILE_PATH, folderHref, folderWord, isFolder, type FolderId } from './file/folders';
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -219,7 +220,10 @@ const loadBundle = () => {
   return bundlePromise;
 };
 
-export default function ControlRoomGame({ cards, file }: { cards: CardBundle; file?: FileCard }) {
+/** A shared link's opening state: which day, and where on it the desk opens. */
+export type Entry = { scenario: string; phase: Phase };
+
+export default function ControlRoomGame({ cards, file, entry }: { cards: CardBundle; file?: FileCard; entry?: Entry }) {
   const [run, setRun] = useState<Run | null>(null);
   const [coachIndex, setCoachIndex] = useState<number | null>(null);
   const wide = useMedia('(min-width: 1024px)');
@@ -229,7 +233,7 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
   // LOG · PICTURE · DIORAMA. Read after mount (the server render is the select screen,
   // so nothing depends on it before then); both modes draw the same run.
   const [mode, setModeState] = useState<DeskMode>('log');
-  useEffect(() => setModeState(loadMode()), []);
+  useEffect(() => setModeState(entry?.phase === 'picture' || entry?.phase === 'diorama' ? entry.phase : loadMode()), []); // eslint-disable-line react-hooks/exhaustive-deps
   // The diorama could not start here (no WebGL, or the context was lost):
   // the run carries on in picture mode, with one line saying why. Not saved,
   // so a later visit (another browser, a restored GPU) tries again.
@@ -368,6 +372,35 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
     return () => window.removeEventListener('hashchange', sync);
   }, [cards]);
 
+  // Opening from a shared link: take the day's desk once, then (for the play
+  // phases) start the session exactly as the button would. Nothing is chosen
+  // on the player's behalf. Debrief needs a finished run, so it opens at the
+  // briefing.
+  const startRef = useRef<() => void>(() => {});
+  const entering = useRef<Entry | null>(entry ?? null);
+  const entered = useRef(false);
+  useEffect(() => {
+    const e = entering.current;
+    if (e && !entered.current) { entered.current = true; pickRef.current(e.scenario); }
+  }, []);
+  useEffect(() => {
+    const e = entering.current;
+    if (e && run && run.sessionId === null && (e.phase === 'play' || e.phase === 'picture' || e.phase === 'diorama')) {
+      entering.current = null;
+      startRef.current();
+    } else if (e && run) entering.current = null;
+  }, [run]);
+
+  // Keep the address bar on the state of the desk, without a navigation
+  // (replaceState: no remount, no history entry per click).
+  const urlId = run?.scenario.id;
+  const urlPhase: Phase | null = !run ? null : !run.sessionId ? 'briefing' : run.done ? 'debrief' : mode === 'log' ? 'play' : mode;
+  useEffect(() => {
+    if (entering.current || (entry && !entered.current)) return;
+    const path = urlId ? `/control-room/${urlId}/${urlPhase}` : '/control-room';
+    if (window.location.pathname !== path) window.history.replaceState(null, '', path + window.location.search);
+  }, [urlId, urlPhase, entry]);
+
   if (!run) {
     return <SelectScreen cards={cards} file={file} onPick={(id) => pick(id)} loading={loading} />;
   }
@@ -397,6 +430,8 @@ export default function ControlRoomGame({ cards, file }: { cards: CardBundle; fi
     setBoot(null);
     stageBeat(scenario, 'start', scenario.clock.start, stamp(steps[0]), 0);
   };
+
+  startRef.current = start;
 
   const endCoach = () => {
     setCoachIndex(null);

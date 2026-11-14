@@ -50,7 +50,7 @@ function valueFor(layer: Layer, iso3: string, hazard: HazardFilter): number | nu
   return typeof v === 'number' ? v : null;
 }
 
-export default function PreparednessMap() {
+export default function PreparednessMap({ initialCase = null }: { initialCase?: string | null }) {
   const { data: world, state: worldState } = useWorld();
   const { layers, state: layerState } = useLayers(LAYER_IDS);
 
@@ -59,7 +59,10 @@ export default function PreparednessMap() {
   const [selected, setSelected] = useState<string | null>(null);
   const [cursor, setCursor] = useState<string | null>(null);
   const [showPins, setShowPins] = useState(true);
-  const [openCase, setOpenCase] = useState<string | null>(null);
+  const [openCase, setOpenCase] = useState<string | null>(
+    CASE_STUDIES.some((c) => c.id === initialCase) ? initialCase : null,
+  );
+  const [synced, setSynced] = useState(false);
   const [announce, setAnnounce] = useState('');
 
   const layer = layers[layerId] ?? null;
@@ -68,9 +71,46 @@ export default function PreparednessMap() {
 
   // A hazard filter only survives a move to a layer that can honour it.
   useEffect(() => {
-    if (hazard === 'all') return;
+    if (hazard === 'all' || !live) return;
     if (!layer?.hazardDimension || !layer.hazards?.includes(hazard)) setHazard('all');
-  }, [layer, hazard]);
+  }, [layer, live, hazard]);
+
+  // Shareable state: ?layer=&hazard=&country= . Read once after mount (so the
+  // static HTML and first client render agree), then mirrored back with
+  // replaceState. Invalid values are ignored; defaults are omitted.
+  useEffect(() => {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      const l = q.get('layer');
+      if (l && (LAYER_IDS as string[]).includes(l)) setLayerId(l as LayerId);
+      const h = q.get('hazard');
+      if (h && HAZARDS.some((x) => x.id === h)) setHazard(h as HazardKey);
+      const c = q.get('country');
+      if (c && /^[A-Z]{3}$/.test(c)) setSelected(c);
+    } catch { /* no URL access: keep defaults */ }
+    setSynced(true);
+  }, []);
+
+  // Drop a ?country= that names no country on the map, once the map is known.
+  useEffect(() => {
+    if (world && selected && !world.countries.some((c) => c.iso3 === selected)) setSelected(null);
+  }, [world, selected]);
+
+  useEffect(() => {
+    if (!synced) return;
+    try {
+      const q = new URLSearchParams();
+      if (layerId !== 'inform') q.set('layer', layerId);
+      if (hazard !== 'all') q.set('hazard', hazard);
+      if (selected) q.set('country', selected);
+      const qs = q.toString();
+      const path = openCase ? `/preparedness/case/${openCase}` : '/preparedness';
+      const url = path + (qs ? `?${qs}` : '') + window.location.hash;
+      if (url !== window.location.pathname + window.location.search + window.location.hash) {
+        window.history.replaceState(null, '', url);
+      }
+    } catch { /* ignore */ }
+  }, [synced, layerId, hazard, selected, openCase]);
 
   const countries = useMemo(
     () => (world?.countries ?? []).slice().sort((a, b) => a.name.localeCompare(b.name)),
